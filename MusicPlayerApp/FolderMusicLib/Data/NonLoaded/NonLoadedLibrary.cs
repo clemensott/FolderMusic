@@ -1,83 +1,117 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Schema;
 
-namespace MusicPlayer.Data
+namespace MusicPlayer.Data.NonLoaded
 {
-    class NonLoadedLibrary : LibraryBase
+    class NonLoadedLibrary : ILibrary
     {
-        private static NonLoadedLibrary instance;
+        private const string nonLoadedFileName = "SimpleData.xml";
 
-        public static NonLoadedLibrary Current
+        public event PlayStateChangedEventHandler PlayStateChanged;
+        public event LibraryChangedEventHandler LibraryChanged;
+        public event PlaylistsPropertyChangedEventHandler PlaylistsChanged;
+        public event CurrentPlaylistPropertyChangedEventHandler CurrentPlaylistChanged;
+        public event SettingsPropertyChangedEventHandler SettingsChanged;
+
+        public IPlaylist this[int index] { get { return Playlists.ElementAtOrDefault(index); } }
+
+        public bool CanceledLoading { get; private set; }
+
+        public IPlaylist CurrentPlaylist { get; set; }
+
+        public bool IsPlaying { get; set; }
+
+        public IPlaylistCollection Playlists { get; private set; }
+
+        public SkipSongs SkippedSongs { get; private set; }
+
+        private NonLoadedLibrary(XmlReader reader)
         {
-            get
-            {
-                if (instance == null) instance = new NonLoadedLibrary();
+            SkippedSongs = new SkipSongs(this);
+            IsPlaying = false;
+            ReadXml(reader);
+        }
 
-                return instance;
+        private NonLoadedLibrary(string xmlText) : this(XmlConverter.GetReader(xmlText))
+        {
+        }
+
+        public NonLoadedLibrary(ILibrary actualLibrary)
+        {
+            string currentPlaylistPath = actualLibrary.CurrentPlaylist.AbsolutePath;
+
+            Playlists = new NonLoadedPlaylistCollection(this, actualLibrary.Playlists, actualLibrary.CurrentPlaylist);
+            CurrentPlaylist = Playlists.FirstOrDefault(p => p.AbsolutePath == currentPlaylistPath) ?? Playlists.FirstOrDefault();
+        }
+
+        public static ILibrary Load()
+        {
+            return new NonLoadedLibrary(IO.LoadText(nonLoadedFileName));
+        }
+
+        public async Task AddNew()
+        {
+        }
+
+        public void CancelLoading()
+        {
+        }
+
+        public async Task Refresh()
+        {
+        }
+
+        public void Save()
+        {
+            try
+            {
+                IO.SaveObject(nonLoadedFileName, this);
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Manager.WriteEvent("NonLoadedLibrarySaveFail", e);
             }
         }
 
-        private NonLoadedLibrary()
+        public async Task SaveAsync()
+        {
+            await new Task(new Action(Save));
+        }
+
+        public async Task Update()
         {
         }
 
-        public override async Task AddNotExistingPlaylists()
+        public void Set(ILibrary library)
         {
         }
 
-        public override void CancelLoading()
+        public XmlSchema GetSchema()
         {
+            return null;
         }
 
-        public override async Task RefreshLibraryFromStorage()
+        public void ReadXml(XmlReader reader)
         {
+            string currentPlaylistPath = reader.GetAttribute("CurrentPlaylistPath");
+
+            reader.ReadStartElement();
+            Playlists = new NonLoadedPlaylistCollection(this, reader);
+            reader.ReadEndElement();
+
+            CurrentPlaylist = Playlists.FirstOrDefault(p => p.AbsolutePath == currentPlaylistPath) ?? Playlists.FirstOrDefault();
         }
 
-        public override void Save()
+        public void WriteXml(XmlWriter writer)
         {
-        }
+            writer.WriteAttributeString("CurrentPlaylistPath", CurrentPlaylist.AbsolutePath);
 
-        public override async Task SaveAsync()
-        {
-        }
-
-        public override async Task UpdateExistingPlaylists()
-        {
-        }
-
-        protected override bool GetIsPlaying()
-        {
-            return false;
-        }
-
-        protected override void SetIsPlaying(bool value)
-        {
-        }
-
-        protected override PlaylistList GetPlaylists()
-        {
-            return NonLoadedPlaylistList.Current;
-        }
-
-        protected override void SetPlaylists(PlaylistList newPlaylists)
-        {
-        }
-
-        protected override int GetCurrentPlaylistIndex()
-        {
-            return 0;
-        }
-
-        protected override void SetCurrentPlaylistIndex(int newCurrentPlaylistIndex)
-        {
-        }
-
-        protected override void SetCurrentPlaylist(Playlist newCurrentPlaylist)
-        {
-        }
-
-        internal override string GetXmlText()
-        {
-            return "LibraryEmpty";
+            writer.WriteStartElement("Playlists");
+            Playlists.WriteXml(writer);
+            writer.WriteEndElement();
         }
     }
 }

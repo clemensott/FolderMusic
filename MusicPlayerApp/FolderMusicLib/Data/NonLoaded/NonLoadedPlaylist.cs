@@ -2,97 +2,189 @@
 using MusicPlayer.Data.Shuffle;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System;
+using System.Xml;
+using System.Xml.Schema;
+using System.Linq;
 
-namespace MusicPlayer.Data
+namespace MusicPlayer.Data.NonLoaded
 {
-    class NonLoadedPlaylist : Playlist
+    class NonLoadedPlaylist : IPlaylist
     {
-        private static NonLoadedPlaylist instance;
+        private double currentSongPositionPercent;
+        private Song currentSong;
+        private LoopType loop;
+        private ShuffleType shuffle;
 
-        public static NonLoadedPlaylist Current
+        public event CurrentSongPropertyChangedEventHandler CurrentSongChanged;
+        public event CurrentSongPositionPropertyChangedEventHandler CurrentSongPositionChanged;
+        public event ShufflePropertyChangedEventHandler ShuffleChanged;
+        public event LoopPropertyChangedEventHandler LoopChanged;
+
+        public Song this[int index] { get { return Songs.ElementAtOrDefault(index); } }
+
+        public string AbsolutePath { get; private set; }
+
+        public Song CurrentSong
         {
-            get
+            get { return currentSong; }
+            set
             {
-                if (instance == null) instance = new NonLoadedPlaylist();
+                //if (value == currentSong || !Songs.Contains(value)) return;
 
-                return instance;
+                currentSong = value;
             }
         }
 
-        private NonLoadedPlaylist()
+        public double CurrentSongPositionPercent
         {
-            Name = "Loading";
+            get { return currentSongPositionPercent; }
+            set
+            {
+                if (value == currentSongPositionPercent) return;
 
+                currentSongPositionPercent = value;
+            }
+        }
+
+        //public bool IsEmpty { get { return false; } }
+
+        public LoopType Loop { get; set; }
+
+        public string Name { get; private set; }
+
+        public IPlaylistCollection Parent { get; private set; }
+
+        public ShuffleType Shuffle { get; set; }
+
+        public IShuffleCollection ShuffleSongs { get; private set; }
+
+        public int SongsCount { get; private set; }
+
+        public ISongCollection Songs { get; private set; }
+
+        public NonLoadedPlaylist(IPlaylistCollection parent, IPlaylist actualPlaylist, bool isCurrentPlaylist)
+        {
+            Parent = parent;
+
+            AbsolutePath = actualPlaylist.AbsolutePath;
+            Name = actualPlaylist.Name;
+            SongsCount = actualPlaylist.SongsCount;
+            Loop = actualPlaylist.Loop;
+            Shuffle = actualPlaylist.Shuffle;
+
+            if (isCurrentPlaylist)
+            {
+                CurrentSong = actualPlaylist.CurrentSong;
+                Songs = new NonLoadedSongCollection(this, actualPlaylist.ShuffleSongs);
+            }
+            else
+            {
+                Songs = new NonLoadedSongCollection(this);
+                CurrentSong = Song.GetEmpty(Songs);
+            }
+        }
+
+        public NonLoadedPlaylist(IPlaylistCollection parent, CurrentPlaySong currentPlaySong)
+        {
+            Parent = parent;
+
+            AbsolutePath = Name = "None";
+            SongsCount = 1;
             Loop = LoopType.Off;
             Shuffle = ShuffleType.Off;
 
-            songs = NonLoadedSongList.Current;
-            shuffleList = new List<int>() { 0 };
+            Songs = new NonLoadedSongCollection(this, currentPlaySong);
+            ShuffleSongs = new NonLoadedShuffleCollection(this, Songs, Shuffle);
 
-            songsIndex = 0;
-            songPositionPercent = CurrentPlaySong.Current.PositionPercent;
+            currentSong = Songs.First();
+            currentSongPositionPercent = currentPlaySong.PositionPercent;
         }
 
-        public override bool ChangeCurrentSong(int offset)
+        public NonLoadedPlaylist(IPlaylistCollection parent, XmlReader reader)
         {
-            return true;
+            MobileDebug.Manager.WriteEvent("NonPlaylistConst1");
+            Parent = parent;
+            MobileDebug.Manager.WriteEvent("NonPlaylistConst2");
+            ReadXml(reader);
         }
 
-        protected override bool GetIsEmptyOrLoading()
-        {
-            return true;
-        }
-
-        protected override int GetPlaylistIndex()
-        {
-            return -1;
-        }
-
-        protected override int GetShuffleListIndex()
-        {
-            return 0;
-        }
-
-        protected override SongList GetSongs()
-        {
-            return songs;
-        }
-
-        protected override int GetSongsIndex()
-        {
-            return 0;
-        }
-
-        protected override void SetShuffle(ShuffleType value)
+        public async Task Refresh()
         {
         }
 
-        protected override void SetLoop(LoopType value)
+        public async Task AddNew()
         {
         }
 
-        protected override void SetShuffleListIndex(int value)
+        public void SetNextLoop()
         {
         }
 
-        protected override void SetSongIndex(int newSongIndex)
+        public void SetNextShuffle()
         {
         }
 
-        protected override void SetSongs(SongList newSongs)
+        public void SetShuffle(IShuffleCollection shuffleSongs)
         {
         }
 
-        public override async Task LoadSongsFromStorage()
+        public void SetNextSong()
+        {
+            ChangeCurrentSong(1);
+        }
+
+        public void SetPreviousSong()
+        {
+            ChangeCurrentSong(-1);
+        }
+
+        public void ChangeCurrentSong(int offset)
+        {
+
+        }
+
+        public async Task Update()
         {
         }
 
-        public override async Task SearchForNewSongs()
+        public XmlSchema GetSchema()
         {
+            return null;
         }
 
-        public override async Task UpdateSongsFromStorage()
+        public void ReadXml(XmlReader reader)
         {
+            AbsolutePath = reader.GetAttribute("AbsolutePath");
+            string currentSongPath = reader.GetAttribute("CurrentSongPath");
+            currentSongPositionPercent = double.Parse(reader.GetAttribute("CurrentSongPositionPercent"));
+            Name = reader.GetAttribute("Name");
+            Loop = (LoopType)Enum.Parse(typeof(LoopType), reader.GetAttribute("Loop"));
+            Shuffle = (ShuffleType)Enum.Parse(typeof(ShuffleType), reader.GetAttribute("Shuffle"));
+            SongsCount = int.Parse(reader.GetAttribute("SongsCount"));
+
+            reader.ReadStartElement();
+            Songs = new NonLoadedSongCollection(this, reader);
+            reader.ReadEndElement();
+
+            ShuffleSongs = new NonLoadedShuffleCollection(this, Songs, Shuffle);
+
+            CurrentSong = Songs.Any(s => s.Path == currentSongPath) ? Songs.First(s => s.Path == currentSongPath) : Songs.First();
+        }
+
+        public void WriteXml(XmlWriter writer)
+        {
+            writer.WriteAttributeString("AbsolutePath", AbsolutePath);
+            writer.WriteAttributeString("CurrentSongPath", CurrentSong.Path);
+            writer.WriteAttributeString("CurrentSongPositionPercent", currentSongPositionPercent.ToString());
+            writer.WriteAttributeString("Loop", Loop.ToString());
+            writer.WriteAttributeString("Name", Name);
+            writer.WriteAttributeString("Shuffle", Shuffle.ToString());
+            writer.WriteAttributeString("SongsCount", SongsCount.ToString());
+
+            writer.WriteStartElement("Songs");
+            Songs.WriteXml(writer);
+            writer.WriteEndElement();
         }
     }
 }

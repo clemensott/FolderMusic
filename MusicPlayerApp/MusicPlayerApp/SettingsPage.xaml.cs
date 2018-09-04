@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using Windows.Storage;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -10,18 +13,38 @@ namespace FolderMusic
 {
     public sealed partial class SettingsPage : Page
     {
-        private static readonly string dataPath = ApplicationData.Current.LocalFolder.Path + "\\Times.txt";
+        private const string dataFileName = "Times.txt";
 
         public SettingsPage()
         {
             this.InitializeComponent();
+
+            LoadData();
+        }
+
+        private async void LoadData()
+        {
+            try
+            {
+                StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(dataFileName);
+                IList<string> lines = await FileIO.ReadLinesAsync(file);
+
+                cbxIsOn.IsChecked = bool.Parse(lines[0]);
+                tbxPeriodeTime.Text = lines[0];
+            }
+            catch { }
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
         }
 
-        private async void AppBarButton_Click(object sender, RoutedEventArgs e)
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            Frame.GoBack();
+        }
+
+        private async void SaveAndBack_Click(object sender, RoutedEventArgs e)
         {
             string[] lines = new string[3];
 
@@ -31,15 +54,26 @@ namespace FolderMusic
 
             try
             {
-                StorageFile file = await ApplicationData.Current.LocalFolder.CreateFileAsync("Times.txt");
-            }
-            catch { }
+                StorageFile file;
 
-            await PathIO.WriteLinesAsync(dataPath, lines);
+                try
+                {
+                    file = await ApplicationData.Current.LocalFolder.GetFileAsync(dataFileName);
+                }
+                catch (FileNotFoundException)
+                {
+                    file = await ApplicationData.Current.LocalFolder.CreateFileAsync("Times.txt");
+                }
+
+                await FileIO.WriteLinesAsync(file, lines);
+            }
+            catch (Exception exc)
+            {
+                string message = "Didn't save.\nType: " + exc.GetType().Name + "\n" + exc.Message;
+                await new MessageDialog(message).ShowAsync();
+            }
 
             Frame.GoBack();
-
-            
         }
     }
 }

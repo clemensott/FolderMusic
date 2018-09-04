@@ -26,3 +26,28 @@ C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerAp
 C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\qualifiers.txt
 C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\qualifiers.txt.intermediate
 C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\MultipleQualifiersPerDimensionFound.txt
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\ARM\Debug\BackgroundTask.winmd
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\ARM\Debug\BackgroundTask.pdb
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\ARM\Debug\BackgroundTask.pri
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\ARM\Debug\FolderMusicDebug.dll
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\ARM\Debug\MusicPlayerLib.dll
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\ARM\Debug\FolderMusicDebug.pdb
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\ARM\Debug\FolderMusicDebug.pri
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\ARM\Debug\MusicPlayerLib.pdb
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\ARM\Debug\MusicPlayerLib.pri
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\BackgroundTask.csprojResolveAssemblyReference.cache
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\BackgroundTask.winmd
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\BackgroundTask.pdb
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\BackgroundTask.winmdobj
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\BackgroundTask.compile.pdb
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\priconfig.xml
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\priconfig.xml.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\layout.resfiles
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\layout.resfiles.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\resources.resfiles
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\resources.resfiles.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\pri.resfiles
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\pri.resfiles.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\qualifiers.txt
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\qualifiers.txt.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\ARM\Debug\MultipleQualifiersPerDimensionFound.txt

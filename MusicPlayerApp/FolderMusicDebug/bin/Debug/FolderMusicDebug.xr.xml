@@ -40,6 +40,10 @@
       <RootProperty Name="Template" />
     </RootType>
     <RootType FullName="FolderMusicDebug.DebugFilterPage" />
+    <RootType FullName="Windows.UI.Xaml.Controls.TextBlock">
+      <RootProperty Name="Text" />
+      <RootProperty Name="TextWrapping" />
+    </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.CommandBar">
       <RootProperty Name="PrimaryCommands" />
     </RootType>

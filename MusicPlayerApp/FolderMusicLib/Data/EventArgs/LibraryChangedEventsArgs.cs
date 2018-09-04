@@ -4,14 +4,22 @@ namespace MusicPlayer.Data
 {
     public class LibraryChangedEventsArgs : EventArgs
     {
-        public ILibrary OldValue { get; private set; }
+        public IPlaylistCollection OldPlaylists { get; private set; }
 
-        public ILibrary NewValue { get; private set; }
+        public IPlaylistCollection NewPlaylists { get; private set; }
 
-        internal LibraryChangedEventsArgs(ILibrary oldValue, ILibrary newValue)
+        public IPlaylist OldCurrentPlaylist { get; private set; }
+
+        public IPlaylist NewCurrentPlaylist { get; private set; }
+
+        internal LibraryChangedEventsArgs(IPlaylistCollection oldPlaylists, IPlaylistCollection newPlaylists,
+            IPlaylist oldCurrentPlaylist,IPlaylist newCurrentPlaylist)
         {
-            OldValue = oldValue;
-            NewValue = newValue;
+            OldPlaylists = oldPlaylists;
+            NewPlaylists = newPlaylists;
+
+            OldCurrentPlaylist = oldCurrentPlaylist;
+            NewCurrentPlaylist = newCurrentPlaylist;
         }
     }
 }

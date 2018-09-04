@@ -11,30 +11,29 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
 using System.Linq;
 using MusicPlayer.Data;
+using MusicPlayer;
 
 namespace FolderMusic
 {
     public sealed partial class MainPage : Page
     {
-
         private bool loopImageEntered = false, shuffleImageEntered = false;
-        private long loadedTicks;
-        private PlayerPosition playerPosition;
+        private ILibrary library;
+        private ViewModel viewModel;
 
-        private SongListView currentPlaylistSongListView;
+        private SongsView currentPlaylistSongListView;
 
         public MainPage()
         {
             this.InitializeComponent();
             this.NavigationCacheMode = NavigationCacheMode.Enabled;
 
-            DataContext = ViewModel.Current;
+            library = Library.Load(true);
+            viewModel = new ViewModel(library);
 
-            playerPosition = new PlayerPosition();
+            DataContext = viewModel;
 
             HardwareButtons.BackPressed += HardwareButtons_BackPressed;
-            Window.Current.Activated += Window_Activated;
-            Window.Current.Closed += Window_Closed;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -43,28 +42,7 @@ namespace FolderMusic
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            loadedTicks = DateTime.Now.Ticks;
-
-            if (Library.Current.SkippedSongs.MoveNext()) Frame.Navigate(typeof(SkipSongsPage));
-        }
-
-        private void Window_Activated(object sender, WindowActivatedEventArgs e)
-        {
-            try
-            {
-                if (e.WindowActivationState == CoreWindowActivationState.PointerActivated) return;
-
-                bool isActiv = e.WindowActivationState == CoreWindowActivationState.CodeActivated;
-
-                if (!isActiv) playerPosition.StopTimer();
-                else if (BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing) playerPosition.StartTimer();
-            }
-            catch { }
-        }
-
-        private void Window_Closed(object sender, CoreWindowEventArgs e)
-        {
-
+            //if (library.SkippedSongs.MoveNext()) Frame.Navigate(typeof(SkipSongsPage));
         }
 
         private void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
@@ -79,7 +57,7 @@ namespace FolderMusic
 
         private void Shuffle_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            Library.Current.CurrentPlaylist.SetNextShuffle();
+            library.CurrentPlaylist.SetNextShuffle();
         }
 
         private void ShuffleImage_PointerEntered(object sender, PointerRoutedEventArgs e)
@@ -97,25 +75,26 @@ namespace FolderMusic
 
         private void Previous_Click(object sender, RoutedEventArgs e)
         {
-            Library.Current.CurrentPlaylist.SetPreviousSong();
+            library.CurrentPlaylist.SetPreviousSong();
         }
 
         private void PlayPause_Click(object sender, RoutedEventArgs e)
         {
-            Library.Current.IsPlaying = !Library.Current.IsPlaying;
+            MobileDebug.Manager.WriteEvent("PlayPauseButtonClick", library.IsPlaying);
+            library.IsPlaying = !library.IsPlaying;
 
-            //if (BackgroundMediaPlayer.Current.CurrentState != MediaPlayerState.Playing) Library.Current.IsPlaying = true;
-            //else Library.Current.IsPlaying = false;
+            //if (BackgroundMediaPlayer.Current.CurrentState != MediaPlayerState.Playing) library.IsPlaying = true;
+            //else library.IsPlaying = false;
         }
 
         private void Next_Click(object sender, RoutedEventArgs e)
         {
-            Library.Current.CurrentPlaylist.SetNextSong();
+            library.CurrentPlaylist.SetNextSong();
         }
 
         private void Loop_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            Library.Current.CurrentPlaylist.SetNextLoop();
+            library.CurrentPlaylist.SetNextLoop();
         }
 
         private void LoopImage_PointerEntered(object sender, PointerRoutedEventArgs e)
@@ -133,17 +112,15 @@ namespace FolderMusic
 
         private void Playlist_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            Library.Current.CurrentPlaylist = (sender as Grid).DataContext as Playlist;
+            library.CurrentPlaylist = (sender as Grid).DataContext as IPlaylist;
         }
 
         private void PlayPlaylist_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            Playlist playlist = (sender as Image).DataContext as Playlist;
+            IPlaylist playlist = (sender as Image).DataContext as IPlaylist;
 
-            if (playlist.IsEmptyOrLoading) return;
-
-            Library.Current.CurrentPlaylist = playlist;
-            Library.Current.IsPlaying = true;
+            library.CurrentPlaylist = playlist;
+            library.IsPlaying = true;
         }
 
         private void DetailPlaylist_Tapped(object sender, TappedRoutedEventArgs e)
@@ -153,8 +130,6 @@ namespace FolderMusic
 
         private void PlaylistsPlaylist_Holding(object sender, HoldingRoutedEventArgs e)
         {
-            if (((sender as Grid).DataContext as Playlist).IsEmptyOrLoading) return;
-
             FlyoutBase.ShowAttachedFlyout(sender as FrameworkElement);
         }
 
@@ -162,75 +137,65 @@ namespace FolderMusic
         {
             Song song = (sender as MenuFlyoutItem).DataContext as Song;
 
-            Library.Current.CurrentPlaylist.Songs.Remove(song);
+            library.CurrentPlaylist.Songs.Remove(song);
         }
 
         private async void RefreshPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            Playlist playlist = (sender as MenuFlyoutItem).DataContext as Playlist;
+            Frame.Navigate(typeof(LoadingPage), library);
 
-            await LoadingPage.NavigateTo();
-            await playlist.LoadSongsFromStorage();
+            IPlaylist playlist = (sender as MenuFlyoutItem).DataContext as IPlaylist;
+            await playlist.Refresh();
 
-            LoadingPage.GoBack();
+            Frame.GoBack();
         }
 
         private async void UpdatePlaylist_Click(object sender, RoutedEventArgs e)
         {
-            Playlist playlist = (sender as MenuFlyoutItem).DataContext as Playlist;
+            Frame.Navigate(typeof(LoadingPage), library);
 
-            await LoadingPage.NavigateTo();
-            await playlist.UpdateSongsFromStorage();
+            IPlaylist playlist = (sender as MenuFlyoutItem).DataContext as IPlaylist;
+            await playlist.Update();
 
-            LoadingPage.GoBack();
+            Frame.GoBack();
         }
 
         private async void SearchForNewSongsPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            await LoadingPage.NavigateTo();
+            Frame.Navigate(typeof(LoadingPage), library);
 
-            Playlist playlist = (sender as MenuFlyoutItem).DataContext as Playlist;
-            await playlist.SearchForNewSongs();
+            IPlaylist playlist = (sender as MenuFlyoutItem).DataContext as IPlaylist;
+            await playlist.AddNew();
 
-            LoadingPage.GoBack();
+            Frame.GoBack();
         }
 
         private void DeletePlaylist_Click(object sender, RoutedEventArgs e)
         {
-            Playlist playlist = (sender as MenuFlyoutItem).DataContext as Playlist;
+            IPlaylist playlist = (sender as MenuFlyoutItem).DataContext as IPlaylist;
 
-            Library.Current.Playlists.Remove(playlist);
-        }
-
-        private void sld_PointerEntered(object sender, PointerRoutedEventArgs e)
-        {
-            ViewModel.Current.PlayerPositionEnabled = false;
-        }
-
-        private void Page_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            ViewModel.Current.PlayerPositionEnabled = true;
+            library.Playlists.Remove(playlist);
         }
 
         private async void ResetLibraryFromStorage_Click(object sender, RoutedEventArgs e)
         {
-            await LoadingPage.NavigateTo();
-            await Library.Current.RefreshLibraryFromStorage();
-            LoadingPage.GoBack();
+            Frame.Navigate(typeof(LoadingPage), library);
+            await library.Refresh();
+            Frame.GoBack();
         }
 
         private async void UpdateExistingPlaylists_Click(object sender, RoutedEventArgs e)
         {
-            await LoadingPage.NavigateTo();
-            await Library.Current.UpdateExistingPlaylists();
-            LoadingPage.GoBack();
+            Frame.Navigate(typeof(LoadingPage), library);
+            await library.Update();
+            Frame.GoBack();
         }
 
         private async void AddNotExistingPlaylists_Click(object sender, RoutedEventArgs e)
         {
-            await LoadingPage.NavigateTo();
-            await Library.Current.AddNotExistingPlaylists();
-            LoadingPage.GoBack();
+            Frame.Navigate(typeof(LoadingPage), library);
+            await library.AddNew();
+            Frame.GoBack();
         }
 
         private void Settings_Click(object sender, RoutedEventArgs e)
@@ -245,17 +210,24 @@ namespace FolderMusic
 
         private void SongListView_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
-            currentPlaylistSongListView = sender as SongListView;
+            currentPlaylistSongListView = sender as SongsView;
         }
 
-        private void TestFunktion_Click(object sender, RoutedEventArgs e)
+        private async void TestFunktion_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(FolderMusicDebug.DebugPage));
+            try
+            {
+                Frame.Navigate(typeof(MobileDebug.DebugPage));
+            }
+            catch (Exception exc)
+            {
+                await new Windows.UI.Popups.MessageDialog(exc.Message).ShowAsync();
+            }
         }
 
         private async void TestFunktion_Click2(object sender, RoutedEventArgs e)
         {
-            StorageFile file = await Library.Current.CurrentPlaylist.CurrentSong.GetStorageFileAsync();
+            StorageFile file = await library.CurrentPlaylist.CurrentSong.GetStorageFileAsync();
             var v = await file.Properties.GetMusicPropertiesAsync();
             string text = string.Empty;
 
@@ -263,35 +235,17 @@ namespace FolderMusic
             text += "AlbumArtist: " + v.AlbumArtist + "\n";
             text += "Artist: " + v.Artist + "\n";
             text += "Bitrate: " + v.Bitrate.ToString() + "\n";
-
-            text += "Composers: ";
-            foreach (string composer in v.Composers) text += composer + "; ";
-            text += "\n";
-
-            text += "Conductors: ";
-            foreach (string conductors in v.Conductors) text += conductors + "; ";
-            text += "\n";
-
+            text += "Composers: " + string.Join("; ", v.Composers) + "\n";
+            text += "Conductors: " + string.Join("; ", v.Conductors) + "\n";
             text += "Duration: " + v.Duration.TotalSeconds.ToString() + "\n";
-
-            text += "Genre: ";
-            foreach (string genre in v.Genre) text += genre + "; ";
-            text += "\n";
-
-            text += "Producers: ";
-            foreach (string producers in v.Producers) text += producers + "; ";
-            text += "\n";
-
+            text += "Genre: " + string.Join("; ", v.Genre) + "\n";
+            text += "Producers: " + string.Join("; ", v.Producers) + "\n";
             text += "Publisher: " + v.Publisher + "\n";
             text += "Rating: " + v.Rating.ToString() + "\n";
             text += "Subtitle: " + v.Subtitle + "\n";
             text += "Title: " + v.Title + "\n";
-
-            text += "Writers: ";
-            foreach (string writers in v.Writers) text += writers + "; ";
-            text += "\n";
-
-            text += "Year: " + v.Year.ToString() + "\n";
+            text += "Writers: " + string.Join("; ", v.Writers) + "\n";
+            text += "Year: " + v.Year.ToString();
 
             await new Windows.UI.Popups.MessageDialog(text).ShowAsync();
         }
@@ -321,8 +275,8 @@ namespace FolderMusic
 
             System.Diagnostics.Debug.WriteLine("Task: {0}\nOn: {1}", taskCompletedTicks, onCanceledTicks);
 
-            taskCompletedTime = FolderMusicDebug.DebugEvent.GetDateTimeString(taskCompletedTicks);
-            onCanceledTime = FolderMusicDebug.DebugEvent.GetDateTimeString(onCanceledTicks);
+            taskCompletedTime = MobileDebug.Event.GetDateTimeString(taskCompletedTicks);
+            onCanceledTime = MobileDebug.Event.GetDateTimeString(onCanceledTicks);
 
             message = string.Format("TaskCompleted:\n{0}\n\nOnCanceled:\n{1}", taskCompletedTime, onCanceledTime);
 
@@ -336,7 +290,7 @@ namespace FolderMusic
                 string ticksText = await PathIO.ReadTextAsync(ApplicationData.Current.LocalFolder.Path + "\\" + filename);
 
                 long ticks = long.Parse(ticksText);
-                string timeText = FolderMusicDebug.DebugEvent.GetDateTimeString(ticks);
+                string timeText = MobileDebug.Event.GetDateTimeString(ticks);
 
                 return string.Format("{0}:\n{1}", filename, timeText);
             }
@@ -347,38 +301,39 @@ namespace FolderMusic
 
         private void TestFunktion_Click3(object sender, RoutedEventArgs e)
         {
-            double beforeMilli, deltaMilli;
-
-            beforeMilli = DateTime.Now.TimeOfDay.TotalMilliseconds;
-
-            Playlist playlist = new Playlist(@"C:\Data\Users\Public\Music\Das Känguru\TestPlaylist");
-
-            playlist.Songs.Add(new Song(@"C:\Data\Users\Public\Music\Das Känguru\TestPlaylist\Ace of Base - All That She Wants.mp3"));
-            playlist.Songs.Add(new Song(@"C:\Data\Users\Public\Music\Das Känguru\TestPlaylist\Charli Xcx - Break The Rules.mp3"));
-            playlist.Songs.Add(new Song(@"C:\Data\Users\Public\Music\Das Känguru\TestPlaylist\Evanescence - My Immortal.mp3"));
-            playlist.Songs.Add(new Song(@"C:\Data\Users\Public\Music\Das Känguru\TestPlaylist\Kelly Clarkson - Heartbeat Song.mp3"));
-            playlist.Songs.Add(new Song(@"C:\Data\Users\Public\Music\Das Känguru\TestPlaylist\Ronald Bell - Celebration.mp3"));
-
-            playlist.SetNextShuffle();
-
-            Library.Current.Playlists.Add(playlist);
-
-            deltaMilli = DateTime.Now.TimeOfDay.TotalMilliseconds - beforeMilli;
-            System.Diagnostics.Debug.WriteLine("deltaMilli: " + deltaMilli.ToString());
+            //await new MessageDialog("CurrentSongPosition").ShowAsync();
+            //try
+            //{
+            //    IPlaylist playlist = null;
+            //    TimeSpan position = playlist.GetCurrentSongPosition();
+            //    await new MessageDialog("CurrentSongPosition: " + position.TotalSeconds).ShowAsync();
+            //}
+            //catch (Exception exc)
+            //{
+            //    await new MessageDialog("CurrentSongPositionFail:\n" + exc.Message).ShowAsync();
+            //}
         }
 
         private void TestFunktion_Click4(object sender, RoutedEventArgs e)
         {
+        }
+
+        public static string LoadText(string filenameWithExtention)
+        {
             try
             {
-                Windows.Foundation.Collections.ValueSet vs = new Windows.Foundation.Collections.ValueSet();
-                vs.Add("TestPrimary", typeof(int));
-                new Windows.UI.Popups.MessageDialog("Success").ShowAsync();
+                string path = ApplicationData.Current.LocalFolder.Path + "\\" + filenameWithExtention;
+                Task<string> load = PathIO.ReadTextAsync(path).AsTask();
+                load.Wait();
+
+                return load.Result;
             }
-            catch (Exception exc)
+            catch (Exception e)
             {
-                new Windows.UI.Popups.MessageDialog("Fail\n" + exc.GetType() + "\n" + exc.Message).ShowAsync();
+                MobileDebug.Manager.WriteEvent("IOLoadTextFail", e, filenameWithExtention);
             }
+
+            return string.Empty;
         }
     }
 }

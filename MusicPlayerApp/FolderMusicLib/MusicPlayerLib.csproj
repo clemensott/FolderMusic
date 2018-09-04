@@ -81,42 +81,46 @@
   <ItemGroup>
     <Compile Include="Communication\BackForegroundCommunicator.cs" />
     <Compile Include="Communication\Receiver.cs" />
-    <Compile Include="Data\ChangedPlaylist.cs" />
-    <Compile Include="Data\ChangedSong.cs" />
+    <Compile Include="Data\EventArgs\ChangedPlaylist.cs" />
+    <Compile Include="Data\EventArgs\ChangedSong.cs" />
     <Compile Include="Data\EventArgs\CurrentPlaylistChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\CurrentSongChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\CurrentSongPositionChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\LoopChangedEventArgs.cs" />
-    <Compile Include="Data\Feedback.cs" />
     <Compile Include="Data\ILibrary.cs" />
-    <Compile Include="Data\LibraryBase.cs" />
+    <Compile Include="Data\IPlaylist.cs" />
+    <Compile Include="Data\IPlaylistCollection.cs" />
+    <Compile Include="Data\ISongCollection.cs" />
     <Compile Include="Data\Loop\LoopAll.cs" />
     <Compile Include="Data\Loop\LoopCurrent.cs" />
     <Compile Include="Data\Loop\LoopOff.cs" />
     <Compile Include="Data\NonLoaded\NonLoadedLibrary.cs" />
     <Compile Include="Data\NonLoaded\NonLoadedPlaylist.cs" />
-    <Compile Include="Data\NonLoaded\NonLoadedPlaylistList.cs" />
-    <Compile Include="Data\NonLoaded\NonLoadedSongList.cs" />
-    <Compile Include="Data\PlaylistList.cs" />
+    <Compile Include="Data\NonLoaded\NonLoadedPlaylistCollection.cs" />
+    <Compile Include="Data\NonLoaded\NonLoadedShuffleCollection.cs" />
+    <Compile Include="Data\NonLoaded\NonLoadedSongCollection.cs" />
+    <Compile Include="Data\PlaylistCollection.cs" />
     <Compile Include="Data\EventArgs\PlaylistsChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\PlayStateChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\ShuffleChangedEventArgs.cs" />
-    <Compile Include="Data\Shuffle\ShuffleComplete.cs" />
+    <Compile Include="Data\Shuffle\IShuffleCollection.cs" />
+    <Compile Include="Data\Shuffle\ShuffleCollectionBase.cs" />
     <Compile Include="Data\Loop\ILoop.cs" />
-    <Compile Include="Data\Shuffle\IShuffle.cs" />
     <Compile Include="Data\CurrentPlaySong.cs" />
     <Compile Include="Data\Library.cs" />
     <Compile Include="Data\Playlist.cs" />
-    <Compile Include="Data\SaveLibrary.cs" />
-    <Compile Include="Data\Shuffle\ShuffleEmpty.cs" />
-    <Compile Include="Data\SkipSong.cs" />
-    <Compile Include="Data\SkipSongs.cs" />
+    <Compile Include="Data\Shuffle\ShuffleCompleteCollection.cs" />
+    <Compile Include="Data\Shuffle\ShuffleOffCollection.cs" />
+    <Compile Include="Data\Shuffle\ShuffleOneTimeCollection.cs" />
+    <Compile Include="Data\Skip\SkipSong.cs" />
+    <Compile Include="Data\Skip\SkipSongs.cs" />
+    <Compile Include="Data\Skip\SkipSongsEnumerator.cs" />
     <Compile Include="Data\Song.cs" />
-    <Compile Include="Data\Shuffle\ShuffleOff.cs" />
-    <Compile Include="Data\Shuffle\ShuffleOneTime.cs" />
-    <Compile Include="Data\IO.cs" />
+    <Compile Include="Extention.cs" />
+    <Compile Include="IO.cs" />
     <Compile Include="Data\EventArgs\SongArtistChangedEventArgs.cs" />
-    <Compile Include="Data\SongList.cs" />
+    <Compile Include="Data\SongCollection.cs" />
+    <Compile Include="Data\EventArgs\SongCollectionChangingEventArgs.cs" />
     <Compile Include="Data\EventArgs\SongNaturalDurationChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\SongsChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\SongTitleChangedEventArgs.cs" />
@@ -125,9 +129,9 @@
     <Compile Include="XmlConverter.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FolderMusicDebug\MusicPlayerDebug.csproj">
+    <ProjectReference Include="..\FolderMusicDebug\MobileDebug.csproj">
       <Project>{ee2e4620-7d8d-4d75-a8a4-157e652449e2}</Project>
-      <Name>MusicPlayerDebug</Name>
+      <Name>MobileDebug</Name>
     </ProjectReference>
     <ProjectReference Include="..\PlayerIconsWP8.1\PlayerIconsWP8_1.csproj">
       <Project>{02fcded3-420b-4c1b-867a-0881a1420d03}</Project>

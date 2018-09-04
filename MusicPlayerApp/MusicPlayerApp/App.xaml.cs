@@ -2,6 +2,7 @@
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
@@ -17,17 +18,17 @@ namespace FolderMusic
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
 
-            FolderMusicDebug.DebugEvent.Id = "Foreground";
-            CurrentPlaySong.Current.Load();
+            MobileDebug.Manager.SetIsForeground();
+            UnhandledException += App_UnhandledException;
+        }
+
+        private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            MobileDebug.Manager.WriteEvent("UnhandledException", e.Exception);
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-
-            //var backgroundColor = Application.Current.Resources["PhoneForegroundBrush"];
-            //BitmapImage img = Resources["DetailIcon"] as BitmapImage;
-            //System.Diagnostics.Debug.WriteLine(img.UriSource.AbsolutePath);
-
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
             {

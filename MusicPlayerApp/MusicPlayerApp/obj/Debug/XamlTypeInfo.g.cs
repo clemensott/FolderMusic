@@ -148,43 +148,55 @@ namespace FolderMusic.FolderMusicApp_XamlTypeInfo
 
         private void InitTypeTables()
         {
-            _typeNameTable = new string[17];
-            _typeNameTable[0] = "FolderMusic.BoolToPlayIcon";
+            _typeNameTable = new string[23];
+            _typeNameTable[0] = "FolderMusic.Converters.PlayIconConverter";
             _typeNameTable[1] = "Object";
-            _typeNameTable[2] = "FolderMusic.BoolToDetailIcon";
-            _typeNameTable[3] = "FolderMusic.ShuffleToIcon";
-            _typeNameTable[4] = "FolderMusic.LoopToIcon";
-            _typeNameTable[5] = "FolderMusic.LoadingPage";
-            _typeNameTable[6] = "Windows.UI.Xaml.Controls.Page";
-            _typeNameTable[7] = "Windows.UI.Xaml.Controls.UserControl";
-            _typeNameTable[8] = "FolderMusic.SongListView";
-            _typeNameTable[9] = "MusicPlayer.Data.Playlist";
-            _typeNameTable[10] = "FolderMusic.SongListView.SongsSourceType";
-            _typeNameTable[11] = "System.Enum";
-            _typeNameTable[12] = "System.ValueType";
-            _typeNameTable[13] = "FolderMusic.MainPage";
-            _typeNameTable[14] = "FolderMusic.PlaylistPage";
-            _typeNameTable[15] = "FolderMusic.SettingsPage";
-            _typeNameTable[16] = "FolderMusic.SkipSongsPage";
+            _typeNameTable[2] = "FolderMusic.Converters.DetailIconConverter";
+            _typeNameTable[3] = "FolderMusic.Converters.ShuffleIconConverter";
+            _typeNameTable[4] = "FolderMusic.Converters.LoopIconConverter";
+            _typeNameTable[5] = "FolderMusic.Converters.SongsCountConverter";
+            _typeNameTable[6] = "FolderMusic.Converters.ShuffleOffSongsConverter";
+            _typeNameTable[7] = "FolderMusic.Converters.PlaylistsUpdateConverter";
+            _typeNameTable[8] = "FolderMusic.LoadingPage";
+            _typeNameTable[9] = "Windows.UI.Xaml.Controls.Page";
+            _typeNameTable[10] = "Windows.UI.Xaml.Controls.UserControl";
+            _typeNameTable[11] = "FolderMusic.Slider";
+            _typeNameTable[12] = "MusicPlayer.Data.ILibrary";
+            _typeNameTable[13] = "Windows.Media.Playback.MediaPlayer";
+            _typeNameTable[14] = "Double";
+            _typeNameTable[15] = "FolderMusic.ShuffleSongsView";
+            _typeNameTable[16] = "FolderMusic.SongsView";
+            _typeNameTable[17] = "MusicPlayer.Data.IPlaylist";
+            _typeNameTable[18] = "FolderMusic.MainPage";
+            _typeNameTable[19] = "FolderMusic.ShuffleOffSongsView";
+            _typeNameTable[20] = "FolderMusic.PlaylistPage";
+            _typeNameTable[21] = "FolderMusic.SettingsPage";
+            _typeNameTable[22] = "FolderMusic.SkipSongsPage";
 
-            _typeTable = new global::System.Type[17];
-            _typeTable[0] = typeof(global::FolderMusic.BoolToPlayIcon);
+            _typeTable = new global::System.Type[23];
+            _typeTable[0] = typeof(global::FolderMusic.Converters.PlayIconConverter);
             _typeTable[1] = typeof(global::System.Object);
-            _typeTable[2] = typeof(global::FolderMusic.BoolToDetailIcon);
-            _typeTable[3] = typeof(global::FolderMusic.ShuffleToIcon);
-            _typeTable[4] = typeof(global::FolderMusic.LoopToIcon);
-            _typeTable[5] = typeof(global::FolderMusic.LoadingPage);
-            _typeTable[6] = typeof(global::Windows.UI.Xaml.Controls.Page);
-            _typeTable[7] = typeof(global::Windows.UI.Xaml.Controls.UserControl);
-            _typeTable[8] = typeof(global::FolderMusic.SongListView);
-            _typeTable[9] = typeof(global::MusicPlayer.Data.Playlist);
-            _typeTable[10] = typeof(global::FolderMusic.SongListView.SongsSourceType);
-            _typeTable[11] = typeof(global::System.Enum);
-            _typeTable[12] = typeof(global::System.ValueType);
-            _typeTable[13] = typeof(global::FolderMusic.MainPage);
-            _typeTable[14] = typeof(global::FolderMusic.PlaylistPage);
-            _typeTable[15] = typeof(global::FolderMusic.SettingsPage);
-            _typeTable[16] = typeof(global::FolderMusic.SkipSongsPage);
+            _typeTable[2] = typeof(global::FolderMusic.Converters.DetailIconConverter);
+            _typeTable[3] = typeof(global::FolderMusic.Converters.ShuffleIconConverter);
+            _typeTable[4] = typeof(global::FolderMusic.Converters.LoopIconConverter);
+            _typeTable[5] = typeof(global::FolderMusic.Converters.SongsCountConverter);
+            _typeTable[6] = typeof(global::FolderMusic.Converters.ShuffleOffSongsConverter);
+            _typeTable[7] = typeof(global::FolderMusic.Converters.PlaylistsUpdateConverter);
+            _typeTable[8] = typeof(global::FolderMusic.LoadingPage);
+            _typeTable[9] = typeof(global::Windows.UI.Xaml.Controls.Page);
+            _typeTable[10] = typeof(global::Windows.UI.Xaml.Controls.UserControl);
+            _typeTable[11] = typeof(global::FolderMusic.Slider);
+            _typeTable[12] = typeof(global::MusicPlayer.Data.ILibrary);
+            _typeTable[13] = typeof(global::Windows.Media.Playback.MediaPlayer);
+            _typeTable[14] = typeof(global::System.Double);
+            _typeTable[15] = typeof(global::FolderMusic.ShuffleSongsView);
+            _typeTable[16] = typeof(global::FolderMusic.SongsView);
+            _typeTable[17] = typeof(global::MusicPlayer.Data.IPlaylist);
+            _typeTable[18] = typeof(global::FolderMusic.MainPage);
+            _typeTable[19] = typeof(global::FolderMusic.ShuffleOffSongsView);
+            _typeTable[20] = typeof(global::FolderMusic.PlaylistPage);
+            _typeTable[21] = typeof(global::FolderMusic.SettingsPage);
+            _typeTable[22] = typeof(global::FolderMusic.SkipSongsPage);
         }
 
         private int LookupTypeIndexByName(string typeName)
@@ -219,17 +231,21 @@ namespace FolderMusic.FolderMusicApp_XamlTypeInfo
             return -1;
         }
 
-        private object Activate_0_BoolToPlayIcon() { return new global::FolderMusic.BoolToPlayIcon(); }
-        private object Activate_2_BoolToDetailIcon() { return new global::FolderMusic.BoolToDetailIcon(); }
-        private object Activate_3_ShuffleToIcon() { return new global::FolderMusic.ShuffleToIcon(); }
-        private object Activate_4_LoopToIcon() { return new global::FolderMusic.LoopToIcon(); }
-        private object Activate_5_LoadingPage() { return new global::FolderMusic.LoadingPage(); }
-        private object Activate_8_SongListView() { return new global::FolderMusic.SongListView(); }
-        private object Activate_9_Playlist() { return new global::MusicPlayer.Data.Playlist(); }
-        private object Activate_13_MainPage() { return new global::FolderMusic.MainPage(); }
-        private object Activate_14_PlaylistPage() { return new global::FolderMusic.PlaylistPage(); }
-        private object Activate_15_SettingsPage() { return new global::FolderMusic.SettingsPage(); }
-        private object Activate_16_SkipSongsPage() { return new global::FolderMusic.SkipSongsPage(); }
+        private object Activate_0_PlayIconConverter() { return new global::FolderMusic.Converters.PlayIconConverter(); }
+        private object Activate_2_DetailIconConverter() { return new global::FolderMusic.Converters.DetailIconConverter(); }
+        private object Activate_3_ShuffleIconConverter() { return new global::FolderMusic.Converters.ShuffleIconConverter(); }
+        private object Activate_4_LoopIconConverter() { return new global::FolderMusic.Converters.LoopIconConverter(); }
+        private object Activate_5_SongsCountConverter() { return new global::FolderMusic.Converters.SongsCountConverter(); }
+        private object Activate_6_ShuffleOffSongsConverter() { return new global::FolderMusic.Converters.ShuffleOffSongsConverter(); }
+        private object Activate_7_PlaylistsUpdateConverter() { return new global::FolderMusic.Converters.PlaylistsUpdateConverter(); }
+        private object Activate_8_LoadingPage() { return new global::FolderMusic.LoadingPage(); }
+        private object Activate_11_Slider() { return new global::FolderMusic.Slider(); }
+        private object Activate_15_ShuffleSongsView() { return new global::FolderMusic.ShuffleSongsView(); }
+        private object Activate_18_MainPage() { return new global::FolderMusic.MainPage(); }
+        private object Activate_19_ShuffleOffSongsView() { return new global::FolderMusic.ShuffleOffSongsView(); }
+        private object Activate_20_PlaylistPage() { return new global::FolderMusic.PlaylistPage(); }
+        private object Activate_21_SettingsPage() { return new global::FolderMusic.SettingsPage(); }
+        private object Activate_22_SkipSongsPage() { return new global::FolderMusic.SkipSongsPage(); }
 
         private global::Windows.UI.Xaml.Markup.IXamlType CreateXamlType(int typeIndex)
         {
@@ -241,9 +257,9 @@ namespace FolderMusic.FolderMusicApp_XamlTypeInfo
             switch (typeIndex)
             {
 
-            case 0:   //  FolderMusic.BoolToPlayIcon
+            case 0:   //  FolderMusic.Converters.PlayIconConverter
                 userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
-                userType.Activator = Activate_0_BoolToPlayIcon;
+                userType.Activator = Activate_0_PlayIconConverter;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
@@ -252,100 +268,142 @@ namespace FolderMusic.FolderMusicApp_XamlTypeInfo
                 xamlType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 2:   //  FolderMusic.BoolToDetailIcon
+            case 2:   //  FolderMusic.Converters.DetailIconConverter
                 userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
-                userType.Activator = Activate_2_BoolToDetailIcon;
+                userType.Activator = Activate_2_DetailIconConverter;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 3:   //  FolderMusic.ShuffleToIcon
+            case 3:   //  FolderMusic.Converters.ShuffleIconConverter
                 userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
-                userType.Activator = Activate_3_ShuffleToIcon;
+                userType.Activator = Activate_3_ShuffleIconConverter;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 4:   //  FolderMusic.LoopToIcon
+            case 4:   //  FolderMusic.Converters.LoopIconConverter
                 userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
-                userType.Activator = Activate_4_LoopToIcon;
+                userType.Activator = Activate_4_LoopIconConverter;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 5:   //  FolderMusic.LoadingPage
+            case 5:   //  FolderMusic.Converters.SongsCountConverter
+                userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
+                userType.Activator = Activate_5_SongsCountConverter;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 6:   //  FolderMusic.Converters.ShuffleOffSongsConverter
+                userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
+                userType.Activator = Activate_6_ShuffleOffSongsConverter;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 7:   //  FolderMusic.Converters.PlaylistsUpdateConverter
+                userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
+                userType.Activator = Activate_7_PlaylistsUpdateConverter;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 8:   //  FolderMusic.LoadingPage
                 userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_5_LoadingPage;
+                userType.Activator = Activate_8_LoadingPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 6:   //  Windows.UI.Xaml.Controls.Page
+            case 9:   //  Windows.UI.Xaml.Controls.Page
                 xamlType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 7:   //  Windows.UI.Xaml.Controls.UserControl
+            case 10:   //  Windows.UI.Xaml.Controls.UserControl
                 xamlType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 8:   //  FolderMusic.SongListView
+            case 11:   //  FolderMusic.Slider
                 userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.UserControl"));
-                userType.Activator = Activate_8_SongListView;
-                userType.AddMemberName("Source");
-                userType.AddMemberName("SongsSource");
+                userType.Activator = Activate_11_Slider;
+                userType.AddMemberName("Library");
+                userType.AddMemberName("Player");
+                userType.AddMemberName("PlayerPositionMilliseconds");
+                userType.AddMemberName("PlayerNaturalDurationMilliseconds");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 9:   //  MusicPlayer.Data.Playlist
+            case 12:   //  MusicPlayer.Data.ILibrary
+                userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, null);
+                userType.SetIsReturnTypeStub();
+                xamlType = userType;
+                break;
+
+            case 13:   //  Windows.Media.Playback.MediaPlayer
                 userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 10:   //  FolderMusic.SongListView.SongsSourceType
-                userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.Enum"));
-                userType.AddEnumValue("Default", global::FolderMusic.SongListView.SongsSourceType.Default);
-                userType.AddEnumValue("Shuffle", global::FolderMusic.SongListView.SongsSourceType.Shuffle);
+            case 14:   //  Double
+                xamlType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 15:   //  FolderMusic.ShuffleSongsView
+                userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("FolderMusic.SongsView"));
+                userType.Activator = Activate_15_ShuffleSongsView;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 11:   //  System.Enum
-                userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.ValueType"));
-                xamlType = userType;
-                break;
-
-            case 12:   //  System.ValueType
-                userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
-                xamlType = userType;
-                break;
-
-            case 13:   //  FolderMusic.MainPage
-                userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_13_MainPage;
+            case 16:   //  FolderMusic.SongsView
+                userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.UserControl"));
+                userType.AddMemberName("Source");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 14:   //  FolderMusic.PlaylistPage
+            case 17:   //  MusicPlayer.Data.IPlaylist
+                userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, null);
+                userType.SetIsReturnTypeStub();
+                xamlType = userType;
+                break;
+
+            case 18:   //  FolderMusic.MainPage
                 userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_14_PlaylistPage;
+                userType.Activator = Activate_18_MainPage;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 19:   //  FolderMusic.ShuffleOffSongsView
+                userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("FolderMusic.SongsView"));
+                userType.Activator = Activate_19_ShuffleOffSongsView;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 20:   //  FolderMusic.PlaylistPage
+                userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_20_PlaylistPage;
                 userType.AddMemberName("Playlist");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 15:   //  FolderMusic.SettingsPage
+            case 21:   //  FolderMusic.SettingsPage
                 userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_15_SettingsPage;
+                userType.Activator = Activate_21_SettingsPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 16:   //  FolderMusic.SkipSongsPage
+            case 22:   //  FolderMusic.SkipSongsPage
                 userType = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_16_SkipSongsPage;
+                userType.Activator = Activate_22_SkipSongsPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
@@ -362,7 +420,7 @@ namespace FolderMusic.FolderMusicApp_XamlTypeInfo
                 {
                     _otherProviders = new global::System.Collections.Generic.List<global::Windows.UI.Xaml.Markup.IXamlMetadataProvider>();
                     global::Windows.UI.Xaml.Markup.IXamlMetadataProvider provider;
-                    provider = new global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlMetaDataProvider() as global::Windows.UI.Xaml.Markup.IXamlMetadataProvider;
+                    provider = new global::MobileDebug.MobileDebug_XamlTypeInfo.XamlMetaDataProvider() as global::Windows.UI.Xaml.Markup.IXamlMetadataProvider;
                     _otherProviders.Add(provider); 
                 }
                 return _otherProviders;
@@ -407,27 +465,47 @@ namespace FolderMusic.FolderMusicApp_XamlTypeInfo
             return foundXamlType;
         }
 
-        private object get_0_SongListView_Source(object instance)
+        private object get_0_Slider_Library(object instance)
         {
-            var that = (global::FolderMusic.SongListView)instance;
+            var that = (global::FolderMusic.Slider)instance;
+            return that.Library;
+        }
+        private void set_0_Slider_Library(object instance, object Value)
+        {
+            var that = (global::FolderMusic.Slider)instance;
+            that.Library = (global::MusicPlayer.Data.ILibrary)Value;
+        }
+        private object get_1_Slider_Player(object instance)
+        {
+            var that = (global::FolderMusic.Slider)instance;
+            return that.Player;
+        }
+        private void set_1_Slider_Player(object instance, object Value)
+        {
+            var that = (global::FolderMusic.Slider)instance;
+            that.Player = (global::Windows.Media.Playback.MediaPlayer)Value;
+        }
+        private object get_2_Slider_PlayerPositionMilliseconds(object instance)
+        {
+            var that = (global::FolderMusic.Slider)instance;
+            return that.PlayerPositionMilliseconds;
+        }
+        private object get_3_Slider_PlayerNaturalDurationMilliseconds(object instance)
+        {
+            var that = (global::FolderMusic.Slider)instance;
+            return that.PlayerNaturalDurationMilliseconds;
+        }
+        private object get_4_SongsView_Source(object instance)
+        {
+            var that = (global::FolderMusic.SongsView)instance;
             return that.Source;
         }
-        private void set_0_SongListView_Source(object instance, object Value)
+        private void set_4_SongsView_Source(object instance, object Value)
         {
-            var that = (global::FolderMusic.SongListView)instance;
-            that.Source = (global::MusicPlayer.Data.Playlist)Value;
+            var that = (global::FolderMusic.SongsView)instance;
+            that.Source = (global::MusicPlayer.Data.IPlaylist)Value;
         }
-        private object get_1_SongListView_SongsSource(object instance)
-        {
-            var that = (global::FolderMusic.SongListView)instance;
-            return that.SongsSource;
-        }
-        private void set_1_SongListView_SongsSource(object instance, object Value)
-        {
-            var that = (global::FolderMusic.SongListView)instance;
-            that.SongsSource = (global::FolderMusic.SongListView.SongsSourceType)Value;
-        }
-        private object get_2_PlaylistPage_Playlist(object instance)
+        private object get_5_PlaylistPage_Playlist(object instance)
         {
             var that = (global::FolderMusic.PlaylistPage)instance;
             return that.Playlist;
@@ -440,23 +518,43 @@ namespace FolderMusic.FolderMusicApp_XamlTypeInfo
 
             switch (longMemberName)
             {
-            case "FolderMusic.SongListView.Source":
-                userType = (global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType)GetXamlTypeByName("FolderMusic.SongListView");
-                xamlMember = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlMember(this, "Source", "MusicPlayer.Data.Playlist");
-                xamlMember.Getter = get_0_SongListView_Source;
-                xamlMember.Setter = set_0_SongListView_Source;
-                break;
-            case "FolderMusic.SongListView.SongsSource":
-                userType = (global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType)GetXamlTypeByName("FolderMusic.SongListView");
-                xamlMember = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlMember(this, "SongsSource", "FolderMusic.SongListView.SongsSourceType");
+            case "FolderMusic.Slider.Library":
+                userType = (global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType)GetXamlTypeByName("FolderMusic.Slider");
+                xamlMember = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlMember(this, "Library", "MusicPlayer.Data.ILibrary");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_1_SongListView_SongsSource;
-                xamlMember.Setter = set_1_SongListView_SongsSource;
+                xamlMember.Getter = get_0_Slider_Library;
+                xamlMember.Setter = set_0_Slider_Library;
+                break;
+            case "FolderMusic.Slider.Player":
+                userType = (global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType)GetXamlTypeByName("FolderMusic.Slider");
+                xamlMember = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlMember(this, "Player", "Windows.Media.Playback.MediaPlayer");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_1_Slider_Player;
+                xamlMember.Setter = set_1_Slider_Player;
+                break;
+            case "FolderMusic.Slider.PlayerPositionMilliseconds":
+                userType = (global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType)GetXamlTypeByName("FolderMusic.Slider");
+                xamlMember = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlMember(this, "PlayerPositionMilliseconds", "Double");
+                xamlMember.Getter = get_2_Slider_PlayerPositionMilliseconds;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "FolderMusic.Slider.PlayerNaturalDurationMilliseconds":
+                userType = (global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType)GetXamlTypeByName("FolderMusic.Slider");
+                xamlMember = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlMember(this, "PlayerNaturalDurationMilliseconds", "Double");
+                xamlMember.Getter = get_3_Slider_PlayerNaturalDurationMilliseconds;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "FolderMusic.SongsView.Source":
+                userType = (global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType)GetXamlTypeByName("FolderMusic.SongsView");
+                xamlMember = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlMember(this, "Source", "MusicPlayer.Data.IPlaylist");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_4_SongsView_Source;
+                xamlMember.Setter = set_4_SongsView_Source;
                 break;
             case "FolderMusic.PlaylistPage.Playlist":
                 userType = (global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlUserType)GetXamlTypeByName("FolderMusic.PlaylistPage");
-                xamlMember = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlMember(this, "Playlist", "MusicPlayer.Data.Playlist");
-                xamlMember.Getter = get_2_PlaylistPage_Playlist;
+                xamlMember = new global::FolderMusic.FolderMusicApp_XamlTypeInfo.XamlMember(this, "Playlist", "MusicPlayer.Data.IPlaylist");
+                xamlMember.Getter = get_5_PlaylistPage_Playlist;
                 xamlMember.SetIsReadOnly();
                 break;
             }

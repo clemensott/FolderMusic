@@ -3,7 +3,7 @@ using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Leere Seite" ist unter http://go.microsoft.com/fwlink/?LinkID=390556 dokumentiert.
 
-namespace FolderMusicDebug
+namespace MobileDebug
 {
     /// <summary>
     /// Eine leere Seite, die eigenständig verwendet werden kann oder auf die innerhalb eines Rahmens navigiert werden kann.
@@ -22,7 +22,12 @@ namespace FolderMusicDebug
         /// Dieser Parameter wird normalerweise zum Konfigurieren der Seite verwendet.</param>
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            DataContext = ViewModelDebug.Current;
+            DataContext = e.Parameter;
+        }
+
+        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
+            (DataContext as ViewModelDebug).IsFinding = true;
         }
     }
 }

@@ -5,14 +5,14 @@ namespace MusicPlayer.Data
 {
     public class LoopChangedEventArgs : EventArgs
     {
-        public LoopType OldValue { get; private set; }
+        public LoopType OldLoop { get; private set; }
 
-        public LoopType NewValue { get; private set; }
+        public LoopType NewLoop { get; private set; }
 
-        internal LoopChangedEventArgs(LoopType oldValue, LoopType newValue)
+        internal LoopChangedEventArgs(LoopType oldLoop, LoopType newLoop)
         {
-            OldValue = oldValue;
-            NewValue = newValue;
+            OldLoop = oldLoop;
+            NewLoop = newLoop;
         }
     }
 }

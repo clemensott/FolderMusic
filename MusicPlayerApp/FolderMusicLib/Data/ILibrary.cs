@@ -1,26 +1,38 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace MusicPlayer.Data
 {
-    public interface ILibrary
+    public delegate void PlayStateChangedEventHandler(ILibrary sender, PlayStateChangedEventArgs args);
+    public delegate void LibraryChangedEventHandler(ILibrary sender, LibraryChangedEventsArgs args);
+    public delegate void PlaylistsPropertyChangedEventHandler(ILibrary sender, PlaylistsChangedEventArgs args);
+    public delegate void CurrentPlaylistPropertyChangedEventHandler(ILibrary sender, CurrentPlaylistChangedEventArgs args);
+    public delegate void SettingsPropertyChangedEventHandler();
+
+    public interface ILibrary : IXmlSerializable
     {
-        Playlist this[int index] { get; set; }
+        event PlayStateChangedEventHandler PlayStateChanged;
+        event LibraryChangedEventHandler LibraryChanged;
+        event PlaylistsPropertyChangedEventHandler PlaylistsChanged;
+        event CurrentPlaylistPropertyChangedEventHandler CurrentPlaylistChanged;
+        event SettingsPropertyChangedEventHandler SettingsChanged;
+
+        IPlaylist this[int index] { get; }
 
         bool CanceledLoading { get; }
-        Playlist CurrentPlaylist { get; set; }
-        int CurrentPlaylistIndex { get; set; }
-        bool IsEmpty { get; }
+        IPlaylist CurrentPlaylist { get; set; }
         bool IsPlaying { get; set; }
-        int Length { get; }
-        PlaylistList Playlists { get; set; }
+        IPlaylistCollection Playlists { get; }
         SkipSongs SkippedSongs { get; }
 
-        Task AddNotExistingPlaylists();
+        Task AddNew();
         void CancelLoading();
-        int GetPlaylistIndex(Playlist playlist);
-        Task RefreshLibraryFromStorage();
+        Task Refresh();
         void Save();
         Task SaveAsync();
-        Task UpdateExistingPlaylists();
+        void Set(ILibrary library);
+        Task Update();
     }
 }

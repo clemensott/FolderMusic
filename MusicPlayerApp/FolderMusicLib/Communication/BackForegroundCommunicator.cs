@@ -1,63 +1,65 @@
 ﻿using MusicPlayer.Data;
 using MusicPlayer.Data.Loop;
+using MusicPlayer.Data.NonLoaded;
 using MusicPlayer.Data.Shuffle;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Windows.ApplicationModel.Core;
 using Windows.Foundation.Collections;
 using Windows.Media.Playback;
+using Windows.UI.Core;
 
 namespace MusicPlayer.Communication
 {
     class BackForegroundCommunicator
     {
-        protected const string playlistsIndexKey = "PlaylistIndex", songsIndexKey = "SongsIndex",
+        private const string primaryKey = "Primary",
+            currentPlaylistPathKey = "CurrentPlaylistPath", currentSongPathKey = "CurrentSongPath",
             songPathKey = "SongPath", playlistPathKey = "PlaylistPath",
-            ArtistPrimaryKey = "ArtistPrimary",
-            TitlePrimaryKey = "TitlePrimary",
-            DurationPrimaryKey = "DurationPrimary",
-            songPositionPrimaryKey = "SongPositionPrimary",
-            playlistPrimaryKey = "PlaylistPrimary",
-            currentSongPrimaryKey = "CurrentSongPrimary",
-            songsPrimaryKey = "SongsPrimary",
-            removeSongPrimaryKey = "RemoveSongPrimary",
-            shufflePrimaryKey = "ShufflePrimary",
-            shuffleListPrimaryKey = "ShuffleListPrimary",
-            loopPrimaryKey = "LoopPrimary",
-            libraryPrimaryKey = "LibraryPrimary",
-            playlistsPrimaryKey = "PlaylistsPrimary",
-            removePlaylistPrimaryKey = "removePlaylistPrimary",
-            currentPlaylistPrimaryKey = "CurrentPlaylistPrimary",
-            settingsPrimaryKey = "SettingsPrimary",
-            playStatePrimaryKey = "PlayStatePrimary",
-            getLibraryPrimaryKey = "GetLibraryPrimary",
-            skipPrimaryKey = "SkipPrimary",
-            songPositionKey = "SongPosition",
+            artistPrimaryKey = "Artist" + primaryKey,
+            titlePrimaryKey = "Title" + primaryKey,
+            durationPrimaryKey = "Duration" + primaryKey,
+            songPositionPrimaryKey = "SongPosition" + primaryKey,
+            currentSongPrimaryKey = "CurrentSong" + primaryKey,
+            songsPrimaryKey = "Songs" + primaryKey,
+            shufflePrimaryKey = "Shuffle" + primaryKey,
+            shuffleSongsPrimaryKey = "ShuffleSongs" + primaryKey,
+            loopPrimaryKey = "Loop" + primaryKey,
+            libraryPrimaryKey = "Library" + primaryKey,
+            playlistsPrimaryKey = "Playlists" + primaryKey,
+            removePlaylistPrimaryKey = "removePlaylist" + primaryKey,
+            currentPlaylistPrimaryKey = "CurrentPlaylist" + primaryKey,
+            settingsPrimaryKey = "Settings" + primaryKey,
+            playStatePrimaryKey = "PlayState" + primaryKey,
+            getLibraryPrimaryKey = "GetLibrary" + primaryKey,
+            skipPrimaryKey = "Skip" + primaryKey,
+
+            currentSongPositionKey = "SongPosition",
             shuffleKey = "Shuffle",
-            shuffleListKey = "ShuffleList",
-            currentPlaylistKey = "CurentPlaylist",
+            shuffleSongsKey = "ShuffleSongs",
             libraryEmptyValue = "libraryEmpty";
-        private static readonly TimeSpan minResendKeyTimeSpan = TimeSpan.FromMilliseconds(300);
 
         private static BackForegroundCommunicator instance;
 
-        public static void StartCommunication(bool isForeground)
+        public static void StartCommunication(ILibrary library, bool isForeground)
         {
-            FolderMusicDebug.DebugEvent.SaveText("StartCommunication", "IsForeground: " + isForeground, "Existing: " + (instance != null));
-            instance = new BackForegroundCommunicator(isForeground);
+            instance = new BackForegroundCommunicator(library, isForeground);
         }
 
         private bool isForeground;
+        private ILibrary library;
         private List<Tuple<int, ValueSet>> receivingItems;
         private Action<ValueSet> senderMethod;
         private Dictionary<string, Receiver> receivers;
 
-        private BackForegroundCommunicator(bool isForeground)
+        private BackForegroundCommunicator(ILibrary library, bool isForeground)
         {
             receivingItems = new List<Tuple<int, ValueSet>>();
-
-            this.isForeground = isForeground;
             receivers = GetAllReceiver().ToDictionary(r => r.Key);
+
+            this.library = library;
+            this.isForeground = isForeground;
 
             if (isForeground)
             {
@@ -72,33 +74,25 @@ namespace MusicPlayer.Communication
                 senderMethod = BackgroundMediaPlayer.SendMessageToForeground;
             }
 
-            Feedback.Current.OnArtistPropertyChanged += OnArtistPropertyChanged;
-            Feedback.Current.OnTitlePropertyChanged += OnTitlePropertyChanged;
-            Feedback.Current.OnCurrentPlaylistPropertyChanged += OnCurrentPlaylistPropertyChanged;
-            Feedback.Current.OnCurrentSongPropertyChanged += OnCurrentSongPropertyChanged;
-            Feedback.Current.OnLibraryChanged += OnLibraryChanged;
-            Feedback.Current.OnLoopPropertyChanged += OnLoopPropertyChanged;
-            Feedback.Current.OnPlaylistsPropertyChanged += OnPlaylistsPropertyChanged;
-            Feedback.Current.OnSettingsPropertyChanged += OnSettingsPropertyChanged;
-            Feedback.Current.OnShufflePropertyChanged += OnShufflePropertyChanged;
-            Feedback.Current.OnSkippedSongsPropertyChanged += OnSkippedSongsPropertyChanged;
-            Feedback.Current.OnSongsPropertyChanged += OnSongsPropertyChanged;
-            Feedback.Current.OnPlayStateChanged += OnPlayStateChanged;
+            library.LibraryChanged += OnLibraryChanged;
+            library.PlayStateChanged += OnPlayStateChanged;
+            library.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
+            library.PlaylistsChanged += OnPlaylistsChanged;
+            library.SettingsChanged += OnSettingsChanged;
         }
 
         private IEnumerable<Receiver> GetAllReceiver()
         {
-            yield return new Receiver(TitlePrimaryKey, new Action<ValueSet, string>(ReceiveSongTitle));
-            yield return new Receiver(ArtistPrimaryKey, new Action<ValueSet, string>(ReceiveSongArtist));
-            yield return new Receiver(DurationPrimaryKey, new Action<ValueSet, string>(ReceiveSongDuration));
-            yield return new Receiver(songPositionPrimaryKey, new Action<ValueSet, string>(ReceiveSongPosition));
-            yield return new Receiver(playlistPrimaryKey, new Action<ValueSet, string>(ReceivePlaylist));
-            yield return new Receiver(currentSongPrimaryKey, new Action<ValueSet, string>(ReceiveCurrentSong));
-            yield return new Receiver(songsPrimaryKey, new Action<ValueSet, string>(ReceiveSongs));
-            yield return new Receiver(shufflePrimaryKey, new Action<ValueSet, string>(ReceiveShuffle));
+            yield return new Receiver(titlePrimaryKey, new Action<ValueSet, string>(ReceiveSongTitleChanged));
+            yield return new Receiver(artistPrimaryKey, new Action<ValueSet, string>(ReceiveSongArtistChanged));
+            yield return new Receiver(durationPrimaryKey, new Action<ValueSet, string>(ReceiveSongDurationChanged));
+            yield return new Receiver(currentSongPrimaryKey, new Action<ValueSet, string>(ReceiveCurrentSongChanged));
+            yield return new Receiver(songsPrimaryKey, new Action<ValueSet, string>(ReceiveSongsChanged));
+            yield return new Receiver(shuffleSongsPrimaryKey, new Action<ValueSet, string>(ReceiveShuffleSongsChanged));
+            yield return new Receiver(shufflePrimaryKey, new Action<ValueSet, string>(ReceiveShuffleChanged));
             yield return new Receiver(loopPrimaryKey, new Action<ValueSet, string>(ReceiveLoop));
             yield return new Receiver(libraryPrimaryKey, new Action<ValueSet, string>(ReceiveLibrary));
-            yield return new Receiver(playlistsPrimaryKey, new Action<ValueSet, string>(ReceivePlaylists));
+            yield return new Receiver(playlistsPrimaryKey, new Action<ValueSet, string>(ReceivePlaylistsChanged));
             yield return new Receiver(currentPlaylistPrimaryKey, new Action<ValueSet, string>(ReceiveCurrentPlaylist));
             yield return new Receiver(settingsPrimaryKey, new Action<ValueSet, string>(ReceiveSettings));
             yield return new Receiver(playStatePrimaryKey, new Action<ValueSet, string>(ReceivePlayState));
@@ -106,185 +100,380 @@ namespace MusicPlayer.Communication
             yield return new Receiver(skipPrimaryKey, new Action<ValueSet, string>(ReceiveSkip));
         }
 
-        private void OnArtistPropertyChanged(Song sender, SongArtistChangedEventArgs args)
+        private void Subscribe(IEnumerable<IPlaylist> playlists)
         {
-            int playlistsIndex, songsIndex;
+            foreach (IPlaylist playlist in playlists ?? Enumerable.Empty<IPlaylist>())
+            {
+                Subscribe(playlist);
+            }
+        }
 
-            if (!Library.Base.HavePlaylistIndexAndSongsIndex(sender, out playlistsIndex, out songsIndex)) return;
+        private void Unsubscribe(IEnumerable<IPlaylist> playlists)
+        {
+            foreach (IPlaylist playlist in playlists ?? Enumerable.Empty<IPlaylist>())
+            {
+                Unsubscribe(playlist);
+            }
+        }
 
-            string path = sender.Path;
+        private void Subscribe(IPlaylist playlist)
+        {
+            if (playlist == null) return;
+
+            playlist.CurrentSongChanged += OnCurrentSongChanged;
+            playlist.LoopChanged += OnLoopChanged;
+            playlist.ShuffleChanged += OnShuffleChanged;
+
+            playlist.Songs.CollectionChanged += OnSongsChanged;
+            playlist.ShuffleSongs.Changed += OnShuffleSongsChanged;
+        }
+
+        private void Unsubscribe(IPlaylist playlist)
+        {
+            if (playlist == null) return;
+
+            playlist.CurrentSongChanged -= OnCurrentSongChanged;
+            playlist.LoopChanged -= OnLoopChanged;
+            playlist.ShuffleChanged -= OnShuffleChanged;
+
+            playlist.Songs.CollectionChanged -= OnSongsChanged;
+            playlist.ShuffleSongs.Changed -= OnShuffleSongsChanged;
+        }
+
+        private void Subscribe(IEnumerable<Song> songs)
+        {
+            foreach (Song song in songs ?? Enumerable.Empty<Song>()) Subscribe(song);
+        }
+
+        private void Unsubscribe(IEnumerable<Song> songs)
+        {
+            foreach (Song song in songs ?? Enumerable.Empty<Song>()) Unsubscribe(song);
+        }
+
+        private void Subscribe(Song song)
+        {
+            if (song?.IsEmpty ?? true) return;
+
+            song.ArtistChanged += OnArtistChanged;
+            song.DurationChanged += OnDurationChanged;
+            song.TitleChanged += OnTitleChanged;
+        }
+
+        private void Unsubscribe(Song song)
+        {
+            if (song?.IsEmpty ?? true) return;
+
+            song.ArtistChanged -= OnArtistChanged;
+            song.DurationChanged -= OnDurationChanged;
+            song.TitleChanged -= OnTitleChanged;
+        }
+
+
+        private void OnArtistChanged(Song sender, SongArtistChangedEventArgs args)
+        {
             string value = sender.Artist;
+            string songPath = sender.Path;
 
-            ValueSet valueSet = receivers[ArtistPrimaryKey].GetValueSet(value);
-            valueSet.Add(playlistsIndexKey, playlistsIndex.ToString());
-            valueSet.Add(songsIndexKey, songsIndex.ToString());
-            valueSet.Add(songPathKey, path);
+            ValueSet valueSet = receivers[artistPrimaryKey].GetValueSet(value);
+            valueSet.Add(songPathKey, songPath);
 
             Send(valueSet);
         }
 
-        private void OnTitlePropertyChanged(Song sender, SongTitleChangedEventArgs args)
+        private void ReceiveSongArtistChanged(ValueSet valueSet, string value)
         {
-            int playlistsIndex, songsIndex;
+            string playlistPath = valueSet[playlistPathKey].ToString();
+            string songPath = valueSet[songPathKey].ToString();
 
-            if (!Library.Base.HavePlaylistIndexAndSongsIndex(sender, out playlistsIndex, out songsIndex)) return;
+            Song changedSong;
+            if (!HaveSong(songPath, out changedSong)) return;
 
-            string path = sender.Path;
+            changedSong.Artist = value;
+        }
+
+
+        private void OnTitleChanged(Song sender, SongTitleChangedEventArgs args)
+        {
             string value = sender.Title;
+            string songPath = sender.Path;
 
-            ValueSet valueSet = receivers[TitlePrimaryKey].GetValueSet(value);
-            valueSet.Add(playlistsIndexKey, playlistsIndex.ToString());
-            valueSet.Add(songsIndexKey, songsIndex.ToString());
-            valueSet.Add(songPathKey, path);
-
-            Send(valueSet);
-        }
-
-        private void OnNaturalDurationPropertyChanged(Song sender, SongNaturalDurationChangedEventArgs args)
-        {
-            int playlistsIndex, songsIndex;
-
-            if (!Library.Base.HavePlaylistIndexAndSongsIndex(sender, out playlistsIndex, out songsIndex)) return;
-
-            string path = sender.Path;
-            double value = sender.NaturalDurationMilliseconds;
-
-            ValueSet valueSet = receivers[DurationPrimaryKey].GetValueSet(value.ToString());
-            valueSet.Add(playlistsIndexKey, playlistsIndex.ToString());
-            valueSet.Add(songsIndexKey, songsIndex.ToString());
-            valueSet.Add(songPathKey, path);
+            ValueSet valueSet = receivers[titlePrimaryKey].GetValueSet(value);
+            valueSet.Add(songPathKey, songPath);
 
             Send(valueSet);
         }
 
-        public void OnCurrentSongPositionPropertyChanged(Playlist sender, CurrentSongPositionChangedEventArgs args)
+        private void ReceiveSongTitleChanged(ValueSet valueSet, string value)
         {
-            return;
-            int playlistsIndex = Library.Current.Playlists.IndexOf(sender);
-            string value = sender.SongPositionPercent.ToString();
-            string path = sender.AbsolutePath;
+            string playlistPath = valueSet[playlistPathKey].ToString();
+            string songPath = valueSet[songPathKey].ToString();
 
-            ValueSet valueSet = receivers[songPositionPrimaryKey].GetValueSet(value);
-            valueSet.Add(playlistPathKey, path);
-            valueSet.Add(playlistsIndexKey, playlistsIndex.ToString());
+            Song changedSong;
+            if (!HaveSong(songPath, out changedSong)) return;
+
+            changedSong.Title = value;
+        }
+
+
+        private void OnDurationChanged(Song sender, SongDurationChangedEventArgs args)
+        {
+            double value = sender.DurationMilliseconds;
+            string songPath = sender.Path;
+
+            ValueSet valueSet = receivers[durationPrimaryKey].GetValueSet(value.ToString());
+            valueSet.Add(songPathKey, songPath);
 
             Send(valueSet);
         }
 
-        public void OnCurrentSongPropertyChanged(Playlist sender, CurrentSongChangedEventArgs args)
+        private void ReceiveSongDurationChanged(ValueSet valueSet, string value)
         {
-            string value = sender.SongsIndex.ToString();
-            int playlistsIndex = sender.PlaylistIndex;
-            string path = sender.CurrentSong.Path;
+            string playlistPath = valueSet[playlistPathKey].ToString();
+            string songPath = valueSet[songPathKey].ToString();
 
+            Song changedSong;
+            if (!HaveSong(songPath, out changedSong)) return;
+
+            changedSong.DurationMilliseconds = double.Parse(value);
+        }
+
+
+        public void OnCurrentSongChanged(IPlaylist sender, CurrentSongChangedEventArgs args)
+        {
+            string value = sender.CurrentSong.Path;
             ValueSet valueSet = receivers[currentSongPrimaryKey].GetValueSet(value);
-            valueSet.Add(songPathKey, path);
-            valueSet.Add(playlistsIndexKey, playlistsIndex.ToString());
 
             Send(valueSet);
         }
 
-        public void OnSongsPropertyChanged(Playlist sender, SongsChangedEventArgs args)
+        private void ReceiveCurrentSongChanged(ValueSet valueSet, string value)
         {
-            string value = XmlConverter.Serialize(sender.Songs);
-            string shuffle = sender.Shuffle.ToString();
-            string shuffleList = XmlConverter.Serialize(sender.ShuffleList);
-            int songsIndex = sender.SongsIndex;
-            double position = sender.SongPositionPercent;
-            int playlistsIndex = sender.PlaylistIndex;
-            string path = sender.AbsolutePath;
+            Song newCurrentSong;
+            if (!HaveSong(value, out newCurrentSong)) return;
+
+            newCurrentSong.Parent.Parent.CurrentSong = newCurrentSong;
+        }
+
+
+        public void OnSongsChanged(ISongCollection sender, SongCollectionChangedEventArgs args)
+        {
+            Unsubscribe(args.GetRemoved());
+            Subscribe(args.GetAdded());
+
+            string value = XmlConverter.Serialize(sender);
+            string shuffleSongs = XmlConverter.Serialize(sender.Parent.ShuffleSongs);
+            string currentSongPath = sender.Parent.CurrentSong.Path;
+            string position = sender.Parent.CurrentSongPositionPercent.ToString();
+            string playlistPath = sender.Parent.AbsolutePath;
 
             ValueSet valueSet = receivers[songsPrimaryKey].GetValueSet(value);
-            valueSet.Add(shuffleKey, shuffle.ToString());
-            valueSet.Add(shuffleListKey, shuffleList);
-            valueSet.Add(songsIndexKey, songsIndex.ToString());
-            valueSet.Add(songPositionKey, position.ToString());
-            valueSet.Add(playlistsIndexKey, playlistsIndex.ToString());
-            valueSet.Add(playlistPathKey, path);
+            valueSet.Add(shuffleSongsKey, shuffleSongs);
+            valueSet.Add(currentSongPathKey, currentSongPath);
+            valueSet.Add(currentSongPositionKey, position.ToString());
+            valueSet.Add(playlistPathKey, playlistPath);
 
             Send(valueSet);
         }
 
-        public void OnShufflePropertyChanged(Playlist sender, ShuffleChangedEventArgs args)
+        private void ReceiveSongsChanged(ValueSet valueSet, string value)
+        {
+            string shuffleSongsXml = valueSet[shuffleSongsKey].ToString();
+            string currentSongPath = valueSet[currentSongPathKey].ToString();
+            double position = double.Parse(valueSet[currentSongPositionKey].ToString());
+            string playlistPath = valueSet[playlistPathKey].ToString();
+
+            IPlaylist changedPlaylist;
+            if (!HavePlaylist(playlistPath, out changedPlaylist)) return;
+
+            ISongCollection songs = new SongCollection(changedPlaylist, value);
+            var shuffleSongs = GetShuffleCollection(changedPlaylist.Shuffle, changedPlaylist, songs, shuffleSongsXml);
+
+            Unsubscribe(changedPlaylist.Songs);
+            Subscribe(songs);
+
+            changedPlaylist.Songs.Reset(songs);
+            changedPlaylist.ShuffleSongs.Reset(shuffleSongs);
+
+            Song newCurrentSong;
+            if (!HaveSong(currentSongPath, out newCurrentSong)) return;
+
+            changedPlaylist.CurrentSong = newCurrentSong;
+            changedPlaylist.CurrentSongPositionPercent = position;
+        }
+
+
+        private void OnShuffleSongsChanged(IShuffleCollection sender)
+        {
+            string value = XmlConverter.Serialize(sender);
+            string currentSongPath = sender.Parent.CurrentSong.Path;
+            string position = sender.Parent.CurrentSongPositionPercent.ToString();
+            string playlistPath = sender.Parent.AbsolutePath;
+
+            ValueSet valueSet = receivers[shuffleSongsPrimaryKey].GetValueSet(value.ToString());
+            valueSet.Add(currentSongPathKey, currentSongPath);
+            valueSet.Add(currentSongPositionKey, position);
+            valueSet.Add(playlistPathKey, playlistPath);
+
+            Send(valueSet);
+        }
+
+        public void ReceiveShuffleSongsChanged(ValueSet valueSet, string value)
+        {
+            string currentSongPath = valueSet[currentSongPathKey].ToString();
+            double position = double.Parse(valueSet[currentSongPositionKey].ToString());
+            string playlistPath = valueSet[playlistPathKey].ToString();
+
+            IPlaylist changedPlaylist;
+            if (!HavePlaylist(playlistPath, out changedPlaylist)) return;
+
+            var shuffleSongs = GetShuffleCollection(changedPlaylist.Shuffle, changedPlaylist, changedPlaylist.Songs, value);
+
+            changedPlaylist.ShuffleSongs.Reset(shuffleSongs);
+
+            Song newCurrentSong;
+            if (!HaveSong(currentSongPath, out newCurrentSong)) return;
+
+            changedPlaylist.CurrentSong = newCurrentSong;
+            changedPlaylist.CurrentSongPositionPercent = position;
+        }
+
+
+        public void OnShuffleChanged(IPlaylist sender, ShuffleChangedEventArgs args)
         {
             string value = sender.Shuffle.ToString();
-            string shuffleList = XmlConverter.Serialize(sender.ShuffleList);
-            int songsIndex = sender.SongsIndex;
-            int playlistsIndex = sender.PlaylistIndex;
-            string path = sender.AbsolutePath;
+            string shuffleSongs = XmlConverter.Serialize(sender.ShuffleSongs);
+            string currentSongPath = sender.CurrentSong.Path;
+            string position = sender.CurrentSongPositionPercent.ToString();
+            string playlistPath = sender.AbsolutePath;
 
-            ValueSet valueSet = receivers[shufflePrimaryKey].GetValueSet(value.ToString());
-            valueSet.Add(shuffleListKey, shuffleList);
-            valueSet.Add(songsIndexKey, songsIndex.ToString());
-            valueSet.Add(playlistsIndexKey, playlistsIndex.ToString());
-            valueSet.Add(playlistPathKey, path);
+            ValueSet valueSet = receivers[shufflePrimaryKey].GetValueSet(value);
+            valueSet.Add(shuffleSongsKey, shuffleSongs);
+            valueSet.Add(currentSongPathKey, currentSongPath);
+            valueSet.Add(currentSongPositionKey, position);
+            valueSet.Add(playlistPathKey, playlistPath);
 
             Send(valueSet);
         }
 
-        public void OnLoopPropertyChanged(Playlist sender, LoopChangedEventArgs args)
+        private void ReceiveShuffleChanged(ValueSet valueSet, string value)
+        {
+            ShuffleType shuffle = (ShuffleType)Enum.Parse(typeof(ShuffleType), value);
+            string shuffleSongsXml = valueSet[shuffleSongsKey].ToString();
+            string currentSongPath = valueSet[currentSongPathKey].ToString();
+            double position = double.Parse(valueSet[currentSongPositionKey].ToString());
+            string playlistPath = valueSet[playlistPathKey].ToString();
+
+            IPlaylist changedPlaylist;
+            if (!HavePlaylist(playlistPath, out changedPlaylist)) return;
+
+            var shuffleSongs = GetShuffleCollection(shuffle, changedPlaylist, changedPlaylist.Songs, shuffleSongsXml);
+
+            changedPlaylist.SetShuffle(shuffleSongs);
+
+            Song newCurrentSong;
+            if (!HaveSong(currentSongPath, out newCurrentSong)) return;
+
+            changedPlaylist.CurrentSong = newCurrentSong;
+            changedPlaylist.CurrentSongPositionPercent = position;
+        }
+
+
+        public void OnLoopChanged(IPlaylist sender, LoopChangedEventArgs args)
         {
             string value = sender.Loop.ToString();
-            int playlistsIndex = sender.PlaylistIndex;
-            string path = sender.AbsolutePath;
+            string playlistPath = sender.AbsolutePath;
 
             ValueSet valueSet = receivers[loopPrimaryKey].GetValueSet(value.ToString());
-            valueSet.Add(playlistPathKey, path);
-            valueSet.Add(playlistsIndexKey, playlistsIndex.ToString());
+            valueSet.Add(playlistPathKey, playlistPath);
 
             Send(valueSet);
         }
 
-        private void OnLibraryChanged(ILibrary sender, LibraryChangedEventsArgs args)
+        private void ReceiveLoop(ValueSet valueSet, string value)
         {
-            if (isForeground) return;
-            if (!Library.IsLoaded(sender)) return;
+            LoopType loop = (LoopType)Enum.Parse(typeof(LoopType), value);
+            string playlistPath = valueSet[playlistPathKey].ToString();
 
-            string value = Library.Base.IsEmpty ? value = libraryEmptyValue : Library.Base.GetXmlText();
+            IPlaylist changedPlaylist;
+            if (!HavePlaylist(playlistPath, out changedPlaylist)) return;
 
-            ValueSet valueSet = receivers[libraryPrimaryKey].GetValueSet(value);
-
-            Send(valueSet);
+            changedPlaylist.Loop = loop;
         }
 
-        private void OnPlaylistsPropertyChanged(ILibrary sender, PlaylistsChangedEventArgs args)
+
+        private void OnPlaylistsChanged(ILibrary sender, PlaylistsChangedEventArgs args)
         {
+            Unsubscribe(args.GetRemoved());
+            Subscribe(args.GetAdded());
+
             string value = XmlConverter.Serialize(sender.Playlists);
-            int currentPlaylistIndex = sender.CurrentPlaylistIndex;
-            string path = sender.CurrentPlaylist.AbsolutePath;
+            string currentPlaylistPath = sender.CurrentPlaylist.AbsolutePath;
 
             ValueSet valueSet = receivers[playlistsPrimaryKey].GetValueSet(value.ToString());
-            valueSet.Add(playlistPathKey, path);
-            valueSet.Add(currentPlaylistKey, currentPlaylistIndex.ToString());
+            valueSet.Add(currentPlaylistPathKey, currentPlaylistPath);
 
             Send(valueSet);
         }
 
-        public void OnCurrentPlaylistPropertyChanged(ILibrary sender, CurrentPlaylistChangedEventArgs args)
+        private void ReceivePlaylistsChanged(ValueSet valueSet, string value)
         {
-            int value = sender.CurrentPlaylistIndex;
-            string path = sender.CurrentPlaylist.AbsolutePath;
+            IPlaylistCollection playlists = new PlaylistCollection(library, value);
+            string currentPlaylistPath = valueSet[currentPlaylistPathKey].ToString();
 
+            library.Playlists.Change(playlists, library.Playlists);
+
+            IPlaylist newCurrentPlaylist;
+            if (!HavePlaylist(currentPlaylistPath, out newCurrentPlaylist)) return;
+
+            library.CurrentPlaylist = newCurrentPlaylist;
+            library.Save();
+        }
+
+
+        public void OnCurrentPlaylistChanged(ILibrary sender, CurrentPlaylistChangedEventArgs args)
+        {
+            string value = sender.CurrentPlaylist.AbsolutePath;
             ValueSet valueSet = receivers[currentPlaylistPrimaryKey].GetValueSet(value.ToString());
-            valueSet.Add(playlistPathKey, path);
 
             Send(valueSet);
         }
 
-        public void OnSettingsPropertyChanged()
+        private void ReceiveCurrentPlaylist(ValueSet valueSet, string value)
         {
-            string value = string.Empty;
+            IPlaylist newCurrentPlaylist;
+            if (!HavePlaylist(value, out newCurrentPlaylist)) return;
 
-            ValueSet valueSet = receivers[settingsPrimaryKey].GetValueSet(value);
-
-            Send(valueSet);
+            library.CurrentPlaylist = newCurrentPlaylist;
         }
+
 
         public void OnPlayStateChanged(ILibrary sender, PlayStateChangedEventArgs args)
         {
             string value = args.NewValue.ToString();
-
             ValueSet valueSet = receivers[playStatePrimaryKey].GetValueSet(value);
+
+            Send(valueSet);
+        }
+
+        private void ReceivePlayState(ValueSet valueSet, string value)
+        {
+            library.IsPlaying = bool.Parse(value);
+        }
+
+
+        private void OnLibraryChanged(ILibrary sender, LibraryChangedEventsArgs args)
+        {
+            Unsubscribe(args.OldPlaylists);
+            Subscribe(args.NewPlaylists);
+
+            SendLibrary();
+        }
+
+
+        public void OnSettingsChanged()
+        {
+            string value = string.Empty;
+            ValueSet valueSet = receivers[settingsPrimaryKey].GetValueSet(value);
 
             Send(valueSet);
         }
@@ -292,16 +481,37 @@ namespace MusicPlayer.Communication
         public void GetLibrary()
         {
             string value = string.Empty;
-
             ValueSet valueSet = receivers[getLibraryPrimaryKey].GetValueSet(value);
 
             Send(valueSet);
         }
 
-        private void OnSkippedSongsPropertyChanged(SkipSongs sender)
+        private void ReceiveGetLibrary(ValueSet valueSet, string value)
+        {
+            if (isForeground || library.CurrentPlaylist is NonLoadedPlaylist || library.Playlists.Count == 0) return;
+
+            SendLibrary();
+        }
+
+        private void SendLibrary()
+        {
+            string value = XmlConverter.Serialize(library);
+            ValueSet valueSet = receivers[libraryPrimaryKey].GetValueSet(value);
+
+            Send(valueSet);
+        }
+
+        private void ReceiveLibrary(ValueSet valueSet, string value)
+        {
+            ILibrary receivedLibrary = new Library(value);
+            MobileDebug.Manager.WriteEvent("ReceiveLibrary", receivedLibrary.Playlists.Count);
+            library.Set(receivedLibrary);
+        }
+
+
+        private void OnSkippedSongsChanged(SkipSongs sender)
         {
             string value = string.Empty;
-
             ValueSet valueSet = receivers[skipPrimaryKey].GetValueSet(value);
 
             Send(valueSet);
@@ -310,7 +520,12 @@ namespace MusicPlayer.Communication
 
         private void Send(ValueSet valueSet)
         {
-            if (AllowedToSend(valueSet)) senderMethod(valueSet);
+            bool send = AllowedToSend(valueSet);
+            MobileDebug.Manager.WriteEvent("Send", GetPrimaryKey(valueSet), send);
+            if (!send) return;
+
+            MediaPlayer player = BackgroundMediaPlayer.Current;     // Player abrufen zum starten
+            senderMethod(valueSet);
         }
 
         private bool AllowedToSend(ValueSet valueSet)
@@ -319,255 +534,126 @@ namespace MusicPlayer.Communication
 
             if (receivingItem == null) return true;
 
-            return Same(valueSet, receivingItem.Item2);
+            return !Same(valueSet, receivingItem.Item2);
         }
 
         private bool Same(ValueSet valueSet1, ValueSet valueSet2)
         {
-            if (valueSet1.Count != valueSet2.Count) return true;
+            if (valueSet1.Count != valueSet2.Count) return false;
 
             for (int i = 0; i < valueSet1.Count; i++)
             {
-                if (valueSet1.ElementAt(i).Key != valueSet2.ElementAt(i).Key) return true;
+                if (valueSet1.ElementAt(i).Key != valueSet2.ElementAt(i).Key) return false;
             }
 
-            return false;
+            return true;
         }
 
         private void BackgroundMediaPlayer_MessageReceived(object sender, MediaPlayerDataReceivedEventArgs e)
         {
-            var receivingItem = new Tuple<int, ValueSet>(Environment.CurrentManagedThreadId, e.Data);
-            receivingItems.Add(receivingItem);
 
             try
             {
-                string currentReceivedPrimaryKey = GetPrimaryKey(e.Data);
-
-                //System.Diagnostics.Debug.WriteLine("IsForeground: {0},Key: {1}, Time: {2}",
-                //    isForeground, currentReceivedPrimaryKey, DateTime.Now.ToString("hh:mm:ss.fff"));
-
-                try
+                if (!UseDispatcher()) Handle(e.Data);
+                else
                 {
-                    receivers[currentReceivedPrimaryKey].Handle(e.Data);
-
-                    string primaryData = e.Data[currentReceivedPrimaryKey].ToString();
-                    if (primaryData.Length > 100) primaryData = primaryData.Remove(100);
-                    FolderMusicDebug.DebugEvent.SaveText("Communicated", currentReceivedPrimaryKey, primaryData);
-                }
-                catch (Exception exc1)
-                {
-                    string primaryData = e.Data[currentReceivedPrimaryKey].ToString();
-                    FolderMusicDebug.DebugEvent.SaveText("CommunicationFailed", currentReceivedPrimaryKey, primaryData);
+                    CoreApplication.MainView.CoreWindow.Dispatcher.
+                        RunAsync(CoreDispatcherPriority.Normal, () => { Handle(e.Data); });
                 }
             }
-            catch (Exception exc2)
+            catch (Exception exc1)
             {
-                //try
-                //{
-                //    foreach (var pair in e.Data)
-                //    {
-                //        System.Diagnostics.Debug.WriteLine("Pair: ");
-                //        System.Diagnostics.Debug.WriteLine("Key: {0}", pair.Key ?? "Null");
-
-                //        string value = (string)pair.Value ?? "Null";
-                //        if (value.Length > 100) value = value.Remove(100);
-
-                //        System.Diagnostics.Debug.WriteLine("Value: {0}", value);
-                //    }
-                //}
-                //catch (Exception exc3)
-                //{
-                //}
+                string currentReceivedPrimaryKey = GetPrimaryKey(e.Data);
+                string primaryData = e.Data[currentReceivedPrimaryKey].ToString();
+                MobileDebug.Manager.WriteEvent("ReceiveFail1", exc1, currentReceivedPrimaryKey);
             }
+        }
+
+        private void Handle(ValueSet valueSet)
+        {
+            var receivingItem = new Tuple<int, ValueSet>(Environment.CurrentManagedThreadId, valueSet);
+            receivingItems.Add(receivingItem);
+
+            string currentReceivedPrimaryKey = GetPrimaryKey(valueSet);
+            receivers[currentReceivedPrimaryKey].Handle(valueSet);
 
             receivingItems.Remove(receivingItem);
         }
 
         private string GetPrimaryKey(ValueSet valueSet)
         {
-            return valueSet.Keys.FirstOrDefault(k => k.Contains("Primary"));
+            return valueSet.Keys.FirstOrDefault(k => k.EndsWith(primaryKey));
         }
 
-
-        private void ReceiveSongTitle(ValueSet valueSet, string value)
+        private bool UseDispatcher()
         {
-            int playlistsIndex = int.Parse(valueSet[playlistsIndexKey].ToString());
-            int songsIndex = int.Parse(valueSet[songsIndexKey].ToString());
-            string path = valueSet[songPathKey].ToString();
-
-            if (!HavePlaylistAndSongsIndex(ref playlistsIndex, ref songsIndex, path)) return;
-
-            Library.Current[playlistsIndex].Songs[songsIndex].Title = value;
-        }
-
-        private void ReceiveSongArtist(ValueSet valueSet, string value)
-        {
-            int playlistsIndex = int.Parse(valueSet[playlistsIndexKey].ToString());
-            int songsIndex = int.Parse(valueSet[songsIndexKey].ToString());
-            string path = valueSet[songPathKey].ToString();
-
-            if (!HavePlaylistAndSongsIndex(ref playlistsIndex, ref songsIndex, path)) return;
-
-            Library.Current[playlistsIndex].Songs[songsIndex].Artist = value;
-        }
-
-        private void ReceiveSongDuration(ValueSet valueSet, string value)
-        {
-            double duration = double.Parse(value);
-            int playlistsIndex = int.Parse(valueSet[playlistsIndexKey].ToString());
-            int songsIndex = int.Parse(valueSet[songsIndexKey].ToString());
-            string path = valueSet[songPathKey].ToString();
-
-            if (!HavePlaylistAndSongsIndex(ref playlistsIndex, ref songsIndex, path)) return;
-
-            Library.Current[playlistsIndex].Songs[songsIndex].NaturalDurationMilliseconds = duration;
-        }
-
-        private void ReceiveSongPosition(ValueSet valueSet, string value)
-        {
-            return;
-            double position = double.Parse(value);
-            int playlistsIndex = int.Parse(valueSet[playlistsIndexKey].ToString());
-            string path = valueSet[playlistPathKey].ToString();
-
-            if (!HavePlaylistIndex(ref playlistsIndex, path)) return;
-
-            Library.Current[playlistsIndex].SongPositionPercent = position;
-        }
-
-        private void ReceivePlaylist(ValueSet valueSet, string value)
-        {
-            Playlist playlist = XmlConverter.Deserialize<Playlist>(value);
-            int playlistsIndex = int.Parse(valueSet[playlistsIndexKey].ToString());
-            string path = valueSet[playlistPathKey].ToString();
-
-            if (!HavePlaylistIndex(ref playlistsIndex, path)) return;
-
-            Library.Current[playlistsIndex] = playlist;
-        }
-
-        private void ReceiveCurrentSong(ValueSet valueSet, string value)
-        {
-            int songsIndex = int.Parse(value);
-            int playlistsIndex = int.Parse(valueSet[playlistsIndexKey].ToString());
-            string path = valueSet[songPathKey].ToString();
-
-            if (!HavePlaylistAndSongsIndex(ref playlistsIndex, ref songsIndex, path)) return;
-
-            Library.Current[playlistsIndex].SongsIndex = songsIndex;
-        }
-
-        private void ReceiveSongs(ValueSet valueSet, string value)
-        {
-            SongList songs = XmlConverter.Deserialize<SongList>(value);
-            ShuffleType shuffle = (ShuffleType)Enum.Parse(typeof(ShuffleType), valueSet[shuffleKey].ToString());
-            List<int> shuffleList = XmlConverter.Deserialize<List<int>>(valueSet[shuffleListKey].ToString());
-            int songsIndex = int.Parse(valueSet[songsIndexKey].ToString());
-            double position = double.Parse(valueSet[songPositionKey].ToString());
-            int playlistsIndex = int.Parse(valueSet[playlistsIndexKey].ToString());
-            string path = valueSet[playlistPathKey].ToString();
-
-            if (!HavePlaylistIndex(ref playlistsIndex, path)) return;
-
-            Playlist playlist = Library.Current[playlistsIndex];
-
-            playlist.SetSongs(songs, shuffle, shuffleList, songs[songsIndex], position);
-        }
-
-        private void ReceiveShuffle(ValueSet valueSet, string value)
-        {
-            ShuffleType shuffle = (ShuffleType)Enum.Parse(typeof(ShuffleType), valueSet[shuffleKey].ToString());
-            List<int> shuffleList = XmlConverter.Deserialize<List<int>>(valueSet[shuffleListKey].ToString());
-            int songsIndex = int.Parse(valueSet[songsIndexKey].ToString());
-            int playlistsIndex = int.Parse(valueSet[playlistsIndexKey].ToString());
-            string path = valueSet[playlistPathKey].ToString();
-
-            if (!HavePlaylistIndex(ref playlistsIndex, path)) return;
-
-            Playlist playlist = Library.Current[playlistsIndex];
-
-            playlist.SetSongs(playlist.Songs, shuffle, shuffleList, playlist[songsIndex], playlist.SongPositionPercent);
-        }
-
-        private void ReceiveLoop(ValueSet valueSet, string value)
-        {
-            LoopType loop = (LoopType)Enum.Parse(typeof(LoopType), value);
-            int playlistsIndex = int.Parse(valueSet[playlistsIndexKey].ToString());
-            string path = valueSet[playlistPathKey].ToString();
-
-            if (!HavePlaylistIndex(ref playlistsIndex, path)) return;
-
-            Library.Current[playlistsIndex].Loop = loop;
-        }
-
-        private void ReceiveLibrary(ValueSet valueSet, string value)
-        {
-            if (value == libraryEmptyValue)
+            try
             {
-                Library.nonLoadedInstance = null;
-
-                CurrentPlaySong.Current.Unset();
-                Library.Current.SkippedSongs.Delete();
-
-                Feedback.Current.RaiseLibraryChanged(Library.Current, Library.Current);
+                return !CoreApplication.MainView.CoreWindow.Dispatcher.HasThreadAccess;
             }
-            else Library.Load(value);
+            catch
+            {
+                return false;
+            }
         }
 
-        private void ReceivePlaylists(ValueSet valueSet, string value)
-        {
-            PlaylistList playlists = XmlConverter.Deserialize<PlaylistList>(value);
-            int playlistsIndex = int.Parse(valueSet[currentPlaylistKey].ToString());
-            string path = playlists[playlistsIndex].AbsolutePath;
-
-            if (!HavePlaylistIndex(ref playlistsIndex, path)) return;
-
-            Library.Data?.SetPlaylists(playlists, playlists[playlistsIndex]);
-        }
-
-        private void ReceiveCurrentPlaylist(ValueSet valueSet, string value)
-        {
-            int currentPlaylistIndex = int.Parse(value);
-            string path = valueSet[playlistPathKey].ToString();
-
-            if (!HavePlaylistIndex(ref currentPlaylistIndex, path)) return;
-
-            Library.Current.CurrentPlaylistIndex = currentPlaylistIndex;
-        }
 
         private void ReceiveSettings(ValueSet valueSet, string value)
         {
-            Feedback.Current.RaiseSettingsPropertyChanged();
-        }
-
-        private void ReceivePlayState(ValueSet valueSet, string value)
-        {
-            Library.Current.IsPlaying = bool.Parse(value);
-        }
-
-        private void ReceiveGetLibrary(ValueSet valueSet, string value)
-        {
-            OnLibraryChanged(Library.Current, new LibraryChangedEventsArgs(Library.Current, Library.Current));
+            //Feedback.Current.RaiseSettingsPropertyChanged();
         }
 
         private void ReceiveSkip(ValueSet valueSet, string value)
         {
-            if (isForeground) Feedback.Current.RaiseSkippedSongsPropertyChanged();
+            //if (isForeground) Feedback.Current.RaiseSkippedSongsPropertyChanged();
         }
 
-        private bool HavePlaylistIndex(ref int playlistsIndex, string path)
+        private bool HaveSong(string path, out Song song)
         {
-            return (playlistsIndex >= 0 && playlistsIndex < Library.Current.Playlists.Count &&
-                Library.Current[playlistsIndex].AbsolutePath != path) ||
-                Library.Base.HavePlaylistIndex(path, out playlistsIndex);
+            foreach (IPlaylist playlist in library.Playlists)
+            {
+                foreach (Song s in playlist.Songs)
+                {
+                    if (s.Path != path) continue;
+
+                    song = s;
+                    return true;
+                }
+            }
+
+            song = null;
+            return false;
         }
 
-        private bool HavePlaylistAndSongsIndex(ref int playlistsIndex, ref int songsIndex, string path)
+        private bool HavePlaylist(string path, out IPlaylist playlist)
         {
-            return (playlistsIndex < 0 && playlistsIndex >= Library.Current.Playlists.Count &&
-                songsIndex < 0 && songsIndex >= Library.Current[playlistsIndex].Songs.Count &&
-                Library.Current[playlistsIndex][songsIndex].Path != path) ||
-                Library.Base.HavePlaylistIndexAndSongsIndex(path, out playlistsIndex, out songsIndex);
+            foreach (IPlaylist p in library.Playlists)
+            {
+                if (p.AbsolutePath != path) continue;
+
+                playlist = p;
+                return true;
+            }
+
+            playlist = null;
+            return false;
+        }
+
+        private IShuffleCollection GetShuffleCollection(ShuffleType shuffle, IPlaylist playlist, ISongCollection songs, string xmlText)
+        {
+            switch (shuffle)
+            {
+                case ShuffleType.Off:
+                    return new ShuffleOffCollection(playlist, songs, xmlText);
+
+                case ShuffleType.OneTime:
+                    return new ShuffleOneTimeCollection(playlist, songs, xmlText);
+
+                case ShuffleType.Complete:
+                    return new ShuffleCompleteCollection(playlist, songs, xmlText);
+            }
+
+            return null;
         }
     }
 }

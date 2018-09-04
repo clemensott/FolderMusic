@@ -1,109 +1,55 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Windows.Media.Playback;
+using Windows.Storage;
 
 namespace MusicPlayer.Data
 {
-    public class CurrentPlaySong
+    public struct CurrentPlaySong
     {
-        private const string currentSongMillisecondsFileName = "CurrentSongMilliseconds.txt",
-            currentSongFileName = "CurrentSong.xml";
+        private const string fileName = "CurrentPlaySong.xml";
 
-        private static CurrentPlaySong instance;
+        public double PositionPercent { get; set; }
 
-        public static CurrentPlaySong Current
+        public string Title { get; set; }
+
+        public string Artist { get; set; }
+
+        public string Path { get; set; }
+
+        private CurrentPlaySong(ILibrary library)
         {
-            get
-            {
-                if (instance == null) instance = new CurrentPlaySong();
+            PositionPercent = library.CurrentPlaylist.CurrentSongPositionPercent;
 
-                return instance;
-            }
+            Title = library.CurrentPlaylist.CurrentSong.Title;
+            Artist = library.CurrentPlaylist.CurrentSong.Artist;
+            Path = library.CurrentPlaylist.CurrentSong.Path;
         }
 
-        private bool loaded;
-        private double positionPercent = 0;
-        private Song song;
-
-        public bool IsLoaded { get { return loaded; } }
-
-        public double PositionPercent { get { return positionPercent; } }
-
-        public Song Song { get { return song != null ? song : new Song(); } }
-
-        private CurrentPlaySong() { }
-
-        public void Unset()
+        public static void Save(ILibrary library)
         {
-            loaded = false;
-            song = null;
-            positionPercent = 0;
-
-            IO.Delete(currentSongFileName);
-            IO.Delete(currentSongMillisecondsFileName);
+            CurrentPlaySong cps = new CurrentPlaySong(library);
+            IO.SaveObject(fileName, cps);
         }
 
-        public void Load()
+        public static void Delete()
         {
-            if (IsLoaded) return;
-
-            try
-            {
-                song = IO.LoadObject<Song>(currentSongFileName);
-
-                if (song.NaturalDurationMilliseconds == 1) song.LoadNaturalDuration().Wait();
-
-                LoadPositionPercent();
-            }
-            catch { }
-
-            loaded = true;
+            IO.Delete(fileName);
         }
 
-        private void SaveSong()
-        {
-            if (song.Path == Library.Current.CurrentPlaylist.CurrentSong.Path) return;
-
-            song = Library.Current.CurrentPlaylist.CurrentSong;
-
-            IO.SaveObject(currentSongFileName, song);
-        }
-
-        private void LoadPositionPercent()
+        public static ILibrary Load()
         {
             try
             {
-                string text = IO.LoadText(currentSongMillisecondsFileName);
-
-                positionPercent = double.Parse(text);
-
-                if (positionPercent > 1) positionPercent = positionPercent / song.NaturalDurationMilliseconds;
+                CurrentPlaySong cps = IO.LoadObject<CurrentPlaySong>(fileName);
+                return new Library(cps);
             }
-            catch { }
-        }
-
-        public async Task SaveAsync()
-        {
-            Save();
-        }
-
-        public void Save()
-        {
-            if (!Library.IsLoaded()) return;
-
-            lock (this)
+            catch (Exception e)
             {
-                double percent = BackgroundMediaPlayer.Current.Position.TotalMilliseconds /
-                    BackgroundMediaPlayer.Current.NaturalDuration.TotalMilliseconds;
-
-                if (percent == 0 || percent == positionPercent) return;
-
-                positionPercent = percent;
-
-                IO.SaveText(currentSongMillisecondsFileName, percent.ToString());
-                SaveSong();
-
-                FolderMusicDebug.DebugEvent.SaveText("CurrentSongSave", song, percent);
+                MobileDebug.Manager.WriteEvent("CurrentPlaySongLoadFail", e);
             }
+
+            return new Library(false);
         }
     }
 }

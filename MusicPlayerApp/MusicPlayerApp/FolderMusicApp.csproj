@@ -82,14 +82,20 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ConvertToIcons.cs" />
+    <Compile Include="Converters\DetailIconConverter.cs" />
+    <Compile Include="Converters\LoopIconConverter.cs" />
+    <Compile Include="Converters\PlayIconConverter.cs" />
+    <Compile Include="Converters\ShuffleIconConverter.cs" />
+    <Compile Include="Converters\ShuffleSongsConverter.cs" />
+    <Compile Include="Converters\SongsCountConverter.cs" />
+    <Compile Include="Converters\PlaylistUpdateConverter.cs" />
+    <Compile Include="Converters\ShuffleOffSongsConverter.cs" />
     <Compile Include="LoadingPage.xaml.cs">
       <DependentUpon>LoadingPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PlayerPosition.cs" />
     <Compile Include="PlaylistPage.xaml.cs">
       <DependentUpon>PlaylistPage.xaml</DependentUpon>
     </Compile>
@@ -97,11 +103,16 @@
     <Compile Include="SettingsPage.xaml.cs">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ShuffleOffSongsView.cs" />
+    <Compile Include="ShuffleSongsView.cs" />
     <Compile Include="SkipSongsPage.xaml.cs">
       <DependentUpon>SkipSongsPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SongListView.xaml.cs">
-      <DependentUpon>SongListView.xaml</DependentUpon>
+    <Compile Include="Slider.xaml.cs">
+      <DependentUpon>Slider.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SongsView.xaml.cs">
+      <DependentUpon>SongsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModel.cs" />
   </ItemGroup>
@@ -166,7 +177,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="SongListView.xaml">
+    <Page Include="Slider.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SongsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -179,9 +194,9 @@
       <Project>{ebaaa64f-0a02-46fa-98d0-0db863efdd6e}</Project>
       <Name>BackgroundTask</Name>
     </ProjectReference>
-    <ProjectReference Include="..\FolderMusicDebug\MusicPlayerDebug.csproj">
+    <ProjectReference Include="..\FolderMusicDebug\MobileDebug.csproj">
       <Project>{ee2e4620-7d8d-4d75-a8a4-157e652449e2}</Project>
-      <Name>MusicPlayerDebug</Name>
+      <Name>MobileDebug</Name>
     </ProjectReference>
     <ProjectReference Include="..\FolderMusicLib\MusicPlayerLib.csproj">
       <Project>{a1d5db9a-4dea-44dd-b754-bd68ee5ada43}</Project>

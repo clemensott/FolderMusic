@@ -1,4 +1,6 @@
 ﻿using MusicPlayer.Data;
+using System.Collections.Generic;
+using System.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -11,7 +13,7 @@ namespace FolderMusic
 
         public static bool Open { get { return open; } }
 
-        private SkipSongs skipSongs;
+        private IEnumerator<SkipSong> enumerator;
 
         public SkipSongsPage()
         {
@@ -22,7 +24,10 @@ namespace FolderMusic
         {
             base.OnNavigatedTo(e);
 
-            if (!Library.Current.SkippedSongs.MoveNext()) Frame.GoBack();
+            IEnumerable<SkipSong> skippedSongs = e.Parameter as IEnumerable<SkipSong>;
+            enumerator = skippedSongs?.GetEnumerator();
+
+            if (enumerator?.MoveNext() != true) Frame.GoBack();
             else SetCurrentSongPath();
         }
 
@@ -30,31 +35,31 @@ namespace FolderMusic
         {
             do
             {
-                if (!Library.Current.SkippedSongs.Current.Song.IsEmptyOrLoading)
+                if (!enumerator.Current.Song.IsEmpty)
                 {
-                    tbl_Path.Text = Library.Current.SkippedSongs.Current.Song.RelativePath;
+                    tbl_Path.Text = enumerator.Current.Song.Path;
                 }
 
-            } while (Library.Current.SkippedSongs.MoveNext());
+            } while (enumerator.MoveNext());
 
-            Library.Current.SkippedSongs.Dispose();
+            enumerator.Dispose();
             Frame.GoBack();
         }
 
         private void Yes_Click(object sender, RoutedEventArgs e)
         {
-            Library.Current.SkippedSongs.Current.Handle = ProgressType.Remove;
+            enumerator.Current.Handle = ProgressType.Remove;
 
-            if (!Library.Current.SkippedSongs.MoveNext()) Frame.GoBack();
+            if (!enumerator.MoveNext()) Frame.GoBack();
 
             SetCurrentSongPath();
         }
 
         private void No_Click(object sender, RoutedEventArgs e)
         {
-            Library.Current.SkippedSongs.Current.Handle = ProgressType.Leave;
+            enumerator.Current.Handle = ProgressType.Leave;
 
-            if (!Library.Current.SkippedSongs.MoveNext()) Frame.GoBack();
+            if (!enumerator.MoveNext()) Frame.GoBack();
 
             SetCurrentSongPath();
         }
@@ -66,9 +71,9 @@ namespace FolderMusic
 
         private void Skip_Click(object sender, RoutedEventArgs e)
         {
-            Library.Current.SkippedSongs.Current.Handle = ProgressType.Skip;
+            enumerator.Current.Handle = ProgressType.Skip;
 
-            if (!Library.Current.SkippedSongs.MoveNext()) Frame.GoBack();
+            if (!enumerator.MoveNext()) Frame.GoBack();
 
             SetCurrentSongPath();
         }

@@ -10,21 +10,21 @@ namespace MusicPlayer.Data
 
         public ShuffleType NewShuffleType { get; private set; }
 
-        public List<int> OldShuffleList { get; private set; }
+        public IShuffleCollection OldShuffleSongs { get; private set; }
 
-        public List<int> NewShuffleList { get; private set; }
+        public IShuffleCollection NewShuffleSongs { get; private set; }
 
         public Song OldCurrentSong { get; private set; }
 
         public Song NewCurrentSong { get; private set; }
 
-        internal ShuffleChangedEventArgs(ShuffleType oldShuffleType, ShuffleType newShuffleType,
-            List<int> oldShuffleList, List<int> newShuffleList, Song oldCurrentSong, Song newCurrentSong)
+        internal ShuffleChangedEventArgs(IShuffleCollection oldShuffleSongs, IShuffleCollection newShuffleSongs,
+            Song oldCurrentSong, Song newCurrentSong)
         {
-            OldShuffleType = oldShuffleType;
-            NewShuffleType = newShuffleType;
-            OldShuffleList = oldShuffleList;
-            NewShuffleList = newShuffleList;
+            OldShuffleType = oldShuffleSongs?.Type ?? ShuffleType.Off;
+            NewShuffleType = newShuffleSongs?.Type ?? ShuffleType.Off;
+            OldShuffleSongs = oldShuffleSongs;
+            NewShuffleSongs = newShuffleSongs;
             OldCurrentSong = oldCurrentSong;
             NewCurrentSong = newCurrentSong;
         }

@@ -80,9 +80,9 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <ProjectReference Include="..\FolderMusicDebug\MusicPlayerDebug.csproj">
+    <ProjectReference Include="..\FolderMusicDebug\MobileDebug.csproj">
       <Project>{ee2e4620-7d8d-4d75-a8a4-157e652449e2}</Project>
-      <Name>MusicPlayerDebug</Name>
+      <Name>MobileDebug</Name>
     </ProjectReference>
     <ProjectReference Include="..\FolderMusicLib\MusicPlayerLib.csproj">
       <Project>{a1d5db9a-4dea-44dd-b754-bd68ee5ada43}</Project>

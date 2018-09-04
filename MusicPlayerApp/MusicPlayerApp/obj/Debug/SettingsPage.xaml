@@ -16,7 +16,8 @@
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
-                <AppBarButton x:ConnectionId='1' Label="Save and Back" Icon="Back"                           />
+                <AppBarButton x:ConnectionId='1' Label="Back" Icon="Back"                   />
+                <AppBarButton x:ConnectionId='2' Label="Save" Icon="Save"                          />
             </CommandBar.PrimaryCommands>
         </CommandBar>
     </Page.BottomAppBar>

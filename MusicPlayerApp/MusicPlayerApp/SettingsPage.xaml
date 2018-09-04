@@ -16,7 +16,8 @@
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
-                <AppBarButton Label="Save and Back" Icon="Back" Click="AppBarButton_Click"/>
+                <AppBarButton Label="Back" Icon="Back" Click="Back_Click"/>
+                <AppBarButton Label="Save" Icon="Save" Click="SaveAndBack_Click"/>
             </CommandBar.PrimaryCommands>
         </CommandBar>
     </Page.BottomAppBar>

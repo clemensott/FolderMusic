@@ -34,4 +34,5 @@ MusicPlayerApp.xr.xml
 PlaylistPage.xbf
 SettingsPage.xbf
 SkipSongsPage.xbf
-SongListView.xbf
+Slider.xbf
+SongsView.xbf

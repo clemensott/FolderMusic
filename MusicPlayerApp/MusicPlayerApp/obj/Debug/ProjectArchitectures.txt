@@ -1,10 +1,10 @@
-D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\BackgroundTask\BackgroundTask.csproj;neutral
-D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicDebug\MusicPlayerDebug.csproj;neutral
-D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicDebug\MusicPlayerDebug.csproj;neutral
-D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicDebug\MusicPlayerDebug.csproj;neutral
-D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\MusicPlayerLib.csproj;neutral
-D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\MusicPlayerLib.csproj;neutral
-D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\FolderMusicApp.csproj;neutral
-D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\PlayerIconsWP8.1\PlayerIconsWP8_1.csproj;neutral
-D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\PlayerIconsWP8.1\PlayerIconsWP8_1.csproj;neutral
-D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\PlayerIconsWP8.1\PlayerIconsWP8_1.csproj;neutral
+D:\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\BackgroundTask.csproj;neutral
+D:\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\MobileDebug.csproj;neutral
+D:\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\MobileDebug.csproj;neutral
+D:\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\MobileDebug.csproj;neutral
+D:\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\MusicPlayerLib.csproj;neutral
+D:\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\MusicPlayerLib.csproj;neutral
+D:\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\FolderMusicApp.csproj;neutral
+D:\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\PlayerIconsWP8_1.csproj;neutral
+D:\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\PlayerIconsWP8_1.csproj;neutral
+D:\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\PlayerIconsWP8_1.csproj;neutral

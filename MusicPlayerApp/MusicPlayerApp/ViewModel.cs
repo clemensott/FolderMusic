@@ -17,73 +17,8 @@ namespace FolderMusic
 {
     public class ViewModel : INotifyPropertyChanged
     {
-        private static ViewModel instance;
-
         private bool playerPositionEnabled = true;
         private SymbolIcon playIcon, pauseIcon;
-
-        public static ViewModel Current
-        {
-            get
-            {
-                if (instance == null) instance = new ViewModel();
-
-                return instance;
-            }
-        }
-
-        public bool PlayerPositionEnabled
-        {
-            get { return playerPositionEnabled; }
-            set
-            {
-                if (value == playerPositionEnabled) return;
-
-                playerPositionEnabled = value;
-
-                if (playerPositionEnabled) BackgroundMediaPlayer.Current.Position = TimeSpan.FromMilliseconds(PlayerPositionMillis);
-            }
-        }
-
-        public int PlaylistsIndex
-        {
-            get { return Library.Current.CurrentPlaylistIndex; }
-            set { UpdatePlaylistIndex(); }
-        }
-
-        public double PlayerPositionPercent
-        {
-            get { return CurrentPlaylist.SongPositionPercent; }
-            set
-            {
-                if (value > 0 && value < 1) { }
-
-                if (value == PlayerPositionPercent && Math.Abs(value * PlayerDurationMillis - PlayerPositionMillis) < 100) return;
-
-                CurrentPlaylist.SongPositionPercent = value;
-                UpdatePlayerPositionAndDuration();
-
-                if (playerPositionEnabled) BackgroundMediaPlayer.Current.Position = TimeSpan.FromMilliseconds(PlayerPositionMillis);
-            }
-        }
-
-        public double PlayerPositionMillis
-        {
-            get { return PlayerPositionPercent * PlayerDurationMillis; }
-        }
-
-        public double PlayerDurationMillis
-        {
-            get { return CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds; }
-            set { CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds = value; }
-        }
-
-        public string PlayerPositionText { get { return GetShowTime(PlayerPositionMillis); } }
-
-        public string PlayerDurationText
-        {
-            get { return GetShowTime(PlayerDurationMillis); }
-        }
 
         public string PlayPauseText
         {
@@ -93,45 +28,97 @@ namespace FolderMusic
             }
         }
 
-        public IconElement PlayPauseIcon
-        {
-            get
-            {
-                return Library.Current.IsPlaying ? GetPauseIcon() : GetPlayIcon();
-            }
-        }
+        public IconElement PlayPauseIcon { get { return Library.IsPlaying ? GetPauseIcon() : GetPlayIcon(); } }
 
-        public Playlist CurrentPlaylist { get { return Library.Current.CurrentPlaylist; } }
+        public ILibrary Library { get; private set; }
 
-        public List<Playlist> Playlists { get { return Library.Current.Playlists.ToList(); } }
+        public IPlaylist CurrentPlaylist { get { return Library.CurrentPlaylist; } }
 
-        public string CurrentPlaylistName { get { return CurrentPlaylist.Name; } }
+        public IEnumerable<IPlaylist> Playlists { get { return Library.Playlists; } }
+
+        public string CurrentPlaylistName { get { return CurrentPlaylist?.Name ?? "Empty"; } }
 
         public BitmapImage CurrentPlaylistShuffleIcon { get { return GetCurrentPlaylistShuffleIcon(); } }
 
         public BitmapImage CurrentPlaylistLoopIcon { get { return GetCurrentPlaylistLoopIcon(); } }
 
-        public string CurrentSongTitle { get { return CurrentPlaylist.CurrentSong.Title; } }
+        public MediaPlayer BackgroundPlayer { get { return BackgroundMediaPlayer.Current; } }
 
-        public string CurrentSongArtist { get { return CurrentPlaylist.CurrentSong.Artist; } }
+        public string CurrentSongTitle { get { return CurrentPlaylist?.CurrentSong?.Title ?? string.Empty; } }
 
-        private ViewModel()
+        public string CurrentSongArtist { get { return CurrentPlaylist?.CurrentSong?.Artist ?? string.Empty; } }
+
+        public ViewModel(ILibrary library)
         {
-            Feedback.Current.OnArtistPropertyChanged += OnArtistPropertyChanged;
-            Feedback.Current.OnCurrentPlaylistPropertyChanged += OnCurrentPlaylistPropertyChanged;
-            Feedback.Current.OnCurrentSongPositionPropertyChanged += OnCurrentSongPositionPropertyChanged;
-            Feedback.Current.OnCurrentSongPropertyChanged += OnCurrentSongPropertyChanged;
-            Feedback.Current.OnLibraryChanged += OnLibraryChanged;
-            Feedback.Current.OnLoopPropertyChanged += OnLoopPropertyChanged;
-            Feedback.Current.OnNaturalDurationPropertyChanged += OnNaturalDurationPropertyChanged;
-            Feedback.Current.OnPlayStateChanged += OnPlayStateChanged;
-            Feedback.Current.OnPlaylistsPropertyChanged += OnPlaylistsPropertyChanged;
-            Feedback.Current.OnShufflePropertyChanged += OnShufflePropertyChanged;
-            Feedback.Current.OnSkippedSongsPropertyChanged += OnSkippedSongsPropertyChanged;
-            Feedback.Current.OnSongsPropertyChanged += OnSongsPropertyChanged;
-            Feedback.Current.OnTitlePropertyChanged += OnTitlePropertyChanged;
+            Library = library;
 
-            Library.Load(true);
+            library.LibraryChanged += OnLibraryChanged;
+            library.PlayStateChanged += OnPlayStateChanged;
+            library.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
+            library.PlaylistsChanged += OnPlaylistsChanged;
+
+            Subscribe(library.Playlists);
+            Subscribe(library.CurrentPlaylist);
+        }
+
+        private void Subscribe(IEnumerable<IPlaylist> playlists)
+        {
+            foreach (IPlaylist playlist in playlists ?? Enumerable.Empty<IPlaylist>())
+            {
+                //Subscribe(playlist);
+            }
+        }
+
+        private void Unsubscribe(IEnumerable<IPlaylist> playlists)
+        {
+            foreach (IPlaylist playlist in playlists ?? Enumerable.Empty<IPlaylist>())
+            {
+                //Unsubscribe(playlist);
+            }
+        }
+
+        private void Subscribe(IPlaylist playlist)
+        {
+            if (playlist == null) return;
+
+            playlist.CurrentSongChanged += OnCurrentSongChanged;
+            playlist.LoopChanged += OnLoopChanged;
+            playlist.ShuffleChanged += OnShuffleChanged;
+
+            Subscribe(playlist.ShuffleSongs);
+        }
+
+        private void Unsubscribe(IPlaylist playlist)
+        {
+            if (playlist == null) return;
+
+            playlist.CurrentSongChanged -= OnCurrentSongChanged;
+            playlist.LoopChanged -= OnLoopChanged;
+            playlist.ShuffleChanged -= OnShuffleChanged;
+
+            Unsubscribe(playlist.ShuffleSongs);
+        }
+
+        private void Subscribe(IEnumerable<Song> songs)
+        {
+            foreach (Song song in songs ?? Enumerable.Empty<Song>()) Subscribe(song);
+        }
+
+        private void Unsubscribe(IEnumerable<Song> songs)
+        {
+            foreach (Song song in songs ?? Enumerable.Empty<Song>()) Unsubscribe(song);
+        }
+
+        private void Subscribe(Song song)
+        {
+            song.ArtistChanged += OnArtistChanged;
+            song.TitleChanged += OnTitleChanged;
+        }
+
+        private void Unsubscribe(Song song)
+        {
+            song.ArtistChanged -= OnArtistChanged;
+            song.TitleChanged -= OnTitleChanged;
         }
 
         private SymbolIcon GetPlayIcon()
@@ -183,7 +170,7 @@ namespace FolderMusic
 
         private BitmapImage GetCurrentPlaylistShuffleIcon()
         {
-            switch (CurrentPlaylist.Shuffle)
+            switch (CurrentPlaylist?.Shuffle ?? ShuffleType.Off)
             {
                 case ShuffleType.Complete:
                     return Icons.Current.ShuffleComplete;
@@ -198,7 +185,7 @@ namespace FolderMusic
 
         private BitmapImage GetCurrentPlaylistLoopIcon()
         {
-            switch (CurrentPlaylist.Loop)
+            switch (CurrentPlaylist?.Loop ?? LoopType.Off)
             {
                 case LoopType.All:
                     return Icons.Current.LoopAll;
@@ -209,28 +196,6 @@ namespace FolderMusic
                 default:
                     return Icons.Current.LoopOff;
             }
-        }
-
-        public void UpdatePlayerPositionAndDuration()
-        {
-            UpdatePlayerPosition();
-            UpdatePlayerDurationText();
-        }
-
-        private void UpdatePlayerPosition()
-        {
-            NotifyPropertyChanged("PlayerPositionPercent");
-            UpdatePlayerPositionText();
-        }
-
-        private void UpdatePlayerPositionText()
-        {
-            NotifyPropertyChanged("PlayerPositionText");
-        }
-
-        private void UpdatePlayerDurationText()
-        {
-            NotifyPropertyChanged("PlayerDurationText");
         }
 
         public void UpdatePlayPauseIconAndText()
@@ -249,9 +214,8 @@ namespace FolderMusic
             NotifyPropertyChanged("PlaylistsIndex");
         }
 
-        public void UpdateCurrentPlaylistIndexAndRest()
+        public void UpdateCurrentPlaylistAndRest()
         {
-            UpdatePlaylistIndex();
             NotifyPropertyChanged("CurrentPlaylist");
 
             NotifyPropertyChanged("CurrentPlaylistName");
@@ -269,73 +233,68 @@ namespace FolderMusic
 
         private void OnLibraryChanged(ILibrary sender, LibraryChangedEventsArgs args)
         {
+            Unsubscribe(args.OldPlaylists);
+            Subscribe(args.NewPlaylists);
+
+            Unsubscribe(args.OldCurrentPlaylist);
+            Subscribe(args.NewCurrentPlaylist);
+
             UpdatePlayPauseIconAndText();
-            UpdatePlayerPositionAndDuration();
             UpdatePlaylists();
-            UpdateCurrentPlaylistIndexAndRest();
+            UpdateCurrentPlaylistAndRest();
             UpdateCurrentSongTitleAndArtist();
         }
 
-        private void OnPlaylistsPropertyChanged(ILibrary sender, PlaylistsChangedEventArgs args)
+        private void OnPlaylistsChanged(ILibrary sender, PlaylistsChangedEventArgs args)
         {
+            Unsubscribe(args.GetRemoved());
+            Subscribe(args.GetAdded());
+
+            Unsubscribe(args.OldCurrentPlaylist);
+            Subscribe(args.NewCurrentPlaylist);
+
             UpdatePlaylists();
-            UpdateCurrentPlaylistIndexAndRest();
+            UpdateCurrentPlaylistAndRest();
         }
 
-        private void OnCurrentPlaylistPropertyChanged(ILibrary sender, CurrentPlaylistChangedEventArgs args)
+        private void OnCurrentPlaylistChanged(ILibrary sender, CurrentPlaylistChangedEventArgs args)
         {
-            UpdateCurrentPlaylistIndexAndRest();
+            Unsubscribe(args.OldCurrentPlaylist);
+            Subscribe(args.NewCurrentPlaylist);
+
+            UpdateCurrentPlaylistAndRest();
         }
 
-        private void OnSkippedSongsPropertyChanged(SkipSongs sender)
+        private void OnSkippedSongsChanged(SkipSongs sender)
         {
-            if (sender.MoveNext()) (Window.Current.Content as Frame).Navigate(typeof(SkipSongsPage));
+            //if (sender.MoveNext()) (Window.Current.Content as Frame).Navigate(typeof(SkipSongsPage));
         }
 
-        private void OnSongsPropertyChanged(Playlist sender, SongsChangedEventArgs args)
+        private void OnCurrentSongChanged(IPlaylist sender, CurrentSongChangedEventArgs args)
         {
-            if (sender == CurrentPlaylist) NotifyPropertyChanged("CurrentPlaylistShuffleIcon");
-            if (args.NewShuffleList.Count != args.OldShuffleList.Count) UpdatePlaylists();
-        }
-
-        private void OnCurrentSongPropertyChanged(Playlist sender, CurrentSongChangedEventArgs args)
-        {
-            if (sender != CurrentPlaylist) return;
-
             UpdateCurrentSongTitleAndArtist();
-            UpdatePlayerPositionAndDuration();
         }
 
-        private void OnCurrentSongPositionPropertyChanged(Playlist sender, CurrentSongPositionChangedEventArgs args)
+        private void OnShuffleChanged(IPlaylist sender, ShuffleChangedEventArgs args)
         {
-            if (sender == CurrentPlaylist) UpdatePlayerPositionAndDuration();
+            NotifyPropertyChanged("CurrentPlaylistShuffleIcon");
         }
 
-        private void OnShufflePropertyChanged(Playlist sender, ShuffleChangedEventArgs args)
+        private void OnLoopChanged(IPlaylist sender, LoopChangedEventArgs args)
         {
-            if (sender == CurrentPlaylist) NotifyPropertyChanged("CurrentPlaylistShuffleIcon");
+            NotifyPropertyChanged("CurrentPlaylistLoopIcon");
         }
 
-        private void OnLoopPropertyChanged(Playlist sender, LoopChangedEventArgs args)
-        {
-            if (sender == CurrentPlaylist) NotifyPropertyChanged("CurrentPlaylistLoopIcon");
-        }
-
-        private void OnTitlePropertyChanged(Song sender, SongTitleChangedEventArgs args)
+        private void OnTitleChanged(Song sender, SongTitleChangedEventArgs args)
         {
             if (sender == CurrentPlaylist.CurrentSong) NotifyPropertyChanged("CurrentSongTitle");
             else if (CurrentPlaylist.Songs.Contains(sender)) NotifyPropertyChanged("CurrentPlaylistShuffleIcon");
         }
 
-        private void OnArtistPropertyChanged(Song sender, SongArtistChangedEventArgs args)
+        private void OnArtistChanged(Song sender, SongArtistChangedEventArgs args)
         {
             if (sender == CurrentPlaylist.CurrentSong) NotifyPropertyChanged("CurrentSongArtist");
             else if (CurrentPlaylist.Songs.Contains(sender)) NotifyPropertyChanged("CurrentPlaylistShuffleIcon");
-        }
-
-        private void OnNaturalDurationPropertyChanged(Song sender, SongNaturalDurationChangedEventArgs args)
-        {
-            if (sender == CurrentPlaylist.CurrentSong) UpdatePlayerPositionAndDuration();
         }
 
         private void OnPlayStateChanged(ILibrary sender, PlayStateChangedEventArgs args)
@@ -361,7 +320,10 @@ namespace FolderMusic
                         () => { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); });
                 }
             }
-            catch { }
+            catch (Exception e)
+            {
+                MobileDebug.Manager.WriteEvent("ViewModelNotifyFail", e);
+            }
         }
     }
 }

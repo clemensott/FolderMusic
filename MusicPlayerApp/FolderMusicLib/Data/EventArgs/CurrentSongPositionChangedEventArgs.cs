@@ -4,14 +4,14 @@ namespace MusicPlayer.Data
 {
     public class CurrentSongPositionChangedEventArgs : EventArgs
     {
-        public double OldValue { get; private set; }
+        public double OldCurrentSongPosition { get; private set; }
 
-        public double NewValue { get; private set; }
+        public double NewCurrentSongPosition { get; private set; }
 
-        internal CurrentSongPositionChangedEventArgs(double oldValue, double newValue)
+        internal CurrentSongPositionChangedEventArgs(double oldCurrentSongPosition, double newCurrentSongPosition)
         {
-            OldValue = oldValue;
-            NewValue = newValue;
+            OldCurrentSongPosition = oldCurrentSongPosition;
+            NewCurrentSongPosition = newCurrentSongPosition;
         }
     }
 }

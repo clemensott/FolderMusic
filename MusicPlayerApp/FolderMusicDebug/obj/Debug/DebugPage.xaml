@@ -1,22 +1,39 @@
 ﻿<Page
-    x:Class="FolderMusicDebug.DebugPage"
+    x:Class="MobileDebug.DebugPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:FolderMusicDebug"
+    xmlns:local="using:MobileDebug"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <ListBox Name="lbxEvents" ItemsSource="{Binding FilterEvents}"/>
+    <ListBox Name="lbxEvents" Background="Transparent" SelectionMode="Multiple"
+             ItemsSource="{Binding FilterEvents}">
+        <ListBox.ItemTemplate>
+            <DataTemplate>
+                <Grid Margin="10">
+                    <TextBlock Text="{Binding}" TextWrapping="WrapWholeWords" Margin="-10"
+                           Foreground="{StaticResource AppBarItemForegroundThemeBrush}"/>
+                </Grid>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+    </ListBox>
 
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
-                <AppBarButton x:ConnectionId='1' Content="Refresh" Icon="Refresh"                  />
-                <AppBarButton x:ConnectionId='2' Content="Filter" Icon="Filter"                     />
-                <AppBarButton x:ConnectionId='3' Content="Delete" Icon="Delete"                     />
+                <AppBarButton x:ConnectionId='1' Label="Refresh" Icon="Refresh"                  />
+                <AppBarToggleButton Label="Background" Icon="Back" IsChecked="{Binding ShowBackground,Mode=TwoWay}"/>
+                <AppBarToggleButton Label="Foreground" Icon="Forward" IsChecked="{Binding ShowForeground,Mode=TwoWay}"/>
+                <AppBarToggleButton x:ConnectionId='2' Label="Find" Icon="Find"                           
+                                    IsChecked="{Binding IsFinding,Mode=TwoWay}"/>
             </CommandBar.PrimaryCommands>
+
+            <CommandBar.SecondaryCommands>
+                <AppBarButton x:ConnectionId='3' Label="Filter"                     />
+                <AppBarButton x:ConnectionId='4' Label="Delete"                     />
+            </CommandBar.SecondaryCommands>
         </CommandBar>
     </Page.BottomAppBar>
 </Page>

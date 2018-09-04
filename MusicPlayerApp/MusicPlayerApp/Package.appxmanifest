@@ -39,6 +39,6 @@
   </Applications>
   <Capabilities>
     <Capability Name="musicLibrary" />
-    <Capability Name="picturesLibrary" />
+    <Capability Name="videosLibrary" />
   </Capabilities>
 </Package>

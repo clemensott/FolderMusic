@@ -1,40 +1,50 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
 
 namespace MusicPlayer.Data
 {
-    public class Song
+    public delegate void TitlePropertyChangedEventHandler(Song sender, SongTitleChangedEventArgs args);
+    public delegate void ArtistPropertyChangedEventHandler(Song sender, SongArtistChangedEventArgs args);
+    public delegate void DurationPropertyChangedEventHandler(Song sender, SongDurationChangedEventArgs args);
+
+    public class Song : IXmlSerializable
     {
         public const double DefaultDuration = 400;
-        private bool isLoading, failed = false;
-        private double naturalDurationMilliseconds = double.NaN;
+
+        public static Song GetEmpty(ISongCollection parent)
+        {
+            return new Song(parent);
+        }
+
+        public event TitlePropertyChangedEventHandler TitleChanged;
+        public event ArtistPropertyChangedEventHandler ArtistChanged;
+        public event DurationPropertyChangedEventHandler DurationChanged;
+
+        private bool failed;
+        private double durationMilliseconds;
         private string title, artist, path;
 
-        [XmlIgnore]
-        public bool IsEmptyOrLoading { get { return path == string.Empty || isLoading; } }
+        public bool IsEmpty { get { return path == string.Empty; } }
 
-        [XmlIgnore]
         public bool Failed { get { return failed; } }
 
-        public double NaturalDurationMilliseconds
-        {
-            get
-            {
-                //if (!double.IsNaN(naturalDurationMilliseconds) || naturalDurationMilliseconds == 1) LoadNaturalDuration();
+        public ISongCollection Parent { get; private set; }
 
-                return !double.IsNaN(naturalDurationMilliseconds) ? naturalDurationMilliseconds : DefaultDuration;
-            }
+        public double DurationMilliseconds
+        {
+            get { return !double.IsNaN(durationMilliseconds) ? durationMilliseconds : DefaultDuration; }
             set
             {
-                if (value < 1 || value == naturalDurationMilliseconds) return;
+                if (value < 1 || value == durationMilliseconds) return;
 
-                double oldValue = naturalDurationMilliseconds;
-                naturalDurationMilliseconds = value;
-
-                Feedback.Current.RaiseNaturalDurationPropertyChanged(this, oldValue, value);
+                var args = new SongDurationChangedEventArgs(durationMilliseconds, value);
+                durationMilliseconds = value;
+                DurationChanged?.Invoke(this, args);
             }
         }
 
@@ -45,10 +55,9 @@ namespace MusicPlayer.Data
             {
                 if (value == title) return;
 
-                string oldValue = title;
+                var args = new SongTitleChangedEventArgs(title, value);
                 title = value;
-
-                Feedback.Current.RaiseTitlePropertyChanged(this, oldValue, value);
+                TitleChanged?.Invoke(this, args);
             }
         }
 
@@ -59,10 +68,9 @@ namespace MusicPlayer.Data
             {
                 if (value == artist) return;
 
-                string oldValue = artist;
+                var args = new SongArtistChangedEventArgs(artist, value);
                 artist = value;
-
-                Feedback.Current.RaiseArtistPropertyChanged(this, oldValue, value);
+                ArtistChanged?.Invoke(this, args);
             }
         }
 
@@ -72,46 +80,78 @@ namespace MusicPlayer.Data
             set { path = value; }
         }
 
-        [XmlIgnore]
-        public string RelativePath { get { return Playlist.GetRelativePath(path); } }
-
-        public Song()
+        private Song(ISongCollection parent)
         {
-            isLoading = false;
-            SetEmptyOrLoading();
+            failed = true;
+
+            durationMilliseconds = double.NaN;
+
+            title = "Empty";
+            artist = path = string.Empty;
+
+            Parent = parent;
         }
 
-        public Song(string absolutePath)
+        internal Song(ISongCollection parent, CurrentPlaySong currentPlaySong)
         {
-            isLoading = true;
-            path = absolutePath;
+            Parent = parent;
+            failed = false;
 
-            SetTitleAndArtistByPath();
+            durationMilliseconds = DefaultDuration;
+            path = currentPlaySong.Path;
+            title = currentPlaySong.Title;
+            artist = currentPlaySong.Artist;
         }
 
-        private void SetEmptyOrLoading()
+        internal Song(ISongCollection parent, XmlReader reader)
         {
-            //Title = Library.IsLoaded() ? "Empty" : "Loading";
-            if (Library.IsLoaded()) Title = "Empty";
-            else Title = "Loading";
-            Artist = path = string.Empty;
+            Parent = parent;
+            ReadXml(reader);
+        }
+
+        internal Song(ISongCollection parent, string xmlText)
+            : this(parent, XmlConverter.GetReader(xmlText))
+        {
+        }
+
+        private Song(ISongCollection parent, double durationMilliseconds, string path, string title, string artist)
+        {
+            failed = false;
+
+            this.durationMilliseconds = durationMilliseconds;
+            this.path = path;
+            this.title = title;
+            this.artist = artist;
+
+            Parent = parent;
+        }
+
+        public static Song GetLoaded(ISongCollection parent, StorageFile file)
+        {
+            Task<MusicProperties> task = file.Properties.GetMusicPropertiesAsync().AsTask();
+            task.Wait();
+            MusicProperties properties = task.Result;
+
+            string title = properties.Title;
+            string artist = properties.Artist;
+            double durationMilliseconds = properties.Duration.TotalMilliseconds;
+
+            return new Song(parent, durationMilliseconds, file.Path, title, artist);
         }
 
         public async void Refresh()
         {
-            naturalDurationMilliseconds = 1;
+            durationMilliseconds = DefaultDuration;
 
             try
             {
                 StorageFile file = await GetStorageFileAsync();
                 await SetTitleAndArtist(file);
             }
-            catch
+            catch (Exception e)
             {
-                SetEmptyOrLoading();
+                MobileDebug.Manager.WriteEvent("SongRefreshFail", e, Path);
             }
-
-            isLoading = false;
         }
 
         private async Task SetTitleAndArtist(StorageFile file)
@@ -124,12 +164,15 @@ namespace MusicPlayer.Data
 
                 Title = properties.Title;
                 Artist = properties.Artist;
-                NaturalDurationMilliseconds = properties.Duration.TotalMilliseconds;
+                DurationMilliseconds = properties.Duration.TotalMilliseconds;
             }
-            catch { }
+            catch (Exception e)
+            {
+                MobileDebug.Manager.WriteEvent("SongSetTitleAndArtistFail", e, Path);
+            }
         }
 
-        public async Task LoadNaturalDuration()
+        public async Task LoadDuration()
         {
             try
             {
@@ -137,9 +180,12 @@ namespace MusicPlayer.Data
 
                 if (properties == null) return;
 
-                NaturalDurationMilliseconds = properties.Duration.TotalMilliseconds;
+                DurationMilliseconds = properties.Duration.TotalMilliseconds;
             }
-            catch { }
+            catch (Exception e)
+            {
+                MobileDebug.Manager.WriteEvent("SongLoadDurationFail", e, Path);
+            }
         }
 
         private void SetTitleAndArtistByPath()
@@ -169,6 +215,7 @@ namespace MusicPlayer.Data
             }
             catch (Exception e)
             {
+                MobileDebug.Manager.WriteEvent("SongGetFileFail", e, Path);
                 failed = true;
                 throw e;
             }
@@ -190,12 +237,38 @@ namespace MusicPlayer.Data
 
         public override bool Equals(object obj)
         {
-            return this == obj as Song;
+            return this == (Song)obj;
         }
 
         public override int GetHashCode()
         {
             return base.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return Artist != null && Artist != string.Empty ? Artist + " - " + Title : Title;
+        }
+
+        public XmlSchema GetSchema()
+        {
+            return null;
+        }
+
+        public void ReadXml(XmlReader reader)
+        {
+            DurationMilliseconds = double.Parse(reader.GetAttribute("DurationMilliseconds"));
+            Title = reader.GetAttribute("Title");
+            Artist = reader.GetAttribute("Artist");
+            Path = reader.GetAttribute("Path");
+        }
+
+        public void WriteXml(XmlWriter writer)
+        {
+            writer.WriteAttributeString("DurationMilliseconds", DurationMilliseconds.ToString());
+            writer.WriteAttributeString("Title", Title.ToString());
+            writer.WriteAttributeString("Artist", Artist.ToString());
+            writer.WriteAttributeString("Path", Path);
         }
 
         public static bool operator ==(Song song1, Song song2)
@@ -204,8 +277,7 @@ namespace MusicPlayer.Data
             if (ReferenceEquals(song1, null) || ReferenceEquals(song2, null)) return false;
             if (song1.Artist != song2.Artist) return false;
             if (song1.Title != song2.Title) return false;
-            if (song1.NaturalDurationMilliseconds != song2.NaturalDurationMilliseconds) return false;
-            if (song1.Failed != song2.Failed) return false;
+            if (song1.DurationMilliseconds != song2.DurationMilliseconds) return false;
             if (song1.Path != song2.Path) return false;
 
             return true;
@@ -214,11 +286,6 @@ namespace MusicPlayer.Data
         public static bool operator !=(Song song1, Song song2)
         {
             return !(song1 == song2);
-        }
-
-        public override string ToString()
-        {
-            return Artist != null && Artist != string.Empty ? Artist + " - " + Title : Title;
         }
     }
 }

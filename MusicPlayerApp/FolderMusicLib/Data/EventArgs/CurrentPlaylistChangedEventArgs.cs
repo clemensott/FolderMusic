@@ -4,14 +4,14 @@ namespace MusicPlayer.Data
 {
     public class CurrentPlaylistChangedEventArgs : EventArgs
     {
-        public Playlist OldValue { get; private set; }
+        public IPlaylist OldCurrentPlaylist { get; private set; }
 
-        public Playlist NewValue { get; private set; }
+        public IPlaylist NewCurrentPlaylist { get; private set; }
 
-        internal CurrentPlaylistChangedEventArgs(Playlist oldValue, Playlist newValue)
+        internal CurrentPlaylistChangedEventArgs(IPlaylist oldCurrentPlaylist, IPlaylist newCurrentPlaylist)
         {
-            OldValue = oldValue;
-            NewValue = newValue;
+            OldCurrentPlaylist = oldCurrentPlaylist;
+            NewCurrentPlaylist = newCurrentPlaylist;
         }
     }
 }

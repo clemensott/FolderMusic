@@ -1,6 +1,8 @@
 ﻿using MusicPlayer.Data;
 using System;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Core;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -14,45 +16,23 @@ namespace FolderMusic
     /// </summary>
     public sealed partial class LoadingPage : Page
     {
-        private static bool open;
-        private static LoadingPage page;
-
-        public static bool Open { get { return open; } }
+        ILibrary library;
 
         public LoadingPage()
         {
             this.InitializeComponent();
-
-            if (open) GoBack();
-
-            open = true;
-            page = this;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            library = e.Parameter as ILibrary;
         }
 
-        public async static Task NavigateTo()
+        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            if (Open) return;
+            library.CancelLoading();
 
-            await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.
-                RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                {
-                    (Window.Current.Content as Frame).Navigate(typeof(LoadingPage));
-                });
-        }
-
-        public static void GoBack()
-        {
-            if (!open) return;
-
-            open = false;
-
-            if (Library.Current.CanceledLoading) Library.Current.CancelLoading();
-
-            page.Frame.GoBack();
+            base.OnNavigatingFrom(e);
         }
     }
 }

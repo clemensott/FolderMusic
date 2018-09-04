@@ -4,14 +4,14 @@ namespace MusicPlayer.Data
 {
     public class SongTitleChangedEventArgs : EventArgs
     {
-        public string OldValue { get; private set; }
+        public string OldTitle { get; private set; }
 
-        public string NewValue { get; private set; }
+        public string NewTitle { get; private set; }
 
-        internal SongTitleChangedEventArgs(string oldValue, string newValue)
+        internal SongTitleChangedEventArgs(string oldTitle, string newTitle)
         {
-            OldValue = oldValue;
-            NewValue = newValue;
+            OldTitle = oldTitle;
+            NewTitle = newTitle;
         }
     }
 }

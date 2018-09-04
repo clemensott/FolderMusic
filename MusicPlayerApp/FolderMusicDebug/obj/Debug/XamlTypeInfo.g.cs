@@ -9,18 +9,18 @@
 
 
 
-namespace FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo
+namespace MobileDebug.MobileDebug_XamlTypeInfo
 {
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Windows.UI.Xaml.Build.Tasks","4.0.0.0")]
     public sealed class XamlMetaDataProvider: global::Windows.UI.Xaml.Markup.IXamlMetadataProvider
     {
-        private global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlTypeInfoProvider _provider;
+        private global::MobileDebug.MobileDebug_XamlTypeInfo.XamlTypeInfoProvider _provider;
 
         public global::Windows.UI.Xaml.Markup.IXamlType GetXamlType(global::System.Type type)
         {
             if(_provider == null)
             {
-                _provider = new global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlTypeInfoProvider();
+                _provider = new global::MobileDebug.MobileDebug_XamlTypeInfo.XamlTypeInfoProvider();
             }
             return _provider.GetXamlTypeByType(type);
         }
@@ -29,7 +29,7 @@ namespace FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo
         {
             if(_provider == null)
             {
-                _provider = new global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlTypeInfoProvider();
+                _provider = new global::MobileDebug.MobileDebug_XamlTypeInfo.XamlTypeInfoProvider();
             }
             return _provider.GetXamlTypeByName(fullName);
         }
@@ -41,7 +41,7 @@ namespace FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo
     }
 }
 
-namespace FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo
+namespace MobileDebug.MobileDebug_XamlTypeInfo
 {
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Windows.UI.Xaml.Build.Tasks", "4.0.0.0")]    
@@ -126,16 +126,16 @@ namespace FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo
         private void InitTypeTables()
         {
             _typeNameTable = new string[4];
-            _typeNameTable[0] = "FolderMusicDebug.DebugFilterPage";
+            _typeNameTable[0] = "MobileDebug.DebugFilterPage";
             _typeNameTable[1] = "Windows.UI.Xaml.Controls.Page";
             _typeNameTable[2] = "Windows.UI.Xaml.Controls.UserControl";
-            _typeNameTable[3] = "FolderMusicDebug.DebugPage";
+            _typeNameTable[3] = "MobileDebug.DebugPage";
 
             _typeTable = new global::System.Type[4];
-            _typeTable[0] = typeof(global::FolderMusicDebug.DebugFilterPage);
+            _typeTable[0] = typeof(global::MobileDebug.DebugFilterPage);
             _typeTable[1] = typeof(global::Windows.UI.Xaml.Controls.Page);
             _typeTable[2] = typeof(global::Windows.UI.Xaml.Controls.UserControl);
-            _typeTable[3] = typeof(global::FolderMusicDebug.DebugPage);
+            _typeTable[3] = typeof(global::MobileDebug.DebugPage);
         }
 
         private int LookupTypeIndexByName(string typeName)
@@ -170,36 +170,36 @@ namespace FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo
             return -1;
         }
 
-        private object Activate_0_DebugFilterPage() { return new global::FolderMusicDebug.DebugFilterPage(); }
-        private object Activate_3_DebugPage() { return new global::FolderMusicDebug.DebugPage(); }
+        private object Activate_0_DebugFilterPage() { return new global::MobileDebug.DebugFilterPage(); }
+        private object Activate_3_DebugPage() { return new global::MobileDebug.DebugPage(); }
 
         private global::Windows.UI.Xaml.Markup.IXamlType CreateXamlType(int typeIndex)
         {
-            global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlSystemBaseType xamlType = null;
-            global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlUserType userType;
+            global::MobileDebug.MobileDebug_XamlTypeInfo.XamlSystemBaseType xamlType = null;
+            global::MobileDebug.MobileDebug_XamlTypeInfo.XamlUserType userType;
             string typeName = _typeNameTable[typeIndex];
             global::System.Type type = _typeTable[typeIndex];
 
             switch (typeIndex)
             {
 
-            case 0:   //  FolderMusicDebug.DebugFilterPage
-                userType = new global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
+            case 0:   //  MobileDebug.DebugFilterPage
+                userType = new global::MobileDebug.MobileDebug_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
                 userType.Activator = Activate_0_DebugFilterPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
             case 1:   //  Windows.UI.Xaml.Controls.Page
-                xamlType = new global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                xamlType = new global::MobileDebug.MobileDebug_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
             case 2:   //  Windows.UI.Xaml.Controls.UserControl
-                xamlType = new global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                xamlType = new global::MobileDebug.MobileDebug_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 3:   //  FolderMusicDebug.DebugPage
-                userType = new global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
+            case 3:   //  MobileDebug.DebugPage
+                userType = new global::MobileDebug.MobileDebug_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
                 userType.Activator = Activate_3_DebugPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
@@ -212,7 +212,7 @@ namespace FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo
 
         private global::Windows.UI.Xaml.Markup.IXamlMember CreateXamlMember(string longMemberName)
         {
-            global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlMember xamlMember = null;
+            global::MobileDebug.MobileDebug_XamlTypeInfo.XamlMember xamlMember = null;
             // No Local Properties
             return xamlMember;
         }
@@ -269,9 +269,9 @@ namespace FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Windows.UI.Xaml.Build.Tasks", "4.0.0.0")]    
     [System.Diagnostics.DebuggerNonUserCodeAttribute()]
-    internal class XamlUserType : global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlSystemBaseType
+    internal class XamlUserType : global::MobileDebug.MobileDebug_XamlTypeInfo.XamlSystemBaseType
     {
-        global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlTypeInfoProvider _provider;
+        global::MobileDebug.MobileDebug_XamlTypeInfo.XamlTypeInfoProvider _provider;
         global::Windows.UI.Xaml.Markup.IXamlType _baseType;
         bool _isArray;
         bool _isMarkupExtension;
@@ -285,7 +285,7 @@ namespace FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo
         global::System.Collections.Generic.Dictionary<string, string> _memberNames;
         global::System.Collections.Generic.Dictionary<string, object> _enumValues;
 
-        public XamlUserType(global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlTypeInfoProvider provider, string fullName, global::System.Type fullType, global::Windows.UI.Xaml.Markup.IXamlType baseType)
+        public XamlUserType(global::MobileDebug.MobileDebug_XamlTypeInfo.XamlTypeInfoProvider provider, string fullName, global::System.Type fullType, global::Windows.UI.Xaml.Markup.IXamlType baseType)
             :base(fullName, fullType)
         {
             _provider = provider;
@@ -478,7 +478,7 @@ namespace FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo
     [System.Diagnostics.DebuggerNonUserCodeAttribute()]
     internal class XamlMember : global::Windows.UI.Xaml.Markup.IXamlMember
     {
-        global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlTypeInfoProvider _provider;
+        global::MobileDebug.MobileDebug_XamlTypeInfo.XamlTypeInfoProvider _provider;
         string _name;
         bool _isAttachable;
         bool _isDependencyProperty;
@@ -487,7 +487,7 @@ namespace FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo
         string _typeName;
         string _targetTypeName;
 
-        public XamlMember(global::FolderMusicDebug.MusicPlayerDebug_XamlTypeInfo.XamlTypeInfoProvider provider, string name, string typeName)
+        public XamlMember(global::MobileDebug.MobileDebug_XamlTypeInfo.XamlTypeInfoProvider provider, string name, string typeName)
         {
             _name = name;
             _typeName = typeName;

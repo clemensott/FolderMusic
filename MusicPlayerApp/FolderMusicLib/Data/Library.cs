@@ -5,316 +5,229 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Media.Playback;
 using Windows.Storage;
+using System.Xml;
+using System.Xml.Schema;
+using Windows.ApplicationModel.Core;
+using MusicPlayer.Data.Shuffle;
+using MusicPlayer.Data.NonLoaded;
 
 namespace MusicPlayer.Data
 {
-    public class Library : LibraryBase
+    public class Library : ILibrary
     {
-        internal static Library dataInstance;
-        internal static LibraryBase currentInstance, nonLoadedInstance;
+        public const double DefaultSongsPositionPercent = 0, DefaultSongsPositionMillis = 1;
 
-        public static ILibrary Current
+        private const string fileName = "Data.xml", backupFileName = "Data.bak";
+
+        private bool isPlaying;
+        private bool? isForeground;
+        private IPlaylist currentPlaylist;
+        private IPlaylistCollection playlists;
+
+        public event PlayStateChangedEventHandler PlayStateChanged;
+        public event PlaylistsPropertyChangedEventHandler PlaylistsChanged;
+        public event CurrentPlaylistPropertyChangedEventHandler CurrentPlaylistChanged;
+        public event SettingsPropertyChangedEventHandler SettingsChanged;
+        public event LibraryChangedEventHandler LibraryChanged;
+
+        public IPlaylist this[int index] { get { return Playlists.ElementAtOrDefault(index); } }
+
+        public bool CanceledLoading { get; private set; }
+
+        public bool IsPlaying
         {
-            get
+            get { return isPlaying; }
+            set
             {
-                if (currentInstance == null) nonLoadedInstance = currentInstance = NonLoadedLibrary.Current;
+                MobileDebug.Manager.WriteEvent("IsPlaying", "Current: " + isPlaying,
+                    "Value: " + value, "Libray: " + GetHashCode());
 
-                return currentInstance;
+                if (value == isPlaying) return;
+
+                isPlaying = value;
+                var args = new PlayStateChangedEventArgs(value);
+                PlayStateChanged?.Invoke(this, args);
+
+                if (!isPlaying) SaveSimple();
             }
         }
 
-        internal static LibraryBase Base
+        public IPlaylist CurrentPlaylist
         {
-            get
+            get { return currentPlaylist; }
+            set
             {
-                if (currentInstance == null) nonLoadedInstance = currentInstance = NonLoadedLibrary.Current;
+                if (value == currentPlaylist || !Playlists.Contains(value)) return;
 
-                return currentInstance;
+                if (isForeground == false)
+                {
+                    TimeSpan position = BackgroundMediaPlayer.Current.Position;
+                    TimeSpan duration = BackgroundMediaPlayer.Current.NaturalDuration;
+                    currentPlaylist.CurrentSongPositionPercent = position.TotalMilliseconds / duration.TotalMilliseconds;
+                }
+
+                var args = new CurrentPlaylistChangedEventArgs(currentPlaylist, value);
+                currentPlaylist = value;
+                CurrentPlaylistChanged?.Invoke(this, args);
+
+                Save();
             }
         }
 
-        internal static Library Data
+        public IPlaylistCollection Playlists { get { return playlists; } }
+
+        public SkipSongs SkippedSongs { get; private set; }
+
+        internal Library(bool isForeground)
         {
-            get
+            SkippedSongs = new SkipSongs(this);
+            this.isForeground = isForeground;
+            playlists = new PlaylistCollection(this);
+            currentPlaylist = null;
+        }
+
+        internal Library(CurrentPlaySong currentPlaySong)
+        {
+            SkippedSongs = new SkipSongs(this);
+            isForeground = false;
+            playlists = new PlaylistCollection(this, currentPlaySong);
+            currentPlaylist = playlists.First();
+
+            LibraryChanged += OnLibraryChanged;
+        }
+
+        internal Library(ILibrary actualLibrary)
+        {
+            SkippedSongs = new SkipSongs(this);
+            currentPlaylist = actualLibrary.CurrentPlaylist;
+            playlists = new NonLoadedPlaylistCollection(this, actualLibrary.Playlists, actualLibrary.CurrentPlaylist);
+        }
+
+        internal Library(string xmlText)
+        {
+            MobileDebug.Manager.WriteEvent("LoadLibXml", xmlText.Length);
+            ReadXml(XmlConverter.GetReader(xmlText));
+            //CheckLibrary(this);
+        }
+
+        public void Set(ILibrary library)
+        {
+            if (library == null) return;
+
+            var args = new LibraryChangedEventsArgs(playlists, library.Playlists, currentPlaylist, library.CurrentPlaylist);
+
+            if (isForeground == false)
             {
-                return dataInstance;
+                Song currentSong = library.CurrentPlaylist?.Songs?.FirstOrDefault(s => s.Path == CurrentPlaylist.CurrentSong.Path);
+                double currentSongPositionPercent = CurrentPlaylist?.CurrentSongPositionPercent ?? 0;
+
+                if (currentSong != null)
+                {
+                    library.CurrentPlaylist.CurrentSong = currentSong;
+                    library.CurrentPlaylist.CurrentSongPositionPercent = currentSongPositionPercent;
+                }
             }
-        }
-
-        public static Feedback Events
-        {
-            get
+            else if (isForeground == true)
             {
-                return Feedback.Current;
-            }
-        }
-
-        public static bool IsLoaded() { return Current != nonLoadedInstance; }
-
-        public static bool IsLoaded(ILibrary library)
-        {
-            return IsLoaded() && Current == library;
-        }
-
-        public static bool IsLoaded(PlaylistList playlists)
-        {
-            return IsLoaded() && Current.Playlists == playlists;
-        }
-
-        public static bool IsLoaded(Playlist playlist)
-        {
-            return IsLoaded() && Current.Playlists.Any(p => ReferenceEquals(p, playlist));
-        }
-
-        public static bool IsLoaded(SongList songs)
-        {
-            return IsLoaded() && Current.Playlists.Any(p => p.Songs == songs);
-        }
-
-        public static bool IsLoaded(Song song)
-        {
-            return IsLoaded() && Current.Playlists.Any(p => p.Songs.Any(s => ReferenceEquals(s, song)));
-        }
-
-
-        internal Library(IEnumerable<Playlist> playlists, int currentPlaylistIndex)
-        {
-            this.playlists = new PlaylistList(playlists);
-            this.currentPlaylistIndex = currentPlaylistIndex;
-
-            SetCurrentSong();
-
-        }
-
-        private void SetCurrentSong()
-        {
-            string currentPlaySongPath = (CurrentPlaySong.Current.Song ?? new Song()).Path;
-            Song currentSong = playlists[currentPlaylistIndex].Songs.FirstOrDefault(x => x.Path == currentPlaySongPath);
-
-            if (currentSong == null) return;
-
-            playlists[currentPlaylistIndex].SongsIndex = playlists[currentPlaylistIndex].Songs.IndexOf(currentSong);
-        }
-
-        public static void Load(bool isForeground)
-        {
-            LibraryBase.isForeground = isForeground;
-
-            if (isForeground)
-            {
-                BackForegroundCommunicator.StartCommunication(isForeground);
-
-                //AskForLibraryData();
-            }
-            else
-            {
-                ILibrary oldLibrary = Current;
-
-                CurrentPlaySong.Current.Load();
-
-                currentInstance = dataInstance = LoadLibrary();
-
-                BackForegroundCommunicator.StartCommunication(isForeground);
-                Feedback.Current.RaiseLibraryChanged(oldLibrary, Current);
-            }
-        }
-
-        private static Library LoadLibrary()
-        {
-            SaveLibray sc = LoadSaveLibrary();
-
-            return new Library(sc.Playlists, sc.CurrentPlaylistIndex);
-        }
-
-        private static SaveLibray LoadSaveLibrary()
-        {
-            for (int i = 0; i < 2; i++)
-            {
-                SaveLibray saveLib = SaveLibray.Load();
-
-                if (saveLib != null) return saveLib;
-
-                FolderMusicDebug.DebugEvent.SaveText("Coundn't load Data");
+                isPlaying = BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing;
             }
 
-            for (int i = 0; i < 2; i++)
-            {
-                SaveLibray saveLib = SaveLibray.LoadBackup();
+            playlists = library.Playlists;
+            currentPlaylist = library.CurrentPlaylist;
 
-                if (saveLib != null) return saveLib;
-
-                FolderMusicDebug.DebugEvent.SaveText("Coundn't load Backup");
-            }
-
-            return new SaveLibray(0, new List<Playlist>() { new Playlist() });
+            LibraryChanged?.Invoke(this, args);
         }
 
-        internal static void Load(string xmlText)
+        public async Task Refresh()
         {
-            nonLoadedInstance = currentInstance;
-            SaveLibray sc = XmlConverter.Deserialize<SaveLibray>(xmlText);
-
-            currentInstance = dataInstance = new Library(sc.Playlists, sc.CurrentPlaylistIndex);
-
-            Feedback.Current.RaiseLibraryChanged(nonLoadedInstance, currentInstance);
-        }
-
-        internal void UpdateAddPlaylist(int index, Playlist addPlaylist, Playlist currentPlaylist)
-        {
-            int newCurrentPlaylistIndex = Playlists.IndexOf(currentPlaylist);
-
-            if (newCurrentPlaylistIndex != -1) currentPlaylistIndex = newCurrentPlaylistIndex;
-
-            Feedback.Current.RaisePlaylistsPropertyChanged(new ChangedPlaylist[] { new ChangedPlaylist(index, addPlaylist) },
-                  new ChangedPlaylist[0], currentPlaylist, CurrentPlaylist);
-        }
-
-        internal void UpdateRemovePlaylist(int index, Playlist removePlaylist, Playlist currentPlaylist)
-        {
-            int newCurrentPlaylistIndex = Playlists.IndexOf(currentPlaylist);
-
-            if (newCurrentPlaylistIndex != -1) currentPlaylistIndex = newCurrentPlaylistIndex;
-
-            Feedback.Current.RaisePlaylistsPropertyChanged(new ChangedPlaylist[0], new ChangedPlaylist[]
-                { new ChangedPlaylist(index, removePlaylist) }, currentPlaylist, CurrentPlaylist);
-        }
-
-        internal void UpdateAddRemovePlaylist(int index, Playlist addPlaylist, Playlist removePlaylist, Playlist currentPlaylist)
-        {
-            int newCurrentPlaylistIndex = Playlists.IndexOf(currentPlaylist);
-
-            if (newCurrentPlaylistIndex != -1) currentPlaylistIndex = newCurrentPlaylistIndex;
-
-            Feedback.Current.RaisePlaylistsPropertyChanged(new ChangedPlaylist[] { new ChangedPlaylist(index, addPlaylist) },
-                new ChangedPlaylist[] { new ChangedPlaylist(index, removePlaylist) }, currentPlaylist, CurrentPlaylist);
-        }
-
-        internal void SetPlaylists(PlaylistList playlists, Playlist currentPlaylist)
-        {
-            bool playlistsChanged = false, currentPlaylistChanged = false;
-            PlaylistList oldPlaylists = Playlists;
-            Playlist oldCurrentPlaylist = CurrentPlaylist;
-
-            if (playlists != Playlists)
-            {
-                this.playlists = playlists;
-                playlistsChanged = true;
-            }
-            else if (!playlists.SequenceEqual(Playlists)) playlistsChanged = true;
-
-            if (currentPlaylist != CurrentPlaylist)
-            {
-                CurrentPlaylist.SongPositionPercent = BackgroundMediaPlayer.Current.Position.TotalMilliseconds /
-                    BackgroundMediaPlayer.Current.NaturalDuration.TotalMilliseconds;
-
-                currentPlaylistIndex = playlists.IndexOf(currentPlaylist);
-                currentPlaylistChanged = true;
-            }
-
-            if (!IsLoaded()) return;
-
-            SaveAsync();
-
-            if (playlistsChanged)
-            {
-                Feedback.Current.RaisePlaylistsPropertyChanged(oldPlaylists, Playlists, oldCurrentPlaylist, CurrentPlaylist);
-            }
-            else if (currentPlaylistChanged)
-            {
-                Feedback.Current.RaiseCurrentPlaylistPropertyChanged(this, oldCurrentPlaylist, CurrentPlaylist);
-            }
-        }
-
-        public override async Task RefreshLibraryFromStorage()
-        {
-            if (!IsLoaded()) return;
-
-            Library oldLibrary = this;
-            cancelLoading = false;
+            CanceledLoading = false;
             IsPlaying = false;
 
-            List<Task> tasks = new List<Task>();
-            List<Playlist> list = new List<Playlist>(await LoadPlaylistsFromStorage());
+            IPlaylistCollection refreshedPlaylists = new PlaylistCollection(this);
+            var folders = await GetStorageFolders();
 
-            foreach (Playlist playlist in list)
+            foreach (StorageFolder folder in await GetStorageFolders())
             {
-                await playlist.LoadSongsFromStorage();
+                IPlaylist playlist = new Playlist(refreshedPlaylists, folder.Path);
+
+                await playlist.Refresh();
 
                 if (CanceledLoading) return;
+                if (playlist.SongsCount > 0) refreshedPlaylists.Add(playlist);
             }
 
-            foreach (Task task in tasks) await task;
+            var args = new PlaylistsChangedEventArgs(Playlists, refreshedPlaylists,
+                CurrentPlaylist, refreshedPlaylists.FirstOrDefault());
 
-            currentPlaylistIndex = 0;
-            playlists = new PlaylistList(list.Where(p => !p.IsEmptyOrLoading));
+            playlists = refreshedPlaylists;
+            currentPlaylist = playlists.FirstOrDefault();
 
-            Feedback.Current.RaiseLibraryChanged(oldLibrary, this);
+            PlaylistsChanged?.Invoke(this, args);
         }
 
-        public override async Task UpdateExistingPlaylists()
+        public async Task Update()
         {
-            for (int i = Length - 1; i >= 0; i--)
+            foreach (IPlaylist playlist in Playlists.AsEnumerable())
             {
                 if (CanceledLoading) return;
 
-                await Playlists[i].UpdateSongsFromStorage();
+                await playlist.Update();
             }
         }
 
-        public override async Task AddNotExistingPlaylists()
+        public async Task AddNew()
         {
-            Playlist currentPlaylist = CurrentPlaylist;
             string currentPlaylistAbsolutePath = CurrentPlaylist.AbsolutePath;
 
-            cancelLoading = false;
+            CanceledLoading = false;
 
-            List<Playlist> possiblePlaylists = new List<Playlist>(await LoadPlaylistsFromStorage());
-            List<Playlist> updatedPlaylists = new List<Playlist>();
+            IPlaylistCollection updatedPlaylists = new PlaylistCollection(this);
 
-            foreach (Playlist possiblePlaylist in possiblePlaylists)
+            foreach (StorageFolder folder in await GetStorageFolders())
             {
-                updatedPlaylists = await GetUpdatedPlaylistsWithAddedPlaylistIfNotContains(possiblePlaylist, updatedPlaylists);
+                await AddOldOrLoadedPlaylist(folder, updatedPlaylists);
 
                 if (CanceledLoading) return;
             }
 
-            SetPlaylists(new PlaylistList(updatedPlaylists), currentPlaylist);
+            var args = new PlaylistsChangedEventArgs(Playlists, updatedPlaylists, CurrentPlaylist, CurrentPlaylist);
+            playlists = updatedPlaylists;
+            PlaylistsChanged?.Invoke(this, args);
         }
 
-        private async Task<List<Playlist>> GetUpdatedPlaylistsWithAddedPlaylistIfNotContains
-            (Playlist possiblePlaylist, List<Playlist> updatedPlaylists)
+        private async Task AddOldOrLoadedPlaylist(StorageFolder folder, IPlaylistCollection playlists)
         {
-            Playlist existingPlaylist = Playlists.FirstOrDefault(x => x.AbsolutePath == possiblePlaylist.AbsolutePath);
+            IPlaylist playlist = Playlists.FirstOrDefault(x => x.AbsolutePath == folder.Path);
 
-            if (existingPlaylist == null)
+            if (playlist == null)
             {
-                await possiblePlaylist.LoadSongsFromStorage();
+                playlist = new Playlist(playlists, folder.Path);
+                await playlist.Refresh();
 
-                if (possiblePlaylist.Songs.Count > 0) updatedPlaylists.Add(possiblePlaylist);
+                if (playlist.Songs.Count == 0) return;
             }
-            else updatedPlaylists.Add(existingPlaylist);
 
-            return updatedPlaylists;
+            playlists.Add(playlist);
         }
 
-        private async Task<List<Playlist>> LoadPlaylistsFromStorage()
+        private async Task<List<StorageFolder>> GetStorageFolders()
         {
-            return await LoadPlaylistsFromStorage(KnownFolders.MusicLibrary);
+            return await GetStorageFolders(KnownFolders.MusicLibrary);
         }
 
-        private async Task<List<Playlist>> LoadPlaylistsFromStorage(StorageFolder folder)
+        private async Task<List<StorageFolder>> GetStorageFolders(StorageFolder folder)
         {
-            List<Playlist> list = new List<Playlist>();
+            List<StorageFolder> list = new List<StorageFolder>();
 
             try
             {
-                list.Add(new Playlist(folder.Path));
+                list.Add(folder);
 
                 var folders = await folder.GetFoldersAsync();
 
                 foreach (StorageFolder listFolder in folders)
                 {
-                    list.AddRange(await LoadPlaylistsFromStorage(listFolder));
+                    list.AddRange(await GetStorageFolders(listFolder));
                 }
             }
             catch { }
@@ -322,74 +235,324 @@ namespace MusicPlayer.Data
             return list;
         }
 
-        internal override string GetXmlText()
+        public async Task SaveAsync()
         {
-            SaveLibray sc = new SaveLibray(CurrentPlaylistIndex, playlists.ToList());
-
-            return XmlConverter.Serialize(sc);
+            if (isForeground == false) await new Task(new Action(Save));
         }
 
-        public override async Task SaveAsync()
+        public void Save()
         {
-            if (isForeground == false) Save();
+            MobileDebug.Manager.WriteEvent("SaveLibrary", "IsForeground: " + isForeground.ToString() ?? "null");
+            SaveSimple();
+
+            if (isForeground != false) return;
+
+            try
+            {
+                IO.SaveObject(fileName, this);
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Manager.WriteEvent("SaveFail", e);
+                CheckLibrary(this);
+            }
         }
 
-        public override void Save()
+        private void SaveSimple()
         {
-            SaveLibray sc = new SaveLibray(CurrentPlaylistIndex, playlists.ToList());
+            if (isForeground != false) return;
 
-            sc.Save();
+            try
+            {
+                CurrentPlaySong.Save(this);
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Manager.WriteEvent("SaveSimpleSongFail", e);
+            }
+
+            try
+            {
+                var non = new NonLoadedLibrary(this);
+                non.Save();
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Manager.WriteEvent("SaveSimpleLibrayFail", e);
+            }
         }
 
-        public override void CancelLoading()
+        public void CancelLoading()
         {
-            cancelLoading = true;
+            CanceledLoading = true;
         }
 
-        protected override bool GetIsPlaying()
+        public XmlSchema GetSchema()
         {
-            return isPlayling;
+            return null;
         }
 
-        protected override void SetIsPlaying(bool value)
+        public void ReadXml(XmlReader reader)
         {
-            if (value == isPlayling) return;
+            string currentPlaylistPath = reader.GetAttribute("CurrentPlaylistPath");
 
-            isPlayling = value;
+            reader.ReadStartElement();
+            playlists = new PlaylistCollection(this, reader);
+            reader.ReadEndElement();
 
-            Feedback.Current.RaisePlayStateChanged(this, value);
+            currentPlaylist = playlists.FirstOrDefault(p => p.AbsolutePath == currentPlaylistPath) ?? playlists.FirstOrDefault();
         }
 
-        protected override PlaylistList GetPlaylists()
+        public void WriteXml(XmlWriter writer)
         {
-            return playlists;
+            writer.WriteAttributeString("CurrentPlaylistPath", CurrentPlaylist.AbsolutePath);
+
+            writer.WriteStartElement("Playlists");
+            Playlists.WriteXml(writer);
+            writer.WriteEndElement();
         }
 
-        protected override void SetPlaylists(PlaylistList newPlaylists)
+        private static void CheckLibrary(ILibrary lib)
         {
-            if (playlists == newPlaylists) return;
+            MobileDebug.Manager.WriteEvent("CheckLibraryStart", lib?.Playlists.Count.ToString() ?? "null");
+            bool contains = lib.Playlists.Contains(lib.CurrentPlaylist);
 
-            if (!IsLoaded()) playlists = newPlaylists;
-            else SetPlaylists(newPlaylists, CurrentPlaylist);
+            List<string> list = new List<string>()
+            {
+                "ContainsCurrentPlaylist: " + contains,
+                "CurrentPlaylist==null: " + (lib.CurrentPlaylist == null)
+            };
+
+            foreach (IPlaylist p in lib.Playlists)
+            {
+                string text = "";
+
+                if (p != null)
+                {
+                    text += "\nName: " + (p?.Name ?? "null");
+                    text += "\nPath: " + (p?.AbsolutePath ?? "null");
+                    text += "\nSong: " + (p?.CurrentSong?.Path ?? "null");
+                    text += "\nContainsCurrentSong: " + (p?.Songs?.Contains(p?.CurrentSong).ToString() ?? "null");
+                    text += "\nPos: " + (p?.CurrentSongPositionPercent.ToString() ?? "null");
+                    text += "\nShuffle: " + (p?.Shuffle.ToString() ?? "null");
+                    text += "\nLoop: " + (p?.Loop.ToString() ?? "null");
+                    text += "\nSongs: " + (p?.Songs?.Count.ToString() ?? "null");
+                    text += "\nDif: " + (p?.Songs?.GroupBy(s => s?.Path ?? "null")?.Count().ToString() ?? "null");
+                    text += "\nShuffle: " + (p?.ShuffleSongs?.Count.ToString() ?? "null");
+                }
+
+                list.Add(text);
+            }
+
+            MobileDebug.Manager.WriteEvent("CheckLibraryEnd", list.AsEnumerable());
         }
 
-        protected override int GetCurrentPlaylistIndex()
+        public static ILibrary Load(bool isForeground)
         {
-            return currentPlaylistIndex;
+            ILibrary library;
+
+            if (isForeground)
+            {
+                library = new Library(true);
+
+                try
+                {
+                    ILibrary nonLoadedLibrary = NonLoadedLibrary.Load();
+                    library.Set(nonLoadedLibrary);
+                }
+                catch (Exception e)
+                {
+                    MobileDebug.Manager.WriteEvent("LibraryLoadForegroundFail", e);
+                }
+
+                BackForegroundCommunicator.StartCommunication(library, isForeground);
+            }
+            else
+            {
+                library = CurrentPlaySong.Load();
+                BackForegroundCommunicator.StartCommunication(library, isForeground);
+
+                new Task(new Action<object>(SetLibrary), library).Start();
+            }
+
+            return library;
         }
 
-        protected override void SetCurrentPlaylistIndex(int newCurrentPlaylistIndex)
+        private static void SetLibrary(object parameter)
         {
-            if (currentPlaylistIndex == newCurrentPlaylistIndex) return;
+            ILibrary targetLibrary = (ILibrary)parameter;
+            ILibrary completeLibrary = GetLibrary();
 
-            if (!IsLoaded()) currentPlaylistIndex = newCurrentPlaylistIndex;
-            else SetPlaylists(Playlists, Playlists[newCurrentPlaylistIndex]);
+            targetLibrary.Set(completeLibrary);
         }
 
-        protected override void SetCurrentPlaylist(Playlist newCurrentPlaylist)
+        private static ILibrary GetLibrary()
         {
-            if (!IsLoaded() || newCurrentPlaylist == CurrentPlaylist) return;
-            else SetPlaylists(Playlists, newCurrentPlaylist);
+            for (int i = 0; i < 2; i++)
+            {
+                try
+                {
+                    return new Library(IO.LoadText(fileName));
+                }
+                catch (Exception e)
+                {
+                    MobileDebug.Manager.WriteEvent("Coundn't load Data", e);
+                }
+            }
+
+            for (int i = 0; i < 2; i++)
+            {
+                try
+                {
+                    return new Library(IO.LoadText(backupFileName));
+                }
+                catch (Exception e)
+                {
+                    MobileDebug.Manager.WriteEvent("Coundn't load Backup", e);
+                }
+            }
+
+            MobileDebug.Manager.WriteEvent("Coundn't load AnyData");
+
+            return new Library(false);
+        }
+
+        private void OnLibraryChanged(ILibrary sender, LibraryChangedEventsArgs args)
+        {
+            Unsubscribe(args.OldPlaylists);
+            Subscribe(args.NewPlaylists);
+
+            if (args.OldPlaylists != null) args.OldPlaylists.Changed -= OnPlaylistsChanged;
+            if (args.NewPlaylists != null) args.NewPlaylists.Changed += OnPlaylistsChanged;
+        }
+
+        private void Subscribe(IEnumerable<IPlaylist> playlists)
+        {
+            foreach (IPlaylist playlist in playlists ?? Enumerable.Empty<IPlaylist>())
+            {
+                Subscribe(playlist);
+            }
+        }
+
+        private void Unsubscribe(IEnumerable<IPlaylist> playlists)
+        {
+            foreach (IPlaylist playlist in playlists ?? Enumerable.Empty<IPlaylist>())
+            {
+                Unsubscribe(playlist);
+            }
+        }
+
+        private void Subscribe(IPlaylist playlist)
+        {
+            if (playlist == null) return;
+
+            playlist.CurrentSongChanged += OnCurrentSongChanged;
+            playlist.CurrentSongPositionChanged += OnCurrentSongPositionChanged;
+            playlist.LoopChanged += OnLoopChanged;
+            playlist.ShuffleChanged += OnShuffleChanged;
+
+            playlist.Songs.CollectionChanged += OnSongsChanged;
+            playlist.ShuffleSongs.Changed += OnShuffleSongsChanged;
+        }
+
+        private void Unsubscribe(IPlaylist playlist)
+        {
+            if (playlist == null) return;
+
+            playlist.CurrentSongChanged -= OnCurrentSongChanged;
+            playlist.CurrentSongPositionChanged -= OnCurrentSongPositionChanged;
+            playlist.LoopChanged -= OnLoopChanged;
+            playlist.ShuffleChanged -= OnShuffleChanged;
+
+            playlist.Songs.CollectionChanged -= OnSongsChanged;
+            playlist.ShuffleSongs.Changed -= OnShuffleSongsChanged;
+        }
+
+        private void Subscribe(IEnumerable<Song> songs)
+        {
+            foreach (Song song in songs ?? Enumerable.Empty<Song>()) Subscribe(song);
+        }
+
+        private void Unsubscribe(IEnumerable<Song> songs)
+        {
+            foreach (Song song in songs ?? Enumerable.Empty<Song>()) Unsubscribe(song);
+        }
+
+        private void Subscribe(Song song)
+        {
+            if (song?.IsEmpty ?? true) return;
+
+            song.ArtistChanged += OnArtistChanged;
+            song.DurationChanged += OnDurationChanged;
+            song.TitleChanged += OnTitleChanged;
+        }
+
+        private void Unsubscribe(Song song)
+        {
+            if (song?.IsEmpty ?? true) return;
+
+            song.ArtistChanged -= OnArtistChanged;
+            song.DurationChanged -= OnDurationChanged;
+            song.TitleChanged -= OnTitleChanged;
+        }
+
+        private void OnPlaylistsChanged(IPlaylistCollection sender, PlaylistsChangedEventArgs args)
+        {
+            Unsubscribe(args.GetRemoved());
+            Subscribe(args.GetAdded());
+
+            Save();
+        }
+
+        private void OnCurrentSongChanged(IPlaylist sender, CurrentSongChangedEventArgs args)
+        {
+            SaveSimple();
+        }
+
+        private void OnCurrentSongPositionChanged(IPlaylist sender, CurrentSongPositionChangedEventArgs args)
+        {
+            SaveSimple();
+        }
+
+        private void OnLoopChanged(IPlaylist sender, LoopChangedEventArgs args)
+        {
+            Save();
+        }
+
+        private void OnShuffleChanged(IPlaylist sender, ShuffleChangedEventArgs args)
+        {
+            args.OldShuffleSongs.Changed -= OnShuffleSongsChanged;
+            args.NewShuffleSongs.Changed += OnShuffleSongsChanged;
+
+            Save();
+        }
+
+        private void OnSongsChanged(ISongCollection sender, SongCollectionChangedEventArgs args)
+        {
+            Unsubscribe(args.GetRemoved());
+            Subscribe(args.GetAdded());
+
+            Save();
+        }
+
+        private void OnShuffleSongsChanged(IShuffleCollection sender)
+        {
+            Save();
+        }
+
+        private void OnArtistChanged(Song sender, SongArtistChangedEventArgs args)
+        {
+            Save();
+        }
+
+        private void OnDurationChanged(Song sender, SongDurationChangedEventArgs args)
+        {
+            Save();
+        }
+
+        private void OnTitleChanged(Song sender, SongTitleChangedEventArgs args)
+        {
+            Save();
         }
     }
 }

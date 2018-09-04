@@ -46,7 +46,7 @@
   </Applications>
   <Capabilities>
     <Capability Name="musicLibrary" />
-    <Capability Name="picturesLibrary" />
+    <Capability Name="videosLibrary" />
   </Capabilities>
   <Extensions>
     <Extension Category="windows.activatableClass.inProcessServer">

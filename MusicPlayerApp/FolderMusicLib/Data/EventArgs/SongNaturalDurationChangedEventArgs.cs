@@ -2,16 +2,16 @@
 
 namespace MusicPlayer.Data
 {
-    public class SongNaturalDurationChangedEventArgs:EventArgs
+    public class SongDurationChangedEventArgs:EventArgs
     {
-        public double OldValue { get; private set; }
+        public double OldDuration { get; private set; }
 
-        public double NewValue { get; private set; }
+        public double NewDuration { get; private set; }
 
-        internal SongNaturalDurationChangedEventArgs(double oldValue, double newValue)
+        internal SongDurationChangedEventArgs(double oldDuration, double newDuration)
         {
-            OldValue = oldValue;
-            NewValue = newValue;
+            OldDuration = oldDuration;
+            NewDuration = newDuration;
         }
     }
 }

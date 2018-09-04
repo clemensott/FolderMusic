@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicPlayerLib", "FolderMus
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundTask", "BackgroundTask\BackgroundTask.csproj", "{EBAAA64F-0A02-46FA-98D0-0DB863EFDD6E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicPlayerDebug", "FolderMusicDebug\MusicPlayerDebug.csproj", "{EE2E4620-7D8D-4D75-A8A4-157E652449E2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileDebug", "FolderMusicDebug\MobileDebug.csproj", "{EE2E4620-7D8D-4D75-A8A4-157E652449E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

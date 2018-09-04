@@ -22,14 +22,15 @@
         <Hub Grid.Row="1" Header="{Binding RelativePath}" Style="{StaticResource HHeaderRelativePath}">
             <HubSection Header="Default" Style="{StaticResource HSHeader}" Margin="0,-10,0,0">
                 <DataTemplate>
-                    <local:SongListView Margin="0,-30,0,0" Source="{Binding ElementName=playlistPage,Path=Playlist}"/>
+                    <local:ShuffleSongsView Margin="0,-30,0,0" 
+                                            Source="{Binding ElementName=playlistPage,Path=Playlist}"/>
                 </DataTemplate>
             </HubSection>
 
             <HubSection Header="Shuffle" Style="{StaticResource HSHeader}" Margin="0,-10,0,0">
                 <DataTemplate>
-                    <local:SongListView Margin="0,-30,0,0" SongsSource="Shuffle"
-                                        Source="{Binding ElementName=playlistPage,Path=Playlist}"/>
+                    <local:ShuffleOffSongsView Margin="0,-30,0,0"
+                                               Source="{Binding ElementName=playlistPage,Path=Playlist}"/>
                 </DataTemplate>
             </HubSection>
         </Hub>
@@ -41,9 +42,9 @@
             </Grid.ColumnDefinitions>
           
             <Image Grid.Column="0" Tapped="Shuffle_Tapped"
-                       Source="{Binding Shuffle, Converter={StaticResource ShuffleConverter}}"/>
+                   Source="{Binding Shuffle, Converter={StaticResource shuffleConverter}}"/>
             <Image Grid.Column="1" Tapped="Loop_Tapped"
-                       Source="{Binding Loop, Converter={StaticResource LoopConverter}}"/>
+                   Source="{Binding Loop, Converter={StaticResource loopConverter}}"/>
         </Grid>
     </Grid>
 

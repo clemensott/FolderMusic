@@ -20,24 +20,21 @@ namespace MusicPlayer.Communication
             ValueSet valueSet = new ValueSet();
             valueSet.Add(Key, value);
 
-            if (Key == null) { }
-
             return valueSet;
         }
 
-        public bool Handle(ValueSet valueSet)
+        public void Handle(ValueSet valueSet)
         {
-            if (!valueSet.ContainsKey(Key)) return false;
-
             try
             {
-                messageReceived(valueSet, valueSet[Key].ToString());
+                MobileDebug.Manager.WriteEvent("Handle1", Key, valueSet.ContainsKey(Key));
+                if (valueSet.ContainsKey(Key)) messageReceived(valueSet, valueSet[Key].ToString());
+                MobileDebug.Manager.WriteEvent("Handle2", Key, valueSet.ContainsKey(Key));
             }
-            catch (Exception e)
+            catch(Exception e)
             {
+                MobileDebug.Manager.WriteEvent("HandleFail", e, Key, valueSet[Key].ToString());
             }
-
-            return true;
         }
     }
 }
