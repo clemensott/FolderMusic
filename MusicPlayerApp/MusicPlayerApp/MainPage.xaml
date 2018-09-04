@@ -11,7 +11,7 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="4"/>
+            <RowDefinition Height="0"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -21,31 +21,27 @@
             <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
 
-        <ProgressBar x:Name="LoadingBar" Visibility="Collapsed" IsEnabled="False" IsIndeterminate="true"
-                     Height="4" HorizontalAlignment="Stretch"/>
-
         <Hub Grid.Row="1" Name="hub" Header="FolderMusic" Style="{StaticResource HHeader}" Margin="0,5,0,0">
             <HubSection Background="Transparent" Margin="0,-10,0,0"
                         Header="{Binding CurrentPlaylistName}" Style="{StaticResource HSHeader}">
                 <DataTemplate>
                     <ListBox x:Name="lbxCurrentPlaylist" Margin="0,-30,0,0" Background="Transparent" SelectionMode="Single"
-                             ItemsSource="{Binding CurrentPlaylistSongs}" 
-                             SelectedIndex="{Binding CurrentSongIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                             PointerEntered="lbxCurrentPlaylist_PointerEntered" SelectionChanged="lbx_SelectionChanged">
+                             ItemsSource="{Binding CurrentPlaylistSongs}" SelectedIndex="{Binding CurrentSongIndex,Mode=TwoWay}"
+                             DataContextChanged="lbxCurrentPlaylist_DataContextChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid Holding="CurrentPlaylistSong_Holding">
+                                <Grid Holding="CurrentPlaylistSong_Holding" Tapped="CurrentPlaylistSong_Tapped">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    
+
                                     <FlyoutBase.AttachedFlyout>
                                         <MenuFlyout>
                                             <MenuFlyoutItem Text="Delete" Click="DeleteSong_Click"/>
                                         </MenuFlyout>
                                     </FlyoutBase.AttachedFlyout>
-                                    
+
                                     <StackPanel Orientation="Vertical">
                                         <TextBlock FontSize="20" Margin="0,-5,0,-2"
                                                Text="{Binding Title}" Foreground="{Binding TextBrush}"/>
@@ -53,7 +49,7 @@
                                                Text="{Binding Artist}" Foreground="{Binding TextBrush}" />
                                     </StackPanel>
 
-                                    <Rectangle Grid.Column="2" Fill="Transparent" Width="1000"/>
+                                    <Rectangle Grid.Column="2" Fill="Transparent" Width="1500"/>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -64,14 +60,12 @@
             <HubSection Header="Playlists" Style="{StaticResource HSHeader}" Margin="0,-10,0,0">
                 <DataTemplate>
                     <ListBox x:Name="lbxPlaylists" SelectionMode="Single" Background="Transparent" Margin="0,-30,0,0"
-                             ItemsSource="{Binding Playlists}"
-                             SelectedIndex="{Binding CurrentPlaylistIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                             SelectionChanged="lbx_SelectionChanged">
+                             ItemsSource="{Binding Playlists}" SelectedIndex="{Binding CurrentPlaylistIndex,Mode=TwoWay}"
+                             DataContextChanged="lbxPlaylists_DataContextChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid Holding="PlaylistsPlaylist_Holding" Tapped="Playlist_Tapped">
+                                <Grid Holding="PlaylistsPlaylist_Holding">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
@@ -84,18 +78,24 @@
                                     </FlyoutBase.AttachedFlyout>
 
                                     <Image Grid.Column="0" Source="{Binding PlayIcon}" 
-                                           Width="55" Height="55" Tapped="PlayPlaylist_Tapped"
-                                           Holding="PlayImage_Holding"/>
+                                           Width="55" Height="55" Tapped="PlayPlaylist_Tapped"/>
 
-                                    <StackPanel Grid.Column="1" Orientation="Vertical">
-                                        <TextBlock Text="{Binding Name}" Foreground="{Binding TextBrush}"
+                                    <Grid Grid.Column="1" Tapped="Playlist_Tapped">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0" Orientation="Vertical">
+                                            <TextBlock Text="{Binding Name}" Foreground="{Binding TextBrush}"
                                                    TextWrapping="WrapWholeWords"
                                                    Margin="10,0,0,0" FontSize="20" VerticalAlignment="Center"/>
-                                        <TextBlock Text="{Binding SongCount}" Foreground="{Binding TextBrush}"
+                                            <TextBlock Text="{Binding SongCount}" Foreground="{Binding TextBrush}"
                                                    Margin="10,0,0,0" FontSize="10" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                        </StackPanel>
 
-                                    <Rectangle Grid.Column="2" Fill="Transparent" Width="1000"/>
+                                        <Rectangle Grid.Column="1" Fill="Transparent" Width="1500"/>
+                                    </Grid>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -133,7 +133,7 @@
                 </Storyboard>
             </Grid.Resources>
 
-            <Slider Grid.Column="1" Height="60" VerticalAlignment="Top" Minimum="0"
+            <Slider Grid.Column="1" Height="60" VerticalAlignment="Top" Minimum="0" SmallChange="1000" LargeChange="1000000"
                     Value="{Binding CurrentSongPositionMilliseconds,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
                     Maximum="{Binding CurrentSongNaturalDurationMilliseconds}" PointerEntered="sld_PointerEntered"/>
 
@@ -156,19 +156,30 @@
                 </Image.RenderTransform>
             </Image>
         </Grid>
+
+        <Grid Name="gdLoading" Grid.RowSpan="8" Visibility="Collapsed">
+            <Rectangle Name="rtLoading" Width="768" Height="1280" Fill="White"/>
+            <StackPanel  VerticalAlignment="Center" Visibility="Collapsed">
+                <ProgressBar Name="pbLoading" IsIndeterminate="True" Height="4"/>
+                <TextBlock Text="Loading..." HorizontalAlignment="Center" FontSize="30"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
-                <AppBarButton Label="Previous" Icon="Previous" Click="Previous_Click"/>
-                <AppBarButton Label="{Binding PlayPauseText}" Icon="{Binding PlayPauseIcon}" Click="PlayPause_Click"/>
-                <AppBarButton Label="Next" Icon="Next" Click="Next_Click"/>
+                <AppBarButton Label="Previous" Icon="Previous" IsEnabled="{Binding IsUiEnabled}" Click="Previous_Click"/>
+                <AppBarButton Label="{Binding PlayPauseText}" Icon="{Binding PlayPauseIcon}"
+                              IsEnabled="{Binding IsUiEnabled}" Click="PlayPause_Click"/>
+                <AppBarButton Label="Next" Icon="Next" IsEnabled="{Binding IsUiEnabled}" Click="Next_Click"/>
             </CommandBar.PrimaryCommands>
             
             <CommandBar.SecondaryCommands>
-                <AppBarButton Label="Refresh every playlists" Click="RefreshEveryPlaylists_Click"/>
-                <AppBarButton Label="Search for new playlists" Click="SearchForNewPlaylists_Click"/>
+                <AppBarButton Label="Refresh every playlists" IsEnabled="{Binding IsUiEnabled}" 
+                              Click="RefreshEveryPlaylists_Click"/>
+                <AppBarButton Label="Search for new playlists" IsEnabled="{Binding IsUiEnabled}"
+                              Click="SearchForNewPlaylists_Click"/>
                 <AppBarButton Label="TestFunktion" Click="TestFunktion_Click"/>
                 <AppBarButton Label="TestFunktion2" Click="TestFunktion_Click2"/>
             </CommandBar.SecondaryCommands>

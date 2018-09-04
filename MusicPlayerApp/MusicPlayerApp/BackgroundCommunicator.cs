@@ -53,12 +53,17 @@ namespace MusicPlayerApp
             BackgroundMediaPlayer.SendMessageToBackground(Library.Current[index].GetShuffleAsValueSet(index));
         }
 
-        public static void SendPlaylistPageTap()
+        public static void SendPlaylistPageTap(bool fromShuffleList, int songsIndex)
         {
             BackgroundMediaPlayer.SendMessageToBackground(
                 new ValueSet { { "PlaylistPageTap", App.ViewModel.OpenPlaylistIndex.ToString() },
-                    { "CurrentSongIndex", App.ViewModel.OpenPlaylist.CurrentSongIndex.ToString() },
-                    { "ShuffleOff", (App.ViewModel.OpenPlaylist.Shuffle == ShuffleKind.Off).ToString() } });
+                    { "CurrentSongIndex", songsIndex.ToString() },
+                    { "FromShuffleList", fromShuffleList.ToString() } });
+        }
+
+        public static void SendRun()
+        {
+            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "Run", "" } });
         }
 
         public static void SendGetCurrent()
@@ -106,11 +111,19 @@ namespace MusicPlayerApp
                     switch (key)
                     {
                         case "Current":
-                            Library.Current.CurrentPlaylist.CurrentSongIndex = int.Parse(valueSet[key].ToString());
-                            Library.Current.CurrentPlaylist.SongPositionMilliseconds = double.Parse(valueSet["Position"].ToString());
-                            Library.Current.CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds = double.Parse(valueSet["Duration"].ToString());
+                            int index = int.Parse(valueSet[key].ToString());
+                            double position = double.Parse(valueSet["Position"].ToString());
+                            double duration = double.Parse(valueSet["Duration"].ToString());
 
-                            App.ViewModel.UpdateCurrentSongTitleArtistNaturalDuration();
+                            bool same = Library.Current.CurrentPlaylist.CurrentSongIndex == index &&
+                                Library.Current.CurrentPlaylist.SongPositionMilliseconds == position &&
+                                Library.Current.CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds == duration;
+
+                            Library.Current.CurrentPlaylist.CurrentSongIndex = index;
+                            Library.Current.CurrentPlaylist.SongPositionMilliseconds = position;
+                            Library.Current.CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds = duration;
+
+                            if (!same) UiUpdate.CurrentSongTitleArtistNaturalDuration();
                             return;
 
                         case "New":
@@ -119,8 +132,8 @@ namespace MusicPlayerApp
 
                             Library.Current.CurrentPlaylist.AddShuffleCompleteSong(first, pathNew);
 
-                            App.ViewModel.UpdateCurrentPlaylistSongsAndIndex();
-                            App.ViewModel.UpdateCurrentSongTitleArtistNaturalDuration();
+                            UiUpdate.CurrentPlaylistSongsAndIndex();
+                            UiUpdate.CurrentSongTitleArtistNaturalDuration();
                             return;
 
                         case "Skip":
@@ -132,13 +145,13 @@ namespace MusicPlayerApp
                         case "Shuffle":
                             Library.Current.CurrentPlaylist.SetShuffleList(valueSet);
 
-                            App.ViewModel.UpdateCurrentPlaylistSongsAndIndex();
-                            App.ViewModel.UpdateShuffleIcon();
-                            App.ViewModel.UpdateCurrentSongTitleArtistNaturalDuration();
+                            UiUpdate.CurrentPlaylistSongsAndIndex();
+                            UiUpdate.ShuffleIcon();
+                            UiUpdate.CurrentSongTitleArtistNaturalDuration();
                             return;
 
                         case "Pause":
-                            App.ViewModel.UpdatePlayPauseIcon();
+                            UiUpdate.PlayPauseIcon();
                             return;
                     }
                 }
@@ -174,8 +187,8 @@ namespace MusicPlayerApp
                     Library.Current.CurrentPlaylist.RemoveSong(skipIndex);
                     SendRemoveSong(skipIndex);
 
-                    App.ViewModel.UpdateCurrentPlaylistSongsAndIndex();
-                    App.ViewModel.UpdateCurrentSongIndex();
+                    UiUpdate.CurrentPlaylistSongsAndIndex();
+                    UiUpdate.CurrentSongIndex();
 
                     Library.SaveAsync();
                     break;

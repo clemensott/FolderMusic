@@ -3,5 +3,5 @@ E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\MusicPlayerApp\M
 E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlayerIconsWP8.1\PlayerIconsWP8.1.csproj;neutral
 E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlayerIconsWP8.1\PlayerIconsWP8.1.csproj;neutral
 E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlayerIconsWP8.1\PlayerIconsWP8.1.csproj;neutral
-E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlaylistSong\PlaylistSong.csproj;neutral
-E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlaylistSong\PlaylistSong.csproj;neutral
+E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlaylistSong\PlaylistSongLibraryLib.csproj;neutral
+E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlaylistSong\PlaylistSongLibraryLib.csproj;neutral

@@ -9,9 +9,12 @@ namespace PlaylistSong
 {
     public class Song
     {
+        private bool isEmpty;
         private double naturalDurationMilliseconds = 1;
         private string title, artist;
         private Uri uri;
+
+        public bool IsEmpty { get { return isEmpty; } }
 
         public double NaturalDurationMilliseconds
         {
@@ -33,6 +36,7 @@ namespace PlaylistSong
 
         public Song()
         {
+            isEmpty = true;
             title = "Empty";
             artist = "";
         }

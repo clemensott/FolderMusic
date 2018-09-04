@@ -7,6 +7,8 @@ using Windows.Storage;
 
 namespace PlaylistSong
 {
+    enum LoadKind { Every, New, One};
+
     public delegate void LoadedEventHandler();
 
     public class Library
@@ -14,19 +16,19 @@ namespace PlaylistSong
         private static Library instance;
 
         private volatile static bool isSaveing = false, saveAgain = false;
-        private static string currentSongIndexFileName = "CurrentSongIndex.txt", playCommandFileName = "PlayCommand.txt";
+        private static string currentSongIndexFileName = "CurrentSongIndex.txt",
+            playCommandFileName = "PlayCommand.txt", currentSongPathFileName = "CurrentSongPath.txt";
 
         private int currentPlaylistIndex;
         private List<Playlist> _playlists;
+
+        public static bool IsLoaded { get { return instance != null; } }
 
         public static Library Current
         {
             get
             {
-                if (instance == null)
-                {
-                    instance = new Library();
-                }
+                if (!IsLoaded) Load();
 
                 return instance;
             }
@@ -71,6 +73,8 @@ namespace PlaylistSong
             playlists = new List<Playlist>();
             LoadNonStatic();
         }
+
+        public event LoadedEventHandler Loaded;
 
         private int GetPossibleCurrentPlaylistIndex(int inIndex)
         {
@@ -129,7 +133,7 @@ namespace PlaylistSong
                 double milliseconds;
                 string text;
                 string[] parts;
-                StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync("CurrentSongIndex.txt");
+                StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(currentSongIndexFileName);
 
                 text = await PathIO.ReadTextAsync(file.Path);
                 parts = text.Split(';');
@@ -146,8 +150,7 @@ namespace PlaylistSong
 
         public async void LoadPlaylistsFromStorage()
         {
-            List<Playlist> list = new List<Playlist>();
-            list.AddRange(await LoadPlaylistsFromStorage(KnownFolders.MusicLibrary));
+            List<Playlist> list = new List<Playlist>(await LoadPlaylistsFromStorage(KnownFolders.MusicLibrary));
 
             foreach (Playlist playlist in list)
             {
@@ -163,8 +166,6 @@ namespace PlaylistSong
 
             Loaded();
         }
-
-        public event LoadedEventHandler Loaded;
 
         private async Task<List<Playlist>> LoadPlaylistsFromStorage(StorageFolder folder)
         {
@@ -199,6 +200,7 @@ namespace PlaylistSong
                     Current.SaveNonStatic();
                 }
 
+                SaveCurrentSongPath();
                 isSaveing = false;
             }
         }
@@ -243,7 +245,7 @@ namespace PlaylistSong
                 text = await PathIO.ReadTextAsync(path);
             }
             catch { }
-
+            
             return bool.Parse(text);
         }
 
@@ -264,6 +266,7 @@ namespace PlaylistSong
                 CreateFileAsync(currentSongIndexFileName, CreationCollisionOption.ReplaceExisting);
 
             await PathIO.WriteTextAsync(file.Path, text);
+            SaveCurrentSongPath();
         }
 
         public static async void DeleteSongIndexAndMilliseconds()
@@ -275,6 +278,36 @@ namespace PlaylistSong
                 await file.DeleteAsync();
             }
             catch { }
+        }
+
+        private static async void SaveCurrentSongPath()
+        {
+            string text = string.Format("{0};{1}", Current.CurrentPlaylist.CurrentSong.Path, Current.CurrentPlaylist.SongPositionMilliseconds);
+            StorageFile file = await ApplicationData.Current.LocalFolder.
+                CreateFileAsync(currentSongPathFileName, CreationCollisionOption.ReplaceExisting);
+
+            await PathIO.WriteTextAsync(file.Path, text);
+        }
+
+        public static async Task<Tuple<string, double>> LoadCurrentSongPath()
+        {
+            double position = 0;
+            string text, path = "";
+            string[] parts;
+
+            try
+            {
+                StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(currentSongPathFileName);
+
+                text = await PathIO.ReadTextAsync(file.Path);
+                parts = text.Split(';');
+
+                path = parts[0];
+                position = double.Parse(parts[1]);
+            }
+            catch { }
+
+            return new Tuple<string, double>(path, position);
         }
 
         public static bool IsEmpty()
@@ -290,7 +323,12 @@ namespace PlaylistSong
 
         public void RemoveSongFromCurrentPlaylist(Song song)
         {
-            CurrentPlaylist.RemoveSong(song);
+            RemoveSongFromPlaylist(CurrentPlaylist, song);
+        }
+
+        public void RemoveSongFromPlaylist(Playlist playlist, Song song)
+        {
+            playlist.RemoveSong(song);
             DeleteEmptyPlaylists();
         }
 
@@ -338,17 +376,9 @@ namespace PlaylistSong
             }
         }
 
-        public async void RefreshPlaylist(int index)
-        {
-            if (IsEmpty()) return;
-
-            await playlists[index].LoadSongsFromStorage();
-            DeleteEmptyPlaylists();
-        }
-
         public async void SearchForNewPlaylists()
         {
-            bool existsAllready, reachedIndex = false;
+            bool existsAllready;
             int newCurrentplaylistIndex = CurrentPlaylistIndex;
             string currentPlaylistAbsolutePath = CurrentPlaylist.AbsolutePath;
 
@@ -366,7 +396,7 @@ namespace PlaylistSong
                         exceptPlaylist.Add(playlist);
                         existsAllready = true;
 
-                        if (playlist.AbsolutePath == currentPlaylistAbsolutePath) reachedIndex = true;
+                        if (playlist.AbsolutePath == currentPlaylistAbsolutePath) CurrentPlaylistIndex = newCurrentplaylistIndex;
                         break;
                     }
                 }
@@ -377,7 +407,7 @@ namespace PlaylistSong
 
                     if (!possiblePlaylists[i].IsEmpty())
                     {
-                        newCurrentplaylistIndex += Convert.ToInt32(!reachedIndex);
+                        newCurrentplaylistIndex++;
                         exceptPlaylist.Add(possiblePlaylists[i]);
                     }
                 }

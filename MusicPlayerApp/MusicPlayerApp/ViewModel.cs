@@ -14,57 +14,56 @@ namespace MusicPlayerApp
 {
     public class ViewModel : INotifyPropertyChanged
     {
-        private bool mainPageLoaded = false, lbxCurrentPlaylistEntered = false, sliderEntered = false;
-        private int lbxPlaylistsChangedIndex;
+        private bool mainPageLoaded = false, sliderEntered = false, isUiEnabled = true;
+        private int openPlaylistsIndex = 0;
         private double sliderValue = 0;
 
         public bool MainPageLoaded { get { return mainPageLoaded; } }
 
         public bool IsOpenPlaylistCurrentPlaylist
         {
-            get { return CurrentPlaylistIndex == lbxPlaylistsChangedIndex; }
+            get { return CurrentPlaylistIndex == openPlaylistsIndex; }
         }
 
-        public int OpenPlaylistIndex { get { return lbxPlaylistsChangedIndex; } }
+        public bool IsUiEnabled
+        {
+            get { return isUiEnabled; }
+            set
+            {
+                if (isUiEnabled == value) return;
+
+                isUiEnabled = value;
+                NotifyPropertyChanged("IsUiEnabled");
+            }
+        }
+
+        public int OpenPlaylistIndex { get { return openPlaylistsIndex; } }
 
         public int CurrentSongIndex
         {
             get { return CurrentPlaylist.CurrentSongIndex; }
-            set
-            {
-                if (lbxCurrentPlaylistEntered && CurrentSongIndex != value)
-                {
-                    CurrentPlaylist.CurrentSongIndex = value;
-                    BackgroundCommunicator.SendPlaySong(CurrentSongIndex);
-                    UpdateCurrentSongTitleArtistNaturalDuration();
-                }
-            }
+            set { UiUpdate.CurrentSongIndex(); }
         }
 
         public int CurrentPlaylistIndex
         {
             get { return Library.Current.CurrentPlaylistIndex; }
-            set
-            {
-                lbxPlaylistsChangedIndex = value;
-
-                if (Library.Current.CurrentPlaylistIndex != value)
-                {
-                    NotifyPropertyChanged("CurrentPlaylistIndex");
-                }
-            }
+            set { UiUpdate.CurrentPlaylistIndex(); }
         }
 
         public double CurrentSongPositionMilliseconds
         {
-            get { return sliderEntered ? sliderValue : BackgroundMediaPlayer.Current.Position.TotalMilliseconds; }
+            get
+            {
+                if (CurrentPlaylist.CurrentSong.IsEmpty) return 0;
+                return sliderEntered ? sliderValue : BackgroundMediaPlayer.Current.Position.TotalMilliseconds;
+            }
             set
             {
-                if (sliderValue != value)
-                {
-                    sliderValue = value;
-                    UpdateCurrentSongPosition();
-                }
+                if (sliderValue == value) return;
+
+                sliderValue = value;
+                UiUpdate.CurrentSongPosition();
             }
         }
 
@@ -72,6 +71,7 @@ namespace MusicPlayerApp
         {
             get
             {
+                if (CurrentPlaylist.CurrentSong.IsEmpty) return 1;
                 return BackgroundMediaPlayer.Current.NaturalDuration.TotalMilliseconds != 0 ?
                     BackgroundMediaPlayer.Current.NaturalDuration.TotalMilliseconds :
                     CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds;
@@ -118,13 +118,31 @@ namespace MusicPlayerApp
 
         public List<Song> CurrentPlaylistSongs { get { return CurrentPlaylist.GetShuffleSongs(); } }
 
-        public Playlist CurrentPlaylist { get { return Library.Current.CurrentPlaylist; } }
+        public Playlist CurrentPlaylist
+        {
+            get { return Library.Current.CurrentPlaylist; }
+            set
+            {
+                if (Library.IsEmpty()) return;
+                int index = GetIndexOfPlaylist(value);
+
+                if (index != -1) Library.Current.CurrentPlaylistIndex = index;
+                if (Library.Current.CurrentPlaylistIndex != index) return;
+
+                UiUpdate.CurrentPlaylistIndexAndRest();   
+            }
+        }
 
         public Playlist OpenPlaylist
         {
-            get
+            get { return Library.Current[openPlaylistsIndex]; }
+            set
             {
-                return Library.Current[lbxPlaylistsChangedIndex];
+                if (Library.IsEmpty()) return;
+                int index = GetIndexOfPlaylist(value);
+
+                openPlaylistsIndex = index != -1 ? index : CurrentPlaylistIndex;
+                //NotifyPropertyChanged("CurrentPlaylistIndex");
             }
         }
 
@@ -150,32 +168,8 @@ namespace MusicPlayerApp
 
         public void SetMainPageLoaded()
         {
-            lbxPlaylistsChangedIndex = CurrentPlaylistIndex;
+            openPlaylistsIndex = CurrentPlaylistIndex;
             mainPageLoaded = true;
-        }
-
-        public void LbxCurrentPlaylistEntered()
-        {
-            lbxCurrentPlaylistEntered = true;
-        }
-
-        public void LbxCurrentPlaylistExited()
-        {
-            lbxCurrentPlaylistEntered = false;
-        }
-
-        public void SetLbxPlaylistsChangedIndex(int index)
-        {
-            lbxPlaylistsChangedIndex = index;
-        }
-
-        public void SetCurrentPlaylistIndex()
-        {
-            if (CurrentPlaylistIndex != lbxPlaylistsChangedIndex)
-            {
-                Library.Current.CurrentPlaylistIndex = lbxPlaylistsChangedIndex;
-                UpdateCurrentPlaylistsIndexAndRest();
-            }
         }
 
         public void EnteredSlider()
@@ -189,121 +183,29 @@ namespace MusicPlayerApp
 
             sliderEntered = false;
             BackgroundMediaPlayer.Current.Position = TimeSpan.FromMilliseconds(sliderValue);
-            UpdateCurrentSongPosition();
+            UiUpdate.CurrentSongPosition();
         }
 
-        public void UpdateCurrentSongTitleArtistNaturalDuration()
+        private int GetIndexOfPlaylist(Playlist playlist)
         {
-            NotifyPropertyChanged("CurrentSongIndex");
-            NotifyPropertyChanged("CurrentSongTitle");
-            NotifyPropertyChanged("CurrentSongArtist");
+            int index = Library.Current.GetPlaylists().IndexOf(playlist);
 
-            UpdateCurrentSongNaturalDuration();
-            UpdateCurrentSongPosition();
+            return index < 0 && index >= Library.Current.Lenght ? -1 : index;
         }
 
-        public void UpdateCurrentSongNaturalDuration()
-        {
-            if (CurrentSongNaturalDurationMilliseconds < 2) return;
 
-            CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds = CurrentSongNaturalDurationMilliseconds;
-
-            NotifyPropertyChanged("CurrentSongNaturalDurationText");
-            NotifyPropertyChanged("CurrentSongNaturalDurationMilliseconds");
-        }
-
-        public void UpdateCurrentSongPosition()
-        {
-            NotifyPropertyChanged("CurrentSongPostionText");
-            NotifyPropertyChanged("CurrentSongPositionMilliseconds");
-        }
-
-        public void UpdatePlayPauseIcon()
-        {
-            NotifyPropertyChanged("PlayPauseIcon");
-        }
-
-        public void UpdateShuffleIcon()
-        {
-            NotifyPropertyChanged("ShuffleIcon");
-        }
-
-        public void UpdateLoopIcon()
-        {
-            NotifyPropertyChanged("LoopIcon");
-        }
-
-        public void UpdatePlaylistsAndCurrentPlaylistIndex()
-        {
-            NotifyPropertyChanged("Playlists");
-            NotifyPropertyChanged("CurrentPlaylistIndex");
-        }
-
-        public void UpdateCurrentPlaylistsIndexAndRest()
-        {
-            UpdateCurrentPlaylistSongsAndIndex();
-            NotifyPropertyChanged("CurrentPlaylistName");
-            UpdateLoopIcon();
-            UpdateShuffleIcon();
-            UpdateCurrentSongTitleArtistNaturalDuration();
-        }
-
-        public void UpdateCurrentPlaylistSongsAndIndex()
-        {
-            NotifyPropertyChanged("CurrentPlaylistSongs");
-            NotifyPropertyChanged("CurrentPlaylistIndex");
-        }
-
-        public void UpdateCurrentSongIndex()
-        {
-            NotifyPropertyChanged("CurrentSongIndex");
-        }
-
-        public void UpdateAfterActivating()
-        {
-            UpdateCurrentSongTitleArtistNaturalDuration();
-            UpdatePlayPauseIcon();
-        }
-
-        public void UpdateAll()
-        {
-            NotifyPropertyChanged("CurrentPlaylistSongs");
-            NotifyPropertyChanged("Playlists");
-
-            NotifyPropertyChanged("CurrentSongIndex");
-            NotifyPropertyChanged("CurrentPlaylistIndex");
-            NotifyPropertyChanged("CurrentPlaylistName");
-
-            NotifyPropertyChanged("CurrentSongTitle");
-            NotifyPropertyChanged("CurrentSongArtist");
-
-            NotifyPropertyChanged("CurrentSongPostionText");
-            NotifyPropertyChanged("CurrentSongPositionMilliseconds");
-            NotifyPropertyChanged("CurrentSongNaturalDurationText");
-            NotifyPropertyChanged("CurrentSongNaturalDurationMilliseconds");
-
-            NotifyPropertyChanged("LoopIcon");
-            NotifyPropertyChanged("NextIcon");
-            NotifyPropertyChanged("PlayPauseIcon");
-            NotifyPropertyChanged("PreviousIcon");
-            NotifyPropertyChanged("ShuffleIcon");
-        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private async void NotifyPropertyChanged(string propertyName)
+        public async void NotifyPropertyChanged(string propertyName)
         {
             try
             {
-                if (null != PropertyChanged)
-                {
-                    await Windows.ApplicationModel.Core.CoreApplication.MainView.
-                        CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                    {
-                        PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-                    }
-                    );
-                }
+                if (null == PropertyChanged) return;
+
+                await Windows.ApplicationModel.Core.CoreApplication.MainView.
+                    CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                    () => { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); });
             }
             catch (Exception e)
             {

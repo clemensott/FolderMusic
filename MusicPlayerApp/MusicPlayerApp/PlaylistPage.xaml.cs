@@ -6,6 +6,7 @@ using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 
@@ -51,8 +52,8 @@ namespace MusicPlayerApp
 
             if (App.ViewModel.IsOpenPlaylistCurrentPlaylist)
             {
-                App.ViewModel.UpdateShuffleIcon();
-                App.ViewModel.UpdateCurrentPlaylistSongsAndIndex();
+                UiUpdate.ShuffleIcon();
+                UiUpdate.CurrentPlaylistSongsAndIndex();
             }
 
             viewModel.LoadShuffle();
@@ -67,46 +68,57 @@ namespace MusicPlayerApp
 
             if (App.ViewModel.IsOpenPlaylistCurrentPlaylist)
             {
-                App.ViewModel.UpdateLoopIcon();
+                UiUpdate.LoopIcon();
             }
 
             BackgroundCommunicator.SendLoop(App.ViewModel.OpenPlaylistIndex);
             Library.SaveAsync();
         }
 
-        private void lbxDefault_Tapped(object sender, TappedRoutedEventArgs e)
+        private void DeleteSong_Click(object sender, RoutedEventArgs e)
         {
             bool same = App.ViewModel.IsOpenPlaylistCurrentPlaylist;
+            Song song = (sender as MenuFlyoutItem).DataContext as Song;
 
-            playlist.Shuffle = ShuffleKind.Off;
-            viewModel.SetLbxDefaultLastSelectedIndex();
+            Library.Current.RemoveSongFromPlaylist(playlist, song);
+            BackgroundCommunicator.SendRemoveSong(playlist.GetShuffleListIndex(song));
 
-            App.ViewModel.SetCurrentPlaylistIndex();
-            BackgroundCommunicator.SendPlaylistPageTap();
+            UiUpdate.CurrentPlaylistSongsAndIndex();
+            viewModel.LoadDefault();
+            viewModel.LoadShuffle();
+        }
 
-            if (same)
-            {
-                App.ViewModel.UpdateCurrentPlaylistsIndexAndRest();
-            }
+        private void DefaultSong_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            bool same = App.ViewModel.IsOpenPlaylistCurrentPlaylist;
+            int songsIndex = playlist.GetSongs().IndexOf((sender as Grid).DataContext as Song);
+
+            BackgroundCommunicator.SendPlaylistPageTap(false, songsIndex);
+            DoSongTappedSame(same);
+        }
+
+        private void ShuffleSong_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            bool same = App.ViewModel.IsOpenPlaylistCurrentPlaylist;
+            playlist.CurrentSongIndex = playlist.GetShuffleListIndex((sender as Grid).DataContext as Song);
+
+            BackgroundCommunicator.SendPlaylistPageTap(true, playlist.ShuffleList[playlist.CurrentSongIndex]);
+            DoSongTappedSame(same);
+        }
+
+        private void DoSongTappedSame(bool same)
+        {
+            App.ViewModel.CurrentPlaylist = playlist;
+            Library.SaveAsync();
+
+            if (same) UiUpdate.CurrentPlaylistIndexAndRest();
 
             GoBack();
         }
 
-        private void lbxShuffle_Tapped(object sender, TappedRoutedEventArgs e)
+        private void CurrentPlaylistSong_Holding(object sender, HoldingRoutedEventArgs e)
         {
-            bool same = App.ViewModel.IsOpenPlaylistCurrentPlaylist;
-
-            viewModel.SetLbxShuffleLastSelectedIndex();
-
-            App.ViewModel.SetCurrentPlaylistIndex();
-            BackgroundCommunicator.SendPlaylistPageTap();
-
-            if (same)
-            {
-                App.ViewModel.UpdateCurrentSongTitleArtistNaturalDuration();
-            }
-
-            GoBack();
+            FlyoutBase.ShowAttachedFlyout(sender as FrameworkElement);
         }
     }
 
@@ -158,19 +170,10 @@ namespace MusicPlayerApp
             return list;
         }
 
-        public void SetLbxDefaultLastSelectedIndex()
-        {
-            playlist.CurrentSongIndex = lbxDefaultLastSelectedIndex;
-        }
-
-        public void SetLbxShuffleLastSelectedIndex()
-        {
-            playlist.CurrentSongIndex = lbxShuffleLastSelectedIndex;
-        }
-
         public void LoadDefault()
         {
             NotifyPropertyChanged("DefaultSongs");
+            NotifyPropertyChanged("DefaultCurrentSongIndex");
         }
 
         public void LoadShuffle()

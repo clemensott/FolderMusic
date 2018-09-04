@@ -27,8 +27,8 @@
     <AppxPackagedFile Include="E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.dll">
       <PackagePath>PlayerIconsWP8.1.dll</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlaylistSong\bin\Debug\PlaylistSong.dll">
-      <PackagePath>PlaylistSong.dll</PackagePath>
+    <AppxPackagedFile Include="E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlaylistSong\bin\Debug\PlaylistSongLibraryLib.dll">
+      <PackagePath>PlaylistSongLibraryLib.dll</PackagePath>
     </AppxPackagedFile>
     <AppxPackagedFile Include="E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlaylistSong\bin\Debug\TagLib.Portable.dll">
       <PackagePath>TagLib.Portable.dll</PackagePath>

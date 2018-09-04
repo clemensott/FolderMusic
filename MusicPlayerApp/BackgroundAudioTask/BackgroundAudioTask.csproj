@@ -86,9 +86,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PlaylistSong\PlaylistSong.csproj">
+    <ProjectReference Include="..\PlaylistSong\PlaylistSongLibraryLib.csproj">
       <Project>{f62f8bb0-8fc6-458a-9941-45751095991f}</Project>
-      <Name>PlaylistSong</Name>
+      <Name>PlaylistSongLibraryLib</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">

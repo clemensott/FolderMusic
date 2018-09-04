@@ -14,14 +14,23 @@ namespace BackgroundAudioTask
         private SystemMediaTransportControls _systemMediaTransportControl;
 
         private bool autoPlay;
+        double postionTotalMilliseconds = 0;
 
         private bool IsPlaying { get { return BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing; } }
+
+        private double CurrentSongPositionTotalMilliseconds
+        {
+            get
+            {
+                return Library.IsLoaded ? CurrentPlaylist.SongPositionMilliseconds : postionTotalMilliseconds;
+            }
+        }
 
         private Song CurrentSong { get { return CurrentPlaylist.CurrentSong; } }
 
         private Playlist CurrentPlaylist { get { return Library.Current.CurrentPlaylist; } }
 
-        public async void Run(IBackgroundTaskInstance taskInstance)
+        public void Run(IBackgroundTaskInstance taskInstance)
         {
             _systemMediaTransportControl = SystemMediaTransportControls.GetForCurrentView();
 
@@ -38,8 +47,28 @@ namespace BackgroundAudioTask
 
             _deferral = taskInstance.GetDeferral();
 
-            Library.Load();
-            PlaySong(await Library.LoadPlayCommand());
+            LoadCurrentSongAndLibrary();
+        }
+
+        private async void LoadCurrentSongAndLibrary()
+        {
+            string title, artist;
+            Song currentSong;
+
+            if (_systemMediaTransportControl.DisplayUpdater.Type == MediaPlaybackType.Music)
+            {
+                autoPlay = await Library.LoadPlayCommand();
+                var data = await Library.LoadCurrentSongPath();
+                postionTotalMilliseconds = data.Item2;
+
+                title = _systemMediaTransportControl.DisplayUpdater.MusicProperties.Title;
+                artist = _systemMediaTransportControl.DisplayUpdater.MusicProperties.Artist;
+
+                currentSong = new Song(";" + title, data.Item1 + ";" + artist);
+                PlaySong(currentSong, autoPlay);
+
+                Library.Load();
+            }
         }
 
         private void SetSystemMediaTransportControlDefaultSettings()
@@ -65,6 +94,10 @@ namespace BackgroundAudioTask
             {
                 switch (key)
                 {
+                    case "Run":
+                        if (!Library.IsLoaded) Library.Load();
+                        return;
+
                     case "PlaySong":
                         SetCurrentSongIndex(int.Parse(valueSet[key].ToString()));
                         CurrentPlaylist.SongPositionMilliseconds = 0;
@@ -101,8 +134,6 @@ namespace BackgroundAudioTask
                     case "CurrentPlaylistIndex":
                         Library.Current.CurrentPlaylistIndex = int.Parse(valueSet[key].ToString());
                         PlaySong(bool.Parse(valueSet["Play"].ToString()));
-
-                        Library.SaveAsync();
                         return;
 
                     case "GetCurrent":
@@ -110,25 +141,24 @@ namespace BackgroundAudioTask
                         return;
 
                     case "Load":
-                        currentSongPath = CurrentSong.Path;
-
                         Library.Load();
-
-                        if (currentSongPath != CurrentSong.Path) PlaySong(IsPlaying);
+                        PlaySong(IsPlaying);
                         return;
 
                     case "PlaylistPageTap":
                         Library.Current.CurrentPlaylistIndex = int.Parse(valueSet[key].ToString());
+                        int songsIndex = int.Parse(valueSet["CurrentSongIndex"].ToString());
+                        int shuffleListIndex = CurrentPlaylist.ShuffleList.IndexOf(songsIndex);
 
-                        if (valueSet["ShuffleOff"].ToString() == true.ToString())
+                        if (!bool.Parse(valueSet["FromShuffleList"].ToString()) && CurrentPlaylist.Shuffle == ShuffleKind.Complete &&
+                           (shuffleListIndex == -1 || shuffleListIndex > CurrentPlaylist.CurrentSongIndex))
                         {
-                            CurrentPlaylist.Shuffle = ShuffleKind.Off;
+                            string path = CurrentPlaylist.GetSongs()[songsIndex].Path;
+                            CurrentPlaylist.AddShuffleCompleteSong(false, path);
                         }
 
-                        SetCurrentSongIndex(int.Parse(valueSet["CurrentSongIndex"].ToString()));
+                        SetCurrentSongIndex(CurrentPlaylist.ShuffleList.IndexOf(songsIndex));
                         PlaySong(true);
-
-                        Library.SaveAsync();
                         return;
 
                     case "RemoveSong":
@@ -214,7 +244,7 @@ namespace BackgroundAudioTask
             bool stop = CurrentPlaylist.SetNextSong();
             autoPlay = fromEnded ? autoPlay && !stop : autoPlay;
 
-            PlaySong(autoPlay);
+            PlaySong();
 
             if (CurrentPlaylist.Shuffle == ShuffleKind.Complete)
             {
@@ -222,21 +252,29 @@ namespace BackgroundAudioTask
             }
         }
 
-        private async void PlaySong(bool autoPlay)
+        private void PlaySong()
         {
+            PlaySong(CurrentSong, autoPlay);
+        }
+
+        private void PlaySong(bool autoPlay)
+        {
+            PlaySong(CurrentSong, autoPlay);
+        }
+
+        private void PlaySong(Song song, bool autoPlay)
+        {
+            if (song.Path == "") return;
+
             StorageFile file;
             this.autoPlay = autoPlay;
             BackgroundMediaPlayer.Current.AutoPlay = false;
 
             try
             {
-                file = await CurrentSong.GetStorageFile();
+                file = song.GetStorageFile().Result;
 
-                if (CurrentSong.Path == "")
-                {
-                    return;
-                }
-                else if (file == null)
+                if (file == null)
                 {
                     SendSkip();
                     return;
@@ -265,19 +303,18 @@ namespace BackgroundAudioTask
 
         private void BackgroundMediaPlayer_MediaOpened(MediaPlayer sender, object args)
         {
-            if (CurrentPlaylist.SongPositionMilliseconds != 0)
+            if (CurrentSongPositionTotalMilliseconds != 0)
             {
-                sender.Position = TimeSpan.FromMilliseconds(CurrentPlaylist.SongPositionMilliseconds);
+                sender.Position = TimeSpan.FromMilliseconds(CurrentSongPositionTotalMilliseconds);
             }
+
+            if (autoPlay) sender.Play();
+            UpdateSystemMediaTransportControl();
 
             if (CurrentSong.NaturalDurationMilliseconds == 1)
             {
                 CurrentSong.NaturalDurationMilliseconds = sender.NaturalDuration.TotalMilliseconds;
             }
-
-            if (autoPlay) sender.Play();
-
-            UpdateSystemMediaTransportControl();
 
             SendCurrentSong();
             SaveSongIndexAndMilliseconds();
@@ -287,7 +324,7 @@ namespace BackgroundAudioTask
         {
             if (args.Error == MediaPlayerError.Unknown)
             {
-                PlaySong(autoPlay);
+                PlaySong();
                 return;
             }
 

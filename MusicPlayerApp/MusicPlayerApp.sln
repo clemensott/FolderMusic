@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicPlayerApp", "MusicPlay
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundAudioTask", "BackgroundAudioTask\BackgroundAudioTask.csproj", "{CA1B9427-6297-4E94-9DD2-405803D0D0D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlaylistSong", "PlaylistSong\PlaylistSong.csproj", "{F62F8BB0-8FC6-458A-9941-45751095991F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlaylistSongLibraryLib", "PlaylistSong\PlaylistSongLibraryLib.csproj", "{F62F8BB0-8FC6-458A-9941-45751095991F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayerIconsWP8.1", "PlayerIconsWP8.1\PlayerIconsWP8.1.csproj", "{02FCDED3-420B-4C1B-867A-0881A1420D03}"
 EndProject

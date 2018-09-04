@@ -16,11 +16,11 @@ e:\clemens\dokumente\visual studio 2015\Projects\MusicPlayerApp\BackgroundAudioT
 e:\clemens\dokumente\visual studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\obj\Debug\qualifiers.txt
 e:\clemens\dokumente\visual studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\obj\Debug\qualifiers.txt.intermediate
 e:\clemens\dokumente\visual studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\obj\Debug\MultipleQualifiersPerDimensionFound.txt
-e:\clemens\dokumente\visual studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\bin\Debug\PlaylistSong.dll
-e:\clemens\dokumente\visual studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\bin\Debug\PlaylistSong.pdb
-e:\clemens\dokumente\visual studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\bin\Debug\PlaylistSong.pri
 e:\clemens\dokumente\visual studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\obj\Debug\BackgroundAudioTask.csprojResolveAssemblyReference.cache
 E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\bin\Debug\PlayerIconsWP8.1.dll
 E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\bin\Debug\PlayerIconsWP8.1.pdb
 E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\bin\Debug\PlayerIconsWP8.1.pri
 E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\bin\Debug\TagLib.Portable.dll
+E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\bin\Debug\PlaylistSongLibraryLib.dll
+E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\bin\Debug\PlaylistSongLibraryLib.pdb
+E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\bin\Debug\PlaylistSongLibraryLib.pri

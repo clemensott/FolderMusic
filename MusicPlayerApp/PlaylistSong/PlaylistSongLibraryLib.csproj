@@ -9,8 +9,8 @@
     <ProjectGuid>{F62F8BB0-8FC6-458A-9941-45751095991F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PlaylistSong</RootNamespace>
-    <AssemblyName>PlaylistSong</AssemblyName>
+    <RootNamespace>LibraryLib</RootNamespace>
+    <AssemblyName>PlaylistSongLibraryLib</AssemblyName>
     <DefaultLanguage>de-DE</DefaultLanguage>
     <TargetPlatformVersion>8.1</TargetPlatformVersion>
     <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>

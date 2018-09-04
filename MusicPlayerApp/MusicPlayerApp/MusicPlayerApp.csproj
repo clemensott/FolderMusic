@@ -93,6 +93,7 @@
     <Compile Include="SecondaryTilePage.xaml.cs">
       <DependentUpon>SecondaryTilePage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UiUpdate.cs" />
     <Compile Include="ViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -158,9 +159,9 @@
       <Project>{02fcded3-420b-4c1b-867a-0881a1420d03}</Project>
       <Name>PlayerIconsWP8.1</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PlaylistSong\PlaylistSong.csproj">
+    <ProjectReference Include="..\PlaylistSong\PlaylistSongLibraryLib.csproj">
       <Project>{f62f8bb0-8fc6-458a-9941-45751095991f}</Project>
-      <Name>PlaylistSong</Name>
+      <Name>PlaylistSongLibraryLib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

@@ -199,28 +199,6 @@ namespace PlaylistSong
             CurrentSongIndex = 0;
         }
 
-        public Playlist(string name, IReadOnlyList<StorageFile> files)
-        {
-            ran = new Random();
-
-            Name = Path.GetFileName(name);
-            absolutePath = Path.GetDirectoryName(files[0].Path);
-            List<Song> songs = new List<Song>();
-
-            foreach (StorageFile file in files)
-            {
-                try
-                {
-                    songs.Add(new Song(file.Path));
-                }
-                catch (Exception e) { }
-            }
-
-            this.songs = songs.OrderBy(x=>x.Title).ToList();
-            GenerateShuffleList();
-            CurrentSongIndex = 0;
-        }
-
         public Playlist(SavePlaylist savePlaylist)
         {
             ran = new Random();
@@ -291,6 +269,11 @@ namespace PlaylistSong
         public Song GetShuffleSong(int index)
         {
             return HaveSong(index) ? Songs[ShuffleList[index]] : new Song();
+        }
+
+        public int GetShuffleListIndex(Song song)
+        {
+            return ShuffleList.IndexOf(Songs.IndexOf(song));
         }
 
         public void AddShuffleCompleteSong(bool first, string pathList)
@@ -572,8 +555,7 @@ namespace PlaylistSong
         {
             if (IsEmpty()) return;
 
-            int songsListIndex = songs.IndexOf(song);
-            RemoveSong(shuffleList.IndexOf(songsListIndex));
+            RemoveSong(GetShuffleListIndex(song));
         }
 
         public void RemoveSong(int shuffleListIndex)
