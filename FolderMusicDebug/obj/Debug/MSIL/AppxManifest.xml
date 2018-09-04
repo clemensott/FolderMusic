@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest" xmlns:m3="http://schemas.microsoft.com/appx/2014/manifest" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:build="http://schemas.microsoft.com/developer/appx/2012/build" IgnorableNamespaces="build">
+  <!--
+    DIESE PAKETMANIFESTDATEI WIRD DURCH DEN BUILDVORGANG GENERIERT.
+
+    Änderungen an dieser Datei gehen verloren, wenn sie erneut erstellt wird. Um Fehler in dieser Datei zu beheben, bearbeiten Sie die ".appxmanifest"-Quelldatei.
+
+    Weitere Informationen zu Paketmanifestdateien finden Sie unter http://go.microsoft.com/fwlink/?LinkID=241727
+  -->
+  <Identity Name="d1dad439-26ee-4143-80da-0757750a0131" Publisher="CN=Clemens" Version="1.0.0.0" ProcessorArchitecture="neutral" />
+  <mp:PhoneIdentity PhoneProductId="d1dad439-26ee-4143-80da-0757750a0131" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Properties>
+    <DisplayName>FolderMusicDebug</DisplayName>
+    <PublisherDisplayName>Clemens</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+  <Prerequisites>
+    <OSMinVersion>6.3.1</OSMinVersion>
+    <OSMaxVersionTested>6.3.1</OSMaxVersionTested>
+  </Prerequisites>
+  <Resources>
+    <Resource Language="DE-DE" />
+  </Resources>
+  <Applications>
+    <Application Id="App" Executable="FolderMusicDebug.exe" EntryPoint="FolderMusicDebug.App">
+      <m3:VisualElements DisplayName="FolderMusicDebug" Square150x150Logo="Assets\Logo.png" Square44x44Logo="Assets\SmallLogo.png" Description="FolderMusicDebug" ForegroundText="light" BackgroundColor="transparent">
+        <m3:DefaultTile Wide310x150Logo="Assets\WideLogo.png" Square71x71Logo="Assets\Square71x71Logo.png"></m3:DefaultTile>
+        <m3:SplashScreen Image="Assets\SplashScreen.png" />
+      </m3:VisualElements>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="videosLibrary" />
+  </Capabilities>
+  <build:Metadata>
+    <build:Item Name="TargetFrameworkMoniker" Value="WindowsPhoneApp,Version=v8.1" />
+    <build:Item Name="VisualStudio" Version="14.0" />
+    <build:Item Name="VisualStudioEdition" Value="Microsoft Visual Studio Enterprise 2015" />
+    <build:Item Name="OperatingSystem" Version="10.0.16299.15 (WinBuild.160101.0800)" />
+    <build:Item Name="Microsoft.Build.AppxPackage.dll" Version="14.0.25431.1" />
+    <build:Item Name="ProjectGUID" Value="{E9F55622-7510-4AEF-BA8D-D876FB6A7AC1}" />
+    <build:Item Name="Microsoft.Windows.UI.Xaml.81.Build.Tasks.dll" Version="14.0.22705.1" />
+    <build:Item Name="MakePri.exe" Version="6.3.9600.17336 (winblue.150226-1500)" />
+  </build:Metadata>
+</Package>

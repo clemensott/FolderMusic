@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Machine>DESKTOP-5SIC2NV</Machine>
+    <WindowsUser>Clemens</WindowsUser>
+    <TargetPlatformIdentifier>WindowsPhoneApp</TargetPlatformIdentifier>
+    <TargetOsVersion>6.3</TargetOsVersion>
+    <TargetOsDescription>Windows Phone 8.1</TargetOsDescription>
+    <SolutionConfiguration>Debug|AnyCPU</SolutionConfiguration>
+    <PackageArchitecture>neutral</PackageArchitecture>
+    <PackageIdentityName>d2042900-d250-4f84-86b2-d373e8d7572e</PackageIdentityName>
+    <IntermediateOutputPath>C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\MusicAppTest\obj\Debug\</IntermediateOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppXManifest Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\MusicAppTest\bin\Debug\AppxManifest.xml">
+      <PackagePath>AppxManifest.xml</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppXManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\MusicAppTest\bin\Debug\MusicAppTest.exe">
+      <PackagePath>MusicAppTest.exe</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\BackgroundMusicTask\bin\Debug\BackgroundMusicTask.winmd">
+      <PackagePath>BackgroundMusicTask.winmd</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\MusicAppTest\Assets\Logo.scale-240.png">
+      <PackagePath>Assets\Logo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\MusicAppTest\Assets\SmallLogo.scale-240.png">
+      <PackagePath>Assets\SmallLogo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\MusicAppTest\Assets\SplashScreen.scale-240.png">
+      <PackagePath>Assets\SplashScreen.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\MusicAppTest\Assets\Square71x71Logo.scale-240.png">
+      <PackagePath>Assets\Square71x71Logo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\MusicAppTest\Assets\StoreLogo.scale-240.png">
+      <PackagePath>Assets\StoreLogo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\MusicAppTest\Assets\WideLogo.scale-240.png">
+      <PackagePath>Assets\WideLogo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\MusicAppTest\bin\Debug\MusicAppTest.xr.xml">
+      <PackagePath>MusicAppTest.xr.xml</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\MusicAppTest\bin\Debug\App.xbf">
+      <PackagePath>App.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\MusicAppTest\bin\Debug\MainPage.xbf">
+      <PackagePath>MainPage.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\MusicAppTest\bin\Debug\resources.pri">
+      <PackagePath>resources.pri</PackagePath>
+    </AppxPackagedFile>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+</Project>

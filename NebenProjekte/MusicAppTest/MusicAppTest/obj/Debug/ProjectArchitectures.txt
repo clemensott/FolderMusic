@@ -1,0 +1,2 @@
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\BackgroundMusicTask\BackgroundMusicTask.csproj;neutral
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\MusicAppTest\MusicAppTest\MusicAppTest.csproj;neutral

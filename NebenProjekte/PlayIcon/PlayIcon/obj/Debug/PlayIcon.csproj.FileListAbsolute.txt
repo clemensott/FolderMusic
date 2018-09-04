@@ -1,0 +1,6 @@
+c:\users\clemens\documents\visual studio 2015\Projects\PlayIcon\PlayIcon\bin\Debug\PlayIcon.exe.config
+c:\users\clemens\documents\visual studio 2015\Projects\PlayIcon\PlayIcon\bin\Debug\PlayIcon.exe
+c:\users\clemens\documents\visual studio 2015\Projects\PlayIcon\PlayIcon\bin\Debug\PlayIcon.pdb
+c:\users\clemens\documents\visual studio 2015\Projects\PlayIcon\PlayIcon\obj\Debug\PlayIcon.csprojResolveAssemblyReference.cache
+c:\users\clemens\documents\visual studio 2015\Projects\PlayIcon\PlayIcon\obj\Debug\PlayIcon.exe
+c:\users\clemens\documents\visual studio 2015\Projects\PlayIcon\PlayIcon\obj\Debug\PlayIcon.pdb

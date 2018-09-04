@@ -1,0 +1,5 @@
+c:\users\clemens\documents\visual studio 2015\Projects\DetailIcon\DetailIcon\bin\Debug\DetailIcon.exe.config
+c:\users\clemens\documents\visual studio 2015\Projects\DetailIcon\DetailIcon\bin\Debug\DetailIcon.exe
+c:\users\clemens\documents\visual studio 2015\Projects\DetailIcon\DetailIcon\bin\Debug\DetailIcon.pdb
+c:\users\clemens\documents\visual studio 2015\Projects\DetailIcon\DetailIcon\obj\Debug\DetailIcon.exe
+c:\users\clemens\documents\visual studio 2015\Projects\DetailIcon\DetailIcon\obj\Debug\DetailIcon.pdb
