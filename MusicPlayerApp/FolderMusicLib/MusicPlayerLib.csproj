@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A1D5DB9A-4DEA-44DD-B754-BD68EE5ADA43}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MusicPlayer</RootNamespace>
+    <AssemblyName>MusicPlayerLib</AssemblyName>
+    <DefaultLanguage>de-DE</DefaultLanguage>
+    <TargetPlatformVersion>8.1</TargetPlatformVersion>
+    <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{76F1466A-8B6D-4E39-A767-685A06062A39};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_PHONE_APP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_PHONE_APP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ARM\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_PHONE_APP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
+    <OutputPath>bin\ARM\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_PHONE_APP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_PHONE_APP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_PHONE_APP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Communication\BackForegroundCommunicator.cs" />
+    <Compile Include="Communication\Receiver.cs" />
+    <Compile Include="Data\ChangedPlaylist.cs" />
+    <Compile Include="Data\ChangedSong.cs" />
+    <Compile Include="Data\EventArgs\CurrentPlaylistChangedEventArgs.cs" />
+    <Compile Include="Data\EventArgs\CurrentSongChangedEventArgs.cs" />
+    <Compile Include="Data\EventArgs\CurrentSongPositionChangedEventArgs.cs" />
+    <Compile Include="Data\EventArgs\LoopChangedEventArgs.cs" />
+    <Compile Include="Data\Feedback.cs" />
+    <Compile Include="Data\ILibrary.cs" />
+    <Compile Include="Data\LibraryBase.cs" />
+    <Compile Include="Data\Loop\LoopAll.cs" />
+    <Compile Include="Data\Loop\LoopCurrent.cs" />
+    <Compile Include="Data\Loop\LoopOff.cs" />
+    <Compile Include="Data\NonLoaded\NonLoadedLibrary.cs" />
+    <Compile Include="Data\NonLoaded\NonLoadedPlaylist.cs" />
+    <Compile Include="Data\NonLoaded\NonLoadedPlaylistList.cs" />
+    <Compile Include="Data\NonLoaded\NonLoadedSongList.cs" />
+    <Compile Include="Data\PlaylistList.cs" />
+    <Compile Include="Data\EventArgs\PlaylistsChangedEventArgs.cs" />
+    <Compile Include="Data\EventArgs\PlayStateChangedEventArgs.cs" />
+    <Compile Include="Data\EventArgs\ShuffleChangedEventArgs.cs" />
+    <Compile Include="Data\Shuffle\ShuffleComplete.cs" />
+    <Compile Include="Data\Loop\ILoop.cs" />
+    <Compile Include="Data\Shuffle\IShuffle.cs" />
+    <Compile Include="Data\CurrentPlaySong.cs" />
+    <Compile Include="Data\Library.cs" />
+    <Compile Include="Data\Playlist.cs" />
+    <Compile Include="Data\SaveLibrary.cs" />
+    <Compile Include="Data\Shuffle\ShuffleEmpty.cs" />
+    <Compile Include="Data\SkipSong.cs" />
+    <Compile Include="Data\SkipSongs.cs" />
+    <Compile Include="Data\Song.cs" />
+    <Compile Include="Data\Shuffle\ShuffleOff.cs" />
+    <Compile Include="Data\Shuffle\ShuffleOneTime.cs" />
+    <Compile Include="Data\IO.cs" />
+    <Compile Include="Data\EventArgs\SongArtistChangedEventArgs.cs" />
+    <Compile Include="Data\SongList.cs" />
+    <Compile Include="Data\EventArgs\SongNaturalDurationChangedEventArgs.cs" />
+    <Compile Include="Data\EventArgs\SongsChangedEventArgs.cs" />
+    <Compile Include="Data\EventArgs\SongTitleChangedEventArgs.cs" />
+    <Compile Include="Data\EventArgs\LibraryChangedEventsArgs.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XmlConverter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FolderMusicDebug\MusicPlayerDebug.csproj">
+      <Project>{ee2e4620-7d8d-4d75-a8a4-157e652449e2}</Project>
+      <Name>MusicPlayerDebug</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PlayerIconsWP8.1\PlayerIconsWP8_1.csproj">
+      <Project>{02fcded3-420b-4c1b-867a-0881a1420d03}</Project>
+      <Name>PlayerIconsWP8_1</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
+    <VisualStudioVersion>12.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetPlatformIdentifier)' == '' ">
+    <TargetPlatformIdentifier>WindowsPhoneApp</TargetPlatformIdentifier>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

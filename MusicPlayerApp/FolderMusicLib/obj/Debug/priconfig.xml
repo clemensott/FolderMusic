@@ -26,8 +26,8 @@
       <qualifier name="Theme" value="Dark" />
       <qualifier name="AlternateForm" value="" />
     </default>
-    <indexer-config type="RESW" convertDotsToSlashes="true" initialPath="FolderMusicLib" />
-    <indexer-config type="RESJSON" initialPath="FolderMusicLib" />
+    <indexer-config type="RESW" convertDotsToSlashes="true" initialPath="MusicPlayerLib" />
+    <indexer-config type="RESJSON" initialPath="MusicPlayerLib" />
     <indexer-config type="RESFILES" qualifierDelimiter="." />
   </index>
   <index root="\" startIndexAt="obj\Debug\pri.resfiles">

@@ -1,0 +1,115 @@
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\MusicPlayerLib.csprojResolveAssemblyReference.cache
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\MusicPlayerLib.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\MusicPlayerLib.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\MusicPlayerLib.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\MusicPlayerLib.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\MusicPlayerLib.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\priconfig.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\priconfig.xml.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\layout.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\layout.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\resources.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\resources.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\pri.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\pri.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\qualifiers.txt
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\qualifiers.txt.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\MusicPlayerLib.dll
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\MusicPlayerLib.pdb
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\MusicPlayerLib.pri
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.dll
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.dll
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.pdb
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.pri
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pri
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\MusicPlayerLib.csprojResolveAssemblyReference.cache
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\MusicPlayerLib.dll
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\MusicPlayerLib.pdb
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\priconfig.xml
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\priconfig.xml.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\layout.resfiles
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\layout.resfiles.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\resources.resfiles
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\resources.resfiles.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\pri.resfiles
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\pri.resfiles.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\qualifiers.txt
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\qualifiers.txt.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\MusicPlayerLib.dll
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\MusicPlayerLib.pdb
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\MusicPlayerLib.pri
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.dll
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.dll
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.pdb
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.pri
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pri
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\MusicPlayerLib.csprojResolveAssemblyReference.cache
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\MusicPlayerLib.dll
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\MusicPlayerLib.pdb
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\priconfig.xml
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\priconfig.xml.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\layout.resfiles
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\layout.resfiles.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\resources.resfiles
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\resources.resfiles.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\pri.resfiles
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\pri.resfiles.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\qualifiers.txt
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\qualifiers.txt.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\FolderMusicLib\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\MusicPlayerLib.dll
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\MusicPlayerLib.pdb
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\MusicPlayerLib.pri
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.dll
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.dll
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.pdb
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.pri
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pdb
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pri
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\MusicPlayerLib.csprojResolveAssemblyReference.cache
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\MusicPlayerLib.dll
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\MusicPlayerLib.pdb
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\priconfig.xml
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\priconfig.xml.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\layout.resfiles
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\layout.resfiles.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\resources.resfiles
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\resources.resfiles.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\pri.resfiles
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\pri.resfiles.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\qualifiers.txt
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\qualifiers.txt.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\bin\Debug\MusicPlayerLib.dll
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\bin\Debug\MusicPlayerLib.pdb
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\bin\Debug\MusicPlayerLib.pri
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\bin\Debug\FolderMusicDebug.dll
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.dll
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\bin\Debug\FolderMusicDebug.pdb
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\bin\Debug\FolderMusicDebug.pri
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pdb
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pri
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\obj\Debug\MusicPlayerLib.csprojResolveAssemblyReference.cache
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\obj\Debug\MusicPlayerLib.dll
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\obj\Debug\MusicPlayerLib.pdb
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\obj\Debug\priconfig.xml
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\obj\Debug\priconfig.xml.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\obj\Debug\layout.resfiles
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\obj\Debug\layout.resfiles.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\obj\Debug\resources.resfiles
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\obj\Debug\resources.resfiles.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\obj\Debug\pri.resfiles
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\obj\Debug\pri.resfiles.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\obj\Debug\qualifiers.txt
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\obj\Debug\qualifiers.txt.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\obj\Debug\MultipleQualifiersPerDimensionFound.txt

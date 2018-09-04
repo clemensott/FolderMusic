@@ -1,4 +1,5 @@
-﻿using LibraryLib;
+﻿using MusicPlayer.Data;
+using MusicPlayer.Data.Loop;
 using System;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Background;
@@ -8,321 +9,160 @@ using Windows.Storage;
 
 namespace BackgroundTask
 {
+    enum BackgroundPlayerType { Music, Ringer }
+
     public sealed class BackgroundAudioTask : IBackgroundTask
     {
-        private const SystemMediaTransportControlsButton defaultPressedButton = SystemMediaTransportControlsButton.ChannelDown;
+        private const long smtcLastPressedMinDeltaTicks = TimeSpan.TicksPerMillisecond * 300;
+        private static long smtcLastPressedTicks = 0;
 
-        private static BackgroundAudioTask task;
-        private static SystemMediaTransportControlsButton lastPressedButton = defaultPressedButton;
-
+        private SystemMediaTransportControls smtc;
         private BackgroundTaskDeferral deferral;
-        private SystemMediaTransportControls systemMediaTransportControl;
+        private BackgroundPlayerType playerType;
+        private MusicPlayer musicPlayer;
+        private Ringer ringer;
 
-        private bool autoPlay = false, pauseAllowed = true, playNext = true, saved;
-        private int deactivateSMTC = 0;
-        private long lastTicks;
-        private Song openSong;
-
-        private string id;
-
-        public static BackgroundAudioTask Current { get { return task; } }
-
-        public bool IsPlaying
+        internal BackgroundPlayerType PlayerType
         {
-            get { return pauseAllowed ? BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing : true; }
+            get { return playerType; }
+            set { playerType = value; }
         }
 
-        private double CurrentSongPositionTotalMilliseconds
+        internal IBackgroundPlayer BackgroundPlayer
         {
             get
             {
-                return Library.Current.CurrentPlaylist.SongPositionMilliseconds != 0 ? 
-                    Library.Current.CurrentPlaylist.SongPositionMilliseconds : 1;
+                return playerType == BackgroundPlayerType.Music ? (IBackgroundPlayer)musicPlayer : ringer;
             }
         }
 
-        private Song CurrentSong { get { return Library.Current.CurrentPlaylist.CurrentSong; } }
-
-        private Playlist CurrentPlaylist { get { return Library.Current.CurrentPlaylist; } }
+        //private Song CurrentSong { get { return Library.Current.CurrentPlaylist.CurrentSong; } }
 
         public void Run(IBackgroundTaskInstance taskInstance)
         {
-            id = taskInstance.InstanceId.ToString();
-            //SaveText("Run");
+            //System.Diagnostics.Debug.WriteLine("BackgroundId: " + Task.CurrentId);
 
-            task = this;
-            saved = false;
+            FolderMusicDebug.DebugEvent.Id = taskInstance.InstanceId.ToString();
+            FolderMusicDebug.DebugEvent.SaveText("Run", "Hash: " + GetHashCode());
 
-            lastTicks = DateTime.Now.Ticks;
-
-            ForegroundCommunicator.SetReceivedEvent();
-
-            systemMediaTransportControl = SystemMediaTransportControls.GetForCurrentView();
             deferral = taskInstance.GetDeferral();
 
-            ActivateSystemMediaTransportControl();
-            systemMediaTransportControl.ButtonPressed += MediaTransportControlButtonPressed;
+            smtcLastPressedTicks = DateTime.Now.Ticks;
+            smtc = SystemMediaTransportControls.GetForCurrentView();
 
-            SetEvents(taskInstance);
+            musicPlayer = new MusicPlayer(this, smtc);
+            ringer = new Ringer(this);
 
             LoadCurrentSongAndLibrary();
+            SetEvents();
+
+            taskInstance.Canceled += OnCanceled;
+            taskInstance.Task.Completed += TaskCompleted;
         }
 
-        private void SetEvents(IBackgroundTaskInstance taskInstance)
+        private void SetEvents()
         {
+            smtc.ButtonPressed += MediaTransportControlButtonPressed;
+
             BackgroundMediaPlayer.Current.CurrentStateChanged += BackgroundMediaPlayer_CurrentStateChanged;
             BackgroundMediaPlayer.Current.MediaEnded += BackgroundMediaPlayer_MediaEnded;
             BackgroundMediaPlayer.Current.MediaOpened += BackgroundMediaPlayer_MediaOpened;
             BackgroundMediaPlayer.Current.MediaFailed += BackgroundMediaPlayer_MediaFailed;
 
-            taskInstance.Canceled += OnCanceled;
-            taskInstance.Task.Completed += Taskcompleted;
+            Feedback.Current.OnCurrentPlaylistPropertyChanged += OnCurrentPlaylistPropertyChanged;
+            Feedback.Current.OnCurrentSongPropertyChanged += OnCurrentSongPropertyChanged;
+            Feedback.Current.OnLibraryChanged += OnLibraryChanged;
+            Feedback.Current.OnLoopPropertyChanged += OnLoopPropertyChanged;
+            Feedback.Current.OnPlayStateChanged += OnPlayStateChanged;
+            Feedback.Current.OnPlaylistsPropertyChanged += OnPlaylistsPropertyChanged;
+            Feedback.Current.OnShufflePropertyChanged += OnShufflePropertyChanged;
+            Feedback.Current.OnSettingsPropertyChanged += OnSettingsPropertyChanged;
+            Feedback.Current.OnSongsPropertyChanged += OnSongsPropertyChanged;
         }
 
-        private async void LoadCurrentSongAndLibrary()
+        private void LoadCurrentSongAndLibrary()
         {
-            if (lastPressedButton == SystemMediaTransportControlsButton.Play)
-            {
-                await LibraryLib.CurrentSong.Current.Load();
-                Play();
-                await LoadLibraryData();
-                return;
-            }               //      */
+            LoadLibraryData();
 
-            await LoadLibraryData();
-
-            if (lastPressedButton == defaultPressedButton) lastPressedButton = SystemMediaTransportControlsButton.Pause;
-            else if (lastPressedButton != SystemMediaTransportControlsButton.Pause)
-            {
-                MediaTransportControlButtonPressed(lastPressedButton);
-            }
-            else Play();
+            FolderMusicDebug.DebugEvent.SaveText("SetLoadCurrentSongAndLibrary", Library.Current.CurrentPlaylist.CurrentSong);
+            BackgroundPlayer.SetCurrent();
         }
 
-        private async Task LoadLibraryData()
+        public void LoadLibraryData()
         {
-            await Library.Current.LoadAsync();
+            Library.Load(false);
+            FolderMusicDebug.DebugEvent.SaveText("AfterLoad", Library.Current.CurrentPlaylist.CurrentSong);
+
             SetLoopToBackgroundPlayer();
-
-            ForegroundCommunicator.SendXmlText();
-            //SaveText("Load");
-        }
-
-        public void ActivateSystemMediaTransportControl()
-        {
-            systemMediaTransportControl.IsEnabled = 
-                systemMediaTransportControl.IsPauseEnabled = systemMediaTransportControl.IsPlayEnabled = 
-                //systemMediaTransportControl.IsRewindEnabled = systemMediaTransportControl.IsFastForwardEnabled = 
-                systemMediaTransportControl.IsPreviousEnabled = systemMediaTransportControl.IsNextEnabled = true;
-
-            
         }
 
         public void SetLoopToBackgroundPlayer()
         {
-            BackgroundMediaPlayer.Current.IsLoopingEnabled = CurrentPlaylist.Loop == LoopKind.Current;
+            BackgroundMediaPlayer.Current.IsLoopingEnabled = Library.Current.CurrentPlaylist.Loop == LoopType.Current;
         }
 
-        public void Play()
+        private void BackgroundMediaPlayer_MediaOpened(MediaPlayer sender, object args)
         {
-            autoPlay = true;
-
-            if (BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing) ;
-            else if (BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Closed ||
-                BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Stopped) SetCurrentSong(true);
-            else if (BackgroundMediaPlayer.Current.CurrentState != MediaPlayerState.Playing)
-            {
-                BackgroundMediaPlayer.Current.Volume = 0;
-                BackgroundMediaPlayer.Current.Play();
-
-                Volume0To1();
-            }
-
-            systemMediaTransportControl.PlaybackStatus = MediaPlaybackStatus.Playing;
-        }
-
-        private async void Volume0To1()
-        {
-            double step = 0.1;
-
-            for (double i = step; i < 1; i += step)
-            {
-                BackgroundMediaPlayer.Current.Volume = Math.Sqrt(i);
-                await Task.Delay(10);
-            }
-        }
-
-        public void Pause()
-        {
-            if (BackgroundMediaPlayer.Current.CurrentState != MediaPlayerState.Paused) Volume1To0AndPause();
-
-            autoPlay = false;
-            systemMediaTransportControl.PlaybackStatus = MediaPlaybackStatus.Paused;
-
-            ForegroundCommunicator.SendPause();
-
-            DeaktivateSystemMediaTransportControlButtons();
-            LibraryLib.CurrentSong.Current.Save();
-        }
-
-        private async void Volume1To0AndPause()
-        {
-            double step = 0.1;
-
-            for (double i = 1; i > 0; i -= step)
-            {
-                BackgroundMediaPlayer.Current.Volume = Math.Sqrt(i);
-                await Task.Delay(1);
-            }
-
-            BackgroundMediaPlayer.Current.Pause();
-        }
-
-        public void Previous()
-        {
-            playNext = false;
-            CurrentPlaylist.SetPreviousSong();
-
-            if (!CurrentSong.Failed) SetCurrentSong(IsPlaying);
-        }
-
-        public void Next(bool autoPlay)
-        {
-            Next(autoPlay, false);
-        }
-
-        public void Next(bool autoPlay, bool fromEnded)
-        {
-            playNext = true;
-            bool stop = CurrentPlaylist.SetNextSong();
-            this.autoPlay = fromEnded ? autoPlay && !stop : autoPlay;
-
-            if (!CurrentSong.Failed) SetCurrentSong();
-        }
-
-        public void SetCurrentSong()
-        {
-            SetCurrentSong(autoPlay);
-        }
-
-        public void SetCurrentSong(bool autoPlay)
-        {
-            if (CurrentSong.IsEmptyOrLoading || CurrentSong == openSong) return;
-
-            StorageFile file;
-            this.autoPlay = autoPlay;
-            pauseAllowed = !autoPlay;
-            BackgroundMediaPlayer.Current.AutoPlay = false;
-
-            try
-            {
-                file = CurrentSong.GetStorageFile();
-                BackgroundMediaPlayer.Current.SetFileSource(file);
-                //SaveText("Set",CurrentSong.Title);
-            }
-            catch
-            {
-                //SaveText("Catch", CurrentSong.Title);
-                SkipSong(CurrentSong);
-                Task.Delay(100).Wait();
-
-                BackgroundMediaPlayer.Current.SetUriSource(null);
-
-                if (playNext) Next(true);
-                else Previous();
-            }
-        }
-
-        private async void SkipSong(Song song)
-        {
-            await SkipSongs.AddSkipSongAndSave(song);
-
-            ForegroundCommunicator.SendSkip();
-        }
-
-        private async void BackgroundMediaPlayer_MediaOpened(MediaPlayer sender, object args)
-        {
-            //SaveText("Open", CurrentSong.Title);
-
-            openSong = CurrentSong;
-            sender.Position = TimeSpan.FromMilliseconds(CurrentSongPositionTotalMilliseconds);
-
-            if (autoPlay)
-            {
-                if (sender.Position.TotalMilliseconds == 1)
-                {
-                    sender.Volume = 1;
-                    sender.Play();
-                }
-                else Play();
-            }
-            else systemMediaTransportControl.PlaybackStatus = MediaPlaybackStatus.Paused;
-
-            playNext = true;
-
-            if (CurrentSong.NaturalDurationMilliseconds == 1)
-            {
-                CurrentSong.NaturalDurationMilliseconds = sender.NaturalDuration.TotalMilliseconds;
-            }
-
-            UpdateSystemMediaTransportControl();
-
-            if (!Library.IsLoaded) await LoadLibraryData();
-            else ForegroundCommunicator.SendSongsIndexAndShuffleIfComplete();
-
-            await LibraryLib.CurrentSong.Current.Save();
-        }
-
-        private void UpdateSystemMediaTransportControl()
-        {
-            systemMediaTransportControl.DisplayUpdater.Type = MediaPlaybackType.Music;
-
-            if (systemMediaTransportControl.DisplayUpdater.MusicProperties.Title != CurrentSong.Title ||
-                systemMediaTransportControl.DisplayUpdater.MusicProperties.Artist != CurrentSong.Artist)
-            {
-                systemMediaTransportControl.DisplayUpdater.MusicProperties.Title = CurrentSong.Title;
-                systemMediaTransportControl.DisplayUpdater.MusicProperties.Artist = CurrentSong.Artist;
-                systemMediaTransportControl.DisplayUpdater.Update();
-            }
+            BackgroundPlayer.MediaOpened(sender, args);
         }
 
         private void BackgroundMediaPlayer_MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
         {
-            //SaveText("Fail", CurrentSong.Title);
-            Task.Delay(100).Wait();
-
-            if (args.Error == MediaPlayerError.Unknown)
-            {
-                SetCurrentSong();
-                return;
-            }
-
-            CurrentSong.SetFailed();
-            SkipSong(CurrentSong);
-
-            if (playNext) Next(true);
-            else Previous();
+            BackgroundPlayer.MediaFailed(sender, args);
         }
 
         private void BackgroundMediaPlayer_MediaEnded(MediaPlayer sender, object args)
         {
-            Next(true, true);
+            BackgroundPlayer.MediaEnded(sender, args);
         }
 
         private void BackgroundMediaPlayer_CurrentStateChanged(MediaPlayer sender, object args)
         {
-            if (sender.CurrentState == MediaPlayerState.Playing) Play();
-            else if (sender.CurrentState == MediaPlayerState.Paused && pauseAllowed) Pause();
+            bool pauseAllowed = false, playling = sender.CurrentState == MediaPlayerState.Playing;
+            double curMillis = sender.Position.TotalMilliseconds;
+            double natMillis = sender.NaturalDuration.TotalMilliseconds;
+
+            if (curMillis >= natMillis) pauseAllowed = false;
+
+            FolderMusicDebug.DebugEvent.SaveText("StateChanged", "Playerstate: " + sender.CurrentState,
+                "SMTC-State: " + smtc.PlaybackStatus, "PlayerPosition [s]: " + sender.Position.TotalMilliseconds,
+                "PlayerDuration [s]: " + sender.NaturalDuration.TotalMilliseconds, "PauseAllowed: " + pauseAllowed,
+                "LibraryIsPlaying: " + Library.Current.IsPlaying, Library.Current.CurrentPlaylist.CurrentSong);
+
+            if (playling)
+            {
+                if (!Library.Current.IsPlaying) { }
+                //Library.Current.IsPlaying = true;
+
+                ringer.SetTimesIfIsDisposed();
+            }
+            else if (pauseAllowed) Library.Current.IsPlaying = false;
+
+            CurrentPlaySong.Current.SaveAsync();
         }
 
         private void MediaTransportControlButtonPressed(SystemMediaTransportControls sender,
             SystemMediaTransportControlsButtonPressedEventArgs args)
         {
-            //SaveText(4, Library.IsLoaded, args.Button.ToString());
-            lastPressedButton = args.Button;
+            long curTicks = DateTime.Now.Ticks;
+            bool timePassed = curTicks - smtcLastPressedTicks > smtcLastPressedMinDeltaTicks;
 
-            if (Library.IsLoaded) MediaTransportControlButtonPressed(args.Button);
-            else lastPressedButton = args.Button;
+            FolderMusicDebug.DebugEvent.SaveText("MTCPressed", "SmtcLastPressedTicks: " + smtcLastPressedTicks,
+                "CurrentButton: " + args.Button, "LastPressedDeltaTicks: " + (curTicks - smtcLastPressedTicks),
+                "TimePassed: " + timePassed, Library.Current.CurrentPlaylist.CurrentSong);
+
+            if (timePassed && smtcLastPressedTicks != 0)
+            {
+                if (!Library.IsLoaded())
+                {
+                    CurrentPlaySong.Current.Load();
+                    FolderMusicDebug.DebugEvent.SaveText("SmtcLoad", Library.Current.CurrentPlaylist.CurrentSong);
+                }
+
+                MediaTransportControlButtonPressed(args.Button);
+            }
+
+            smtcLastPressedTicks = DateTime.Now.Ticks;
         }
 
         private void MediaTransportControlButtonPressed(SystemMediaTransportControlsButton button)
@@ -330,81 +170,121 @@ namespace BackgroundTask
             switch (button)
             {
                 case SystemMediaTransportControlsButton.Play:
-                    Play();
+                    Library.Current.IsPlaying = true;
                     return;
 
                 case SystemMediaTransportControlsButton.Pause:
-                    Pause();
+                    Library.Current.IsPlaying = false;
                     return;
 
                 case SystemMediaTransportControlsButton.Previous:
-                    Previous();
+                    BackgroundPlayer.Previous();
                     return;
 
                 case SystemMediaTransportControlsButton.Next:
-                    Next(IsPlaying);
+                    BackgroundPlayer.Next(false);
                     return;
             }
         }
 
-        private async void DeaktivateSystemMediaTransportControlButtons()
+        private void OnSettingsPropertyChanged()
         {
-            deactivateSMTC++;
-            await Task.Delay(TimeSpan.FromSeconds(290));
-
-            if (BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing || 
-                --deactivateSMTC > 0 || systemMediaTransportControl.IsEnabled == false) return;
-
-            //systemMediaTransportControl.IsRewindEnabled = systemMediaTransportControl.IsFastForwardEnabled = 
-            systemMediaTransportControl.IsPreviousEnabled = systemMediaTransportControl.IsNextEnabled = 
-            systemMediaTransportControl.IsPauseEnabled = false;
+            ringer.ReloadTimes();
         }
 
-        private void Taskcompleted(BackgroundTaskRegistration sender, BackgroundTaskCompletedEventArgs args)
+        private void OnSongsPropertyChanged(Playlist sender, SongsChangedEventArgs args)
         {
-            BackgroundMediaPlayer.Shutdown();
-            deferral.Complete();
+            if (Library.Current.CurrentPlaylist == sender)
+            {
+                FolderMusicDebug.DebugEvent.SaveText("SetOnSongs", Library.Current.CurrentPlaylist.CurrentSong);
+                BackgroundPlayer.SetCurrent();
+            }
+        }
 
-            if (saved) return;
+        private void OnShufflePropertyChanged(Playlist sender, ShuffleChangedEventArgs args)
+        {
+            if (Library.Current.CurrentPlaylist == sender)
+            {
+                FolderMusicDebug.DebugEvent.SaveText("SetOnShuffle", Library.Current.CurrentPlaylist.CurrentSong);
+                BackgroundPlayer.SetCurrent();
+            }
+        }
 
-            saved = true;
-            LibraryLib.CurrentSong.Current.Save();
-            Library.Current.SaveAsync();
+        private void OnPlaylistsPropertyChanged(ILibrary sender, PlaylistsChangedEventArgs args)
+        {
+            FolderMusicDebug.DebugEvent.SaveText("SetOnPlaylists", Library.Current.CurrentPlaylist.CurrentSong);
+            BackgroundPlayer.SetCurrent();
+        }
+
+        private void OnPlayStateChanged(ILibrary sender, PlayStateChangedEventArgs args)
+        {
+            if (args.NewValue) BackgroundPlayer.Play();
+            else BackgroundPlayer.Pause();
+        }
+
+        private void OnLoopPropertyChanged(Playlist sender, LoopChangedEventArgs args)
+        {
+            if (Library.Current.CurrentPlaylist == sender) SetLoopToBackgroundPlayer();
+        }
+
+        private void OnLibraryChanged(ILibrary sender, LibraryChangedEventsArgs args)
+        {
+            SetLoopToBackgroundPlayer();
+
+            FolderMusicDebug.DebugEvent.SaveText("SetOnLibrary", Library.Current.CurrentPlaylist.CurrentSong);
+            BackgroundPlayer.SetCurrent();
+        }
+
+        private void OnCurrentSongPropertyChanged(Playlist sender, CurrentSongChangedEventArgs args)
+        {
+            FolderMusicDebug.DebugEvent.SaveText("SetOnCurrentSong", Library.Current.CurrentPlaylist.CurrentSong);
+            BackgroundPlayer.SetCurrent();
+        }
+
+        private void OnCurrentPlaylistPropertyChanged(ILibrary sender, CurrentPlaylistChangedEventArgs args)
+        {
+            FolderMusicDebug.DebugEvent.SaveText("SetOnCurrentPlaylist", Library.Current.CurrentPlaylist.CurrentSong);
+            BackgroundPlayer.SetCurrent();
+        }
+
+        private void TaskCompleted(BackgroundTaskRegistration sender, BackgroundTaskCompletedEventArgs args)
+        {
+            Dispose();
         }
 
         private void OnCanceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason)
         {
+            Dispose();
+        }
+
+        private void Dispose()
+        {
+            ringer?.Dispose();
+            //musicPlayer?.Dispose();
+            //Unsubscribe();
+
             BackgroundMediaPlayer.Shutdown();
             deferral.Complete();
-
-            if (saved) return;
-
-            saved = true;
-            LibraryLib.CurrentSong.Current.Save();
-            Library.Current.SaveAsync();
         }
 
-        private async Task SaveText(params object[] objs)
+        private void Unsubscribe()
         {
-            await SaveText(Convert.ToUInt32(new Random().Next(10, 1000)), DateTime.Now.Ticks, objs, id);
-        }
+            //smtc.ButtonPressed -= MediaTransportControlButtonPressed;
 
-        private async Task SaveText(uint no, params object[] objs)
-        {
-            try
-            {
-                string text = "";
-                string filename = string.Format("Text{0}.txt", no);
-                StorageFile file = await ApplicationData.Current.LocalFolder.
-                    CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting);
+            BackgroundMediaPlayer.Current.CurrentStateChanged -= BackgroundMediaPlayer_CurrentStateChanged;
+            BackgroundMediaPlayer.Current.MediaEnded -= BackgroundMediaPlayer_MediaEnded;
+            BackgroundMediaPlayer.Current.MediaOpened -= BackgroundMediaPlayer_MediaOpened;
+            BackgroundMediaPlayer.Current.MediaFailed -= BackgroundMediaPlayer_MediaFailed;
 
-                foreach (object obj in objs) text += obj.ToString() + ";";
-
-                text = text.TrimEnd(';');
-
-                await PathIO.WriteTextAsync(file.Path, text);
-            }
-            catch { }
+            Feedback.Current.OnCurrentPlaylistPropertyChanged -= OnCurrentPlaylistPropertyChanged;
+            Feedback.Current.OnCurrentSongPropertyChanged -= OnCurrentSongPropertyChanged;
+            Feedback.Current.OnLibraryChanged -= OnLibraryChanged;
+            Feedback.Current.OnLoopPropertyChanged -= OnLoopPropertyChanged;
+            Feedback.Current.OnPlayStateChanged -= OnPlayStateChanged;
+            Feedback.Current.OnPlaylistsPropertyChanged -= OnPlaylistsPropertyChanged;
+            Feedback.Current.OnShufflePropertyChanged -= OnShufflePropertyChanged;
+            Feedback.Current.OnSettingsPropertyChanged -= OnSettingsPropertyChanged;
+            Feedback.Current.OnSongsPropertyChanged -= OnSongsPropertyChanged;
         }
     }
 }

@@ -1,14 +1,20 @@
 ﻿<Page
-    x:Class="MusicPlayerApp.MainPage"
+    x:Class="FolderMusic.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:MusicPlayerApp"
+    xmlns:local="using:FolderMusic"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     Loaded="Page_Loaded" PointerExited="Page_PointerExited">
 
+    <Page.Resources>
+        <local:BoolToPlayIcon x:Key="PlayConverter"/>
+        <local:BoolToDetailIcon x:Key="DetailConverter"/>
+        <local:ShuffleToIcon x:Key="ShuffleConverter"/>
+        <local:LoopToIcon x:Key="LoopConverter"/>
+    </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -17,40 +23,11 @@
         </Grid.RowDefinitions>
 
         <Hub Grid.Row="0" Name="hub" Header="FolderMusic" Style="{StaticResource HHeader}" Margin="0,5,0,0">
-            <HubSection Background="Transparent" Margin="0,-10,0,0" DataContext="{Binding CurrentPlaylist}"
-                        Header="{Binding Name}" Style="{StaticResource HSHeader}">
+            <HubSection Background="Transparent" Margin="0,-10,0,0"
+                        Header="{Binding CurrentPlaylistName}" Style="{StaticResource HSHeader}">
                 <DataTemplate>
-                    <ListBox x:Name="lbxCurrentPlaylist" Margin="0,-30,0,0" Background="Transparent"
-                             SelectionMode="Single" ItemsSource="{Binding ShuffleSongs}"
-                             SelectedIndex="{Binding ShuffleListIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                             DataContextChanged="lbxCurrentPlaylist_DataContextChanged" SizeChanged="lbxCurrentPlaylist_SizeChanged">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Holding="CurrentPlaylistSong_Holding">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <FlyoutBase.AttachedFlyout>
-                                        <MenuFlyout>
-                                            <MenuFlyoutItem Text="Refresh" Click="RefreshSong_Click"/>
-                                            <MenuFlyoutItem Text="Delete" Click="DeleteSong_Click"/>
-                                        </MenuFlyout>
-                                    </FlyoutBase.AttachedFlyout>
-
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock FontSize="20" Margin="0,-5,0,-2"
-                                               Text="{Binding Title}" Foreground="{Binding TextFirstBrush}"/>
-                                        <TextBlock FontSize="15" Margin="0,-2,0,0" Text="{Binding Artist}" 
-                                                   Foreground="{Binding TextSecondBrush}" />
-                                    </StackPanel>
-
-                                    <Rectangle Grid.Column="2" Fill="Transparent" Width="1500"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <local:SongListView Margin="0,-30,0,0" Source="{Binding CurrentPlaylist}"
+                                        SongsSource="Shuffle" DataContextChanged="SongListView_DataContextChanged"/>
                 </DataTemplate>
             </HubSection>
 
@@ -76,12 +53,12 @@
                                     </FlyoutBase.AttachedFlyout>
 
                                     <StackPanel Orientation="Vertical">
-                                        <Image Source="{Binding PlayIcon}" Margin="0,0,0,5" 
-                                               Width="30" Height="30" Tapped="PlayPlaylist_Tapped"/>
-                                        <Image Source="{Binding DetailIcon}"
+                                        <Image Source="{Binding IsEmptyOrLoading, Converter={StaticResource PlayConverter}}"
+                                               Margin="0,0,0,5" Width="30" Height="30" Tapped="PlayPlaylist_Tapped"/>
+                                        <Image Source="{Binding IsEmptyOrLoading, Converter={StaticResource DetailConverter}}"
                                                Width="30" Height="30" Tapped="DetailPlaylist_Tapped"/>
                                     </StackPanel>
-                                    
+
                                     <Grid Grid.Column="1" Tapped="Playlist_Tapped">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
@@ -89,11 +66,11 @@
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Name}" Foreground="{Binding TextFirstBrush}"
+                                            <TextBlock Text="{Binding Name}" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"
                                                        TextWrapping="WrapWholeWords"
                                                        Margin="10,0,0,0" FontSize="20" VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding SongCount}" 
-                                                       Foreground="{Binding TextSecondBrush}"
+                                                       Foreground="{ThemeResource ApplicationPointerOverForegroundThemeBrush}"
                                                        Margin="10,0,0,0" FontSize="10" VerticalAlignment="Center"/>
                                         </StackPanel>
 
@@ -107,13 +84,13 @@
             </HubSection>
         </Hub>
 
-        <Grid DataContext="{Binding CurrentPlaylist}" Grid.Row="1">
+        <Grid Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Grid DataContext="{Binding CurrentSong}" Tapped="CurrentSong_Tapped">
+            <Grid Tapped="CurrentSong_Tapped">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -125,8 +102,8 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="{Binding Title}" FontSize="25" Margin="10,0" 
-                               TextWrapping="Wrap" Foreground="{Binding TextFirstBrush}"/>
+                    <TextBlock Text="{Binding CurrentSongTitle}" FontSize="25" Margin="10,0" TextWrapping="Wrap" 
+                               Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"/>
                     <Rectangle Fill="Transparent" Width="1500"/>
                 </Grid>
 
@@ -136,8 +113,8 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="{Binding Artist}" FontSize="20" Margin="10,0" FontStyle="Italic"
-                               Foreground="{Binding TextSecondBrush}"/>
+                    <TextBlock Text="{Binding CurrentSongArtist}" FontSize="20" Margin="10,0" FontStyle="Italic"
+                               Foreground="{ThemeResource ApplicationPointerOverForegroundThemeBrush}"/>
                     <Rectangle Fill="Transparent" Width="1500"/>
                 </Grid>
             </Grid>
@@ -150,7 +127,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Grid DataContext="{Binding CurrentPlaylist}" Grid.Column="0">
+            <Grid Grid.Column="0">
                 <Grid.Resources>
                     <Storyboard x:Name="ShuffleImageTap">
                         <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateY)"
@@ -161,24 +138,24 @@
                     </Storyboard>
                 </Grid.Resources>
 
-                <Image Grid.Column="0" x:Name="ShuffleImage" Source="{Binding ShuffleIcon}" Tapped="Shuffle_Tapped"
-                   PointerEntered="ShuffleImage_PointerEntered" PointerExited="ShuffleImage_PointerExited">
+                <Image Grid.Column="0" x:Name="ShuffleImage" Source="{Binding CurrentPlaylistShuffleIcon}"
+                       Tapped="Shuffle_Tapped" PointerEntered="ShuffleImage_PointerEntered" PointerExited="ShuffleImage_PointerExited">
                     <Image.RenderTransform>
                         <CompositeTransform TranslateY="0"/>
                     </Image.RenderTransform>
                 </Image>
             </Grid>
 
-            <Slider Grid.Column="1" Height="60" VerticalAlignment="Top" Minimum="0" SmallChange="1000"
-                    Value="{Binding SliderValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
-                    Maximum="{Binding SliderMaximum}" PointerEntered="sld_PointerEntered"/>
+            <Slider Grid.Column="1" Height="60" VerticalAlignment="Top" Minimum="0" Maximum="1" 
+                    Value="{Binding PlayerPositionPercent,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                    SnapsTo="StepValues" StepFrequency="0.001" PointerEntered="sld_PointerEntered"/>
 
-            <TextBlock Grid.Column="1" Text="{Binding SliderValueText}" VerticalAlignment="Bottom"
+            <TextBlock Grid.Column="1" Text="{Binding PlayerPositionText}" VerticalAlignment="Bottom"
                        HorizontalAlignment="Left" FontSize="20"/>
-            <TextBlock Grid.Column="1" Text="{Binding SliderMaximumText}" VerticalAlignment="Bottom" 
+            <TextBlock Grid.Column="1" Text="{Binding PlayerDurationText}" VerticalAlignment="Bottom" 
                        HorizontalAlignment="Right" FontSize="20"/>
 
-            <Grid DataContext="{Binding CurrentPlaylist}" Grid.Column="2">
+            <Grid Grid.Column="2">
                 <Grid.Resources>
                     <Storyboard x:Name="LoopImageTap">
                         <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateY)" 
@@ -189,8 +166,8 @@
                     </Storyboard>
                 </Grid.Resources>
 
-                <Image Grid.Column="2" x:Name="LoopImage" Source="{Binding LoopIcon}" Tapped="Loop_Tapped"
-                   PointerEntered="LoopImage_PointerEntered" PointerExited="LoopImage_PointerExited">
+                <Image Grid.Column="2" x:Name="LoopImage" Source="{Binding CurrentPlaylistLoopIcon}" Tapped="Loop_Tapped"
+                       PointerEntered="LoopImage_PointerEntered" PointerExited="LoopImage_PointerExited">
                     <Image.RenderTransform>
                         <CompositeTransform TranslateY="0"/>
                     </Image.RenderTransform>
@@ -206,15 +183,17 @@
                 <AppBarButton Label="{Binding PlayPauseText}" Icon="{Binding PlayPauseIcon}" Click="PlayPause_Click"/>
                 <AppBarButton Label="Next" Icon="Next" Click="Next_Click"/>
             </CommandBar.PrimaryCommands>
-            
+
             <CommandBar.SecondaryCommands>
                 <AppBarButton Label="Refresh Library" Click="ResetLibraryFromStorage_Click"/>
                 <AppBarButton Label="Update existing playlists" Click="UpdateExistingPlaylists_Click"/>
                 <AppBarButton Label="Add not existing playlists" Click="AddNotExistingPlaylists_Click"/>
-                <AppBarButton Label="TestFunktion" Click="TestFunktion_Click"/>
-                <AppBarButton Label="TestFunktion2" Click="TestFunktion_Click2"/>
-                <AppBarButton Label="TestFunktion3" Click="TestFunktion_Click3"/>
-                <AppBarButton Label="TestFunktion4" Click="TestFunktion_Click4"/>
+                <AppBarButton Label="Settings" Click="Settings_Click"/>
+                <AppBarButton Label="Debug Site" Click="TestFunktion_Click"/>
+                <AppBarButton Label="Music Properties" Click="TestFunktion_Click2"/>
+                <AppBarButton Label="Foreground Debug Data" Click="AppBarButton_Click"/>
+                <AppBarButton Label="Add false Playlist" Click="TestFunktion_Click3"/>
+                <AppBarButton Label="Ask for Reply" Click="TestFunktion_Click4"/>
             </CommandBar.SecondaryCommands>
         </CommandBar>
     </Page.BottomAppBar>

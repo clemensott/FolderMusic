@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <Machine>DESKTOP-5SIC2NV</Machine>
+    <Machine>DESKTOP-I7ELNS5</Machine>
     <WindowsUser>Clemens</WindowsUser>
     <TargetPlatformIdentifier>WindowsPhoneApp</TargetPlatformIdentifier>
     <TargetOsVersion>6.3</TargetOsVersion>
@@ -9,7 +9,11 @@
     <SolutionConfiguration>Debug|AnyCPU</SolutionConfiguration>
     <PackageArchitecture>neutral</PackageArchitecture>
     <PackageIdentityName>69e6029b-a318-49e1-9d96-dfe1f80190d7</PackageIdentityName>
+    <PackageIdentityPublisher>CN=Clemens</PackageIdentityPublisher>
     <IntermediateOutputPath>C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\</IntermediateOutputPath>
+    <RemoteDeploymentType></RemoteDeploymentType>
+    <PackageRegistrationPath></PackageRegistrationPath>
+    <RemoveNonLayoutFiles>true</RemoveNonLayoutFiles>
   </PropertyGroup>
   <ItemGroup>
     <AppXManifest Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\AppxManifest.xml">
@@ -24,14 +28,14 @@
     <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\BackgroundTask.winmd">
       <PackagePath>BackgroundTask.winmd</PackagePath>
     </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\bin\Debug\FolderMusicDebug.dll">
+      <PackagePath>FolderMusicDebug.dll</PackagePath>
+    </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicLib.dll">
       <PackagePath>FolderMusicLib.dll</PackagePath>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.dll">
       <PackagePath>PlayerIconsWP8.1.dll</PackagePath>
-    </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\TagLib.Portable.dll">
-      <PackagePath>TagLib.Portable.dll</PackagePath>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\Assets\Dark\DetailButton.png">
       <PackagePath>Assets\Dark\DetailButton.png</PackagePath>
@@ -123,8 +127,14 @@
       <PackagePath>Assets\WideLogo.scale-240.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
     </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\Assets\Glockenschlag.mp3">
+      <PackagePath>Assets\Glockenschlag.mp3</PackagePath>
+    </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerApp.xr.xml">
       <PackagePath>MusicPlayerApp.xr.xml</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\bin\Debug\FolderMusicDebug.xr.xml">
+      <PackagePath>FolderMusicDebug\FolderMusicDebug.xr.xml</PackagePath>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicLib.xr.xml">
       <PackagePath>FolderMusicLib\FolderMusicLib.xr.xml</PackagePath>
@@ -141,17 +151,21 @@
     <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlaylistPage.xbf">
       <PackagePath>PlaylistPage.xbf</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\SecondaryTilePage.xbf">
-      <PackagePath>SecondaryTilePage.xbf</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\Settings.xbf">
+      <PackagePath>Settings.xbf</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\TextPage.xbf">
-      <PackagePath>TextPage.xbf</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\bin\Debug\DebugFilterPage.xbf">
+      <PackagePath>FolderMusicDebug\DebugFilterPage.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\bin\Debug\DebugPage.xbf">
+      <PackagePath>FolderMusicDebug\DebugPage.xbf</PackagePath>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\SkipSongsPage.xbf">
       <PackagePath>FolderMusicLib\SkipSongsPage.xbf</PackagePath>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\resources.pri">
       <PackagePath>resources.pri</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>

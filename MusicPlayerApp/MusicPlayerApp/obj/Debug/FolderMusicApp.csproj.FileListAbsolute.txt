@@ -1,0 +1,355 @@
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.g.i.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.g.i.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.g.i.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.g.i.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\XamlTypeInfo.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.xaml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.xaml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.xaml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.xaml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\XamlSaveStateFile.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\MusicPlayerApp.exe
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\MusicPlayerApp.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\FolderMusicApp.csprojResolveAssemblyReference.cache
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.g.i.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.xaml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\App.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\LoadingPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MainPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlaylistPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\SkipSongsPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerApp.xr.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerApp.exe
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerApp.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\resources.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\AppxManifest.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicApp.build.appxrecipe
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\BackgroundTask.winmd
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicDebug.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerLib.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\BackgroundTask.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\BackgroundTask.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicDebug.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicDebug.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerLib.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerLib.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\FolderMusicApp.csproj.GenerateResource.Cache
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\priconfig.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\priconfig.xml.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\layout.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\layout.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\resources.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\resources.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\pri.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\pri.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\qualifiers.txt
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\qualifiers.txt.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\ProjectArchitectures.txt
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\SettingsPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.g.i.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.xaml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.g.i.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.xaml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\SongListView.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\App.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\LoadingPage.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\MainPage.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlaylistPage.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\SettingsPage.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\SkipSongsPage.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\SongListView.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerApp.xr.xml
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerApp.exe
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerApp.pdb
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\resources.pri
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\AppxManifest.xml
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicApp.build.appxrecipe
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\BackgroundTask.winmd
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicDebug.dll
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerLib.dll
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.dll
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\BackgroundTask.pdb
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\BackgroundTask.pri
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicDebug.pdb
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicDebug.pri
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerLib.pdb
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerLib.pri
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.pri
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\FolderMusicApp.csprojResolveAssemblyReference.cache
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.g.i.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.g.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.g.i.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.g.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.g.i.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.g.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.g.i.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.g.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.g.i.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.g.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.g.i.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.g.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.g.i.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.g.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\XamlTypeInfo.g.cs
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.xaml
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.xaml
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.xaml
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.xaml
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.xaml
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.xaml
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.xaml
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.xbf
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\XamlSaveStateFile.xml
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\MusicPlayerApp.exe
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\MusicPlayerApp.pdb
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\FolderMusicApp.csproj.GenerateResource.Cache
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\priconfig.xml
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\priconfig.xml.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\layout.resfiles
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\layout.resfiles.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\resources.resfiles
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\resources.resfiles.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\pri.resfiles
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\pri.resfiles.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\qualifiers.txt
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\qualifiers.txt.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\ProjectArchitectures.txt
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\App.xbf
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\LoadingPage.xbf
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\MainPage.xbf
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlaylistPage.xbf
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\SettingsPage.xbf
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\SkipSongsPage.xbf
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\SongListView.xbf
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerApp.xr.xml
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerApp.exe
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerApp.pdb
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\resources.pri
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\AppxManifest.xml
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicApp.build.appxrecipe
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\BackgroundTask.winmd
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicDebug.dll
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerLib.dll
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.dll
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\BackgroundTask.pdb
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\BackgroundTask.pri
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicDebug.pdb
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicDebug.pri
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerLib.pdb
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerLib.pri
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.pri
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\FolderMusicApp.csprojResolveAssemblyReference.cache
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.g.i.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.g.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.g.i.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.g.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.g.i.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.g.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.g.i.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.g.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.g.i.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.g.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.g.i.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.g.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.g.i.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.g.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\XamlTypeInfo.g.cs
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.xaml
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.xaml
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.xaml
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.xaml
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.xaml
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.xaml
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.xaml
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.xbf
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.xbf
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.xbf
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.xbf
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.xbf
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.xbf
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.xbf
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\XamlSaveStateFile.xml
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\MusicPlayerApp.exe
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\MusicPlayerApp.pdb
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\FolderMusicApp.csproj.GenerateResource.Cache
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\priconfig.xml
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\priconfig.xml.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\layout.resfiles
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\layout.resfiles.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\resources.resfiles
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\resources.resfiles.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\pri.resfiles
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\pri.resfiles.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\qualifiers.txt
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\qualifiers.txt.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+C:\Users\Clemens\Desktop\MusicPlayerApp\MusicPlayerApp\obj\Debug\ProjectArchitectures.txt
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\App.xbf
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\LoadingPage.xbf
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MainPage.xbf
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlaylistPage.xbf
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\SettingsPage.xbf
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\SkipSongsPage.xbf
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\SongListView.xbf
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerApp.xr.xml
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerApp.exe
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerApp.pdb
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\resources.pri
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\AppxManifest.xml
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicApp.build.appxrecipe
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\BackgroundTask.winmd
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicDebug.dll
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerLib.dll
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.dll
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\BackgroundTask.pdb
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\BackgroundTask.pri
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicDebug.pdb
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\FolderMusicDebug.pri
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerLib.pdb
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\MusicPlayerLib.pri
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.pdb
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.pri
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\FolderMusicApp.csprojResolveAssemblyReference.cache
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.g.i.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.g.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.g.i.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.g.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.g.i.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.g.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.g.i.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.g.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.g.i.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.g.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.g.i.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.g.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.g.i.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.g.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\XamlTypeInfo.g.cs
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.xaml
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.xaml
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.xaml
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.xaml
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.xaml
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.xaml
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.xaml
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\App.xbf
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.xbf
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\MainPage.xbf
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\PlaylistPage.xbf
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SettingsPage.xbf
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SkipSongsPage.xbf
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\SongListView.xbf
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\XamlSaveStateFile.xml
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\MusicPlayerApp.exe
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\MusicPlayerApp.pdb
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\FolderMusicApp.csproj.GenerateResource.Cache
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\priconfig.xml
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\priconfig.xml.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\layout.resfiles
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\layout.resfiles.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\resources.resfiles
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\resources.resfiles.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\pri.resfiles
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\pri.resfiles.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\qualifiers.txt
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\qualifiers.txt.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\obj\Debug\ProjectArchitectures.txt
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\App.xbf
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\LoadingPage.xbf
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\MainPage.xbf
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\PlaylistPage.xbf
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\SettingsPage.xbf
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\SkipSongsPage.xbf
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\SongListView.xbf
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\MusicPlayerApp.xr.xml
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\MusicPlayerApp.exe
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\MusicPlayerApp.pdb
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\resources.pri
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\AppxManifest.xml
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\FolderMusicApp.build.appxrecipe
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\BackgroundTask.winmd
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\FolderMusicDebug.dll
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\MusicPlayerLib.dll
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.dll
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\BackgroundTask.pdb
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\BackgroundTask.pri
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\FolderMusicDebug.pdb
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\FolderMusicDebug.pri
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\MusicPlayerLib.pdb
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\MusicPlayerLib.pri
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.pdb
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\PlayerIconsWP8.1.pri
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\FolderMusicApp.csprojResolveAssemblyReference.cache
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\App.g.i.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\App.g.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\LoadingPage.g.i.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\LoadingPage.g.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\MainPage.g.i.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\MainPage.g.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\PlaylistPage.g.i.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\PlaylistPage.g.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\SettingsPage.g.i.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\SettingsPage.g.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\SkipSongsPage.g.i.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\SkipSongsPage.g.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\SongListView.g.i.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\SongListView.g.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\XamlTypeInfo.g.cs
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\App.xaml
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\LoadingPage.xaml
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\MainPage.xaml
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\PlaylistPage.xaml
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\SettingsPage.xaml
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\SkipSongsPage.xaml
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\SongListView.xaml
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\App.xbf
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\LoadingPage.xbf
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\MainPage.xbf
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\PlaylistPage.xbf
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\SettingsPage.xbf
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\SkipSongsPage.xbf
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\SongListView.xbf
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\XamlSaveStateFile.xml
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\MusicPlayerApp.exe
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\MusicPlayerApp.pdb
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\FolderMusicApp.csproj.GenerateResource.Cache
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\priconfig.xml
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\priconfig.xml.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\layout.resfiles
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\layout.resfiles.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\resources.resfiles
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\resources.resfiles.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\pri.resfiles
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\pri.resfiles.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\qualifiers.txt
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\qualifiers.txt.intermediate
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\ProjectArchitectures.txt

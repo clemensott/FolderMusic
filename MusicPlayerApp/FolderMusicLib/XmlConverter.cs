@@ -2,7 +2,7 @@
 using System.IO;
 using System.Xml.Serialization;
 
-namespace FolderMusicLib
+namespace MusicPlayer
 {
     public class XmlConverter
     {
@@ -26,16 +26,12 @@ namespace FolderMusicLib
 
                 TextWriter tw = new StringWriter();
                 serializer.Serialize(tw, obj);
-                string xmlText = tw.ToString();
 
-                TextReader tr = new StringReader(xmlText);
-                object deObj = serializer.Deserialize(tr);
-
-                return deObj.GetType() == type ? xmlText : "";
+                return tw.ToString();
             }
             catch { }
 
-            return "";
+            return string.Empty;
         }
     }
 }

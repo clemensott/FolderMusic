@@ -1,0 +1,64 @@
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\PlayerIconsWP8.1.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\priconfig.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\priconfig.xml.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\layout.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\layout.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\resources.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\resources.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\pri.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\pri.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\qualifiers.txt
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\qualifiers.txt.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.dll
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.pri
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\PlayerIconsWP8.1.dll
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\priconfig.xml
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\priconfig.xml.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\layout.resfiles
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\layout.resfiles.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\resources.resfiles
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\resources.resfiles.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\pri.resfiles
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\pri.resfiles.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\qualifiers.txt
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\qualifiers.txt.intermediate
+C:\Users\Bernhard & Christine\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.dll
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.pri
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\PlayerIconsWP8.1.dll
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\priconfig.xml
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\priconfig.xml.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\layout.resfiles
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\layout.resfiles.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\resources.resfiles
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\resources.resfiles.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\pri.resfiles
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\pri.resfiles.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\qualifiers.txt
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\qualifiers.txt.intermediate
+C:\Users\Clemens\Desktop\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.dll
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.pdb
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.pri
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\PlayerIconsWP8.1.dll
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\PlayerIconsWP8.1.pdb
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\priconfig.xml
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\priconfig.xml.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\layout.resfiles
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\layout.resfiles.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\resources.resfiles
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\resources.resfiles.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\pri.resfiles
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\pri.resfiles.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\qualifiers.txt
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\qualifiers.txt.intermediate
+D:\Dokumente\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\obj\Debug\MultipleQualifiersPerDimensionFound.txt

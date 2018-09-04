@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Machine>DESKTOP-NLB8O9M</Machine>
+    <WindowsUser>Clemens</WindowsUser>
+    <TargetPlatformIdentifier>WindowsPhoneApp</TargetPlatformIdentifier>
+    <TargetOsVersion>6.3</TargetOsVersion>
+    <TargetOsDescription>Windows Phone 8.1</TargetOsDescription>
+    <SolutionConfiguration>Debug|AnyCPU</SolutionConfiguration>
+    <PackageArchitecture>neutral</PackageArchitecture>
+    <PackageIdentityName>69e6029b-a318-49e1-9d96-dfe1f80190d7</PackageIdentityName>
+    <PackageIdentityPublisher>CN=Clemens</PackageIdentityPublisher>
+    <IntermediateOutputPath>D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\obj\Debug\</IntermediateOutputPath>
+    <RemoteDeploymentType></RemoteDeploymentType>
+    <PackageRegistrationPath></PackageRegistrationPath>
+    <RemoveNonLayoutFiles>true</RemoveNonLayoutFiles>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppXManifest Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\AppxManifest.xml">
+      <PackagePath>AppxManifest.xml</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppXManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\MusicPlayerApp.exe">
+      <PackagePath>MusicPlayerApp.exe</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\BackgroundTask\bin\Debug\BackgroundTask.winmd">
+      <PackagePath>BackgroundTask.winmd</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicDebug\bin\Debug\FolderMusicDebug.dll">
+      <PackagePath>FolderMusicDebug.dll</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicLib\bin\Debug\MusicPlayerLib.dll">
+      <PackagePath>MusicPlayerLib.dll</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\PlayerIconsWP8.1\bin\Debug\PlayerIconsWP8.1.dll">
+      <PackagePath>PlayerIconsWP8.1.dll</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Dark\DetailButton.png">
+      <PackagePath>Assets\Dark\DetailButton.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Dark\loopAll.png">
+      <PackagePath>Assets\Dark\loopAll.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Dark\loopCurrent.png">
+      <PackagePath>Assets\Dark\loopCurrent.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Dark\loopOff.png">
+      <PackagePath>Assets\Dark\loopOff.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Dark\NextButton.png">
+      <PackagePath>Assets\Dark\NextButton.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Dark\PauseButton.png">
+      <PackagePath>Assets\Dark\PauseButton.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Dark\PlayButton.png">
+      <PackagePath>Assets\Dark\PlayButton.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Dark\PreviousButton.png">
+      <PackagePath>Assets\Dark\PreviousButton.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Dark\shuffleComplete.png">
+      <PackagePath>Assets\Dark\shuffleComplete.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Dark\shuffleOff.png">
+      <PackagePath>Assets\Dark\shuffleOff.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Dark\shuffleOn.png">
+      <PackagePath>Assets\Dark\shuffleOn.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Light\DetailButton.png">
+      <PackagePath>Assets\Light\DetailButton.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Light\loopAll.png">
+      <PackagePath>Assets\Light\loopAll.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Light\loopCurrent.png">
+      <PackagePath>Assets\Light\loopCurrent.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Light\loopOff.png">
+      <PackagePath>Assets\Light\loopOff.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Light\NextButton.png">
+      <PackagePath>Assets\Light\NextButton.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Light\PauseButton.png">
+      <PackagePath>Assets\Light\PauseButton.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Light\PlayButton.png">
+      <PackagePath>Assets\Light\PlayButton.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Light\PreviousButton.png">
+      <PackagePath>Assets\Light\PreviousButton.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Light\shuffleComplete.png">
+      <PackagePath>Assets\Light\shuffleComplete.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Light\shuffleOff.png">
+      <PackagePath>Assets\Light\shuffleOff.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Light\shuffleOn.png">
+      <PackagePath>Assets\Light\shuffleOn.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Logo.scale-240.png">
+      <PackagePath>Assets\Logo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\SmallLogo.scale-240.png">
+      <PackagePath>Assets\SmallLogo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\SplashScreen.scale-240.png">
+      <PackagePath>Assets\SplashScreen.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Square71x71Logo.scale-240.png">
+      <PackagePath>Assets\Square71x71Logo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\StoreLogo.scale-240.png">
+      <PackagePath>Assets\StoreLogo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\WideLogo.scale-240.png">
+      <PackagePath>Assets\WideLogo.scale-240.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\Assets\Glockenschlag.mp3">
+      <PackagePath>Assets\Glockenschlag.mp3</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\MusicPlayerApp.xr.xml">
+      <PackagePath>MusicPlayerApp.xr.xml</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicDebug\bin\Debug\FolderMusicDebug.xr.xml">
+      <PackagePath>FolderMusicDebug\FolderMusicDebug.xr.xml</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\App.xbf">
+      <PackagePath>App.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\LoadingPage.xbf">
+      <PackagePath>LoadingPage.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\MainPage.xbf">
+      <PackagePath>MainPage.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\PlaylistPage.xbf">
+      <PackagePath>PlaylistPage.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\SettingsPage.xbf">
+      <PackagePath>SettingsPage.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\SkipSongsPage.xbf">
+      <PackagePath>SkipSongsPage.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\SongListView.xbf">
+      <PackagePath>SongListView.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicDebug\bin\Debug\DebugFilterPage.xbf">
+      <PackagePath>FolderMusicDebug\DebugFilterPage.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\FolderMusicDebug\bin\Debug\DebugPage.xbf">
+      <PackagePath>FolderMusicDebug\DebugPage.xbf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\Projects\FolderMusic\MusicPlayerApp - Vor XmlWriter\MusicPlayerApp\bin\Debug\resources.pri">
+      <PackagePath>resources.pri</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+</Project>

@@ -1,8 +1,9 @@
 <XamlCompilerSaveState>
   <ReferenceAssemblyList>
-    <LocalAssembly PathName="c:\users\clemens\documents\visual studio 2015\projects\musicplayerapp\musicplayerapp\obj\debug\intermediatexaml\musicplayerapp.exe" HashGuid="dad242d5-3b85-5dc6-c7df-6b7bef2624e0" />
-    <ReferenceAssembly PathName="c:\users\clemens\documents\visual studio 2015\projects\foldermusic\musicplayerapp - symtop bekämpft\backgroundtask\bin\debug\backgroundtask.winmd" HashGuid="760bd98a-71e9-953f-5575-f2d299e1ed8f" />
-    <ReferenceAssembly PathName="c:\users\clemens\documents\visual studio 2015\projects\foldermusic\musicplayerapp - symtop bekämpft\foldermusiclib\bin\debug\foldermusiclib.dll" HashGuid="33787099-8b85-d64b-b61b-fe3d542f98eb" />
-    <ReferenceAssembly PathName="c:\users\clemens\documents\visual studio 2015\projects\foldermusic\musicplayerapp - symtop bekämpft\playericonswp8.1\bin\debug\playericonswp8.1.dll" HashGuid="d96dc5c9-05ce-1493-e446-a9a2a1bc603d" />
+    <LocalAssembly PathName="d:\dokumente\visual studio 2015\projects\foldermusic\musicplayerapp\musicplayerapp\obj\debug\intermediatexaml\musicplayerapp.exe" HashGuid="d1ca2a6d-b52d-0369-bda0-d1778c6f5974" />
+    <ReferenceAssembly PathName="d:\projects\foldermusic\musicplayerapp - vor xmlwriter\backgroundtask\bin\debug\backgroundtask.winmd" HashGuid="a04d7042-9586-19ab-2129-28745daf8858" />
+    <ReferenceAssembly PathName="d:\projects\foldermusic\musicplayerapp - vor xmlwriter\foldermusicdebug\bin\debug\foldermusicdebug.dll" HashGuid="545e9031-6cfd-0ce6-4e49-e5cf5eff6f12" />
+    <ReferenceAssembly PathName="d:\projects\foldermusic\musicplayerapp - vor xmlwriter\foldermusiclib\bin\debug\musicplayerlib.dll" HashGuid="280ff2a1-b431-e8af-d7e1-98636bac55d6" />
+    <ReferenceAssembly PathName="d:\projects\foldermusic\musicplayerapp - vor xmlwriter\playericonswp8.1\bin\debug\playericonswp8.1.dll" HashGuid="3303c29d-bfd6-9c31-c37e-c703fdff2677" />
   </ReferenceAssemblyList>
 </XamlCompilerSaveState>

@@ -1,11 +1,12 @@
 ﻿<Page
-    x:Class="MusicPlayerApp.PlaylistPage"
+    x:Class="FolderMusic.PlaylistPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:MusicPlayerApp"
+    xmlns:local="using:FolderMusic"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
+    x:Name="playlistPage"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     Loaded="Page_Loaded">
 
@@ -21,71 +22,14 @@
         <Hub Grid.Row="1" Header="{Binding RelativePath}" Style="{StaticResource HHeaderRelativePath}">
             <HubSection Header="Default" Style="{StaticResource HSHeader}" Margin="0,-10,0,0">
                 <DataTemplate>
-                    <ListBox ItemsSource="{Binding Songs}" Background="Transparent" Margin="0,-30,0,0"
-                             SelectedIndex="{Binding SongsIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                             DataContextChanged="LbxDefaultSongs_DataContextChanged">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Holding="CurrentPlaylistSong_Holding" Tapped="Song_Tapped">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <FlyoutBase.AttachedFlyout>
-                                        <MenuFlyout>
-                                            <MenuFlyoutItem Text="Refresh" Click="RefreshSong_Click"/>
-                                            <MenuFlyoutItem Text="Delete" Click="DeleteSong_Click"/>
-                                        </MenuFlyout>
-                                    </FlyoutBase.AttachedFlyout>
-
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock FontSize="20" Margin="0,-5,0,-2" Text="{Binding Title}" 
-                                                   Foreground="{Binding TextFirstBrush}"/>
-                                        <TextBlock FontSize="15" Margin="0,-2,0,0" Text="{Binding Artist}" 
-                                                   Foreground="{Binding TextSecondBrush}" />
-                                    </StackPanel>
-
-                                    <Rectangle Grid.Column="2" Fill="Transparent" Width="1000"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <local:SongListView Margin="0,-30,0,0" Source="{Binding ElementName=playlistPage,Path=Playlist}"/>
                 </DataTemplate>
             </HubSection>
 
             <HubSection Header="Shuffle" Style="{StaticResource HSHeader}" Margin="0,-10,0,0">
                 <DataTemplate>
-                    <ListBox ItemsSource="{Binding ShuffleSongs}" Background="Transparent" Margin="0,-30,0,0"
-                             SelectedIndex="{Binding ShuffleListIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                             DataContextChanged="LbxShuffleSongs_DataContextChanged">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Holding="CurrentPlaylistSong_Holding" Tapped="Song_Tapped">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <FlyoutBase.AttachedFlyout>
-                                        <MenuFlyout>
-                                            <MenuFlyoutItem Text="Refresh" Click="RefreshSong_Click"/>
-                                            <MenuFlyoutItem Text="Delete" Click="DeleteSong_Click"/>
-                                        </MenuFlyout>
-                                    </FlyoutBase.AttachedFlyout>
-
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock FontSize="20" Margin="0,-5,0,-2" Text="{Binding Title}" 
-                                                   Foreground="{Binding TextFirstBrush}"/>
-                                        <TextBlock FontSize="15" Margin="0,-2,0,0" Text="{Binding Artist}"
-                                                   Foreground="{Binding TextSecondBrush}" />
-                                    </StackPanel>
-
-                                    <Rectangle Grid.Column="2" Fill="Transparent" Width="1000"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <local:SongListView Margin="0,-30,0,0" SongsSource="Shuffle"
+                                        Source="{Binding ElementName=playlistPage,Path=Playlist}"/>
                 </DataTemplate>
             </HubSection>
         </Hub>
@@ -95,9 +39,11 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-
-            <Image Grid.Column="0" Source="{Binding ShuffleIcon}" Tapped="Shuffle_Tapped"/>
-            <Image Grid.Column="1" Source="{Binding LoopIcon}" Tapped="Loop_Tapped"/>
+          
+            <Image Grid.Column="0" Tapped="Shuffle_Tapped"
+                       Source="{Binding Shuffle, Converter={StaticResource ShuffleConverter}}"/>
+            <Image Grid.Column="1" Tapped="Loop_Tapped"
+                       Source="{Binding Loop, Converter={StaticResource LoopConverter}}"/>
         </Grid>
     </Grid>
 

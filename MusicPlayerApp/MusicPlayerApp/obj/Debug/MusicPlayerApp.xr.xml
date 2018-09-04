@@ -1,31 +1,33 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Roots xmlns="clr-namespace:Microsoft.Xaml.Tools.XamlCompiler.RootLog;assembly=Microsoft.Windows.UI.Xaml.81.Build.Tasks">
+  <Roots.Interfaces>
+    <RootInterface FullName="Windows.UI.Xaml.Data.IValueConverter" />
+  </Roots.Interfaces>
   <Roots.PropertyPathNames>
-    <RootPropertyPathName Name="CurrentPlaylist" />
-    <RootPropertyPathName Name="LoopIcon" />
-    <RootPropertyPathName Name="SliderMaximumText" />
-    <RootPropertyPathName Name="SliderValueText" />
-    <RootPropertyPathName Name="SliderValue" />
-    <RootPropertyPathName Name="SliderMaximum" />
-    <RootPropertyPathName Name="ShuffleIcon" />
-    <RootPropertyPathName Name="CurrentSong" />
-    <RootPropertyPathName Name="Artist" />
-    <RootPropertyPathName Name="TextSecondBrush" />
-    <RootPropertyPathName Name="Title" />
-    <RootPropertyPathName Name="TextFirstBrush" />
+    <RootPropertyPathName Name="CurrentPlaylistLoopIcon" />
+    <RootPropertyPathName Name="PlayerDurationText" />
+    <RootPropertyPathName Name="PlayerPositionText" />
+    <RootPropertyPathName Name="PlayerPositionPercent" />
+    <RootPropertyPathName Name="CurrentPlaylistShuffleIcon" />
+    <RootPropertyPathName Name="CurrentSongArtist" />
+    <RootPropertyPathName Name="CurrentSongTitle" />
     <RootPropertyPathName Name="Playlists" />
     <RootPropertyPathName Name="PlaylistsIndex" />
     <RootPropertyPathName Name="SongCount" />
     <RootPropertyPathName Name="Name" />
-    <RootPropertyPathName Name="DetailIcon" />
-    <RootPropertyPathName Name="PlayIcon" />
-    <RootPropertyPathName Name="ShuffleSongs" />
-    <RootPropertyPathName Name="ShuffleListIndex" />
+    <RootPropertyPathName Name="IsEmptyOrLoading" />
+    <RootPropertyPathName Name="CurrentPlaylistName" />
+    <RootPropertyPathName Name="CurrentPlaylist" />
     <RootPropertyPathName Name="PlayPauseText" />
     <RootPropertyPathName Name="PlayPauseIcon" />
+    <RootPropertyPathName Name="Loop" />
+    <RootPropertyPathName Name="Shuffle" />
     <RootPropertyPathName Name="RelativePath" />
-    <RootPropertyPathName Name="Songs" />
-    <RootPropertyPathName Name="SongsIndex" />
+    <RootPropertyPathName Name="Playlist" />
+    <RootPropertyPathName Name="SongList" />
+    <RootPropertyPathName Name="SelectedIndex" />
+    <RootPropertyPathName Name="Artist" />
+    <RootPropertyPathName Name="Title" />
   </Roots.PropertyPathNames>
   <Roots.RootTypes>
     <RootType FullName="Windows.UI.Xaml.Application">
@@ -35,7 +37,6 @@
       <RootProperty Name="HeaderTemplate" />
       <RootProperty Name="Background" />
       <RootProperty Name="Margin" />
-      <RootProperty Name="DataContext" />
       <RootProperty Name="Header" />
       <RootProperty Name="Style" />
       <RootProperty Name="ContentTemplate" />
@@ -48,6 +49,10 @@
       <RootProperty Name="Margin" />
       <RootProperty Name="Sections" />
     </RootType>
+    <RootType FullName="FolderMusic.BoolToPlayIcon" />
+    <RootType FullName="FolderMusic.BoolToDetailIcon" />
+    <RootType FullName="FolderMusic.ShuffleToIcon" />
+    <RootType FullName="FolderMusic.LoopToIcon" />
     <RootType FullName="Windows.UI.Xaml.Setter">
       <RootProperty Name="Property" />
       <RootProperty Name="Value" />
@@ -64,14 +69,19 @@
       <RootProperty Name="FontStyle" />
       <RootProperty Name="Foreground" />
       <RootProperty Name="TextWrapping" />
+      <RootProperty Name="Name" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Data.Binding">
       <RootProperty Name="Mode" />
       <RootProperty Name="UpdateSourceTrigger" />
+      <RootProperty Name="Converter" />
+      <RootProperty Name="ElementName" />
+      <RootProperty Name="Path" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.Page">
       <RootProperty Name="Background" />
       <RootProperty Name="Content" />
+      <RootProperty Name="Resources" />
       <RootProperty Name="BottomAppBar" />
       <RootEvent Name="Loaded" />
       <RootEvent Name="PointerExited" />
@@ -82,7 +92,6 @@
       <RootProperty Name="Visibility" />
       <RootProperty Name="RowDefinitions" />
       <RootProperty Name="Children" />
-      <RootProperty Name="DataContext" />
       <RootProperty Name="ColumnDefinitions" />
       <RootProperty Name="Resources" />
       <RootEvent Name="Tapped" />
@@ -93,6 +102,8 @@
       <RootMethod Name="SetRow" />
       <RootMethod Name="GetColumn" />
       <RootMethod Name="SetColumn" />
+      <RootMethod Name="GetColumnSpan" />
+      <RootMethod Name="SetColumnSpan" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.RowDefinition">
       <RootProperty Name="Height" />
@@ -102,7 +113,7 @@
       <RootProperty Name="IsEnabled" />
       <RootProperty Name="Height" />
     </RootType>
-    <RootType FullName="MusicPlayerApp.LoadingPage" />
+    <RootType FullName="FolderMusic.LoadingPage" />
     <RootType FullName="Windows.UI.Xaml.Controls.ColumnDefinition">
       <RootProperty Name="Width" />
     </RootType>
@@ -110,9 +121,10 @@
       <RootProperty Name="Height" />
       <RootProperty Name="VerticalAlignment" />
       <RootProperty Name="Minimum" />
-      <RootProperty Name="SmallChange" />
-      <RootProperty Name="Value" />
       <RootProperty Name="Maximum" />
+      <RootProperty Name="Value" />
+      <RootProperty Name="SnapsTo" />
+      <RootProperty Name="StepFrequency" />
       <RootEvent Name="PointerEntered" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Media.Animation.Storyboard">
@@ -155,8 +167,7 @@
       <RootProperty Name="ItemsSource" />
       <RootProperty Name="SelectedIndex" />
       <RootProperty Name="ItemTemplate" />
-      <RootEvent Name="DataContextChanged" />
-      <RootEvent Name="SizeChanged" />
+      <RootEvent Name="LayoutUpdated" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.Primitives.FlyoutBase">
       <RootMethod Name="GetAttachedFlyout" />
@@ -173,7 +184,12 @@
       <RootProperty Name="Orientation" />
       <RootProperty Name="Children" />
       <RootProperty Name="VerticalAlignment" />
-      <RootProperty Name="HorizontalAlignment" />
+    </RootType>
+    <RootType FullName="FolderMusic.SongListView">
+      <RootProperty Name="Margin" />
+      <RootProperty Name="Source" />
+      <RootProperty Name="SongsSource" />
+      <RootEvent Name="DataContextChanged" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.CommandBar">
       <RootProperty Name="PrimaryCommands" />
@@ -184,18 +200,29 @@
       <RootProperty Name="Icon" />
       <RootEvent Name="Click" />
     </RootType>
-    <RootType FullName="MusicPlayerApp.MainPage" />
-    <RootType FullName="MusicPlayerApp.PlaylistPage" />
-    <RootType FullName="MusicPlayerApp.SecondaryTilePage" />
-    <RootType FullName="Windows.UI.Xaml.Controls.ScrollViewer">
-      <RootProperty Name="Content" />
+    <RootType FullName="FolderMusic.MainPage" />
+    <RootType FullName="FolderMusic.PlaylistPage" />
+    <RootType FullName="Windows.UI.Xaml.Controls.TextBox">
+      <RootProperty Name="Name" />
+      <RootProperty Name="Text" />
+      <RootProperty Name="Width" />
+      <RootProperty Name="HorizontalAlignment" />
     </RootType>
-    <RootType FullName="Windows.UI.Xaml.Controls.Button">
+    <RootType FullName="Windows.UI.Xaml.Controls.CheckBox">
+      <RootProperty Name="Name" />
       <RootProperty Name="Content" />
       <RootProperty Name="HorizontalAlignment" />
+    </RootType>
+    <RootType FullName="FolderMusic.SettingsPage" />
+    <RootType FullName="Windows.UI.Xaml.Controls.Button">
       <RootProperty Name="Margin" />
+      <RootProperty Name="HorizontalAlignment" />
+      <RootProperty Name="Content" />
       <RootEvent Name="Click" />
     </RootType>
-    <RootType FullName="MusicPlayerApp.TextPage" />
+    <RootType FullName="FolderMusic.SkipSongsPage" />
+    <RootType FullName="Windows.UI.Xaml.Controls.UserControl">
+      <RootProperty Name="Content" />
+    </RootType>
   </Roots.RootTypes>
 </Roots>

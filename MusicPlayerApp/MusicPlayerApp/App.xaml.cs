@@ -1,4 +1,4 @@
-﻿using LibraryLib;
+﻿using MusicPlayer.Data;
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
@@ -7,7 +7,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
-namespace MusicPlayerApp
+namespace FolderMusic
 {
     public sealed partial class App : Application
     {
@@ -17,16 +17,17 @@ namespace MusicPlayerApp
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
 
-            CurrentSong.Current.Load();
-
-            Library.Current.SetIsForeground();
-            Library.Current.UpdatePlaylistsObjectANdCurrentPlaylistSongsObject();
-                
-            System.Diagnostics.Debug.WriteLine("AppConstructor");
+            FolderMusicDebug.DebugEvent.Id = "Foreground";
+            CurrentPlaySong.Current.Load();
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
+
+            //var backgroundColor = Application.Current.Resources["PhoneForegroundBrush"];
+            //BitmapImage img = Resources["DetailIcon"] as BitmapImage;
+            //System.Diagnostics.Debug.WriteLine(img.UriSource.AbsolutePath);
+
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
             {

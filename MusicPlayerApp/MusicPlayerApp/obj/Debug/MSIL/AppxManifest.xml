@@ -10,7 +10,7 @@
   <Identity Name="69e6029b-a318-49e1-9d96-dfe1f80190d7" Publisher="CN=Clemens" Version="1.0.0.0" ProcessorArchitecture="neutral" />
   <mp:PhoneIdentity PhoneProductId="69e6029b-a318-49e1-9d96-dfe1f80190d7" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>MusicPlayerApp</DisplayName>
+    <DisplayName>FolderMusic</DisplayName>
     <PublisherDisplayName>Clemens</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -22,8 +22,8 @@
     <Resource Language="DE-DE" />
   </Resources>
   <Applications>
-    <Application Id="App" Executable="MusicPlayerApp.exe" EntryPoint="MusicPlayerApp.App">
-      <m3:VisualElements DisplayName="FolderMusic" Square150x150Logo="Assets\Logo.png" Square44x44Logo="Assets\SmallLogo.png" Description="MusicPlayerApp" ForegroundText="light" BackgroundColor="transparent">
+    <Application Id="App" Executable="MusicPlayerApp.exe" EntryPoint="FolderMusic.App">
+      <m3:VisualElements DisplayName="FolderMusic" Square150x150Logo="Assets\Logo.png" Square44x44Logo="Assets\SmallLogo.png" Description="FolderMusic" ForegroundText="light" BackgroundColor="transparent">
         <m3:DefaultTile Wide310x150Logo="Assets\WideLogo.png" Square71x71Logo="Assets\Square71x71Logo.png">
           <m3:ShowNameOnTiles>
             <m3:ShowOn Tile="square150x150Logo" />
@@ -53,7 +53,6 @@
       <InProcessServer>
         <Path>CLRHost.dll</Path>
         <ActivatableClass ActivatableClassId="BackgroundTask.BackgroundAudioTask" ThreadingModel="both" />
-        <ActivatableClass ActivatableClassId="BackgroundTask.ForegroundCommunicator" ThreadingModel="both" />
       </InProcessServer>
     </Extension>
   </Extensions>
@@ -61,8 +60,8 @@
     <build:Item Name="TargetFrameworkMoniker" Value="WindowsPhoneApp,Version=v8.1" />
     <build:Item Name="VisualStudio" Version="14.0" />
     <build:Item Name="VisualStudioEdition" Value="Microsoft Visual Studio Enterprise 2015" />
-    <build:Item Name="OperatingSystem" Version="10.0.10586.0 (th2_release.151029-1700)" />
-    <build:Item Name="Microsoft.Build.AppxPackage.dll" Version="14.0.25123.0" />
+    <build:Item Name="OperatingSystem" Version="10.0.15063.0 (WinBuild.160101.0800)" />
+    <build:Item Name="Microsoft.Build.AppxPackage.dll" Version="14.0.25431.1" />
     <build:Item Name="ProjectGUID" Value="{D734C1FA-0FC5-4CCE-9BD8-903F62801397}" />
     <build:Item Name="Microsoft.Windows.UI.Xaml.81.Build.Tasks.dll" Version="14.0.22705.1" />
     <build:Item Name="MakePri.exe" Version="6.3.9600.17336 (winblue.150226-1500)" />
