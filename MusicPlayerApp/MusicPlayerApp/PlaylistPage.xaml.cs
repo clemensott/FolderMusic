@@ -5,6 +5,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Navigation;
 
 namespace MusicPlayerApp
 {
@@ -27,15 +28,18 @@ namespace MusicPlayerApp
             page = this;
             playlistPageOpen = true;
 
-            playlist = ViewModel.Current.OpenPlaylist;
-            DataContext = playlist;
-
             Library.Current.ScrollToIndex += Library_SrcollToIndex;
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            DataContext = playlist = e.Parameter as Playlist;
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-
+            ScrollToCurrentSong(lbxDefault);
+            ScrollToCurrentSong(lbxShuffle);
         }
 
         public static void GoBack()
@@ -85,13 +89,11 @@ namespace MusicPlayerApp
         private void LbxDefaultSongs_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
             lbxDefault = sender as ListBox;
-            ScrollToCurrentSong(lbxDefault);
         }
 
         private void LbxShuffleSongs_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
             lbxShuffle = sender as ListBox;
-            ScrollToCurrentSong(lbxShuffle);
         }
 
         private void ScrollToCurrentSong(ListBox lbx)
@@ -127,6 +129,13 @@ namespace MusicPlayerApp
         {
             await LoadingPage.NavigateTo();
             await playlist.SearchForNewSongs();
+            LoadingPage.GoBack();
+        }
+
+        private async void UpdateThisPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            await LoadingPage.NavigateTo();
+            await playlist.UpdateSongsFromStorage();
             LoadingPage.GoBack();
         }
 

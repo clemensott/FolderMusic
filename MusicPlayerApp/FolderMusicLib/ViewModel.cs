@@ -13,7 +13,6 @@ namespace FolderMusicLib
         private static ViewModel instance;
 
         private bool mainPageLoaded, sliderEntered = false;
-        private int openPlaylistIndex = 0;
         private SymbolIcon playIcon, pauseIcon;
 
         public static ViewModel Current
@@ -32,17 +31,7 @@ namespace FolderMusicLib
         public int PlaylistsIndex
         {
             get { return Library.Current.CurrentPlaylistIndex; }
-            set
-            {
-                openPlaylistIndex = value;
-                UpdatePlaylistIndex();
-            }
-        }
-
-        public int OpenPlaylistIndex
-        {
-            get { return openPlaylistIndex != -1 ? openPlaylistIndex : PlaylistsIndex; }
-            set { openPlaylistIndex = value; }
+            set { UpdatePlaylistIndex(); }
         }
 
         public double BackgroundPlayerPositionMilliseconds
@@ -105,19 +94,6 @@ namespace FolderMusicLib
         }
 
         public Playlist CurrentPlaylist { get { return Library.Current.CurrentPlaylist; } }
-
-        public Playlist OpenPlaylist
-        {
-            get { return Library.Current[OpenPlaylistIndex]; }
-            set
-            {
-                if (Library.Current.IsEmpty) return;
-
-                openPlaylistIndex = value.PlaylistIndex;
-
-                if (openPlaylistIndex == -1) openPlaylistIndex = Library.Current.CurrentPlaylistIndex;
-            }
-        }
 
         public List<Playlist> Playlists { get { return Library.Current.Playlists; } }
 

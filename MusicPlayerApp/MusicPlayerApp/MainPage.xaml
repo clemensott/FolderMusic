@@ -23,7 +23,7 @@
                     <ListBox x:Name="lbxCurrentPlaylist" Margin="0,-30,0,0" Background="Transparent"
                              SelectionMode="Single" ItemsSource="{Binding ShuffleSongs}"
                              SelectedIndex="{Binding ShuffleListIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                             DataContextChanged="lbxCurrentPlaylist_DataContextChanged">
+                             DataContextChanged="lbxCurrentPlaylist_DataContextChanged" SizeChanged="lbxCurrentPlaylist_SizeChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid Holding="CurrentPlaylistSong_Holding">
@@ -75,19 +75,23 @@
                                         </MenuFlyout>
                                     </FlyoutBase.AttachedFlyout>
 
-                                    <Image Grid.Column="0" Source="{Binding PlayIcon}" 
-                                           Width="55" Height="55" Tapped="PlayPlaylist_Tapped"/>
-
+                                    <StackPanel Orientation="Vertical">
+                                        <Image Source="{Binding PlayIcon}" Margin="0,0,0,5" 
+                                               Width="30" Height="30" Tapped="PlayPlaylist_Tapped"/>
+                                        <Image Source="{Binding DetailIcon}"
+                                               Width="30" Height="30" Tapped="DetailPlaylist_Tapped"/>
+                                    </StackPanel>
+                                    
                                     <Grid Grid.Column="1" Tapped="Playlist_Tapped">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <StackPanel Grid.Column="0" Orientation="Vertical">
+                                        <StackPanel Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Name}" Foreground="{Binding TextFirstBrush}"
-                                                   TextWrapping="WrapWholeWords"
-                                                   Margin="10,0,0,0" FontSize="20" VerticalAlignment="Center"/>
+                                                       TextWrapping="WrapWholeWords"
+                                                       Margin="10,0,0,0" FontSize="20" VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding SongCount}" 
                                                        Foreground="{Binding TextSecondBrush}"
                                                        Margin="10,0,0,0" FontSize="10" VerticalAlignment="Center"/>

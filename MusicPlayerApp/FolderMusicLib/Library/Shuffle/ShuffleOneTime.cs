@@ -15,7 +15,7 @@ namespace LibraryLib
             {
                 if (updatedSongs.Contains(oldSongs[shuffleList[i]]))
                 {
-                    shuffleList[i] = GetUpdatedSongsIndexFromSongs(i, oldSongs, updatedSongs);
+                    shuffleList[i] = GetUpdatedSongsIndexFromSongs(shuffleList[i], oldSongs, updatedSongs);
                 }
                 else shuffleList.RemoveAt(i);
             }

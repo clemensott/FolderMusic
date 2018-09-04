@@ -105,6 +105,7 @@
         <CommandBar>
             <CommandBar.PrimaryCommands>
                 <AppBarButton Label="Refresh" Icon="Refresh" Click="RefreshThisPlaylist_Click"/>
+                <AppBarButton Label="Update" Icon="Redo" Click="UpdateThisPlaylist_Click"/>
                 <AppBarButton Label="New Songs" Icon="Add" Click="SearchForNewSongs_Click"/>
                 <AppBarButton Label="Delete" Icon="Delete" Click="DeleteThisPlaylist_Click"/>
             </CommandBar.PrimaryCommands>

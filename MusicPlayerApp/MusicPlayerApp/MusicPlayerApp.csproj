@@ -105,6 +105,7 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\Dark\DetailButton.png" />
     <Content Include="Assets\Dark\loopAll.png" />
     <Content Include="Assets\Dark\loopCurrent.png" />
     <Content Include="Assets\Dark\loopOff.png" />
@@ -115,6 +116,7 @@
     <Content Include="Assets\Dark\shuffleComplete.png" />
     <Content Include="Assets\Dark\shuffleOff.png" />
     <Content Include="Assets\Dark\shuffleOn.png" />
+    <Content Include="Assets\Light\DetailButton.png" />
     <Content Include="Assets\Light\loopAll.png" />
     <Content Include="Assets\Light\loopCurrent.png" />
     <Content Include="Assets\Light\loopOff.png" />

@@ -1,0 +1,222 @@
+﻿<Page x:ConnectionId='1'
+    x:Class="MusicPlayerApp.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:MusicPlayerApp"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                                                           >
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Hub Grid.Row="0" Name="hub" Header="FolderMusic" Style="{StaticResource HHeader}" Margin="0,5,0,0">
+            <HubSection Background="Transparent" Margin="0,-10,0,0" DataContext="{Binding CurrentPlaylist}"
+                        Header="{Binding Name}" Style="{StaticResource HSHeader}">
+                <DataTemplate>
+                    <ListBox x:ConnectionId='14' x:Name="lbxCurrentPlaylist" Margin="0,-30,0,0" Background="Transparent"
+                             SelectionMode="Single" ItemsSource="{Binding ShuffleSongs}"
+                             SelectedIndex="{Binding ShuffleListIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                                                                                                    >
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid x:ConnectionId='15'                                      >
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <FlyoutBase.AttachedFlyout>
+                                        <MenuFlyout>
+                                            <MenuFlyoutItem x:ConnectionId='16' Text="Refresh"                          />
+                                            <MenuFlyoutItem x:ConnectionId='17' Text="Delete"                         />
+                                        </MenuFlyout>
+                                    </FlyoutBase.AttachedFlyout>
+
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock FontSize="20" Margin="0,-5,0,-2"
+                                               Text="{Binding Title}" Foreground="{Binding TextFirstBrush}"/>
+                                        <TextBlock FontSize="15" Margin="0,-2,0,0" Text="{Binding Artist}" 
+                                                   Foreground="{Binding TextSecondBrush}" />
+                                    </StackPanel>
+
+                                    <Rectangle Grid.Column="2" Fill="Transparent" Width="1500"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DataTemplate>
+            </HubSection>
+
+            <HubSection Header="Playlists" Style="{StaticResource HSHeader}" Margin="0,-10,0,0">
+                <DataTemplate>
+                    <ListBox x:Name="lbxPlaylists" SelectionMode="Single" Background="Transparent" Margin="0,-30,0,0"
+                             ItemsSource="{Binding Playlists}" SelectedIndex="{Binding PlaylistsIndex,Mode=TwoWay}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid x:ConnectionId='6'                                    >
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <FlyoutBase.AttachedFlyout>
+                                        <MenuFlyout>
+                                            <MenuFlyoutItem x:ConnectionId='7' Text="Refresh"                              />
+                                            <MenuFlyoutItem x:ConnectionId='8' Text="Update"                             />
+                                            <MenuFlyoutItem x:ConnectionId='9' Text="Search for New Songs"                                        />
+                                            <MenuFlyoutItem x:ConnectionId='10' Text="Delete"                             />
+                                        </MenuFlyout>
+                                    </FlyoutBase.AttachedFlyout>
+
+                                    <StackPanel Orientation="Vertical">
+                                        <Image x:ConnectionId='12' Source="{Binding PlayIcon}" Margin="0,0,0,5" 
+                                               Width="30" Height="30"                             />
+                                        <Image x:ConnectionId='13' Source="{Binding DetailIcon}"
+                                               Width="30" Height="30"                               />
+                                    </StackPanel>
+                                    
+                                    <Grid x:ConnectionId='11' Grid.Column="1"                         >
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" Foreground="{Binding TextFirstBrush}"
+                                                       TextWrapping="WrapWholeWords"
+                                                       Margin="10,0,0,0" FontSize="20" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding SongCount}" 
+                                                       Foreground="{Binding TextSecondBrush}"
+                                                       Margin="10,0,0,0" FontSize="10" VerticalAlignment="Center"/>
+                                        </StackPanel>
+
+                                        <Rectangle Grid.Column="1" Fill="Transparent" Width="1500"/>
+                                    </Grid>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DataTemplate>
+            </HubSection>
+        </Hub>
+
+        <Grid DataContext="{Binding CurrentPlaylist}" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid x:ConnectionId='5' DataContext="{Binding CurrentSong}"                            >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="{Binding Title}" FontSize="25" Margin="10,0" 
+                               TextWrapping="Wrap" Foreground="{Binding TextFirstBrush}"/>
+                    <Rectangle Fill="Transparent" Width="1500"/>
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="{Binding Artist}" FontSize="20" Margin="10,0" FontStyle="Italic"
+                               Foreground="{Binding TextSecondBrush}"/>
+                    <Rectangle Fill="Transparent" Width="1500"/>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid DataContext="{Binding CurrentPlaylist}" Grid.Column="0">
+                <Grid.Resources>
+                    <Storyboard x:Name="ShuffleImageTap">
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateY)"
+                                                   Storyboard.TargetName="ShuffleImage" AutoReverse="True">
+                            <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
+                            <EasingDoubleKeyFrame KeyTime="0:0:0.1" Value="-10"/>
+                        </DoubleAnimationUsingKeyFrames>
+                    </Storyboard>
+                </Grid.Resources>
+
+                <Image x:ConnectionId='4' Grid.Column="0" x:Name="ShuffleImage" Source="{Binding ShuffleIcon}"                        
+                                                                                                          >
+                    <Image.RenderTransform>
+                        <CompositeTransform TranslateY="0"/>
+                    </Image.RenderTransform>
+                </Image>
+            </Grid>
+
+            <Slider x:ConnectionId='2' Grid.Column="1" Height="60" VerticalAlignment="Top" Minimum="0" SmallChange="1000"
+                    Value="{Binding SliderValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                    Maximum="{Binding SliderMaximum}"                                    />
+
+            <TextBlock Grid.Column="1" Text="{Binding SliderValueText}" VerticalAlignment="Bottom"
+                       HorizontalAlignment="Left" FontSize="20"/>
+            <TextBlock Grid.Column="1" Text="{Binding SliderMaximumText}" VerticalAlignment="Bottom" 
+                       HorizontalAlignment="Right" FontSize="20"/>
+
+            <Grid DataContext="{Binding CurrentPlaylist}" Grid.Column="2">
+                <Grid.Resources>
+                    <Storyboard x:Name="LoopImageTap">
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateY)" 
+                                                   Storyboard.TargetName="LoopImage" AutoReverse="True">
+                            <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
+                            <EasingDoubleKeyFrame KeyTime="0:0:0.1" Value="-10"/>
+                        </DoubleAnimationUsingKeyFrames>
+                    </Storyboard>
+                </Grid.Resources>
+
+                <Image x:ConnectionId='3' Grid.Column="2" x:Name="LoopImage" Source="{Binding LoopIcon}"                     
+                                                                                                    >
+                    <Image.RenderTransform>
+                        <CompositeTransform TranslateY="0"/>
+                    </Image.RenderTransform>
+                </Image>
+            </Grid>
+        </Grid>
+    </Grid>
+
+    <Page.BottomAppBar>
+        <CommandBar>
+            <CommandBar.PrimaryCommands>
+                <AppBarButton x:ConnectionId='18' Label="Previous" Icon="Previous"                       />
+                <AppBarButton x:ConnectionId='19' Label="{Binding PlayPauseText}" Icon="{Binding PlayPauseIcon}"                        />
+                <AppBarButton x:ConnectionId='20' Label="Next" Icon="Next"                   />
+            </CommandBar.PrimaryCommands>
+            
+            <CommandBar.SecondaryCommands>
+                <AppBarButton x:ConnectionId='21' Label="Refresh Library"                                      />
+                <AppBarButton x:ConnectionId='22' Label="Update existing playlists"                                      />
+                <AppBarButton x:ConnectionId='23' Label="Add not existing playlists"                                      />
+                <AppBarButton x:ConnectionId='24' Label="TestFunktion"                           />
+                <AppBarButton x:ConnectionId='25' Label="TestFunktion2"                            />
+                <AppBarButton x:ConnectionId='26' Label="TestFunktion3"                            />
+                <AppBarButton x:ConnectionId='27' Label="TestFunktion4"                            />
+            </CommandBar.SecondaryCommands>
+        </CommandBar>
+    </Page.BottomAppBar>
+</Page>
+

@@ -37,7 +37,7 @@ namespace LibraryLib
 
         public string Artist
         {
-            get { return artist; }
+            get { return artist == "" ? "Unkown" : artist; }
             set { artist = value; }
         }
 
@@ -120,7 +120,7 @@ namespace LibraryLib
         private void SetTitleAndArtistByPath()
         {
             title = GetTitleFromPath();
-            artist = "Unkown";
+            artist = "";
         }
 
         private string GetTitleFromPath()

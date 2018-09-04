@@ -20,6 +20,7 @@ namespace MusicPlayerApp
     public sealed partial class MainPage : Page
     {
         private bool pauseClick = false, loopImageEntered = false, shuffleImageEntered = false;
+        private long loadedTicks;
         private Timer timer;
 
         private ListBox lbxCurrentPlaylist;
@@ -37,7 +38,7 @@ namespace MusicPlayerApp
             HardwareButtons.BackPressed += HardwareButtons_BackPressed;
             Window.Current.Activated += Current_Activated;
             BackgroundMediaPlayer.Current.CurrentStateChanged += BackgroundMediaPlayer_CurrentStateChanged;
-            Library.Current.ScrollToIndex += Library_ScroolToIndex;
+            Library.Current.ScrollToIndex += Library_ScrollToIndex;
 
             System.Diagnostics.Debug.WriteLine("MainPageConstructor");
         }
@@ -49,7 +50,8 @@ namespace MusicPlayerApp
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            Library_ScroolToIndex(Library.Current, Library.Current.CurrentPlaylist);
+            loadedTicks = DateTime.Now.Ticks;
+            Library_ScrollToIndex(Library.Current, Library.Current.CurrentPlaylist);
 
             ViewModel.Current.SetMainPageLoaded();
             SkipSongsPage.NavigateToIfSkipSongsExists();
@@ -170,7 +172,8 @@ namespace MusicPlayerApp
 
         private void Playlist_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            if (!PlaylistPage.Open) Frame.Navigate(typeof(PlaylistPage));
+            BackgroundCommunicator.SendPause();
+            Library.Current.CurrentPlaylist = (sender as Grid).DataContext as Playlist;
         }
 
         private void PlayPlaylist_Tapped(object sender, TappedRoutedEventArgs e)
@@ -181,6 +184,11 @@ namespace MusicPlayerApp
 
             Library.Current.CurrentPlaylist = playlist;
             ViewModel.Current.Play();
+        }
+
+        private void DetailPlaylist_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            if (!PlaylistPage.Open) Frame.Navigate(typeof(PlaylistPage), (sender as Image).DataContext);
         }
 
         private void PlaylistsPlaylist_Holding(object sender, HoldingRoutedEventArgs e)
@@ -288,7 +296,14 @@ namespace MusicPlayerApp
             lbx.ScrollIntoView(ViewModel.Current.CurrentPlaylist.CurrentSong);
         }
 
-        private async void Library_ScroolToIndex(object sender, Playlist e)
+        private void lbxCurrentPlaylist_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (loadedTicks + 10000000 < DateTime.Now.Ticks) return;
+
+            Library_ScrollToIndex(Library.Current, Library.Current.CurrentPlaylist);
+        }
+
+        private async void Library_ScrollToIndex(object sender, Playlist e)
         {
             if (lbxCurrentPlaylist == null || e.IsEmptyOrLoading) return;
 
@@ -299,7 +314,7 @@ namespace MusicPlayerApp
 
         private void CurrentSong_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            Library_ScroolToIndex(Library.Current, Library.Current.CurrentPlaylist);
+            Library_ScrollToIndex(Library.Current, Library.Current.CurrentPlaylist);
         }
 
         private void TestFunktion_Click(object sender, RoutedEventArgs e)

@@ -15,7 +15,7 @@
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="OK" HorizontalAlignment="Center" Click="Button_Click"/>
-                <Button Content="Refresh" Click="Button_Click_1"/>
+                <Button Content="Refresh" Click="Button_Click_1" Margin="10,0"/>
                 <Button Content="Delete" Click="Delete_Click"/>
             </StackPanel>
         </StackPanel>

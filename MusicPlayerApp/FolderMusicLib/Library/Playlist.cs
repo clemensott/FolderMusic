@@ -164,6 +164,9 @@ namespace LibraryLib
         public BitmapImage PlayIcon { get { return Library.Current.IsEmpty ? new BitmapImage() : Icons.PlayImage; } }
 
         [XmlIgnore]
+        public BitmapImage DetailIcon { get { return Library.Current.IsEmpty ? new BitmapImage() : Icons.Detail; } }
+
+        [XmlIgnore]
         public Song CurrentSong { get { return !IsEmptyOrLoading ? Songs[SongsIndex] : new Song(); } }
 
         public List<Song> Songs { get { return songs; } }
@@ -177,7 +180,7 @@ namespace LibraryLib
 
                 List<Song> list = new List<Song>();
 
-                foreach (int i in ShuffleList) list.Add(Songs[i]);
+                foreach (int i in ShuffleList) list.Add(Songs[i < 0 ? 0 : i]);
 
                 return list;
             }
@@ -362,10 +365,13 @@ namespace LibraryLib
 
         private List<Song> SetCurrentSongsOrderedWithAddedSongs(List<Song> currentSongs, List<Song> addSongs)
         {
-            if (addSongs.Count == 0) return currentSongs;
+            List<Song> updatedSongs = new List<Song>();
 
-            List<Song> updatedSongs = new List<Song>(currentSongs);
-            updatedSongs.AddRange(addSongs);
+            if (addSongs.Count != 0)
+            {
+                updatedSongs = new List<Song>(currentSongs);
+                updatedSongs.AddRange(addSongs);
+            }
 
             return GetOrderedSongs(updatedSongs);
         }
@@ -378,6 +384,7 @@ namespace LibraryLib
         public void RemoveSong(int songsIndex)
         {
             if (IsEmptyOrLoading) return;
+            if (Library.Current.IsForeground) BackgroundCommunicator.SendRemoveSong(PlaylistIndex, songsIndex);
 
             List<Song> updatedSongs = new List<Song>(Songs);
             updatedSongs.RemoveAt(songsIndex);
@@ -386,16 +393,15 @@ namespace LibraryLib
             songs = updatedSongs;
 
             if (SongsIndex > songsIndex) this.songsIndex--;
+            else if (SongsIndex == songsIndex) SongPositionMilliseconds = 0;
 
             if (Library.Current.IsForeground)
             {
-                BackgroundCommunicator.SendRemoveSong(PlaylistIndex, songsIndex);
-
                 UpdateSongsAndShuffleListSongs();
                 UpdateCurrentSong();
             }
 
-            Library.Current.DeleteEmptyPlaylists();
+            if (IsEmptyOrLoading) Library.Current.Delete(this);
         }
 
         private async Task<StorageFolder> GetStorageFolder()
@@ -477,11 +483,13 @@ namespace LibraryLib
             }
 
             addSong = CurrentSong;
-            songs = GetOrderedSongs(updatedSongs);
+            updatedSongs = GetOrderedSongs(updatedSongs);
             shuffleList = iShuffle.AddSongsToShuffleList(ShuffleList, Songs, updatedSongs);
+            songs = updatedSongs;
             songsIndex = Songs.IndexOf(addSong);
 
-            Library.Current.DeleteEmptyPlaylists();
+            if (IsEmptyOrLoading) Library.Current.Delete(this);
+
             UpdateAndSendToBackground();
         }
 

@@ -44,6 +44,8 @@ namespace BackgroundTask
                 else text = Library.Current.GetXmlText();
             }
 
+            BackgroundAudioTask.Current.ActivateSystemMediaTransportControl();
+
             Send(new ValueSet { { "XmlText", text } });
         }
 

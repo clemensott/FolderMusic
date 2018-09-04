@@ -24,5 +24,7 @@ namespace PlayerIcons
         public static BitmapImage ShuffleOff { get { return IconCollection.ShuffleOff; } }
 
         public static BitmapImage ShuffleOneTime { get { return IconCollection.ShuffleOneTime; } }
+
+        public static BitmapImage Detail { get { return IconCollection.Detail; } }
     }
 }
