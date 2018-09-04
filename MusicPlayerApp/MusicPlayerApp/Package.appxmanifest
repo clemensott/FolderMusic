@@ -29,7 +29,7 @@
         </m3:InitialRotationPreference>
       </m3:VisualElements>
       <Extensions>
-        <Extension Category="windows.backgroundTasks" EntryPoint="BackgroundAudioTask.BackgroundAudioTask">
+        <Extension Category="windows.backgroundTasks" EntryPoint="BackgroundTask.BackgroundAudioTask">
           <BackgroundTasks>
             <Task Type="audio" />
           </BackgroundTasks>
@@ -39,5 +39,6 @@
   </Applications>
   <Capabilities>
     <Capability Name="musicLibrary" />
+    <Capability Name="picturesLibrary" />
   </Capabilities>
 </Package>

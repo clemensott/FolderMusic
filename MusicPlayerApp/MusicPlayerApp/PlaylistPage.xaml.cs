@@ -1,133 +1,76 @@
 ﻿using LibraryLib;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using Windows.ApplicationModel.Core;
-using Windows.UI.Core;
+using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Navigation;
 
 namespace MusicPlayerApp
 {
     public sealed partial class PlaylistPage : Page
     {
         private static bool playlistPageOpen;
-        private static PlaylistPage page;
 
         private Playlist playlist;
-        private PlaylistPageViewModel viewModel;
+
+        private ListBox lbxDefault, lbxShuffle;
 
         public static bool Open { get { return playlistPageOpen; } }
-
-        public static PlaylistPage Current { get { return Open ? page : null; } }
 
         public PlaylistPage()
         {
             this.InitializeComponent();
-            page = this;
             playlistPageOpen = true;
 
-            playlist = App.ViewModel.OpenPlaylist;
-            viewModel = new PlaylistPageViewModel(playlist);
-            DataContext = viewModel;
+            Library.Current.ScrollToIndex += Library_SrcollToIndex;
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            DataContext = playlist = e.Parameter as Playlist;
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            playlistPageOpen = false;
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            viewModel.ScrollIntoLbxDefault();
-            viewModel.ScrollIntoLbxShuffle();
-        }
-
-        public static void GoBack()
-        {
-            playlistPageOpen = false;
-            page.Frame.GoBack();
+            ScrollToCurrentSong(lbxDefault);
+            ScrollToCurrentSong(lbxShuffle);
         }
 
         private void Shuffle_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            App.ViewModel.SetChangedCurrentPlaylistIndex();
-            viewModel.SetScrollLbxShuffle();
-
-            BackgroundCommunicator.SendShuffle(App.ViewModel.OpenPlaylistIndex);
+            playlist.SetNextShuffle();
         }
 
         private void Loop_Tapped(object sender, TappedRoutedEventArgs e)
         {
             playlist.SetNextLoop();
-            viewModel.UpdateLoopIcon();
-
-            if (App.ViewModel.IsOpenPlaylistCurrentPlaylist)
-            {
-                UiUpdate.LoopIcon();
-            }
-
-            BackgroundCommunicator.SendLoop(App.ViewModel.OpenPlaylistIndex);
         }
 
-        private async void RefreshSong_Click(object sender, RoutedEventArgs e)
+        private void RefreshSong_Click(object sender, RoutedEventArgs e)
         {
             Song song = (sender as MenuFlyoutItem).DataContext as Song;
 
-            await song.Refresh();
-
-            BackgroundCommunicator.SendSong(song);
-            song.UpdateTitleAndArtist();
+            song.Refresh();
         }
 
         private void DeleteSong_Click(object sender, RoutedEventArgs e)
         {
-            bool same = App.ViewModel.IsOpenPlaylistCurrentPlaylist;
             Song song = (sender as MenuFlyoutItem).DataContext as Song;
-            int songsIndex = playlist.Songs.IndexOf(song);
 
-            Library.Current.RemoveSongFromPlaylist(playlist, songsIndex);
-            BackgroundCommunicator.SendRemoveSong(App.ViewModel.OpenPlaylistIndex, songsIndex);
+            playlist.RemoveSong(playlist.Songs.IndexOf(song));
 
-            if (playlist.IsEmptyOrLoading)
-            {
-                UiUpdate.Playlists();
-                if (same) UiUpdate.CurrentPlaylistIndexAndRest();
-
-                GoBack();
-                return;
-            }
-
-            viewModel.UpdateDefaultSongs();
-            viewModel.UpdateShuffleSongsAndIcon();
-
-            playlist.UpdateSongCount();
-            if (same) UiUpdate.CurrentPlaylistSongs();
+            if (playlist.IsEmptyOrLoading) Frame.GoBack();
         }
 
-        private void DefaultSong_Tapped(object sender, TappedRoutedEventArgs e)
+        private void Song_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            bool same = App.ViewModel.IsOpenPlaylistCurrentPlaylist;
-            int songsIndex = playlist.Songs.IndexOf((sender as Grid).DataContext as Song);
-
-            BackgroundCommunicator.SendPlaylistPageTap(songsIndex);
-            DoSongTappedSame(same);
-        }
-
-        private void ShuffleSong_Tapped(object sender, TappedRoutedEventArgs e)
-        {
-            bool same = App.ViewModel.IsOpenPlaylistCurrentPlaylist;
-            playlist.SongsIndex = playlist.Songs.IndexOf((sender as Grid).DataContext as Song);
-
-            BackgroundCommunicator.SendPlaylistPageTap(playlist.SongsIndex);
-            DoSongTappedSame(same);
-        }
-
-        private void DoSongTappedSame(bool same)
-        {
-            App.ViewModel.CurrentPlaylist = playlist;
-
-            if (same) UiUpdate.CurrentPlaylistIndexAndRest();
-
-            GoBack();
+            Frame.GoBack();
         }
 
         private void CurrentPlaylistSong_Holding(object sender, HoldingRoutedEventArgs e)
@@ -136,141 +79,64 @@ namespace MusicPlayerApp
             FlyoutBase.ShowAttachedFlyout(sender as FrameworkElement);
         }
 
-        public void UpdateUi()
-        {
-            if (playlist.IsEmptyOrLoading)
-            {
-                GoBack();
-                return;
-            }
-
-            viewModel.UpdateDefaultSongs();
-            viewModel.UpdateShuffleSongsAndIcon();
-        }
-
         private void LbxDefaultSongs_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
-            viewModel.SetLbxDefault(sender as ListBox);
+            lbxDefault = sender as ListBox;
         }
 
         private void LbxShuffleSongs_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
-            viewModel.SetLbxShuffle(sender as ListBox);
-        }
-    }
-
-    class PlaylistPageViewModel : INotifyPropertyChanged
-    {
-        private bool scrollLbxShuffle = true;
-        private Playlist playlist;
-
-        private ListBox lbxDefault,lbxShuffle;
-
-        public int DefaultCurrentSongIndex
-        {
-            get { return playlist.SongsIndex; }
-            set { NotifyPropertyChanged("DefaultCurrentSongIndex"); }
+            lbxShuffle = sender as ListBox;
         }
 
-        public int ShuffleCurrentSongIndex
+        private void ScrollToCurrentSong(ListBox lbx)
         {
-            get { return playlist.ShuffleListIndex; }
-            set
+            if (lbx == null || !lbx.Items.Contains(playlist.CurrentSong)) return;
+
+            lbx.ScrollIntoView(playlist.CurrentSong);
+        }
+
+        private async void Library_SrcollToIndex(object sender, Playlist e)
+        {
+            if (lbxDefault == null || lbxShuffle == null) return;
+
+            while (lbxDefault.Items.Count < e.SongsIndex || lbxShuffle.Items.Count < e.ShuffleListIndex)
             {
-                NotifyPropertyChanged("ShuffleCurrentSongIndex");
-
-                if (scrollLbxShuffle)
-                {
-                    scrollLbxShuffle = false;
-                    ScrollIntoLbxShuffle();
-                }
+                await Task.Delay(10);
             }
+
+            lbxDefault.ScrollIntoView(lbxDefault.Items[e.SongsIndex]);
+            lbxShuffle.ScrollIntoView(lbxShuffle.Items[e.ShuffleListIndex]);
         }
 
-        public string Name { get { return playlist.Name; } }
-
-        public string RelativePath { get { return playlist.RelativePath; } }
-
-        public ImageSource ShuffleIcon { get { return playlist.ShuffleIcon; } }
-
-        public ImageSource LoopIcon { get { return playlist.LoopIcon; } }
-
-        public List<Song> DefaultSongs { get { return playlist.Songs; } }
-
-        public List<Song> ShuffleSongs { get { return playlist.GetShuffleSongs(); } }
-
-        public PlaylistPageViewModel(Playlist playlist)
+        private async void RefreshThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            this.playlist = playlist;
+            await LoadingPage.NavigateTo();
+            await playlist.LoadSongsFromStorage();
+            LoadingPage.GoBack();
+
+            if (playlist.IsEmptyOrLoading) Frame.GoBack();
         }
 
-        public void SetLbxDefault(ListBox listBox)
+        private async void SearchForNewSongs_Click(object sender, RoutedEventArgs e)
         {
-            lbxDefault = listBox;
+            await LoadingPage.NavigateTo();
+            await playlist.SearchForNewSongs();
+            LoadingPage.GoBack();
         }
 
-        public void ScrollIntoLbxDefault()
+        private async void UpdateThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            if (lbxDefault == null) return;
-
-            lbxDefault.ScrollIntoView(playlist.CurrentSong);
+            await LoadingPage.NavigateTo();
+            await playlist.UpdateSongsFromStorage();
+            LoadingPage.GoBack();
         }
 
-        public void ScrollIntoLbxShuffle()
+        private void DeleteThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            if (lbxShuffle == null) return;
+            Library.Current.Delete(playlist);
 
-            lbxShuffle.ScrollIntoView(playlist.CurrentSong);
-        }
-
-        public void SetLbxShuffle(ListBox listBox)
-        {
-            lbxShuffle = listBox;
-        }
-
-        public void SetScrollLbxShuffle()
-        {
-            scrollLbxShuffle = true;
-            App.ViewModel.SetChangedCurrentPlaylistIndex();
-        }
-
-        public void UpdateDefaultSongs()
-        {
-            NotifyPropertyChanged("DefaultSongs");
-        }
-
-        public void UpdateShuffleSongsAndIcon()
-        {
-            NotifyPropertyChanged("ShuffleSongs");
-            UpdateShuffleIcon();
-        }
-
-        public void UpdateShuffleIcon()
-        {
-            NotifyPropertyChanged("ShuffleIcon");
-        }
-
-        public void UpdateLoopIcon()
-        {
-            NotifyPropertyChanged("LoopIcon");
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private async void NotifyPropertyChanged(String propertyName)
-        {
-            try
-            {
-                if (null != PropertyChanged)
-                {
-                    await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                    {
-                        PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-                    }
-                    );
-                }
-            }
-            catch { }
+            Frame.GoBack();
         }
     }
 }

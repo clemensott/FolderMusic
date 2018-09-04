@@ -1,0 +1,10 @@
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\BackgroundTask\BackgroundTask.csproj;arm
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\FolderMusicDebug.csproj;arm
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\FolderMusicDebug.csproj;arm
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\FolderMusicDebug.csproj;arm
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicLib\FolderMusicLib.csproj;arm
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicLib\FolderMusicLib.csproj;arm
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\MusicPlayerApp\MusicPlayerApp.csproj;arm
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\PlayerIconsWP8.1\PlayerIconsWP8.1.csproj;arm
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\PlayerIconsWP8.1\PlayerIconsWP8.1.csproj;arm
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\PlayerIconsWP8.1\PlayerIconsWP8.1.csproj;arm

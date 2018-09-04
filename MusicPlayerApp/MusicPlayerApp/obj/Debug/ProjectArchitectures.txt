@@ -1,7 +1,10 @@
-E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\BackgroundAudioTask\BackgroundAudioTask.csproj;neutral
-E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\MusicPlayerApp\MusicPlayerApp.csproj;neutral
-E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlayerIconsWP8.1\PlayerIconsWP8.1.csproj;neutral
-E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlayerIconsWP8.1\PlayerIconsWP8.1.csproj;neutral
-E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlayerIconsWP8.1\PlayerIconsWP8.1.csproj;neutral
-E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlaylistSong\PlaylistSongLibraryLib.csproj;neutral
-E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\PlaylistSong\PlaylistSongLibraryLib.csproj;neutral
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\BackgroundTask.csproj;neutral
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\FolderMusicDebug.csproj;neutral
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\FolderMusicDebug.csproj;neutral
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\FolderMusicDebug.csproj;neutral
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\FolderMusicLib.csproj;neutral
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\FolderMusicLib.csproj;neutral
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\MusicPlayerApp\MusicPlayerApp.csproj;neutral
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\PlayerIconsWP8.1.csproj;neutral
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\PlayerIconsWP8.1.csproj;neutral
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\PlayerIconsWP8.1\PlayerIconsWP8.1.csproj;neutral

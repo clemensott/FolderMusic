@@ -1,0 +1,58 @@
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\bin\ARM\Debug\DebugFilterPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\bin\ARM\Debug\DebugPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\bin\ARM\Debug\FolderMusicDebug.xr.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\bin\ARM\Debug\FolderMusicDebug.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\bin\ARM\Debug\FolderMusicDebug.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\bin\ARM\Debug\FolderMusicDebug.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\DebugFilterPage.g.i.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\DebugFilterPage.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\DebugPage.g.i.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\DebugPage.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\XamlTypeInfo.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\DebugFilterPage.xaml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\DebugPage.xaml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\DebugFilterPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\DebugPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\XamlSaveStateFile.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\FolderMusicDebug.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\FolderMusicDebug.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\priconfig.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\priconfig.xml.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\layout.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\layout.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\resources.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\resources.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\pri.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\pri.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\qualifiers.txt
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\qualifiers.txt.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\obj\ARM\Debug\MultipleQualifiersPerDimensionFound.txt
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\bin\ARM\Debug\DebugFilterPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\bin\ARM\Debug\DebugPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\bin\ARM\Debug\FolderMusicDebug.xr.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\bin\ARM\Debug\FolderMusicDebug.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\bin\ARM\Debug\FolderMusicDebug.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\bin\ARM\Debug\FolderMusicDebug.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\DebugFilterPage.g.i.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\DebugFilterPage.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\DebugPage.g.i.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\DebugPage.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\XamlTypeInfo.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\DebugFilterPage.xaml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\DebugPage.xaml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\DebugFilterPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\DebugPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\XamlSaveStateFile.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\FolderMusicDebug.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\FolderMusicDebug.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\priconfig.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\priconfig.xml.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\layout.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\layout.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\resources.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\resources.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\pri.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\pri.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\qualifiers.txt
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\qualifiers.txt.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp - Vor InterfaceSystem\FolderMusicDebug\obj\ARM\Debug\MultipleQualifiersPerDimensionFound.txt

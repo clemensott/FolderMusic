@@ -1,0 +1,88 @@
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\FolderMusicLib.csprojResolveAssemblyReference.cache
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicLib.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicLib.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicLib.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\FolderMusicLib.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\FolderMusicLib.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\priconfig.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\priconfig.xml.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\layout.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\layout.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\resources.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\resources.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\pri.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\pri.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\qualifiers.txt
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\qualifiers.txt.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\bin\Debug\TagLib.Portable.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\bin\Debug\SkipSongsPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicLib.xr.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\SkipSongsPage.g.i.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\SkipSongsPage.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\XamlTypeInfo.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\XamlSaveStateFile.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\SkipSongsPage.xaml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\FolderMusicLib\obj\Debug\SkipSongsPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\SkipSongsPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicLib.xr.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicLib.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicLib.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicLib.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\FolderMusicLib.csprojResolveAssemblyReference.cache
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\SkipSongsPage.g.i.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\SkipSongsPage.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\XamlTypeInfo.g.cs
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\SkipSongsPage.xaml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\SkipSongsPage.xbf
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\XamlSaveStateFile.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\FolderMusicLib.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\FolderMusicLib.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\priconfig.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\priconfig.xml.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\layout.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\layout.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\resources.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\resources.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\pri.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\pri.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\qualifiers.txt
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\qualifiers.txt.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\SkipSongsPage.xbf
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicLib.xr.xml
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicLib.dll
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicLib.pdb
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicLib.pri
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.dll
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\PlayerIconsWP8.1.pri
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\FolderMusicLib.csprojResolveAssemblyReference.cache
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\SkipSongsPage.g.i.cs
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\SkipSongsPage.g.cs
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\XamlTypeInfo.g.cs
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\SkipSongsPage.xaml
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\SkipSongsPage.xbf
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\XamlSaveStateFile.xml
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\FolderMusicLib.dll
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\FolderMusicLib.pdb
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\priconfig.xml
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\priconfig.xml.intermediate
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\layout.resfiles
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\layout.resfiles.intermediate
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\resources.resfiles
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\resources.resfiles.intermediate
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\pri.resfiles
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\pri.resfiles.intermediate
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\qualifiers.txt
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\qualifiers.txt.intermediate
+C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\obj\Debug\MultipleQualifiersPerDimensionFound.txt
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicLib\bin\Debug\FolderMusicDebug.pri

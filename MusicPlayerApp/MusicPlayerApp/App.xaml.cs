@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibraryLib;
+using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
@@ -11,32 +12,16 @@ namespace MusicPlayerApp
     public sealed partial class App : Application
     {
         private TransitionCollection transitions;
-        private static ViewModel viewModel;
-
-        public static ViewModel ViewModel
-        {
-            get
-            {
-                if (viewModel == null)
-                {
-                    viewModel = new ViewModel();
-                }
-
-                return viewModel;
-            }
-        }
-
         public App()
         {
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
 
-            LibraryLib.Library.SavePlayCommand(false);
-            LibraryLib.Library.Current.LoadCurrentSong();
+            FolderMusicDebug.SaveTextClass.Id = "Foreground";
+            CurrentSong.Current.Load();
 
-            BackgroundCommunicator.SetReceivedEvent();
-
-            viewModel = new ViewModel();
+            Library.Current.SetIsForeground();
+            Library.Current.UpdatePlaylistsObjectANdCurrentPlaylistSongsObject();
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs e)
@@ -47,7 +32,6 @@ namespace MusicPlayerApp
                 this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
-
             Frame rootFrame = Window.Current.Content as Frame;
 
             if (rootFrame == null)
