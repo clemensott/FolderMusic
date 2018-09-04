@@ -41,9 +41,9 @@
 
                                     <StackPanel Orientation="Vertical">
                                         <TextBlock FontSize="20" Margin="0,-5,0,-2"
-                                               Text="{Binding Title}" Foreground="{Binding TextBrush}"/>
-                                        <TextBlock FontSize="15" Margin="0,-2,0,0"
-                                               Text="{Binding Artist}" Foreground="{Binding TextBrush}" />
+                                               Text="{Binding Title}" Foreground="{Binding TextFirstBrush}"/>
+                                        <TextBlock FontSize="15" Margin="0,-2,0,0" Text="{Binding Artist}" 
+                                                   Foreground="{Binding TextSecondBrush}" />
                                     </StackPanel>
 
                                     <Rectangle Grid.Column="2" Fill="Transparent" Width="1500"/>
@@ -69,6 +69,7 @@
                                     <FlyoutBase.AttachedFlyout>
                                         <MenuFlyout>
                                             <MenuFlyoutItem Text="Refresh" Click="RefreshPlaylist_Click"/>
+                                            <MenuFlyoutItem Text="Update" Click="UpdatePlaylist_Click"/>
                                             <MenuFlyoutItem Text="Search for New Songs" Click="SearchForNewSongsPlaylist_Click"/>
                                             <MenuFlyoutItem Text="Delete" Click="DeletePlaylist_Click"/>
                                         </MenuFlyout>
@@ -84,11 +85,12 @@
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel Grid.Column="0" Orientation="Vertical">
-                                            <TextBlock Text="{Binding Name}" Foreground="{Binding TextBrush}"
+                                            <TextBlock Text="{Binding Name}" Foreground="{Binding TextFirstBrush}"
                                                    TextWrapping="WrapWholeWords"
                                                    Margin="10,0,0,0" FontSize="20" VerticalAlignment="Center"/>
-                                            <TextBlock Text="{Binding SongCount}" Foreground="{Binding TextBrush}"
-                                                   Margin="10,0,0,0" FontSize="10" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding SongCount}" 
+                                                       Foreground="{Binding TextSecondBrush}"
+                                                       Margin="10,0,0,0" FontSize="10" VerticalAlignment="Center"/>
                                         </StackPanel>
 
                                         <Rectangle Grid.Column="1" Fill="Transparent" Width="1500"/>
@@ -119,7 +121,8 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="{Binding Title}" FontSize="25" Margin="10,0" TextWrapping="WrapWholeWords"/>
+                    <TextBlock Text="{Binding Title}" FontSize="25" Margin="10,0" 
+                               TextWrapping="Wrap" Foreground="{Binding TextFirstBrush}"/>
                     <Rectangle Fill="Transparent" Width="1500"/>
                 </Grid>
 
@@ -129,7 +132,8 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="{Binding Artist}" FontSize="20" Margin="10,0" FontStyle="Italic"/>
+                    <TextBlock Text="{Binding Artist}" FontSize="20" Margin="10,0" FontStyle="Italic"
+                               Foreground="{Binding TextSecondBrush}"/>
                     <Rectangle Fill="Transparent" Width="1500"/>
                 </Grid>
             </Grid>
@@ -200,8 +204,9 @@
             </CommandBar.PrimaryCommands>
             
             <CommandBar.SecondaryCommands>
-                <AppBarButton Label="Refresh every playlists" Click="RefreshEveryPlaylists_Click"/>
-                <AppBarButton Label="Search for new playlists" Click="SearchForNewPlaylists_Click"/>
+                <AppBarButton Label="Refresh Library" Click="ResetLibraryFromStorage_Click"/>
+                <AppBarButton Label="Update existing playlists" Click="UpdateExistingPlaylists_Click"/>
+                <AppBarButton Label="Add not existing playlists" Click="AddNotExistingPlaylists_Click"/>
                 <AppBarButton Label="TestFunktion" Click="TestFunktion_Click"/>
                 <AppBarButton Label="TestFunktion2" Click="TestFunktion_Click2"/>
                 <AppBarButton Label="TestFunktion3" Click="TestFunktion_Click3"/>

@@ -13,6 +13,7 @@ namespace FolderMusicLib
             if (playlist.PlaylistIndex == -1 || playlist.SongsIndex == -1) return;
 
             ValueSet valueSet = new ValueSet();
+            valueSet.Add("Path", playlist.CurrentSong.Path);
 
             if (playlist.Shuffle == ShuffleKind.Complete)
             {
@@ -32,6 +33,7 @@ namespace FolderMusicLib
 
             ValueSet valueSet = new ValueSet();
             valueSet.Add("CurrentPlaylistIndex", Library.Current.CurrentPlaylistIndex.ToString());
+            valueSet.Add("Path", Library.Current.CurrentPlaylist.AbsolutePath);
 
             Send(valueSet);
         }
@@ -74,6 +76,29 @@ namespace FolderMusicLib
             Send(valueSet);
         }
 
+        public static void SendGetXmlText()
+        {
+            Send(new ValueSet { { "GetXmlText", "" } });
+        }
+
+        public static void SendLoadXML()
+        {
+            Send(new ValueSet { { "LoadXML", Library.Current.GetXmlText() } });
+        }
+
+        public static void SendSongXML(Song song)
+        {
+            int playlistIndex, songsIndex;
+
+            if (!Library.Current.HavePlaylistIndexAndSongsIndex(song, out playlistIndex, out songsIndex)) return;
+            
+            ValueSet valueSet = new ValueSet();
+            valueSet.Add("SongXML", string.Format("{0};{1}", playlistIndex, songsIndex));
+            valueSet.Add("XML", XmlConverter.Serialize(song));
+
+            Send(valueSet);
+        }
+
         public static void SendPlaylistXML(Playlist playlist)
         {
             if (playlist.PlaylistIndex == -1) return;
@@ -86,49 +111,14 @@ namespace FolderMusicLib
             Send(valueSet);
         }
 
-        public static void SendGetXmlText()
-        {
-            Send(new ValueSet { { "GetXmlText", "" } });
-        }
-
-        public static void SendLoadXML()
-        {
-            ValueSet valueSet = new ValueSet { { "LoadXML", Library.Current.GetXmlText() } };
-
-            Send(valueSet);
-        }
-
-        public static void SendSongXML(Song song)
-        {
-            Tuple<int, int> playlistsIndexAndSongsIndex = Library.Current.GetPlaylistsIndexAndSongsIndex(song);
-            int playlistIndex = playlistsIndexAndSongsIndex.Item1;
-            int songsIndex = playlistsIndexAndSongsIndex.Item2;
-
-            if (playlistIndex == -1 || songsIndex == -1) return;
-
-            ValueSet valueSet = new ValueSet();
-            valueSet.Add("SongXML", string.Format("{0};{1}", playlistIndex, songsIndex));
-            valueSet.Add("XML", XmlConverter.Serialize(song));
-
-            Send(valueSet);
-        }
-
-        public static void SendSongXML(int playlistIndex, int songsIndex)
-        {
-            if (playlistIndex == -1 || songsIndex == -1) return;
-
-            ValueSet valueSet = new ValueSet();
-            valueSet.Add("SongXML", string.Format("{0};{1}", playlistIndex, songsIndex));
-            valueSet.Add("XML", XmlConverter.Serialize(Library.Current[playlistIndex][songsIndex]));
-
-            Send(valueSet);
-        }
-
         public static void SendRemoveSong(int playlistIndex, int songsIndex)
         {
             if (playlistIndex == -1 || songsIndex == -1) return;
 
-            ValueSet valueSet = new ValueSet { { "RemoveSong", string.Format("{0};{1}", playlistIndex, songsIndex) } };
+            ValueSet valueSet = new ValueSet();
+            valueSet.Add("RemoveSong", string.Format("{0};{1}", playlistIndex, songsIndex));
+            valueSet.Add("Path", Library.Current[playlistIndex][songsIndex].Path);
+
             Send(valueSet);
         }
 
@@ -136,7 +126,11 @@ namespace FolderMusicLib
         {
             if (playlist.PlaylistIndex == -1) return;
 
-            Send(new ValueSet { { "RemovePlaylist", playlist.PlaylistIndex.ToString() } });
+            ValueSet valueSet = new ValueSet();
+            valueSet.Add("RemovePlaylist", playlist.PlaylistIndex.ToString());
+            valueSet.Add("Path", playlist.AbsolutePath);
+
+            Send(valueSet);
         }
 
         private static void Send(ValueSet valueSet)
@@ -181,7 +175,7 @@ namespace FolderMusicLib
                     return true;
 
                 case "Skip":
-                    SkipSongs.AskAboutSkippedSong();
+                    SkipSongsPage.NavigateToIfSkipSongsExists();
                     return true;
             }
 
@@ -215,7 +209,7 @@ namespace FolderMusicLib
             ViewModel.Current.CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds = naturalDuration;
         }
 
-        private static void GetXmlText(ValueSet valueSet)
+        private async static void GetXmlText(ValueSet valueSet)
         {
             string text = valueSet["XmlText"].ToString();
 
@@ -224,9 +218,13 @@ namespace FolderMusicLib
             {
                 CurrentSong.Current.Unset();
                 Library.Current.SetLoaded();
-                SkipSongs.AskAboutSkippedSong();
+                await SkipSongs.Delete();
             }
-            else Library.Current.Load(text);
+            else
+            {
+                Library.Current.Load(text);
+                await SkipSongsPage.NavigateToIfSkipSongsExists();
+            }
         }
     }
 }

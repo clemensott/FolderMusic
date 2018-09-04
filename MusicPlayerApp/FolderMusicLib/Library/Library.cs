@@ -107,6 +107,12 @@ namespace LibraryLib
             playlists = new List<Playlist>();
         }
 
+        public void UpdatePlaylistsObjectANdCurrentPlaylistSongsObject()
+        {
+            playlists = new List<Playlist>(playlists);
+            CurrentPlaylist.UpdateSongsObject();
+        }
+
         public void SetIsForeground()
         {
             isForeground = true;
@@ -130,18 +136,49 @@ namespace LibraryLib
             return Playlists.IndexOf(playlist);
         }
 
-        public Tuple<int,int> GetPlaylistsIndexAndSongsIndex(Song song)
+        public bool HavePlaylistIndex(string playlistAbsolutePath,out int playlistIndex)
         {
-            int songsIndex;
+            Playlist[] playlists = Playlists.Where(x => x.AbsolutePath == playlistAbsolutePath).ToArray();
+            playlistIndex = -1;
 
-            for (int i = 0; i < Playlists.Count; i++)
+            if (playlists.Length != 1) return false;
+
+            playlistIndex = Playlists.IndexOf(playlists[0]);
+            return true;
+        }
+
+        public bool HavePlaylistIndexAndSongsIndex(string songPath, out int playlistIndex,out int songsIndex)
+        {
+            for (playlistIndex = 0; playlistIndex < Length; playlistIndex++)
             {
-                songsIndex = Playlists[i].Songs.IndexOf(song);
+                Song[] songs = Library.Current[playlistIndex].Songs.Where(x => x.Path == songPath).ToArray();
 
-                if (songsIndex != -1) return new Tuple<int, int>(i, songsIndex);
+                if (songs.Length == 1)
+                {
+                    songsIndex = Playlists[playlistIndex].Songs.IndexOf(songs[0]);
+                    return true;
+                }
             }
 
-            return new Tuple<int, int>(-1, -1);
+            playlistIndex = -1;
+            songsIndex = -1;
+
+            return false;
+        }
+
+        public bool HavePlaylistIndexAndSongsIndex(Song song, out int playlistIndex, out int songsIndex)
+        {
+            for (playlistIndex = 0; playlistIndex < Length; playlistIndex++)
+            {
+                songsIndex = Playlists[playlistIndex].Songs.IndexOf(song);
+
+                if (songsIndex != -1) return true;
+            }
+
+            playlistIndex = -1;
+            songsIndex = -1;
+
+            return false;
         }
 
         public void SetLoaded()
@@ -191,10 +228,14 @@ namespace LibraryLib
             loaded = true;
             currentPlaylistIndex = sc.CurrentPlaylistIndex == -2 ? 0 : sc.CurrentPlaylistIndex;
 
-            if (IsEmpty) await SaveLibray.Delete();
+            //if (IsEmpty)
+            //{
+            //    await SaveLibray.Delete();
+            //    LibraryIO.SaveText(DateTime.Now.Ticks.ToString(), "LibraryDeletedLoad.txt");
+            //}
         }
 
-        public async Task RefreshEveryPlaylist()
+        public async Task ResetLibraryFromStorage()
         {
             cancelLoading = false;
             ViewModel.Current.Pause();
@@ -214,7 +255,17 @@ namespace LibraryLib
             Playlists = new List<Playlist>(list);
         }
 
-        public async Task SearchForNewPlaylists()
+        public async Task UpdateExistingPlaylists()
+        {
+            for (int i = Length - 1; i >= 0; i--)
+            {
+                if (CanceledLoading) return;
+
+                await Playlists[i].UpdateSongsFromStorage();
+            }
+        }
+
+        public async Task AddNotExistingPlaylists()
         {
             int updatedCurrentPlaylistIndex = 0;
             string currentPlaylistAbsolutePath = CurrentPlaylist.AbsolutePath;
@@ -296,12 +347,6 @@ namespace LibraryLib
             await sc.Save();
         }
 
-        public void RemoveSongFromPlaylist(Playlist playlist, int songsIndex)
-        {
-            playlist.RemoveSong(songsIndex);
-            DeleteEmptyPlaylists();
-        }
-
         private void DeleteEmptyPlaylists(ref List<Playlist> playlists)
         {
             for (int i = playlists.Count - 1; i >= 0; i--)
@@ -310,7 +355,7 @@ namespace LibraryLib
             }
         }
 
-        private void DeleteEmptyPlaylists()
+        public void DeleteEmptyPlaylists()
         {
             for (int i = playlists.Count - 1; i >= 0; i--)
             {
@@ -321,6 +366,8 @@ namespace LibraryLib
         public void Delete(Playlist playlist)
         {
             if (IsEmpty || playlist.PlaylistIndex == -1) return;
+
+            BackgroundCommunicator.SendRemovePlaylist(playlist);
 
             Playlist oldCurrentPlaylist = CurrentPlaylist;
             playlists.Remove(playlist);
@@ -337,6 +384,7 @@ namespace LibraryLib
                 {
                     CurrentSong.Current.Unset();
                     SaveLibray.Delete();
+                    LibraryIO.SaveText(DateTime.Now.Ticks.ToString(), "LibraryDeletedDelete.txt");
                 }
             }
         }
@@ -354,6 +402,7 @@ namespace LibraryLib
             {
                 CurrentPlaylistIndex = newCurrentPlaylistIndex;
             }
+            else CurrentPlaylistIndex = CurrentPlaylistIndex;
         }
 
         public void FireScrollEvent(Playlist playlist)

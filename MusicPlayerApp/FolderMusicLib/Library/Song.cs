@@ -48,7 +48,13 @@ namespace LibraryLib
         }
 
         [XmlIgnore]
-        public Brush TextBrush { get { return Playlist.TextBrush; } }
+        public string RelativePath { get { return Playlist.GetRelativePath(path); } }
+
+        [XmlIgnore]
+        public Brush TextFirstBrush { get { return Playlist.TextFirstBrush; } }
+
+        [XmlIgnore]
+        public Brush TextSecondBrush { get { return Playlist.TextSecondBrush; } }
 
         public Song()
         {
@@ -146,6 +152,23 @@ namespace LibraryLib
         public void SetFailed()
         {
             failed = true;
+            SaveFailed();
+        }
+
+        private async void SaveFailed()
+        {
+            string filename = "SongFailed.txt";
+            string text = "";
+
+            try
+            {
+                text = await LibraryIO.LoadText(filename) + "\n";
+            }
+            catch { }
+
+            text += DateTime.Now.Ticks.ToString() + ";" + RelativePath;
+
+            await LibraryIO.SaveText(text, filename);
         }
 
         public void UpdateTitleAndArtist()

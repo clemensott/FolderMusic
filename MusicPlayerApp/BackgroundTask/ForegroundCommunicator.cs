@@ -1,7 +1,6 @@
 ﻿using FolderMusicLib;
 using LibraryLib;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Windows.Foundation.Collections;
 using Windows.Media.Playback;
 
@@ -86,6 +85,10 @@ namespace BackgroundTask
                     GetPlaylistsAndSongsIndexAndShuffle(valueSet);
                     return true;
 
+                case "CurrentPlaylistIndex":
+                    SetCurrentPlaylistIndex(valueSet);
+                    return true;
+
                 case "Play":
                     BackgroundAudioTask.Current.Play();
                     return true;
@@ -102,16 +105,8 @@ namespace BackgroundTask
                     GetShuffle(valueSet);
                     return true;
 
-                case "CurrentPlaylistIndex":
-                    GetCurrentPlaylistIndex(valueSet);
-                    return true;
-
                 case "GetXmlText":
                     SendXmlText();
-                    return true;
-
-                case "PlaylistXML":
-                    GetPlaylistXML(valueSet);
                     return true;
 
                 case "LoadXML":
@@ -120,6 +115,10 @@ namespace BackgroundTask
 
                 case "SongXML":
                     GetSongXML(valueSet);
+                    return true;
+
+                case "PlaylistXML":
+                    GetPlaylistXML(valueSet);
                     return true;
 
                 case "RemoveSong":
@@ -138,9 +137,13 @@ namespace BackgroundTask
         {
             string currentSongPath = CurrentSong.Path;
 
+            string path = valueSet["Path"].ToString();
             string[] parts = valueSet["PlaylistsAndSongsIndex"].ToString().Split(';');
             int playlistIndex = int.Parse(parts[0]);
             int songsIndex = int.Parse(parts[1]);
+
+            if (Library.Current[playlistIndex][songsIndex].Path != path &&
+                !Library.Current.HavePlaylistIndexAndSongsIndex(path, out playlistIndex, out songsIndex)) return;
 
             Library.Current.CurrentPlaylistIndex = playlistIndex;
             Library.Current.CurrentPlaylist.SongsIndex = songsIndex;
@@ -152,9 +155,13 @@ namespace BackgroundTask
         {
             string currentSongPath = CurrentSong.Path;
 
+            string path = valueSet["Path"].ToString();
             string[] parts = valueSet["PlaylistsAndSongsIndexAndShuffle"].ToString().Split(';');
             int playlistIndex = int.Parse(parts[0]);
             int songsIndex = int.Parse(parts[1]);
+
+            if (Library.Current[playlistIndex][songsIndex].Path != path &&
+                !Library.Current.HavePlaylistIndexAndSongsIndex(path, out playlistIndex, out songsIndex)) return;
 
             Library.Current.CurrentPlaylistIndex = playlistIndex;
             Library.Current.CurrentPlaylist.SongsIndex = songsIndex;
@@ -164,93 +171,120 @@ namespace BackgroundTask
             PlaySongIfOther(currentSongPath);
         }
 
-        private async static void GetLoop(ValueSet valueSet)
+        private static void SetCurrentPlaylistIndex(ValueSet valueSet)
+        {
+            string currentSongPath = CurrentSong.Path;
+
+            int playlistIndex = int.Parse(valueSet["CurrentPlaylistIndex"].ToString());
+            string path = valueSet["Path"].ToString();
+
+            if (Library.Current[playlistIndex].AbsolutePath != path &&
+                !Library.Current.HavePlaylistIndex(path, out playlistIndex)) return;
+
+            Library.Current.CurrentPlaylistIndex = playlistIndex;
+
+            PlaySongIfOther(currentSongPath);
+
+            Library.Current.SaveAsync();
+        }
+
+        private static void GetLoop(ValueSet valueSet)
         {
             int playlistIndex = int.Parse(valueSet["Loop"].ToString());
 
             Library.Current[playlistIndex].Loop = XmlConverter.Deserialize<LoopKind>(valueSet["Kind"].ToString());
             BackgroundAudioTask.Current.SetLoopToBackgroundPlayer();
 
-            await Library.Current.SaveAsync();
+            Library.Current.SaveAsync();
         }
 
-        private async static void GetShuffle(ValueSet valueSet)
+        private static void GetShuffle(ValueSet valueSet)
         {
             int playlistIndex = int.Parse(valueSet["Shuffle"].ToString());
 
             Library.Current[playlistIndex].Shuffle = XmlConverter.Deserialize<ShuffleKind>(valueSet["Kind"].ToString());
             Library.Current[playlistIndex].ShuffleList = XmlConverter.Deserialize<List<int>>(valueSet["List"].ToString());
 
-            await Library.Current.SaveAsync();
+            Library.Current.SaveAsync();
         }
 
-        private async static void GetCurrentPlaylistIndex(ValueSet valueSet)
+        private static void GetLoadXML(ValueSet valueSet)
         {
             string currentSongPath = CurrentSong.Path;
 
-            Library.Current.CurrentPlaylistIndex = int.Parse(valueSet["CurrentPlaylistIndex"].ToString());
-
-            PlaySongIfOther(currentSongPath);
-
-            await Library.Current.SaveAsync();
-        }
-
-        private async static void GetPlaylistXML(ValueSet valueSet)
-        {
-            string currentSongPath = CurrentSong.Path;
-
-            int playlistIndex = int.Parse(valueSet["PlaylistXML"].ToString());
-
-            Library.Current[playlistIndex] = XmlConverter.Deserialize<Playlist>(valueSet["XML"].ToString());
-            PlaySongIfOther(currentSongPath);
-
-            await Library.Current.SaveAsync();
-        }
-
-        private async static void GetLoadXML(ValueSet valueSet)
-        {
             Library.Current.Load(valueSet["LoadXML"].ToString());
-            BackgroundAudioTask.Current.SetCurrentSong();
 
-            await Library.Current.SaveAsync();
+            PlaySongIfOther(currentSongPath);
+
+            Library.Current.SaveAsync();
         }
 
-        private static async void GetSongXML(ValueSet valueSet)
+        private static void GetSongXML(ValueSet valueSet)
         {
             string currentSongPath = CurrentSong.Path;
 
             string[] parts = valueSet["SongXML"].ToString().Split(';');
             int playlistIndex = int.Parse(parts[0]);
             int songsIndex = int.Parse(parts[1]);
+            Song song = XmlConverter.Deserialize<Song>(valueSet["XML"].ToString());
 
-            Library.Current[playlistIndex][songsIndex] = XmlConverter.Deserialize<Song>(valueSet["XML"].ToString());
+            if (Library.Current[playlistIndex][songsIndex].Path != song.Path && 
+                !Library.Current.HavePlaylistIndexAndSongsIndex(song.Path, out playlistIndex, out songsIndex)) return;
+
+            Library.Current[playlistIndex][songsIndex] = song;
             PlaySongIfOther(currentSongPath);
 
-            await Library.Current.SaveAsync();
+            Library.Current.SaveAsync();
         }
 
-        private static async void GetRemoveSong(ValueSet valueSet)
+        private static void GetPlaylistXML(ValueSet valueSet)
         {
             string currentSongPath = CurrentSong.Path;
 
+            int playlistIndex = int.Parse(valueSet["PlaylistXML"].ToString());
+            Playlist playlist = XmlConverter.Deserialize<Playlist>(valueSet["XML"].ToString());
+
+            if (Library.Current[playlistIndex].AbsolutePath != playlist.AbsolutePath &&
+                !Library.Current.HavePlaylistIndex(playlist.AbsolutePath, out playlistIndex)) return;
+
+            Library.Current[playlistIndex] = playlist;
+            PlaySongIfOther(currentSongPath);
+
+            Library.Current.SaveAsync();
+        }
+
+        private static void GetRemoveSong(ValueSet valueSet)
+        {
+            string currentSongPath = CurrentSong.Path;
+
+            string path = valueSet["Path"].ToString();
             string[] parts = valueSet["RemoveSong"].ToString().Split(';');
             int playlistIndex = int.Parse(parts[0]);
             int songsIndex = int.Parse(parts[1]);
 
-            Library.Current.RemoveSongFromPlaylist(Library.Current[playlistIndex], songsIndex);
+            if (Library.Current[playlistIndex][songsIndex].Path != path &&
+                !Library.Current.HavePlaylistIndexAndSongsIndex(path, out playlistIndex, out songsIndex)) return;
+
+            Library.Current[playlistIndex].RemoveSong(songsIndex);
             PlaySongIfOther(currentSongPath);
 
-            await Library.Current.SaveAsync();
+            Library.Current.SaveAsync();
         }
 
-        private static async void GetRemovePlaylist(ValueSet valueSet)
+        private static void GetRemovePlaylist(ValueSet valueSet)
         {
             string currentSongPath = CurrentSong.Path;
 
-            Library.Current.DeleteAt(int.Parse(valueSet["RemovePlaylist"].ToString()));
+            int playlistIndex = int.Parse(valueSet["RemovePlaylist"].ToString());
+            string path = valueSet["Path"].ToString();
+
+            if (Library.Current[playlistIndex].AbsolutePath != path &&
+                !Library.Current.HavePlaylistIndex(path, out playlistIndex)) return;
+
+            Library.Current.DeleteAt(playlistIndex);
             PlaySongIfOther(currentSongPath);
             
-            await Library.Current.SaveAsync();
+            Library.Current.SaveAsync();
         }
 
         private static void PlaySongIfOther(string path)

@@ -90,13 +90,16 @@
     <Compile Include="Library\Library.cs" />
     <Compile Include="Library\Playlist.cs" />
     <Compile Include="Library\SaveLibrary.cs" />
+    <Compile Include="Library\SkipSongs.cs" />
     <Compile Include="Library\Song.cs" />
     <Compile Include="Library\Shuffle\ShuffleOff.cs" />
     <Compile Include="Library\Shuffle\ShuffleOneTime.cs" />
     <Compile Include="Library\LibraryIO.cs" />
+    <Compile Include="SkipSongsPage.xaml.cs">
+      <DependentUpon>SkipSongsPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Library\SkipSongs.cs" />
     <Compile Include="XmlConverter.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -113,6 +116,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="SkipSongsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>

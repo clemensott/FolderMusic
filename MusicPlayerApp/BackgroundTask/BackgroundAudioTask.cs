@@ -10,13 +10,18 @@ namespace BackgroundTask
 {
     public sealed class BackgroundAudioTask : IBackgroundTask
     {
+        private const SystemMediaTransportControlsButton defaultPressedButton = SystemMediaTransportControlsButton.ChannelDown;
+
         private static BackgroundAudioTask task;
         private BackgroundTaskDeferral deferral;
         private SystemMediaTransportControls systemMediaTransportControl;
-        private static SystemMediaTransportControlsButton defaultPressedButton = SystemMediaTransportControlsButton.ChannelDown;
+
+        private bool autoPlay = false, pauseAllowed = true, playNext = true, saved;
+        private long lastTicks;
+        private Song openSong;
         private static SystemMediaTransportControlsButton lastPressedButton = defaultPressedButton;
 
-        private bool autoPlay = false, pauseAllowed = true, playNext = true;
+        private string id;
 
         public static BackgroundAudioTask Current { get { return task; } }
 
@@ -40,9 +45,17 @@ namespace BackgroundTask
 
         public void Run(IBackgroundTaskInstance taskInstance)
         {
-            System.Diagnostics.Debug.WriteLine("BackgroundAudioTask Run wird ausgeführt");
+            id = taskInstance.InstanceId.ToString();
+            SaveText(Convert.ToUInt32(new Random().Next(10, 1000)), DateTime.Now.Ticks, "Run", id,
+                taskInstance.TriggerDetails == null ? "" : taskInstance.TriggerDetails);
+            /*SaveText(Convert.ToUInt32(new Random().Next(10, 100)), DateTime.Now.Ticks, lastPressedButton,
+                Library.IsLoaded, saved, task == null, lastTicks);      //      */
 
             task = this;
+            saved = false;
+
+            lastTicks = DateTime.Now.Ticks;
+
             ForegroundCommunicator.SetReceivedEvent();
 
             systemMediaTransportControl = SystemMediaTransportControls.GetForCurrentView();
@@ -67,10 +80,11 @@ namespace BackgroundTask
 
         private async void LoadCurrentSongAndLibrary()
         {
-            if (lastPressedButton == SystemMediaTransportControlsButton.Play)
+            if (true/*lastPressedButton == SystemMediaTransportControlsButton.Play*/)
             {
                 await LibraryLib.CurrentSong.Current.Load();
-                SetCurrentSong(true);
+                Play();
+                await LoadLibraryData();
                 return;
             }
 
@@ -81,7 +95,7 @@ namespace BackgroundTask
             {
                 MediaTransportControlButtonPressed(lastPressedButton);
             }
-            else SetCurrentSong(false);
+            else Play();
         }
 
         private async Task LoadLibraryData()
@@ -90,6 +104,7 @@ namespace BackgroundTask
             SetLoopToBackgroundPlayer();
 
             ForegroundCommunicator.SendXmlText();
+            SaveText(Convert.ToUInt32(new Random().Next(10, 1000)), DateTime.Now.Ticks,"Load", id);
         }
 
         private void SetSystemMediaTransportControlDefaultSettings()
@@ -114,8 +129,9 @@ namespace BackgroundTask
         {
             autoPlay = true;
 
-            if (BackgroundMediaPlayer.Current.NaturalDuration.TotalMilliseconds == 0) SetCurrentSong(true);
-            else BackgroundMediaPlayer.Current.Play();
+            if (BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Closed ||
+                BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Stopped) SetCurrentSong(true);
+            else if (BackgroundMediaPlayer.Current.CurrentState != MediaPlayerState.Playing) BackgroundMediaPlayer.Current.Play();
 
             systemMediaTransportControl.PlaybackStatus = MediaPlaybackStatus.Playing;
         }
@@ -127,6 +143,8 @@ namespace BackgroundTask
 
             systemMediaTransportControl.PlaybackStatus = MediaPlaybackStatus.Paused;
             ForegroundCommunicator.SendPause();
+
+            LibraryLib.CurrentSong.Current.Save();
         }
 
         public void Previous()
@@ -158,22 +176,26 @@ namespace BackgroundTask
 
         public void SetCurrentSong(bool autoPlay)
         {
-            if (CurrentSong.IsEmptyOrLoading) return;
+            if (CurrentSong.IsEmptyOrLoading || CurrentSong == openSong) return;
 
             StorageFile file;
             this.autoPlay = autoPlay;
             pauseAllowed = !autoPlay;
-            BackgroundMediaPlayer.Current.AutoPlay = true;
+            BackgroundMediaPlayer.Current.AutoPlay = false;
 
             try
             {
                 file = CurrentSong.GetStorageFile();
                 BackgroundMediaPlayer.Current.SetFileSource(file);
+                SaveText(Convert.ToUInt32(new Random().Next(10, 1000)), DateTime.Now.Ticks, "Set", id);
             }
             catch
             {
+                SaveText(Convert.ToUInt32(new Random().Next(10, 1000)), DateTime.Now.Ticks, "Catch", id);
                 SkipSongs.AddSkipSongAndSave(CurrentSong);
                 Task.Delay(100).Wait();
+
+                BackgroundMediaPlayer.Current.SetUriSource(null);
                 ForegroundCommunicator.SendSkip();
 
                 if (playNext) Next(true);
@@ -183,6 +205,9 @@ namespace BackgroundTask
 
         private async void BackgroundMediaPlayer_MediaOpened(MediaPlayer sender, object args)
         {
+            SaveText(Convert.ToUInt32(new Random().Next(10, 1000)), DateTime.Now.Ticks, "Open", id);
+
+            openSong = CurrentSong;
             sender.Position = TimeSpan.FromMilliseconds(CurrentSongPositionTotalMilliseconds);
 
             if (autoPlay) sender.Play();
@@ -218,6 +243,7 @@ namespace BackgroundTask
 
         private async void BackgroundMediaPlayer_MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
         {
+            SaveText(Convert.ToUInt32(new Random().Next(10, 1000)), DateTime.Now.Ticks, "Fail", id);
             Task.Delay(100).Wait();
 
             if (args.Error == MediaPlayerError.Unknown)
@@ -248,8 +274,30 @@ namespace BackgroundTask
         private void MediaTransportControlButtonPressed(SystemMediaTransportControls sender,
             SystemMediaTransportControlsButtonPressedEventArgs args)
         {
+            SaveText(4, DateTime.Now.Ticks, Library.IsLoaded, args.Button.ToString(), id);
+            lastPressedButton = args.Button;
+
+            int beforeShuffleListIndex = Library.Current.CurrentPlaylist.ShuffleListIndex;
+
             if (Library.IsLoaded) MediaTransportControlButtonPressed(args.Button);
             else lastPressedButton = args.Button;
+
+            if (!Library.IsLoaded)
+            {
+                SaveText(1, DateTime.Now.Ticks, Library.IsLoaded, lastPressedButton.ToString());
+            }
+
+            long nowTicks = DateTime.Now.Ticks;
+            if (nowTicks - lastTicks < 1000000)
+            {
+                SaveText(2, nowTicks, "DeltaTicks: ", nowTicks - lastTicks);
+                lastTicks = nowTicks;
+            }
+
+            if (Math.Abs(Library.Current.CurrentPlaylist.ShuffleListIndex - beforeShuffleListIndex) > 1)
+            {
+                SaveText(3, DateTime.Now.Ticks, "DeltaIndex: ", Library.Current.CurrentPlaylist.ShuffleListIndex - beforeShuffleListIndex);
+            }
         }
 
         private void MediaTransportControlButtonPressed(SystemMediaTransportControlsButton button)
@@ -278,37 +326,40 @@ namespace BackgroundTask
         {
             BackgroundMediaPlayer.Shutdown();
             deferral.Complete();
+
+            if (saved) return;
+
+            saved = true;
+            LibraryLib.CurrentSong.Current.Save();
+            Library.Current.SaveAsync();
         }
 
         private void OnCanceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason)
         {
-            LibraryLib.CurrentSong.Current.Save();
-            Library.Current.SaveAsync();
-
             BackgroundMediaPlayer.Shutdown();
             deferral.Complete();
+
+            if (saved) return;
+
+            saved = true;
+            LibraryLib.CurrentSong.Current.Save();
+            Library.Current.SaveAsync();
         }
 
-        private async Task SaveText(object obj)
+        private async Task SaveText(uint no, params object[] objs)
         {
             try
             {
-                StorageFile file = await ApplicationData.Current.LocalFolder.CreateFileAsync("Text.txt", 
-                    CreationCollisionOption.ReplaceExisting);
+                string text = "";
+                string filename = string.Format("Text{0}.txt", no);
+                StorageFile file = await ApplicationData.Current.LocalFolder.
+                    CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting);
 
-                await PathIO.WriteTextAsync(file.Path, obj.ToString());
-            }
-            catch { }
-        }
+                foreach (object obj in objs) text += obj.ToString() + ";";
 
-        private async Task SaveText2(object obj)
-        {
-            try
-            {
-                StorageFile file = await ApplicationData.Current.LocalFolder.CreateFileAsync("Text2.txt",
-                    CreationCollisionOption.ReplaceExisting);
+                text = text.TrimEnd(';');
 
-                await PathIO.WriteTextAsync(file.Path, obj.ToString());
+                await PathIO.WriteTextAsync(file.Path, text);
             }
             catch { }
         }

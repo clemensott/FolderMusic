@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
 namespace ConsoleTesten
 {
@@ -6,11 +7,11 @@ namespace ConsoleTesten
     {
         static void Main(string[] args)
         {
-            int f = 50, width, height = 360;
-            int xb = 25, yb = 25, xg = (92 + xb * 2) * f, yg = (92 + yb * 2) * f;
+            int f = 50, width, height = 1920;
+            int xb = 25, yb = 72, xg = (92 + xb * 2) * f, yg = (92 + yb * 2) * f;
             Brush brush = Brushes.White;
 
-            width = height * xg / yg;
+            width = Convert.ToInt32(height * xg / Convert.ToDouble(yg));
 
             using (Bitmap bmp = new Bitmap(xg, yg))
             {
@@ -27,7 +28,7 @@ namespace ConsoleTesten
                     new Point((70 + xb) * f, (10 + yb) * f), new Point((74 + xb) * f, (14 + yb) * f),
                     new Point((74 + xb) * f, (20 + yb) * f), new Point((41 + xb) * f, (34 + yb) * f),
                     new Point((41 + xb) * f, (54 + yb) * f), new Point((4 + xb) * f, (54 + yb) * f),
-                    new Point((0 + xb) * f, (48 + yb) * f), new Point((0 + xb) * f, (14 + yb) * f) };
+                    new Point((0 + xb) * f, (50 + yb) * f), new Point((0 + xb) * f, (14 + yb) * f) };
                 g.FillPolygon(brush, ordnerPoints1);
 
                 //Ordner rechts unten
@@ -69,8 +70,10 @@ namespace ConsoleTesten
                 Rectangle eckeRechtsUnten = new Rectangle((0 + xb) * f, (46 + yb) * f, 8 * f, 8 * f);
                 g.FillEllipse(brush, eckeRechtsUnten);
 
-                string path = string.Format(@"G:\Users\Clemens\Desktop\logo {0}x{1}.bmp", width, height);
-                new Bitmap(bmp, width, height).Save(path);
+                Bitmap bmpOut = new Bitmap(bmp, width, height);
+                string path = string.Format(@"C:\Users\Clemens\Desktop\logo {0}x{1}.bmp", width, height);
+
+                bmpOut.Save(path);
                 //System.Diagnostics.Process.Start(path);
             }
         }

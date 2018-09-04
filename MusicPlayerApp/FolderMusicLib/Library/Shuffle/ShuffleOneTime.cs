@@ -11,12 +11,16 @@ namespace LibraryLib
 
         public List<int> AddSongsToShuffleList(List<int> shuffleList, List<Song> oldSongs, List<Song> updatedSongs)
         {
-            for (int i = 0; i < shuffleList.Count; i++)
+            for (int i = shuffleList.Count - 1; i >= 0; i--)
             {
-                shuffleList[i] = GetUpdatedSongsIndexFromSongs(i, oldSongs, updatedSongs);
+                if (updatedSongs.Contains(oldSongs[shuffleList[i]]))
+                {
+                    shuffleList[i] = GetUpdatedSongsIndexFromSongs(i, oldSongs, updatedSongs);
+                }
+                else shuffleList.RemoveAt(i);
             }
 
-            for (int i = oldSongs.Count; i < updatedSongs.Count; i++)
+            for (int i = shuffleList.Count; i < updatedSongs.Count; i++)
             {
                 AddRandomIndexToFrontOrBackOfShuffleList(ref shuffleList, updatedSongs.Count);
             }

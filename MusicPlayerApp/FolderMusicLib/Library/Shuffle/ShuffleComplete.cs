@@ -12,19 +12,23 @@ namespace LibraryLib
 
         public List<int> AddSongsToShuffleList(List<int> shuffleList, List<Song> oldSongs, List<Song> updatedSongs)
         {
-            for (int i = 0; i < shuffleList.Count; i++)
+            for (int i = shuffleList.Count - 1; shuffleList.Count >= 0; i--)
             {
-                shuffleList[i] = GetUpdatedSongsIndexFromSongs(i, oldSongs, updatedSongs);
+                if (updatedSongs.Contains(oldSongs[shuffleList[i]]))
+                {
+                    shuffleList[i] = GetUpdatedSongsIndexFromSongs(i, oldSongs, updatedSongs);
+                }
+                else shuffleList.RemoveAt(i);
             }
 
             while (GetShuffleListIndex(shuffleList.Count) < GetShuffleListIndex(updatedSongs.Count))
             {
-                AddRandomIndexToFrontOrBackOfShuffleList(ref shuffleList, updatedSongs.Count, true);
+                AddRandomIndexToFrontOrBackOfShuffleList(ref shuffleList, updatedSongs.Count, true, false);
             }
 
             while (shuffleList.Count < GetShuffleListCount(updatedSongs.Count))
             {
-                AddRandomIndexToFrontOrBackOfShuffleList(ref shuffleList, updatedSongs.Count, false);
+                AddRandomIndexToFrontOrBackOfShuffleList(ref shuffleList, updatedSongs.Count, false, false);
             }
 
             return new List<int>(shuffleList);
@@ -37,11 +41,12 @@ namespace LibraryLib
 
         public List<int> GenerateShuffleList(int songsIndex, int songsCount)
         {
-            List<int> shuffleList = new List<int>(songsIndex);
+            List<int> shuffleList = new List<int>();
 
-            for (int i = 1; i < GetShuffleListCount(songsCount); i++)
+            for (int i = 0; i < GetShuffleListCount(songsCount); i++)
             {
-                AddRandomIndexToFrontOrBackOfShuffleList(ref shuffleList, songsCount, false);
+                if (i == GetShuffleListIndex(songsCount)) shuffleList.Add(songsIndex);
+                else AddRandomIndexToFrontOrBackOfShuffleList(ref shuffleList, songsCount, false, false);
             }
 
             return shuffleList;
@@ -57,7 +62,7 @@ namespace LibraryLib
 
                 if (offset == 0) return new List<int>(shuffleList);
 
-                AddRandomIndexToFrontOrBackOfShuffleList(ref shuffleList, songsCount, offset > 0);
+                AddRandomIndexToFrontOrBackOfShuffleList(ref shuffleList, songsCount, offset > 0, true);
             }
         }
 
@@ -116,14 +121,15 @@ namespace LibraryLib
             if (shuffleList.Count == songsCount) return new List<int>(shuffleList);
 
             bool front = GetShuffleListIndex(songsIndex, shuffleList, songsCount) >= songsIndex;
-            AddRandomIndexToFrontOrBackOfShuffleList(ref shuffleList, songsCount, front);
+            AddRandomIndexToFrontOrBackOfShuffleList(ref shuffleList, songsCount, front, false);
 
             return new List<int>(shuffleList);
         }
 
-        private void AddRandomIndexToFrontOrBackOfShuffleList(ref List<int> shuffleList, int songsCount, bool front)
+        private void AddRandomIndexToFrontOrBackOfShuffleList(ref List<int> shuffleList, int songsCount, bool front, bool keepCount)
         {
             if (front) shuffleList.Reverse();
+            if (keepCount) shuffleList.RemoveAt(0);
             shuffleList.Add(GetRandomIndexWhichIsNotInShuffleList(shuffleList, songsCount));
             if (front) shuffleList.Reverse();
         }

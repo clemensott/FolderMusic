@@ -65,9 +65,8 @@ namespace MusicPlayerApp
         private void DeleteSong_Click(object sender, RoutedEventArgs e)
         {
             Song song = (sender as MenuFlyoutItem).DataContext as Song;
-            int songsIndex = playlist.Songs.IndexOf(song);
 
-            Library.Current.RemoveSongFromPlaylist(playlist, songsIndex);
+            playlist.RemoveSong(playlist.Songs.IndexOf(song));
 
             if (playlist.IsEmptyOrLoading) GoBack();
         }
@@ -117,7 +116,7 @@ namespace MusicPlayerApp
 
         private async void RefreshThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            LoadingPage.OpenLoading(Frame);
+            await LoadingPage.NavigateTo();
             await playlist.LoadSongsFromStorage();
             LoadingPage.GoBack();
 
@@ -126,10 +125,8 @@ namespace MusicPlayerApp
 
         private async void SearchForNewSongs_Click(object sender, RoutedEventArgs e)
         {
-            LoadingPage.OpenLoading(Frame);
-
+            await LoadingPage.NavigateTo();
             await playlist.SearchForNewSongs();
-
             LoadingPage.GoBack();
         }
 

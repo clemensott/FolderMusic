@@ -40,10 +40,10 @@
                                     </FlyoutBase.AttachedFlyout>
 
                                     <StackPanel Orientation="Vertical">
-                                        <TextBlock FontSize="20" Margin="0,-5,0,-2"
-                                               Text="{Binding Title}" Foreground="{Binding TextBrush}"/>
-                                        <TextBlock FontSize="15" Margin="0,-2,0,0"
-                                               Text="{Binding Artist}" Foreground="{Binding TextBrush}" />
+                                        <TextBlock FontSize="20" Margin="0,-5,0,-2" Text="{Binding Title}" 
+                                                   Foreground="{Binding TextFirstBrush}"/>
+                                        <TextBlock FontSize="15" Margin="0,-2,0,0" Text="{Binding Artist}" 
+                                                   Foreground="{Binding TextSecondBrush}" />
                                     </StackPanel>
 
                                     <Rectangle Grid.Column="2" Fill="Transparent" Width="1000"/>
@@ -75,10 +75,10 @@
                                     </FlyoutBase.AttachedFlyout>
 
                                     <StackPanel Orientation="Vertical">
-                                        <TextBlock FontSize="20" Margin="0,-5,0,-2"
-                                               Text="{Binding Title}" Foreground="{Binding TextBrush}"/>
-                                        <TextBlock FontSize="15" Margin="0,-2,0,0"
-                                               Text="{Binding Artist}" Foreground="{Binding TextBrush}" />
+                                        <TextBlock FontSize="20" Margin="0,-5,0,-2" Text="{Binding Title}" 
+                                                   Foreground="{Binding TextFirstBrush}"/>
+                                        <TextBlock FontSize="15" Margin="0,-2,0,0" Text="{Binding Artist}"
+                                                   Foreground="{Binding TextSecondBrush}" />
                                     </StackPanel>
 
                                     <Rectangle Grid.Column="2" Fill="Transparent" Width="1000"/>

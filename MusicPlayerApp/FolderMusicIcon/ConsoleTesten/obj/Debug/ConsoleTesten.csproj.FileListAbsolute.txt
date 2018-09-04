@@ -51,3 +51,13 @@ G:\Users\Clemens\Desktop\Programme\ConsoleTesten - Kopie\ConsoleTesten\obj\Debug
 C:\Users\Clemens\Desktop\ProjectsBackup\Programme\ConsoleTesten - Kopie\ConsoleTesten\bin\Debug\ConsoleTesten.exe.config
 C:\Users\Clemens\Desktop\ProjectsBackup\Programme\ConsoleTesten - Kopie\ConsoleTesten\obj\Debug\ConsoleTesten.exe
 C:\Users\Clemens\Desktop\ProjectsBackup\Programme\ConsoleTesten - Kopie\ConsoleTesten\obj\Debug\ConsoleTesten.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicIcon\ConsoleTesten\bin\Debug\ConsoleTesten.exe.config
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicIcon\ConsoleTesten\obj\Debug\ConsoleTesten.exe
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicIcon\ConsoleTesten\obj\Debug\ConsoleTesten.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicIcon\ConsoleTesten\bin\Debug\ConsoleTesten.exe
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicIcon\ConsoleTesten\bin\Debug\ConsoleTesten.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicIcon\ConsoleTesten\bin\Debug\policy.2.0.taglib-sharp.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicIcon\ConsoleTesten\bin\Debug\taglib-sharp.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicIcon\ConsoleTesten\bin\Debug\OrdnerDatei.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicIcon\ConsoleTesten\bin\Debug\policy.2.0.taglib-sharp.config
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\FolderMusicIcon\ConsoleTesten\obj\Debug\ConsoleTesten.csprojResolveAssemblyReference.cache

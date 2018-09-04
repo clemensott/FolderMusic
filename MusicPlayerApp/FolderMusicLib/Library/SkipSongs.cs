@@ -1,123 +1,129 @@
 ﻿using FolderMusicLib;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.Core;
-using Windows.UI.Core;
-using Windows.UI.Popups;
 
 namespace LibraryLib
 {
     public class SkipSongs
     {
-        private static volatile bool IsAskingSkipSong = false;
-        private static int playlistIndex, songsIndex;
         private static string skipSongsFileName = "SkipSongs.xml";
 
-        public static async Task AskAboutSkippedSong()
+        private List<Song> allSkipSongs;
+        private List<Song> skipSkipSongs;
+
+        public bool HaveSongs { get { return Songs.Count > 0; } }
+
+        public Song CurrentSong { get { return  GetCurrentSong(); } }
+
+        public List<Song> Songs { get { return GetAllNotSkipSongs(); } }
+
+        private SkipSongs()
         {
-            if (IsAskingSkipSong || Library.Current.IsEmpty) return;
-            IsAskingSkipSong = true;
+            allSkipSongs = new List<Song>();
+            skipSkipSongs = new List<Song>();
+        }
 
-            MessageDialog messageDialog;
-            List<Song> list = await LoadSkipSongs();
-            int listCount = list.Count;
+        public async static Task<SkipSongs> GetNew()
+        {
+            SkipSongs obj = new SkipSongs();
 
-            FindExistingSong(list);
+            await obj.SetAllSkipSongs();
 
-            if (list.Count == 0)
+            return obj;
+        }
+
+        private Song GetCurrentSong()
+        {
+            List<Song> songs = Songs;
+
+            if (songs.Count == 0) return new Song();
+
+            return songs[0];
+        }
+
+        private List<Song> GetAllNotSkipSongs()
+        {
+            List<Song> list = new List<Song>(allSkipSongs);
+
+            foreach (Song skipSkipSong in skipSkipSongs)
             {
-                await LibraryIO.Delete(skipSongsFileName);
-                IsAskingSkipSong = false;
-                return;
+                if (list.Contains(skipSkipSong)) list.Remove(skipSkipSong);
             }
 
-            await SaveListWhenCountsAreDiffrent(list, listCount, list.Count);
-
-            messageDialog = GetMessageDialog(list[0].Path);
-
-            await CoreApplication.MainView.CoreWindow.Dispatcher.
-                RunAsync(CoreDispatcherPriority.Normal, async () =>
-                { await messageDialog.ShowAsync(); });
+            return list;
         }
 
-        private static void FindExistingSong(List<Song> list)
+        public async Task Yes_Click()
         {
-            while (list.Count > 0 && !IsSongInAnyPlaylist(list[0]))
+            foreach (Playlist playlist in Library.Current.Playlists)
             {
-                list.RemoveAt(0);
+                if (playlist.Songs.Contains(CurrentSong))
+                {
+                    playlist.RemoveSong(playlist.Songs.IndexOf(CurrentSong));
+                    break;
+                }
             }
+
+            await SetAllSkipSongs();
+            await RemoveSkipSongAndSave(CurrentSong);
         }
 
-        private async static Task SaveListWhenCountsAreDiffrent(List<Song> list, int count1, int count2)
+        public async Task No_Click()
         {
-            if (count1 == count2) return;
+            BackgroundCommunicator.SendSongXML(CurrentSong);
 
-            await RemoveSkipSongAndSave(list, new Song());
+            await SetAllSkipSongs();
+            await RemoveSkipSongAndSave(CurrentSong);
         }
 
-        private static MessageDialog GetMessageDialog(string path)
+        public async Task Skip_Click()
         {
-            string content = GetMessageDialogContent(path);
-            MessageDialog messageDialog = new MessageDialog(content);
+            await SetAllSkipSongs();
+            skipSkipSongs.Add(CurrentSong);
+        }
 
+        public async Task RemoveSkipSongAndSave(Song song)
+        {
+            for (int i = 0; i < allSkipSongs.Count; i++)
+            {
+                if (allSkipSongs[i].Path == song.Path) allSkipSongs.RemoveAt(i);
+            }
+
+            await SaveSkipSongs(allSkipSongs);
+        }
+
+        public async Task SetAllSkipSongs()
+        {
             try
             {
-                messageDialog.Commands.Add(new UICommand("Yes", new UICommandInvokedHandler(CommandHandlers)));
-                messageDialog.Commands.Add(new UICommand("No", new UICommandInvokedHandler(CommandHandlers)));
+                List<Song> loadSongs = await LoadSkipSongs();
+
+                DeleteNotExistingSongs(loadSongs);
+            }
+            catch { }
+        }
+
+        private async static Task<List<Song>> LoadSkipSongs()
+        {
+            try
+            {
+                return await LibraryIO.LoadObject<List<Song>>(skipSongsFileName);
             }
             catch { }
 
-            return messageDialog;
+            return new List<Song>();
         }
 
-        private static string GetMessageDialogContent(string path)
+        private void DeleteNotExistingSongs(List<Song> list)
         {
-            return "Couldn't play following song. Do you want to remove it?\n" + path;
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                if (!IsSongInAnyPlaylist(list[i])) list.RemoveAt(0);
+            }
         }
 
-        private async static void CommandHandlers(IUICommand commandLabel)
-        {
-            int saveSongsCount;
-            string actions = commandLabel.Label;
-            Song song = Library.Current[playlistIndex][songsIndex];
-            List<Song> skipSongs;
-            Playlist playlist = Library.Current[playlistIndex];
-            bool same = Library.Current.CurrentPlaylist == playlist;
-
-            switch (actions)
-            {
-                case "No":
-                    BackgroundCommunicator.SendSongXML(playlistIndex, songsIndex);
-                    break;
-
-                case "Yes":
-                    Library.Current.RemoveSongFromPlaylist(playlist, songsIndex);
-
-                    if (!same) break;
-
-                    playlist.UpdateSongsAndShuffleListSongs();
-                    playlist.UpdateCurrentSong();
-                    break;
-            }
-
-            skipSongs = await LoadSkipSongs();
-            saveSongsCount = skipSongs.Count;
-
-            await RemoveSkipSongAndSave(skipSongs, song);
-            IsAskingSkipSong = false;
-
-            if (saveSongsCount == 1)
-            {
-                await Library.Current.SaveAsync();
-                return;
-            }
-
-            AskAboutSkippedSong();
-        }
-
-        private static bool IsSongInAnyPlaylist(Song skipSong)
+        private bool IsSongInAnyPlaylist(Song skipSong)
         {
             Song[] songs;
 
@@ -127,17 +133,19 @@ namespace LibraryLib
 
                 if (songs.Length == 1)
                 {
-                    playlistIndex = i;
-                    songsIndex = Library.Current[playlistIndex].Songs.IndexOf(songs[0]);
+                    System.Diagnostics.Debug.WriteLine(songs[0]);
+                    if (!allSkipSongs.Contains(songs[0])) allSkipSongs.Add(songs[0]);
 
                     return true;
                 }
             }
 
-            playlistIndex = -1;
-            songsIndex = -1;
-
             return false;
+        }
+
+        public async static Task<bool> SkipSongsExists()
+        {
+            return (await LoadSkipSongs()).Count > 0;
         }
 
         public async static Task AddSkipSongAndSave(Song song)
@@ -154,30 +162,14 @@ namespace LibraryLib
             await SaveSkipSongs(list);
         }
 
-        public async static Task RemoveSkipSongAndSave(List<Song> list, Song saveSong)
-        {
-            for (int i = 0; i < list.Count; i++)
-            {
-                if (list[i].Path == saveSong.Path) list.RemoveAt(i);
-            }
-
-            await SaveSkipSongs(list);
-        }
-
         private async static Task SaveSkipSongs(List<Song> list)
         {
             await LibraryIO.SaveObject(list, skipSongsFileName);
         }
 
-        public async static Task<List<Song>> LoadSkipSongs()
+        public async static Task Delete()
         {
-            try
-            {
-                return await LibraryIO.LoadObject<List<Song>>(skipSongsFileName);
-            }
-            catch { }
-
-            return new List<Song>();
+            await LibraryIO.Delete(skipSongsFileName);
         }
     }
 }

@@ -22,6 +22,9 @@ namespace LibraryLib
 
     public class Playlist : INotifyPropertyChanged
     {
+        private static Brush textFirstBrush;
+        private static Brush textSecondBrush;
+
         private const string emptyOrLoadingPath = "None";
 
         private int songsIndex = 0;
@@ -53,7 +56,7 @@ namespace LibraryLib
             get { return GetPossibleSongsIndex(songsIndex); }
             set
             {
-                if (SongsIndex == value) return;
+                if (SongsIndex == value || value == -1) return;
 
                 if (!IsEmptyOrLoading)
                 {
@@ -79,6 +82,12 @@ namespace LibraryLib
             get { return iShuffle.GetShuffleListIndex(SongsIndex, ShuffleList, Songs.Count); }
             set
             {
+                if (value == -1)
+                {
+                    UpdateCurrentSongIndex();
+                    return;
+                }
+
                 if (!IsShuffleListIndex(value)) return;
 
                 SongsIndex = ShuffleList[value];
@@ -116,12 +125,32 @@ namespace LibraryLib
         public string RelativePath { get { return GetRelativePath(absolutePath); } }
 
         [XmlIgnore]
-        public static Brush TextBrush
+        public static Brush TextFirstBrush
         {
             get
             {
-                return Icons.Theme == ElementTheme.Light ? new SolidColorBrush(Color.FromArgb(255, 0, 0, 0)) :
-                    new SolidColorBrush(Color.FromArgb(255, 255, 255, 255));
+                if (textFirstBrush == null)
+                {
+                    textFirstBrush = Icons.Theme == ElementTheme.Light ? new SolidColorBrush(Color.FromArgb(255, 0, 0, 0)) :
+                      new SolidColorBrush(Color.FromArgb(255, 255, 255, 255));
+                }
+
+                return textFirstBrush;
+            }
+        }
+
+        [XmlIgnore]
+        public static Brush TextSecondBrush
+        {
+            get
+            {
+                if (textSecondBrush == null)
+                {
+                    textSecondBrush = Icons.Theme == ElementTheme.Light ? new SolidColorBrush(Color.FromArgb(255, 127, 127, 127)) :
+                      new SolidColorBrush(Color.FromArgb(255, 192, 192, 192));
+                }
+
+                return textSecondBrush;
             }
         }
 
@@ -250,6 +279,11 @@ namespace LibraryLib
             return absolutePath.Remove(0, index);
         }
 
+        public void UpdateSongsObject()
+        {
+            songs = new List<Song>(songs);
+        }
+
         private int GetPossibleSongsIndex(int inIndex)
         {
             if (inIndex >= 0 && inIndex < Songs.Count && Songs.Count > 0) return inIndex;
@@ -333,7 +367,12 @@ namespace LibraryLib
             List<Song> updatedSongs = new List<Song>(currentSongs);
             updatedSongs.AddRange(addSongs);
 
-            return updatedSongs.OrderBy(x => x.Title).ThenBy(x => x.Artist).ToList();
+            return GetOrderedSongs(updatedSongs);
+        }
+
+        private List<Song> GetOrderedSongs(List<Song> songs)
+        {
+            return songs.OrderBy(x => x.Title).ThenBy(x => x.Artist).ToList();
         }
 
         public void RemoveSong(int songsIndex)
@@ -355,6 +394,8 @@ namespace LibraryLib
                 UpdateSongsAndShuffleListSongs();
                 UpdateCurrentSong();
             }
+
+            Library.Current.DeleteEmptyPlaylists();
         }
 
         private async Task<StorageFolder> GetStorageFolder()
@@ -412,6 +453,36 @@ namespace LibraryLib
             }
 
             return list;
+        }
+
+        public async Task UpdateSongsFromStorage()
+        {
+            Song addSong;
+            List<string> songsPath = Songs.Select(x => x.Path).ToList();
+            List<StorageFile> files = await GetStorageFolderFiles();
+            List<Song> updatedSongs = new List<Song>();
+
+            foreach (StorageFile file in files)
+            {
+                if (Library.Current.CanceledLoading) return;
+
+                if (songsPath.Contains(file.Path)) updatedSongs.Add(Songs[songsPath.IndexOf(file.Path)]);
+                else
+                {
+                    addSong = new Song(file.Path);
+                    await addSong.Refresh();
+
+                    updatedSongs.Add(addSong);
+                }
+            }
+
+            addSong = CurrentSong;
+            songs = GetOrderedSongs(updatedSongs);
+            shuffleList = iShuffle.AddSongsToShuffleList(ShuffleList, Songs, updatedSongs);
+            songsIndex = Songs.IndexOf(addSong);
+
+            Library.Current.DeleteEmptyPlaylists();
+            UpdateAndSendToBackground();
         }
 
         public async Task SearchForNewSongs()
