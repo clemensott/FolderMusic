@@ -5,11 +5,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Schema;
-using System.Xml.Serialization;
 
 namespace MusicPlayer.Data
 {
@@ -40,24 +37,10 @@ namespace MusicPlayer.Data
             collection.CollectionChanged += This_CollectionChanged;
         }
 
-        public PlaylistCollection(ILibrary parent, CurrentPlaySong currentPlaySong)
-        {
-            Parent = parent;
-
-            collection = new ObservableCollection<IPlaylist>();
-            collection.Add(new NonLoadedPlaylist(this, currentPlaySong));
-            collection.CollectionChanged += This_CollectionChanged;
-        }
-
-        public PlaylistCollection(ILibrary parent, XmlReader reader)
-        {
-            Parent = parent;
-            ReadXml(reader);
-        }
-
         public PlaylistCollection(ILibrary parent, string xmlText)
-            : this(parent, XmlConverter.GetReader(xmlText))
         {
+            Parent = parent;
+            ReadXml(XmlConverter.GetReader(xmlText));
         }
 
         private void This_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -94,15 +77,18 @@ namespace MusicPlayer.Data
 
             if (removed.Length == 0 && added.Length == 0) return;
 
-            if (!collection.Contains(oldCurrentPlaylist))
+            if (oldCurrentPlaylist == null) newCurrentPlaylist = collection.FirstOrDefault();
+            else if (Parent.Playlists == this && !collection.Contains(oldCurrentPlaylist))
             {
                 if (currentPlaylistIndex < 0) currentPlaylistIndex = 0;
                 if (currentPlaylistIndex >= collection.Count) currentPlaylistIndex = collection.Count;
-                Parent.CurrentPlaylist = newCurrentPlaylist = collection.ElementAtOrDefault(currentPlaylistIndex);
+                newCurrentPlaylist = collection.ElementAtOrDefault(currentPlaylistIndex);
             }
 
-            var args = new PlaylistsChangedEventArgs(added, removed, oldCurrentPlaylist, newCurrentPlaylist);
+            var args = new PlaylistCollectionChangedEventArgs(added, removed, oldCurrentPlaylist, newCurrentPlaylist);
             Changed?.Invoke(this, args);
+
+            Parent.CurrentPlaylist = newCurrentPlaylist;
         }
 
         private IEnumerable<ChangedPlaylist> GetAddedChangedPlaylists(IEnumerable<IPlaylist> adds)
@@ -165,14 +151,13 @@ namespace MusicPlayer.Data
             {
                 try
                 {
-                    collection.Add(new Playlist(this, reader));
+                    collection.Add(new Playlist(reader.ReadOuterXml(), this));
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Manager.WriteEvent("XmlReadPlaylistCollectionFail", e, collection.Count, "Node: " + reader.NodeType);
+                    MobileDebug.Manager.WriteEventPair("XmlReadPlaylistCollectionFail", 
+                        e, "Count: ", collection.Count, "Node: ", reader.NodeType);
                 }
-
-                reader.Read();
             }
         }
 
@@ -181,14 +166,7 @@ namespace MusicPlayer.Data
             foreach (var playlist in this)
             {
                 writer.WriteStartElement("Playlist");
-                try
-                {
-                    playlist.WriteXml(writer);
-                }
-                catch (Exception e)
-                {
-                    MobileDebug.Manager.WriteEvent("XmlWritePlaylistCollectionFail", e);
-                }
+                playlist.WriteXml(writer);
                 writer.WriteEndElement();
             }
         }

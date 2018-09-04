@@ -5,10 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
-using Windows.Storage;
 using System.Xml;
 using System.Xml.Schema;
+using Windows.Storage;
 
 namespace MusicPlayer.Data
 {
@@ -70,7 +69,6 @@ namespace MusicPlayer.Data
                 var args = new CurrentSongChangedEventArgs(currentSong, value);
                 currentSong = value;
                 currentSongPositionPercent = 0;
-                MobileDebug.Manager.WriteEvent("CurrentSongSet", Name);
                 CurrentSongChanged?.Invoke(this, args);
             }
         }
@@ -140,29 +138,16 @@ namespace MusicPlayer.Data
             Shuffle = ShuffleType.Off;
         }
 
-        public Playlist(IPlaylistCollection parent, XmlReader reader)
+        public Playlist(string xmlText, IPlaylistCollection parent)
         {
             Parent = parent;
-            ReadXml(reader);
-        }
-
-        public Playlist(string xmlText, IPlaylistCollection parent)
-            : this(parent, XmlConverter.GetReader(xmlText))
-        {
+            ReadXml(XmlConverter.GetReader(xmlText));
         }
 
         public Playlist(IPlaylistCollection parent, string path) : this(parent)
         {
             name = path != string.Empty ? Path.GetFileName(path) : KnownFolders.MusicLibrary.Name;
             absolutePath = path;
-        }
-
-        public static string GetRelativePath(string absolutePath)
-        {
-            if (absolutePath == string.Empty) return "\\Music";
-            int index = absolutePath.IndexOf("\\Music");
-
-            return absolutePath.Remove(0, index);
         }
 
         private ILoop GetLooper(LoopType type)
@@ -226,12 +211,10 @@ namespace MusicPlayer.Data
 
         public void SetShuffle(IShuffleCollection shuffleSongs)
         {
-            MobileDebug.Manager.WriteEvent("SetShuffleSongs1", shuffleSongs.Parent == this);
             if (shuffleSongs.Parent != this) return;
 
             var args = new ShuffleChangedEventArgs(ShuffleSongs, shuffleSongs, CurrentSong, CurrentSong);
             ShuffleSongs = shuffleSongs;
-            MobileDebug.Manager.WriteEvent("SetShuffleSongs2");
             ShuffleChanged?.Invoke(this, args);
         }
 
@@ -278,10 +261,17 @@ namespace MusicPlayer.Data
             IEnumerable<Song> foundSongs = GetSongsFromStorageFiles(files).ToArray();
 
             if (Parent.Parent.CanceledLoading) return;
-
+       
             Songs.Reset(foundSongs);
+
+            IShuffleCollection newShuffleSongs = new ShuffleOffCollection(this, Songs);
+            var args = new ShuffleChangedEventArgs(ShuffleSongs, newShuffleSongs,
+                CurrentSong, newShuffleSongs.FirstOrDefault());
+
             ShuffleSongs = new ShuffleOffCollection(this, Songs);
             CurrentSong = ShuffleSongs.FirstOrDefault();
+
+            ShuffleChanged?.Invoke(this, args);
         }
 
         private IEnumerable<Song> GetSongsFromStorageFiles(IEnumerable<StorageFile> files)
@@ -293,7 +283,6 @@ namespace MusicPlayer.Data
         {
             IReadOnlyList<StorageFile> files = await GetStorageFolderFiles();
             Song[] songs = Songs.ToArray();
-
             IEnumerable<StorageFile> addFiles = files.Where(f => !songs.Any(s => s.Path == f.Path));
             Song[] addSongs = addFiles.Select(f => GetLoadedSong(f)).Where(s => !s.IsEmpty).ToArray();
             Song[] removeSongs = songs.Where(s => !files.Any(f => f.Path == s.Path)).ToArray();
@@ -394,142 +383,64 @@ namespace MusicPlayer.Data
 
         public void ReadXml(XmlReader reader)
         {
-            absolutePath = reader.GetAttribute("AbsolutePath");
-            string currentSongPath = reader.GetAttribute("CurrentSongPath");
-            currentSongPositionPercent = double.Parse(reader.GetAttribute("CurrentSongPositionPercent"));
-            name = reader.GetAttribute("Name");
-            try
-            {
-                Loop = (LoopType)Enum.Parse(typeof(LoopType), reader.GetAttribute("Loop"));
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Manager.WriteEvent("PlaylistWriteXmlLoopFail", e, Name, reader.GetAttribute("Loop"));
-            }
-            ShuffleType shuffle = ShuffleType.Off;
-            try
-            {
-                shuffle = (ShuffleType)Enum.Parse(typeof(ShuffleType), reader.GetAttribute("Shuffle"));
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Manager.WriteEvent("PlaylistReadXmlShuffleFail", e, Name, reader.GetAttribute("Shuffle"));
-            }
+            absolutePath = reader.GetAttribute("AbsolutePath") ?? emptyOrLoadingPath;
+            currentSongPositionPercent = double.Parse(reader.GetAttribute("CurrentSongPositionPercent") ?? "0");
+            name = reader.GetAttribute("Name") ?? emptyName;
+            Loop = (LoopType)Enum.Parse(typeof(LoopType), reader.GetAttribute("Loop") ?? LoopType.Off.ToString());
+
+            string currentSongPath = reader.GetAttribute("CurrentSongPath") ?? string.Empty; ;
+            ShuffleType shuffle = (ShuffleType)Enum.Parse(typeof(ShuffleType),
+                reader.GetAttribute("Shuffle") ?? ShuffleType.Off.ToString());
 
             reader.ReadStartElement();
-            try
-            {
-                Songs = new SongCollection(this, reader);
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Manager.WriteEvent("PlaylistReadXmlShuffleFail", e, Name, reader.GetAttribute("Shuffle"));
-            }
-            reader.ReadEndElement();
 
+            Songs = new SongCollection(this, reader.ReadOuterXml());
             ShuffleSongs = ReadShuffleSongs(shuffle, reader);
 
-            currentSong = Songs.Any(s => s.Path == currentSongPath) ? Songs.First(s => s.Path == currentSongPath) : Songs.FirstOrDefault();
+            currentSong = Songs.FirstOrDefault(s => s.Path == currentSongPath) ?? Songs.FirstOrDefault();
         }
 
         private IShuffleCollection ReadShuffleSongs(ShuffleType type, XmlReader reader)
         {
-            ShuffleCollectionBase collection = null;
-            reader.ReadStartElement();
-
-            switch (type)
+            try
             {
-                case ShuffleType.Off:
-                    collection = new ShuffleOffCollection(this, Songs, reader);
-                    break;
+                string outerXml = reader.ReadOuterXml();
 
-                case ShuffleType.OneTime:
-                    collection = new ShuffleOneTimeCollection(this, Songs, reader);
-                    break;
+                switch (type)
+                {
+                    case ShuffleType.Off:
+                        return new ShuffleOffCollection(this, Songs, outerXml);
 
-                case ShuffleType.Complete:
-                    collection = new ShuffleCompleteCollection(this, Songs, reader);
-                    break;
+                    case ShuffleType.OneTime:
+                        return new ShuffleOneTimeCollection(this, Songs, outerXml);
+
+                    case ShuffleType.Complete:
+                        return new ShuffleCompleteCollection(this, Songs, outerXml);
+                }
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Manager.WriteEvent("PlaylistShuffleSongsReadXmlFail", e, AbsolutePath);
             }
 
-            reader.ReadEndElement();
-
-            return collection;
+            return new ShuffleOffCollection(this, Songs);
         }
 
         public void WriteXml(XmlWriter writer)
         {
-            try
-            {
-                writer.WriteAttributeString("AbsolutePath", AbsolutePath);
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Manager.WriteEvent("PlaylistWriteXmlPathFail", e, Name);
-            }
-            try
-            {
-                writer.WriteAttributeString("CurrentSongPath", CurrentSong.Path);
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Manager.WriteEvent("PlaylistWriteXmlCurrentSongFail", e, Name, CurrentSong == null);
-            }
-            try
-            {
-                writer.WriteAttributeString("CurrentSongPositionPercent", currentSongPositionPercent.ToString());
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Manager.WriteEvent("PlaylistWriteXmlPositionFail", e, Name);
-            }
-            try
-            {
-                writer.WriteAttributeString("Loop", Loop.ToString());
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Manager.WriteEvent("PlaylistWriteXmlLoopFail", e, Name);
-            }
-            try
-            {
-                writer.WriteAttributeString("Name", Name);
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Manager.WriteEvent("PlaylistWriteXmlNameFail", e, Name);
-            }
-            try
-            {
-                writer.WriteAttributeString("Shuffle", Shuffle.ToString());
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Manager.WriteEvent("PlaylistWriteXmlShuffleFail", e, Name);
-            }
-
+            writer.WriteAttributeString("AbsolutePath", AbsolutePath);
+            writer.WriteAttributeString("CurrentSongPath", CurrentSong.Path);
+            writer.WriteAttributeString("CurrentSongPositionPercent", currentSongPositionPercent.ToString());
+            writer.WriteAttributeString("Loop", Loop.ToString());
+            writer.WriteAttributeString("Name", Name);
+            writer.WriteAttributeString("Shuffle", Shuffle.ToString());
 
             writer.WriteStartElement("Songs");
-            try
-            {
-                Songs.WriteXml(writer);
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Manager.WriteEvent("PlaylistWriteXmlSongsFail", e, Name);
-            }
-
+            Songs.WriteXml(writer);
             writer.WriteEndElement();
 
             writer.WriteStartElement("ShuffleSongs");
-            try
-            {
-                ShuffleSongs.WriteXml(writer);
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Manager.WriteEvent("PlaylistWriteXmlShuffleSongsFail", e, Name);
-            }
+            ShuffleSongs.WriteXml(writer);
             writer.WriteEndElement();
         }
     }

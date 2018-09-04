@@ -103,15 +103,10 @@ namespace MusicPlayer.Data
             artist = currentPlaySong.Artist;
         }
 
-        internal Song(ISongCollection parent, XmlReader reader)
+        internal Song(ISongCollection parent, string xmlText)
         {
             Parent = parent;
-            ReadXml(reader);
-        }
-
-        internal Song(ISongCollection parent, string xmlText)
-            : this(parent, XmlConverter.GetReader(xmlText))
-        {
+            ReadXml(XmlConverter.GetReader(xmlText));
         }
 
         private Song(ISongCollection parent, double durationMilliseconds, string path, string title, string artist)
@@ -224,15 +219,6 @@ namespace MusicPlayer.Data
         public void SetFailed()
         {
             failed = true;
-            SaveFailed();
-        }
-
-        private void SaveFailed()
-        {
-            //string filename = "SongFailed.txt";
-            //string text = DateTime.Now.Ticks.ToString() + ";" + RelativePath + "\n";
-
-            //IO.AppendText(text, filename);
         }
 
         public override bool Equals(object obj)

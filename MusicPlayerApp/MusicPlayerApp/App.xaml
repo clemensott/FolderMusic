@@ -35,12 +35,12 @@
             </Setter>
         </Style>
 
-        <con:PlayIconConverter x:Key="playConverter"/>
-        <con:DetailIconConverter x:Key="detailConverter"/>
+        <con:PlaylistViewModelConverter x:Key="playlistViewModelConverter"/>
         <con:ShuffleIconConverter x:Key="shuffleConverter"/>
         <con:LoopIconConverter x:Key="loopConverter"/>
+        <con:PlayPauseIconConverter x:Key="playPauseIconConverter"/>
+        <con:PlayPauseTextConverter x:Key="playPauseTextConverter"/>
         <con:SongsCountConverter x:Key="songsCountConverter"/>
-        <con:ShuffleOffSongsConverter x:Key="songsConverter"/>
-        <con:PlaylistsUpdateConverter x:Key="playlistsConverter"/>
+        <con:RelativePathConverter x:Key="relativePathConverter"/>
     </Application.Resources>
 </Application>

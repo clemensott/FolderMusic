@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Storage;
+using System.Text;
 
 namespace MobileDebug
 {
-    public class Event
+    public class Event : IEquatable<Event>
     {
         private const char partSplitter = ';', eventSplitter = '|';
         private const int maxLengthOfOneData = 1000;
+
+        public const string NullReferenceValue = "RefNull";
 
         private static int count = 0;
 
@@ -20,51 +19,81 @@ namespace MobileDebug
 
         public int Count { get; private set; }
 
-        public string TaskId { get; private set; }
+        public string BackgroundTaskId { get; private set; }
+
+        public int ThreadId { get; private set; }
 
         public string Name { get; private set; }
 
         public string[] Data { get; private set; }
 
-        private Event()
+        private Event(string name)
         {
             Time = DateTime.Now.Ticks;
             Count = count++;
-        }
 
-        internal Event(string name, IEnumerable<object> data) : this()
-        {
             Name = name;
-            TaskId = Manager.Id;
-
-            Data = data.Select(x => ToString(x)).ToArray();
+            BackgroundTaskId = Manager.Id;
+            ThreadId = Environment.CurrentManagedThreadId;
         }
 
-        public Event(string dataString) : this()
+        internal Event(string name, IEnumerable data) : this(name)
+        {
+            Data = data.OfType<object>().Select(x => ToString(x)).ToArray();
+        }
+
+        private Event(string name, IEnumerable<string> data) : this(name)
+        {
+            Data = data.ToArray();
+        }
+
+        internal static Event GetPair(string name, IEnumerable data)
+        {
+            bool isFirst = true;
+            List<string> list = new List<string>();
+
+            foreach (string text in data.OfType<object>().Select(x => ToString(x)))
+            {
+                if (isFirst) list.Add(text);
+                else list[list.Count - 1] += text;
+
+                isFirst = !isFirst;
+            }
+
+            return new Event(name, list);
+        }
+
+        internal Event(StringBuilder dataString)
         {
             Time = long.Parse(Manager.GetUntil(ref dataString, partSplitter));
             Count = int.Parse(Manager.GetUntil(ref dataString, partSplitter));
-            TaskId = Manager.GetUntil(ref dataString, partSplitter);
+            BackgroundTaskId = Manager.GetUntil(ref dataString, partSplitter);
+            ThreadId = int.Parse(Manager.GetUntil(ref dataString, partSplitter));
             Name = Manager.GetUntil(ref dataString, partSplitter);
 
             Data = Manager.Split(dataString, partSplitter).ToArray();
         }
 
-        public static IEnumerable<Event> GetEvents(string eventsDataString)
+        internal static IEnumerable<Event> GetEvents(string eventsDataString)
         {
-            var array = Manager.Split(eventsDataString, eventSplitter);
+            StringBuilder dataString = new StringBuilder(eventsDataString);
+            var dataStrings = Manager.Split(dataString, eventSplitter);
 
-            foreach (string eventDataString in array)
+            foreach (string eventDataString in dataStrings)
             {
-                Event debugEvent = null;
+                Event debugEvent;
+                StringBuilder eventData = new StringBuilder(eventDataString);
 
                 try
                 {
-                    debugEvent = new Event(eventDataString);
+                    debugEvent = new Event(eventData);
                 }
-                catch { }
+                catch
+                {
+                    continue;
+                }
 
-                if (debugEvent != null) yield return debugEvent;
+                yield return debugEvent;
             }
         }
 
@@ -74,7 +103,8 @@ namespace MobileDebug
 
             Manager.AddToDataString(ref dataString, Time, partSplitter, eventSplitter);
             Manager.AddToDataString(ref dataString, Count, partSplitter, eventSplitter);
-            Manager.AddToDataString(ref dataString, TaskId, partSplitter, eventSplitter);
+            Manager.AddToDataString(ref dataString, BackgroundTaskId, partSplitter, eventSplitter);
+            Manager.AddToDataString(ref dataString, ThreadId, partSplitter, eventSplitter);
             Manager.AddToDataString(ref dataString, Name, partSplitter, eventSplitter);
 
             foreach (string data in Data)
@@ -85,9 +115,9 @@ namespace MobileDebug
             return dataString + eventSplitter;
         }
 
-        private string ToString(object obj)
+        private static string ToString(object obj)
         {
-            if (ReferenceEquals(obj, null)) return "RefNull";
+            if (ReferenceEquals(obj, null)) return NullReferenceValue;
             long value;
             string text = obj.ToString();
 
@@ -103,18 +133,43 @@ namespace MobileDebug
 
         public static string GetDateTimeString(long ticks)
         {
-            var dateTime = new DateTime(ticks);
+            var t = new DateTime(ticks);
 
-            return string.Format("{0,2}.{1,2}.{2,4}", dateTime.Day, dateTime.Month, dateTime.Year).Replace(" ", "0")
-                + " " + string.Format("{0,2}:{1,2}:{2,2},{3,3}", dateTime.Hour, dateTime.Minute,
-                dateTime.Second, dateTime.Millisecond).Replace(" ", "0");
+            string date = string.Format("{0,2}.{1,2}.{2,4}", t.Day, t.Month, t.Year);
+            string time = string.Format("{0,2}:{1,2}:{2,2},{3,3}", t.Hour, t.Minute, t.Second, t.Millisecond);
+
+            return date.Replace(" ", "0") + " " + time.Replace(" ", "0");
         }
 
         public override string ToString()
         {
-            string[] headerData = new string[] { GetDateTimeString(Time), TaskId, Name };
+            string[] headerData = new string[] { GetDateTimeString(Time), BackgroundTaskId, ThreadId.ToString(), Name };
 
             return string.Join("\n", headerData.Concat(Data));
+        }
+
+        public bool Equals(Event other)
+        {
+            return this == other;
+        }
+
+        public static bool operator ==(Event e1, Event e2)
+        {
+            if (ReferenceEquals(e1, null) && ReferenceEquals(e2, null)) return true;
+            if (ReferenceEquals(e1, null) || ReferenceEquals(e2, null)) return false;
+            if (e1.BackgroundTaskId != e2.BackgroundTaskId) return false;
+            if (e1.Count != e2.Count) return false;
+            if (!e1.Data.SequenceEqual(e2.Data)) return false;
+            if (e1.Name != e2.Name) return false;
+            if (e1.ThreadId != e2.ThreadId) return false;
+            if (e1.Time != e2.Time) return false;
+
+            return true;
+        }
+
+        public static bool operator !=(Event e1, Event e2)
+        {
+            return !(e1 == e2);
         }
     }
 }

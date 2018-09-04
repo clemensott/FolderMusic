@@ -1,16 +1,16 @@
 ﻿namespace MusicPlayer.Data
 {
-    public enum ProgressType { Remove, Leave, Skip }
+    public enum HandleType { Remove, Keep, Skip }
 
     public class SkipSong
     {
-        public ProgressType Handle { get; set; }
+        public HandleType Handle { get; set; }
 
         public Song Song { get; private set; }
 
         public SkipSong(Song song)
         {
-            Handle = ProgressType.Leave;
+            Handle = HandleType.Keep;
             Song = song;
         }
     }

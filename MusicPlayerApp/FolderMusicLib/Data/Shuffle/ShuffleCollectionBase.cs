@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
-using System.Xml.Serialization;
 
 namespace MusicPlayer.Data.Shuffle
 {
@@ -14,10 +11,9 @@ namespace MusicPlayer.Data.Shuffle
 
     abstract class ShuffleCollectionBase : IShuffleCollection
     {
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
         public event ShuffleCollectionChangedEventHandler Changed;
 
-        private ObservableCollection<Song> collection;
+        protected List<Song> list;
 
         public IPlaylist Parent { get; set; }
 
@@ -25,51 +21,39 @@ namespace MusicPlayer.Data.Shuffle
 
         public ShuffleType Type { get { return GetShuffleType(); } }
 
-        public int Count { get { return collection.Count; } }
+        public int Count { get { return list.Count; } }
 
         public ShuffleCollectionBase(IPlaylist parent, ISongCollection songs, IEnumerable<Song> shuffleSongs)
         {
             Parent = parent;
             Songs = songs;
-            songs.CollectionChanged += Songs_CollectionChanged;
+            songs.Changed += Songs_CollectionChanged;
 
-            collection = new ObservableCollection<Song>(shuffleSongs);
-            collection.CollectionChanged += This_CollectionChanged;
+            list = new List<Song>(shuffleSongs);
         }
 
-        public ShuffleCollectionBase(IPlaylist parent, ISongCollection songs, XmlReader reader)
+        public ShuffleCollectionBase(IPlaylist parent, ISongCollection songs, string xmlText)
         {
             Parent = parent;
             Songs = songs;
-            songs.CollectionChanged += Songs_CollectionChanged;
+            songs.Changed += Songs_CollectionChanged;
 
-            ReadXml(reader);
-        }
-
-        protected ObservableCollection<Song> GetCollection()
-        {
-            return collection;
-        }
-
-        private void This_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            CollectionChanged?.Invoke(this, e);
+            ReadXml(XmlConverter.GetReader(xmlText));
         }
 
         protected abstract ShuffleType GetShuffleType();
 
         public int IndexOf(Song song)
         {
-            return collection.IndexOf(song);
+            return list.IndexOf(song);
         }
 
         public void Reset(IEnumerable<Song> newShuffleSongs)
         {
-            collection.Clear();
+            list.Clear();
+            list.AddRange(newShuffleSongs);
 
-            foreach (Song song in newShuffleSongs) collection.Add(song);
-
-            if (newShuffleSongs.Any()) RaiseChange();
+            RaiseChange();
         }
 
         private void Songs_CollectionChanged(ISongCollection sender, SongCollectionChangedEventArgs args)
@@ -86,12 +70,12 @@ namespace MusicPlayer.Data.Shuffle
 
         public IEnumerator<Song> GetEnumerator()
         {
-            return collection.GetEnumerator();
+            return list.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return collection.GetEnumerator();
+            return list.GetEnumerator();
         }
 
         public XmlSchema GetSchema()
@@ -101,33 +85,24 @@ namespace MusicPlayer.Data.Shuffle
 
         public void ReadXml(XmlReader reader)
         {
-            collection = new ObservableCollection<Song>();
+            list = new List<Song>();
 
-            try
+            reader.ReadStartElement();
+
+            while (reader.NodeType == XmlNodeType.Element)
             {
-                if (reader.Name != "string") reader.ReadStartElement();
-
-                while (reader.NodeType == XmlNodeType.Element)
+                try
                 {
-                    try
-                    {
-                        string path = reader.ReadElementContentAsString();
-                        Song song = Songs.FirstOrDefault(s => s.Path == path);
+                    string path = reader.ReadElementContentAsString();
+                    Song song = Songs.FirstOrDefault(s => s.Path == path);
 
-                        if (!(song?.IsEmpty ?? true)) collection.Add(song);
-                    }
-                    catch (Exception e)
-                    {
-                        MobileDebug.Manager.WriteEvent("ShuffleCollectionReadXmlFail1", e, reader.NodeType, reader.Name);
-                    }
+                    if (!(song?.IsEmpty ?? true)) list.Add(song);
+                }
+                catch (Exception e)
+                {
+                    MobileDebug.Manager.WriteEvent("ShuffleCollectionReadXmlFail1", e, reader.NodeType, reader.Name);
                 }
             }
-            catch (Exception e)
-            {
-                MobileDebug.Manager.WriteEvent("ShuffleCollectionBaseReadXmlFail2", e);
-            }
-
-            collection.CollectionChanged += This_CollectionChanged;
         }
 
         public void WriteXml(XmlWriter writer)

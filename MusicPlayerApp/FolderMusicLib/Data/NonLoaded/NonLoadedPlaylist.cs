@@ -1,16 +1,16 @@
 ﻿using MusicPlayer.Data.Loop;
 using MusicPlayer.Data.Shuffle;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Schema;
-using System.Linq;
 
 namespace MusicPlayer.Data.NonLoaded
 {
     class NonLoadedPlaylist : IPlaylist
     {
+        private const string defaultName = "None";
         private double currentSongPositionPercent;
         private Song currentSong;
         private LoopType loop;
@@ -89,7 +89,7 @@ namespace MusicPlayer.Data.NonLoaded
         {
             Parent = parent;
 
-            AbsolutePath = Name = "None";
+            AbsolutePath = Name = defaultName;
             SongsCount = 1;
             Loop = LoopType.Off;
             Shuffle = ShuffleType.Off;
@@ -101,12 +101,10 @@ namespace MusicPlayer.Data.NonLoaded
             currentSongPositionPercent = currentPlaySong.PositionPercent;
         }
 
-        public NonLoadedPlaylist(IPlaylistCollection parent, XmlReader reader)
+        public NonLoadedPlaylist(IPlaylistCollection parent, string xmlText)
         {
-            MobileDebug.Manager.WriteEvent("NonPlaylistConst1");
             Parent = parent;
-            MobileDebug.Manager.WriteEvent("NonPlaylistConst2");
-            ReadXml(reader);
+            ReadXml(XmlConverter.GetReader(xmlText));
         }
 
         public async Task Refresh()
@@ -155,21 +153,20 @@ namespace MusicPlayer.Data.NonLoaded
 
         public void ReadXml(XmlReader reader)
         {
-            AbsolutePath = reader.GetAttribute("AbsolutePath");
-            string currentSongPath = reader.GetAttribute("CurrentSongPath");
-            currentSongPositionPercent = double.Parse(reader.GetAttribute("CurrentSongPositionPercent"));
-            Name = reader.GetAttribute("Name");
-            Loop = (LoopType)Enum.Parse(typeof(LoopType), reader.GetAttribute("Loop"));
-            Shuffle = (ShuffleType)Enum.Parse(typeof(ShuffleType), reader.GetAttribute("Shuffle"));
-            SongsCount = int.Parse(reader.GetAttribute("SongsCount"));
+            AbsolutePath = reader.GetAttribute("AbsolutePath") ?? defaultName;
+            currentSongPositionPercent = double.Parse(reader.GetAttribute("CurrentSongPositionPercent") ?? "0");
+            Name = reader.GetAttribute("Name") ?? defaultName;
+            Loop = (LoopType)Enum.Parse(typeof(LoopType), reader.GetAttribute("Loop") ?? LoopType.Off.ToString());
+            Shuffle = (ShuffleType)Enum.Parse(typeof(ShuffleType), reader.GetAttribute("Shuffle") ?? ShuffleType.Off.ToString());
+            SongsCount = int.Parse(reader.GetAttribute("SongsCount") ?? "0");
+
+            string currentSongPath = reader.GetAttribute("CurrentSongPath") ?? string.Empty;
 
             reader.ReadStartElement();
-            Songs = new NonLoadedSongCollection(this, reader);
-            reader.ReadEndElement();
-
+            Songs = new NonLoadedSongCollection(this, reader.ReadOuterXml());
             ShuffleSongs = new NonLoadedShuffleCollection(this, Songs, Shuffle);
 
-            CurrentSong = Songs.Any(s => s.Path == currentSongPath) ? Songs.First(s => s.Path == currentSongPath) : Songs.First();
+            CurrentSong = Songs.FirstOrDefault(s => s.Path == currentSongPath) ?? Songs.FirstOrDefault();
         }
 
         public void WriteXml(XmlWriter writer)

@@ -6,33 +6,60 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
+    x:Name="page"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <ListBox Name="lbxEvents" Background="Transparent" SelectionMode="Multiple"
-             ItemsSource="{Binding FilterEvents}">
-        <ListBox.ItemTemplate>
-            <DataTemplate>
-                <Grid Margin="10">
-                    <TextBlock Text="{Binding}" TextWrapping="WrapWholeWords" Margin="-10"
-                           Foreground="{StaticResource AppBarItemForegroundThemeBrush}"/>
-                </Grid>
-            </DataTemplate>
-        </ListBox.ItemTemplate>
-    </ListBox>
+    <Page.Resources>
+        <local:VisibilityConverter x:Key="visCon"/>
+    </Page.Resources>
+
+    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="{Binding LoadingLog}" TextWrapping="Wrap"
+                   Visibility="{Binding ShowLog,Converter={StaticResource visCon}}"/>
+
+        <ListBox Grid.Row="1" Name="lbxEvents" Background="Transparent" 
+                 SelectionMode="Multiple" ItemsSource="{Binding FilterEvents}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="5">
+                        <TextBlock Text="{Binding}" TextWrapping="WrapWholeWords" Margin="-10"
+                                   Foreground="{StaticResource AppBarItemForegroundThemeBrush}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Grid Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+              Visibility="{Binding IsLoading,Converter={StaticResource visCon}}">
+            <Rectangle Fill="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+
+            <ProgressBar VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                         IsIndeterminate="True" />
+        </Grid>
+    </Grid>
 
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
                 <AppBarButton x:ConnectionId='1' Label="Refresh" Icon="Refresh"                  />
-                <AppBarToggleButton Label="Background" Icon="Back" IsChecked="{Binding ShowBackground,Mode=TwoWay}"/>
-                <AppBarToggleButton Label="Foreground" Icon="Forward" IsChecked="{Binding ShowForeground,Mode=TwoWay}"/>
-                <AppBarToggleButton x:ConnectionId='2' Label="Find" Icon="Find"                           
-                                    IsChecked="{Binding IsFinding,Mode=TwoWay}"/>
+                <AppBarToggleButton x:ConnectionId='2' Label="Background" Icon="Back" IsChecked="{Binding ShowBackground,Mode=TwoWay}"
+                                                                />
+                <AppBarToggleButton x:ConnectionId='3' Label="Foreground" Icon="Forward" IsChecked="{Binding ShowForeground,Mode=TwoWay}"
+                                                                />
+                <AppBarToggleButton x:ConnectionId='4' Label="Find" Icon="Find" IsChecked="{Binding IsFinding,Mode=TwoWay}"
+                                                      />
             </CommandBar.PrimaryCommands>
 
             <CommandBar.SecondaryCommands>
-                <AppBarButton x:ConnectionId='3' Label="Filter"                     />
-                <AppBarButton x:ConnectionId='4' Label="Delete"                     />
+                <AppBarButton x:ConnectionId='5' Label="Filter"                     />
+                <AppBarButton x:ConnectionId='6' Label="Delete"                     />
+                <AppBarToggleButton Label="View metadata" IsChecked="{Binding ForceLog,Mode=TwoWay}"/>
             </CommandBar.SecondaryCommands>
         </CommandBar>
     </Page.BottomAppBar>

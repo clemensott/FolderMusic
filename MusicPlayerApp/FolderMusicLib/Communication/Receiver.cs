@@ -31,7 +31,7 @@ namespace MusicPlayer.Communication
                 if (valueSet.ContainsKey(Key)) messageReceived(valueSet, valueSet[Key].ToString());
                 MobileDebug.Manager.WriteEvent("Handle2", Key, valueSet.ContainsKey(Key));
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MobileDebug.Manager.WriteEvent("HandleFail", e, Key, valueSet[Key].ToString());
             }

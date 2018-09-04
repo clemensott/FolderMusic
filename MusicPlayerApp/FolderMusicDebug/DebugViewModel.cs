@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.Storage;
 using Windows.UI.Core;
+using Windows.UI.Popups;
 
 namespace MobileDebug
 {
@@ -21,12 +23,41 @@ namespace MobileDebug
             return instance;
         }
 
-        public const string FilterFilename = "Filter.txt";
-        private static readonly string filterFilepath = ApplicationData.Current.LocalFolder.Path + "\\" + FilterFilename;
+        public const string FilterFileName = "Filter.txt";
+        private static readonly string filterFilepath = ApplicationData.Current.LocalFolder.Path + "\\" + FilterFileName;
 
-        private bool allNamesIsChecked, isFinding, isUpadetingAllNames, showForeground, showBackground;
+        private bool allNamesIsChecked, isFinding, isUpadetingAllNames, showForeground, showBackground, isLoading, forceLog;
         private IList<object> selectedItems;
-        private object[] selectedItemsBackup;
+        private Event[] selectedItemsBackup;
+        private string loadingLog;
+
+        public bool IsLoading
+        {
+            get { return isLoading; }
+            private set
+            {
+                if (value == isLoading) return;
+
+                isLoading = value;
+                NotifyPropertyChanged("IsLoading");
+                NotifyPropertyChanged("ShowLog");
+            }
+        }
+
+        public bool ForceLog
+        {
+            get { return forceLog; }
+            set
+            {
+                if (value == forceLog) return;
+
+                forceLog = value;
+                NotifyPropertyChanged("ForceLog");
+                NotifyPropertyChanged("ShowLog");
+            }
+        }
+
+        public bool ShowLog { get { return IsLoading || ForceLog; } }
 
         public bool AllNamesIsChecked
         {
@@ -97,10 +128,22 @@ namespace MobileDebug
 
         public EventName[] ShowEventNames { get; private set; }
 
+        public string LoadingLog
+        {
+            get { return loadingLog; }
+            set
+            {
+                if (value == loadingLog) return;
+
+                loadingLog = value;
+                NotifyPropertyChanged("LoadingLog");
+            }
+        }
+
         private ViewModelDebug(IList<object> selectedItems)
         {
             this.selectedItems = selectedItems;
-            selectedItemsBackup = new object[0];
+            selectedItemsBackup = new Event[0];
 
             showBackground = true;
             showForeground = true;
@@ -108,6 +151,8 @@ namespace MobileDebug
 
             Events = new Event[0];
             ShowEventNames = new EventName[0];
+
+            ForceLog = false;
 
             Reload();
         }
@@ -118,8 +163,8 @@ namespace MobileDebug
 
             IEnumerable<Event> filterer = IsFinding ? Join(Events, ShowEventNames) : Events;
 
-            if (ShowBackground && !ShowForeground) return filterer.Where(e => e.TaskId != Manager.ForegroundId);
-            else if (ShowForeground && !ShowBackground) return filterer.Where(e => e.TaskId == Manager.ForegroundId);
+            if (ShowBackground && !ShowForeground) return filterer.Where(e => e.BackgroundTaskId != Manager.ForegroundId);
+            else if (ShowForeground && !ShowBackground) return filterer.Where(e => e.BackgroundTaskId == Manager.ForegroundId);
 
             return filterer;
         }
@@ -131,25 +176,58 @@ namespace MobileDebug
 
         public async void Reload()
         {
+            StartLoadingLog("StartLoading");
+
+            IsLoading = true;
             await LoadDebugEvents();
             await SetFilter();
 
             UpdateFilteredEvents();
             UpdateAllNamesIsChecked();
+
+            IsLoading = false;
+            if (Events.Length > 0) ForceLog = true;
+
+            AppandLoadingLog("Relaoding is done: " + GetFilterEvents().Count());
         }
 
         private async Task LoadDebugEvents()
         {
             try
             {
-                string backDataEventsString = await FileIO.ReadTextAsync(await Manager.GetBackDebugDataFile());
-                string foreDataEventsString = await FileIO.ReadTextAsync(await Manager.GetForeDebugDataFile());
+                AppandLoadingLog("\nGetBackFile: ");
+                StorageFile backFile = await Manager.GetBackDebugDataFile();
+                AppandLoadingLog(backFile.Path);
 
-                Events = Event.GetEvents(backDataEventsString).Concat(Event.GetEvents(foreDataEventsString)).ToArray();
+                AppandLoadingLog("\nGetForeFile: ");
+                StorageFile foreFile = await Manager.GetForeDebugDataFile();
+                AppandLoadingLog(foreFile.Path);
+
+                AppandLoadingLog("\nLoadBackFile: ");
+                string backDataEventsString = await FileIO.ReadTextAsync(backFile);
+                AppandLoadingLog(backDataEventsString.Length);
+
+                AppandLoadingLog("\nLoadForeFile: ");
+                string foreDataEventsString = await FileIO.ReadTextAsync(foreFile);
+                AppandLoadingLog(foreDataEventsString.Length);
+
+                AppandLoadingLog("\nGetBackEvents: ");
+                Event[] backEvents = Event.GetEvents(backDataEventsString).ToArray();
+                AppandLoadingLog(backEvents.Length);
+
+                AppandLoadingLog("\nGetForeEvents: ");
+                Event[] foreEvents = Event.GetEvents(foreDataEventsString).ToArray();
+                AppandLoadingLog(foreEvents.Length);
+
+                AppandLoadingLog("\nConcatEvents: ");
+                Events = backEvents.Concat(foreEvents).ToArray();
+                AppandLoadingLog(Events.Length);
             }
             catch (Exception e)
             {
-                await new Windows.UI.Popups.MessageDialog("LoadDebugEventsFail:" + GetExceptionMesageses(e)).ShowAsync();
+                AppandLoadingLog(GetExceptionMesageses(e));
+
+                await new MessageDialog("LoadDebugEventsFail:" + GetExceptionMesageses(e)).ShowAsync();
                 Events = new Event[0];
             }
         }
@@ -162,7 +240,6 @@ namespace MobileDebug
             {
                 text += string.Format("\nType: {0}\nMess: {1}", e.GetType().Name, e.Message);
                 e = e.InnerException;
-
             }
 
             return text;
@@ -179,7 +256,7 @@ namespace MobileDebug
             }
             catch (Exception e)
             {
-                await new Windows.UI.Popups.MessageDialog("SetFilter:" + GetExceptionMesageses(e)).ShowAsync();
+                await new MessageDialog("SetFilter:" + GetExceptionMesageses(e)).ShowAsync();
             }
         }
 
@@ -192,7 +269,7 @@ namespace MobileDebug
             }
             catch
             {
-                await ApplicationData.Current.LocalFolder.CreateFileAsync(FilterFilename);
+                await ApplicationData.Current.LocalFolder.CreateFileAsync(FilterFileName);
             }
 
             return new string[0];
@@ -200,14 +277,14 @@ namespace MobileDebug
 
         public void StoreSelectedItems()
         {
-            selectedItemsBackup = selectedItems.ToArray();
+            selectedItemsBackup = selectedItems.OfType<Event>().ToArray();
         }
 
         public void RestoreSelectedItems()
         {
             selectedItems.Clear();
 
-            foreach (object obj in selectedItemsBackup.Where(i => GetFilterEvents().Any(e => e.ToString() == i.ToString())))
+            foreach (object obj in selectedItemsBackup.Where(i => GetFilterEvents().Contains(i)))
             {
                 selectedItems.Add(obj);
             }
@@ -215,10 +292,14 @@ namespace MobileDebug
 
         public void UpdateAllNamesIsChecked()
         {
+            AppandLoadingLog("\nUpdateAllNamesIsChecked: " + isUpadetingAllNames);
+
             if (isUpadetingAllNames) return;
             isUpadetingAllNames = true;
 
+            AppandLoadingLog("\nAllNamesIsChecked: ");
             allNamesIsChecked = ShowEventNames.All(x => x.IsChecked);
+            AppandLoadingLog(allNamesIsChecked);
 
             NotifyPropertyChanged("AllNamesIsChecked");
             SaveUncheckedNames();
@@ -228,16 +309,45 @@ namespace MobileDebug
 
         private async void SaveUncheckedNames()
         {
-            var uncheckedNames = ShowEventNames.Where(x => !x.IsChecked);
+            AppandLoadingLog("\nUncheckedNames: ");
+            var uncheckedNames = ShowEventNames.Where(x => !x.IsChecked).Select(x => x.Name);
+            AppandLoadingLog(uncheckedNames.Count());
 
             try
             {
-                await PathIO.WriteLinesAsync(filterFilepath, uncheckedNames.Select(x => x.Name));
+                AppandLoadingLog("\nSaveUncheckedNames...");
+                await PathIO.WriteLinesAsync(filterFilepath, uncheckedNames);
+                AppandLoadingLog("Done");
             }
-            catch
+            catch (FileNotFoundException)
             {
-                await ApplicationData.Current.LocalFolder.CreateFileAsync(FilterFilename);
+                try
+                {
+                    AppandLoadingLog("\nFileNotFound. CreateFile...");
+                    await ApplicationData.Current.LocalFolder.CreateFileAsync(FilterFileName);
+                    AppandLoadingLog("Done\nTrySaveAgain...");
+                    await PathIO.WriteLinesAsync(filterFilepath, uncheckedNames);
+                    AppandLoadingLog("Done");
+                }
+                catch (Exception e)
+                {
+                    AppandLoadingLog(GetExceptionMesageses(e));
+                }
             }
+            catch (Exception e)
+            {
+                AppandLoadingLog(GetExceptionMesageses(e));
+            }
+        }
+
+        private void StartLoadingLog(object start)
+        {
+            LoadingLog = start.ToString();
+        }
+
+        private void AppandLoadingLog(object log)
+        {
+            LoadingLog += log.ToString();
         }
 
         private void UpdateFilteredEvents()

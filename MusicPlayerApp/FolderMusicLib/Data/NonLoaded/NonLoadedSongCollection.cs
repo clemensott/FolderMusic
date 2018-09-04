@@ -1,5 +1,4 @@
 ﻿using MusicPlayer.Data.Shuffle;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +17,7 @@ namespace MusicPlayer.Data.NonLoaded
 
         public IPlaylist Parent { get; private set; }
 
-        public event SongCollectionChangedEventHandler CollectionChanged;
+        public event SongCollectionChangedEventHandler Changed;
 
         public NonLoadedSongCollection(IPlaylist parent)
         {
@@ -32,12 +31,27 @@ namespace MusicPlayer.Data.NonLoaded
             list = new List<Song>();
 
             int currentSongIndex = actualShuffleSongs.IndexOf(parent.CurrentSong);
-            int startIndex = actualShuffleSongs.Count - saveSongsCount > currentSongIndex ?
-                currentSongIndex : actualShuffleSongs.Count - saveSongsCount;
+            int startIndex, count;
 
-            for (int i = 0; i < saveSongsCount; i++)
+            if (actualShuffleSongs.Count < saveSongsCount)
             {
-                list.Add(actualShuffleSongs.ElementAt(currentSongIndex + i));
+                startIndex = 0;
+                count = actualShuffleSongs.Count;
+            }
+            else if (currentSongIndex + saveSongsCount < actualShuffleSongs.Count)
+            {
+                startIndex = currentSongIndex;
+                count = saveSongsCount;
+            }
+            else
+            {
+                startIndex = actualShuffleSongs.Count - saveSongsCount;
+                count = saveSongsCount;
+            }
+
+            foreach (Song song in actualShuffleSongs.Skip(startIndex).Take(count))
+            {
+                list.Add(song);
             }
         }
 
@@ -49,10 +63,10 @@ namespace MusicPlayer.Data.NonLoaded
             list.Add(new Song(this, currentPlaySong));
         }
 
-        public NonLoadedSongCollection(IPlaylist parent, XmlReader reader)
+        public NonLoadedSongCollection(IPlaylist parent, string xmlText)
         {
             Parent = parent;
-            ReadXml(reader);
+            ReadXml(XmlConverter.GetReader(xmlText));
         }
 
         public int IndexOf(Song song)
@@ -100,9 +114,7 @@ namespace MusicPlayer.Data.NonLoaded
 
             while (reader.NodeType == XmlNodeType.Element)
             {
-                list.Add(new Song(this, reader));
-
-                reader.Read();
+                list.Add(new Song(this, reader.ReadOuterXml()));
             }
         }
 

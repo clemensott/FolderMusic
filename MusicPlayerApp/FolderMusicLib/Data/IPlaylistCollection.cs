@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Xml.Serialization;
 
 namespace MusicPlayer.Data
 {
-    public delegate void PlaylistCollectionChangedEventHandler(IPlaylistCollection sender, PlaylistsChangedEventArgs args);
+    public delegate void PlaylistCollectionChangedEventHandler(IPlaylistCollection sender, PlaylistCollectionChangedEventArgs args);
 
-    public interface IPlaylistCollection : IEnumerable<IPlaylist>, INotifyCollectionChanged, IXmlSerializable
+    public interface IPlaylistCollection : IEnumerable<IPlaylist>, IXmlSerializable
     {
         int Count { get; }
         ILibrary Parent { get; }

@@ -125,17 +125,21 @@ namespace MobileDebug.MobileDebug_XamlTypeInfo
 
         private void InitTypeTables()
         {
-            _typeNameTable = new string[4];
+            _typeNameTable = new string[6];
             _typeNameTable[0] = "MobileDebug.DebugFilterPage";
             _typeNameTable[1] = "Windows.UI.Xaml.Controls.Page";
             _typeNameTable[2] = "Windows.UI.Xaml.Controls.UserControl";
-            _typeNameTable[3] = "MobileDebug.DebugPage";
+            _typeNameTable[3] = "MobileDebug.VisibilityConverter";
+            _typeNameTable[4] = "Object";
+            _typeNameTable[5] = "MobileDebug.DebugPage";
 
-            _typeTable = new global::System.Type[4];
+            _typeTable = new global::System.Type[6];
             _typeTable[0] = typeof(global::MobileDebug.DebugFilterPage);
             _typeTable[1] = typeof(global::Windows.UI.Xaml.Controls.Page);
             _typeTable[2] = typeof(global::Windows.UI.Xaml.Controls.UserControl);
-            _typeTable[3] = typeof(global::MobileDebug.DebugPage);
+            _typeTable[3] = typeof(global::MobileDebug.VisibilityConverter);
+            _typeTable[4] = typeof(global::System.Object);
+            _typeTable[5] = typeof(global::MobileDebug.DebugPage);
         }
 
         private int LookupTypeIndexByName(string typeName)
@@ -171,7 +175,8 @@ namespace MobileDebug.MobileDebug_XamlTypeInfo
         }
 
         private object Activate_0_DebugFilterPage() { return new global::MobileDebug.DebugFilterPage(); }
-        private object Activate_3_DebugPage() { return new global::MobileDebug.DebugPage(); }
+        private object Activate_3_VisibilityConverter() { return new global::MobileDebug.VisibilityConverter(); }
+        private object Activate_5_DebugPage() { return new global::MobileDebug.DebugPage(); }
 
         private global::Windows.UI.Xaml.Markup.IXamlType CreateXamlType(int typeIndex)
         {
@@ -198,9 +203,20 @@ namespace MobileDebug.MobileDebug_XamlTypeInfo
                 xamlType = new global::MobileDebug.MobileDebug_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 3:   //  MobileDebug.DebugPage
+            case 3:   //  MobileDebug.VisibilityConverter
+                userType = new global::MobileDebug.MobileDebug_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
+                userType.Activator = Activate_3_VisibilityConverter;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 4:   //  Object
+                xamlType = new global::MobileDebug.MobileDebug_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 5:   //  MobileDebug.DebugPage
                 userType = new global::MobileDebug.MobileDebug_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_3_DebugPage;
+                userType.Activator = Activate_5_DebugPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;

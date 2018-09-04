@@ -1,0 +1,51 @@
+﻿<UserControl
+    x:Class="FolderMusic.IListStringControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FolderMusic"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:con="using:FolderMusic.Converters"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400"
+    x:Name="control"
+    DataContextChanged="OnDataContextChanged">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="tblNone" Text="None" Margin="25,0,0,0"
+                   FontSize="{Binding ElementName=control,Path=FontSize}"/>
+        
+        <StackPanel x:Name="panel"/>
+
+        <Grid Grid.Row="1" HorizontalAlignment="Stretch" Margin="0,-5,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Content="Add" MinWidth="0"
+                    FontSize="{Binding ElementName=control,Path=FontSize}" 
+                    HorizontalAlignment="Stretch" Click="BtnAdd_Click"/>
+            
+            <Button Grid.Column="1" x:Name="btnRemove" Content="Remove" MinWidth="0"
+                    FontSize="{Binding ElementName=control,Path=FontSize}" 
+                    Margin="5,0,0,0" HorizontalAlignment="Stretch" Click="BtnRemove_Click"/>
+            
+            <Button Grid.Column="2" x:Name="btnUp" Content="Up" MinWidth="0"
+                    FontSize="{Binding ElementName=control,Path=FontSize}" 
+                    Margin="5,0,0,0" HorizontalAlignment="Stretch" Click="BtnUp_Click"/>
+            
+            <Button Grid.Column="3" x:Name="btnDown" Content="Down" MinWidth="0"
+                    FontSize="{Binding ElementName=control,Path=FontSize}" 
+                    Margin="5,0,0,0" HorizontalAlignment="Stretch" Click="BtnDown_Click"/>
+        </Grid>
+    </Grid>
+</UserControl>

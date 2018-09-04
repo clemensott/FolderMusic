@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
-using Windows.Media.Playback;
-using Windows.Storage;
 
 namespace MusicPlayer.Data
 {

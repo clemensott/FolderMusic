@@ -1,6 +1,5 @@
 ﻿using MusicPlayer.Data.Shuffle;
 using System;
-using System.Collections.Generic;
 
 namespace MusicPlayer.Data
 {

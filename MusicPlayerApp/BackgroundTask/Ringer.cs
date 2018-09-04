@@ -82,7 +82,7 @@ namespace BackgroundTask
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("RingFileFail2", e);
+                MobileDebug.Manager.WriteEvent("RingFileFaFileName", e);
             }
         }
 
@@ -120,7 +120,7 @@ namespace BackgroundTask
 
         public void MediaEnded(MediaPlayer sender, object args)
         {
-            MobileDebug.Manager.WriteEvent("RingerEnded", "RingerState: " + State);
+            MobileDebug.Manager.WriteEventPair("RingerEnded", "RingerState: ", State);
 
             if (State == RingerState.Waiting) SetCurrent();
             else if (State == RingerState.Ringing)

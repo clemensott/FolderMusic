@@ -1,7 +1,4 @@
-﻿using Windows.UI.Xaml.Media.Imaging;
-using PlayerIcons;
-
-namespace MusicPlayer.Data.Loop
+﻿namespace MusicPlayer.Data.Loop
 {
     class LoopCurrent : ILoop
     {

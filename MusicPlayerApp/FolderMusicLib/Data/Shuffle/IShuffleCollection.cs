@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Xml.Serialization;
 
 namespace MusicPlayer.Data.Shuffle
 {
     public delegate void ShuffleCollectionChangedEventHandler(IShuffleCollection sender);
 
-    public interface IShuffleCollection : IEnumerable<Song>, INotifyCollectionChanged, IXmlSerializable
+    public interface IShuffleCollection : IEnumerable<Song>, IXmlSerializable
     {
         int Count { get; }
         IPlaylist Parent { get; }

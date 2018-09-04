@@ -16,25 +16,46 @@
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="10"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.ColumnSpan="3" Grid.Row="1" FontSize="24" Margin="15,0" TextWrapping="WrapWholeWords"
-                   Text="Was not able to play the following file. Do you want to Remove it?:"/>
+        <TextBlock Grid.ColumnSpan="3" Grid.Row="0" FontSize="24" Margin="15,0" TextWrapping="WrapWholeWords"
+                   Text="Was not able to play these files:" TextAlignment="Center"/>
         <TextBlock Grid.ColumnSpan="3" Grid.Row="2" FontSize="20" Margin="20,10" Name="tbl_Path"
                    TextWrapping="Wrap"/>
 
-        <Button x:ConnectionId='1' Grid.Column="0" Grid.Row="4" Margin="10" HorizontalAlignment="Center"
-                Content="Yes"                  />
-        <Button x:ConnectionId='2' Grid.Column="1" Grid.Row="4" Margin="10" HorizontalAlignment="Center" 
-                Content="No"                 />
-        <Button x:ConnectionId='3' Grid.Column="3" Grid.Row="4" Margin="10" HorizontalAlignment="Center" 
-                Content="Skip"                   />
+        <ListBox Grid.ColumnSpan="3" Grid.Row="1" x:Name="lbxSongs"
+                 Background="Transparent" SelectionMode="Multiple">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid x:Name="grid">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Rectangle Grid.ColumnSpan="2" Fill="Transparent"
+                                   Width="{Binding ElementName=grid,Path=ActualWidth}"/>
+
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock FontSize="20" Margin="0,-5,0,-2" Text="{Binding Title}"
+                                       Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"/>
+                            <TextBlock FontSize="15" Margin="0,-2,0,0" Text="{Binding Artist}"
+                                       Foreground="{ThemeResource ApplicationPointerOverForegroundThemeBrush}" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Button x:ConnectionId='1' Grid.Column="0" Grid.Row="2" Margin="10" HorizontalAlignment="Center"
+                Content="Togle"                     />
+        <Button x:ConnectionId='2' Grid.Column="1" Grid.Row="2" Margin="10" HorizontalAlignment="Center"
+                Content="Keep"                   />
+        <Button x:ConnectionId='3' Grid.Column="2" Grid.Row="2" Margin="10" HorizontalAlignment="Center" 
+                Content="Remove"                     />
     </Grid>
 </Page>
 

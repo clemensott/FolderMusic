@@ -1,15 +1,14 @@
 ﻿using MusicPlayer.Communication;
+using MusicPlayer.Data.NonLoaded;
+using MusicPlayer.Data.Shuffle;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Media.Playback;
-using Windows.Storage;
 using System.Xml;
 using System.Xml.Schema;
-using Windows.ApplicationModel.Core;
-using MusicPlayer.Data.Shuffle;
-using MusicPlayer.Data.NonLoaded;
+using Windows.Media.Playback;
+using Windows.Storage;
 
 namespace MusicPlayer.Data
 {
@@ -34,14 +33,13 @@ namespace MusicPlayer.Data
 
         public bool CanceledLoading { get; private set; }
 
+        public bool IsLoadedComplete { get; private set; }
+
         public bool IsPlaying
         {
             get { return isPlaying; }
             set
             {
-                MobileDebug.Manager.WriteEvent("IsPlaying", "Current: " + isPlaying,
-                    "Value: " + value, "Libray: " + GetHashCode());
-
                 if (value == isPlaying) return;
 
                 isPlaying = value;
@@ -59,7 +57,7 @@ namespace MusicPlayer.Data
             {
                 if (value == currentPlaylist || !Playlists.Contains(value)) return;
 
-                if (isForeground == false)
+                if (isForeground == false && currentPlaylist != null)
                 {
                     TimeSpan position = BackgroundMediaPlayer.Current.Position;
                     TimeSpan duration = BackgroundMediaPlayer.Current.NaturalDuration;
@@ -80,34 +78,29 @@ namespace MusicPlayer.Data
 
         internal Library(bool isForeground)
         {
-            SkippedSongs = new SkipSongs(this);
             this.isForeground = isForeground;
+            SkippedSongs = new SkipSongs(this);
             playlists = new PlaylistCollection(this);
             currentPlaylist = null;
         }
 
         internal Library(CurrentPlaySong currentPlaySong)
         {
-            SkippedSongs = new SkipSongs(this);
             isForeground = false;
-            playlists = new PlaylistCollection(this, currentPlaySong);
+            IsLoadedComplete = false;
+
+            SkippedSongs = new SkipSongs(this);
+            playlists = new NonLoadedPlaylistCollection(this, currentPlaySong);
             currentPlaylist = playlists.First();
 
             LibraryChanged += OnLibraryChanged;
         }
 
-        internal Library(ILibrary actualLibrary)
+        public Library(string xmlText)
         {
-            SkippedSongs = new SkipSongs(this);
-            currentPlaylist = actualLibrary.CurrentPlaylist;
-            playlists = new NonLoadedPlaylistCollection(this, actualLibrary.Playlists, actualLibrary.CurrentPlaylist);
-        }
-
-        internal Library(string xmlText)
-        {
-            MobileDebug.Manager.WriteEvent("LoadLibXml", xmlText.Length);
+            IsLoadedComplete = true;
+            System.Diagnostics.Debug.WriteLine(xmlText.Length);
             ReadXml(XmlConverter.GetReader(xmlText));
-            //CheckLibrary(this);
         }
 
         public void Set(ILibrary library)
@@ -118,7 +111,10 @@ namespace MusicPlayer.Data
 
             if (isForeground == false)
             {
-                Song currentSong = library.CurrentPlaylist?.Songs?.FirstOrDefault(s => s.Path == CurrentPlaylist.CurrentSong.Path);
+                ISongCollection songs = library?.CurrentPlaylist?.Songs;
+                Song currentSong = songs?.FirstOrDefault(s => s.Path == CurrentPlaylist?.CurrentSong?.Path) ??
+                    library.CurrentPlaylist?.Songs.FirstOrDefault();
+
                 double currentSongPositionPercent = CurrentPlaylist?.CurrentSongPositionPercent ?? 0;
 
                 if (currentSong != null)
@@ -134,6 +130,7 @@ namespace MusicPlayer.Data
 
             playlists = library.Playlists;
             currentPlaylist = library.CurrentPlaylist;
+            IsLoadedComplete = true;
 
             LibraryChanged?.Invoke(this, args);
         }
@@ -167,7 +164,7 @@ namespace MusicPlayer.Data
 
         public async Task Update()
         {
-            foreach (IPlaylist playlist in Playlists.AsEnumerable())
+            foreach (IPlaylist playlist in Playlists.ToArray())
             {
                 if (CanceledLoading) return;
 
@@ -177,15 +174,13 @@ namespace MusicPlayer.Data
 
         public async Task AddNew()
         {
-            string currentPlaylistAbsolutePath = CurrentPlaylist.AbsolutePath;
-
             CanceledLoading = false;
 
             IPlaylistCollection updatedPlaylists = new PlaylistCollection(this);
 
             foreach (StorageFolder folder in await GetStorageFolders())
             {
-                await AddOldOrLoadedPlaylist(folder, updatedPlaylists);
+                await AddOldOrLoadedPlaylist(folder.Path, updatedPlaylists);
 
                 if (CanceledLoading) return;
             }
@@ -195,13 +190,13 @@ namespace MusicPlayer.Data
             PlaylistsChanged?.Invoke(this, args);
         }
 
-        private async Task AddOldOrLoadedPlaylist(StorageFolder folder, IPlaylistCollection playlists)
+        private async Task AddOldOrLoadedPlaylist(string folderPath, IPlaylistCollection playlists)
         {
-            IPlaylist playlist = Playlists.FirstOrDefault(x => x.AbsolutePath == folder.Path);
+            IPlaylist playlist = Playlists.FirstOrDefault(x => x.AbsolutePath == folderPath);
 
             if (playlist == null)
             {
-                playlist = new Playlist(playlists, folder.Path);
+                playlist = new Playlist(playlists, folderPath);
                 await playlist.Refresh();
 
                 if (playlist.Songs.Count == 0) return;
@@ -242,7 +237,7 @@ namespace MusicPlayer.Data
 
         public void Save()
         {
-            MobileDebug.Manager.WriteEvent("SaveLibrary", "IsForeground: " + isForeground.ToString() ?? "null");
+            MobileDebug.Manager.WriteEventPair("SaveLibrary", "IsForeground: ", isForeground);
             SaveSimple();
 
             if (isForeground != false) return;
@@ -296,31 +291,39 @@ namespace MusicPlayer.Data
         {
             string currentPlaylistPath = reader.GetAttribute("CurrentPlaylistPath");
 
-            reader.ReadStartElement();
-            playlists = new PlaylistCollection(this, reader);
-            reader.ReadEndElement();
+            try
+            {
+                playlists = new PlaylistCollection(this, reader.ReadInnerXml());
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Manager.WriteEvent("LibraryXmlLoadFail", e, reader.Name, reader.NodeType);
+                throw;
+            }
 
             currentPlaylist = playlists.FirstOrDefault(p => p.AbsolutePath == currentPlaylistPath) ?? playlists.FirstOrDefault();
         }
 
         public void WriteXml(XmlWriter writer)
         {
-            writer.WriteAttributeString("CurrentPlaylistPath", CurrentPlaylist.AbsolutePath);
+            writer.WriteAttributeString("CurrentPlaylistPath", CurrentPlaylist?.AbsolutePath ?? "null");
 
             writer.WriteStartElement("Playlists");
             Playlists.WriteXml(writer);
             writer.WriteEndElement();
         }
 
-        private static void CheckLibrary(ILibrary lib)
+        public static string CheckLibrary(ILibrary lib)
         {
-            MobileDebug.Manager.WriteEvent("CheckLibraryStart", lib?.Playlists.Count.ToString() ?? "null");
+            MobileDebug.Manager.WriteEvent("CheckLibraryStart", lib?.Playlists?.Count.ToString() ?? "null");
             bool contains = lib.Playlists.Contains(lib.CurrentPlaylist);
 
             List<string> list = new List<string>()
             {
                 "ContainsCurrentPlaylist: " + contains,
-                "CurrentPlaylist==null: " + (lib.CurrentPlaylist == null)
+                "CurrentPlaylist==null: " + (lib.CurrentPlaylist == null),
+                "LibraryType: " + lib.GetType().Name,
+                "LibraryHash: " + lib.GetHashCode()
             };
 
             foreach (IPlaylist p in lib.Playlists)
@@ -339,15 +342,19 @@ namespace MusicPlayer.Data
                     text += "\nSongs: " + (p?.Songs?.Count.ToString() ?? "null");
                     text += "\nDif: " + (p?.Songs?.GroupBy(s => s?.Path ?? "null")?.Count().ToString() ?? "null");
                     text += "\nShuffle: " + (p?.ShuffleSongs?.Count.ToString() ?? "null");
+
+                    text += "\nHash: " + (p?.GetHashCode() ?? -1);
                 }
 
                 list.Add(text);
             }
 
             MobileDebug.Manager.WriteEvent("CheckLibraryEnd", list.AsEnumerable());
+
+            return string.Join("\r\n", list);
         }
 
-        public static ILibrary Load(bool isForeground)
+        public static ILibrary LoadSimple(bool isForeground)
         {
             ILibrary library;
 
@@ -371,19 +378,9 @@ namespace MusicPlayer.Data
             {
                 library = CurrentPlaySong.Load();
                 BackForegroundCommunicator.StartCommunication(library, isForeground);
-
-                new Task(new Action<object>(SetLibrary), library).Start();
             }
 
             return library;
-        }
-
-        private static void SetLibrary(object parameter)
-        {
-            ILibrary targetLibrary = (ILibrary)parameter;
-            ILibrary completeLibrary = GetLibrary();
-
-            targetLibrary.Set(completeLibrary);
         }
 
         private static ILibrary GetLibrary()
@@ -392,7 +389,9 @@ namespace MusicPlayer.Data
             {
                 try
                 {
-                    return new Library(IO.LoadText(fileName));
+                    ILibrary lib = new Library(IO.LoadText(fileName));
+                    IO.Copy(fileName, backupFileName);
+                    return lib;
                 }
                 catch (Exception e)
                 {
@@ -404,7 +403,9 @@ namespace MusicPlayer.Data
             {
                 try
                 {
-                    return new Library(IO.LoadText(backupFileName));
+                    ILibrary lib = new Library(IO.LoadText(backupFileName));
+                    IO.Copy(backupFileName, fileName);
+                    return lib;
                 }
                 catch (Exception e)
                 {
@@ -412,9 +413,17 @@ namespace MusicPlayer.Data
                 }
             }
 
-            MobileDebug.Manager.WriteEvent("Coundn't load AnyData");
+            MobileDebug.Manager.WriteEvent("Coundn't load any data");
+            IO.Copy(fileName, KnownFolders.VideosLibrary, fileName);
+            IO.Copy(backupFileName, KnownFolders.VideosLibrary, backupFileName);
 
             return new Library(false);
+        }
+
+        public void LoadComplete()
+        {
+            ILibrary completeLibrary = GetLibrary();
+            Set(completeLibrary);
         }
 
         private void OnLibraryChanged(ILibrary sender, LibraryChangedEventsArgs args)
@@ -451,8 +460,10 @@ namespace MusicPlayer.Data
             playlist.LoopChanged += OnLoopChanged;
             playlist.ShuffleChanged += OnShuffleChanged;
 
-            playlist.Songs.CollectionChanged += OnSongsChanged;
+            playlist.Songs.Changed += OnSongsChanged;
             playlist.ShuffleSongs.Changed += OnShuffleSongsChanged;
+
+            Subscribe(playlist.Songs);
         }
 
         private void Unsubscribe(IPlaylist playlist)
@@ -464,8 +475,10 @@ namespace MusicPlayer.Data
             playlist.LoopChanged -= OnLoopChanged;
             playlist.ShuffleChanged -= OnShuffleChanged;
 
-            playlist.Songs.CollectionChanged -= OnSongsChanged;
+            playlist.Songs.Changed -= OnSongsChanged;
             playlist.ShuffleSongs.Changed -= OnShuffleSongsChanged;
+
+            Unsubscribe(playlist.Songs);
         }
 
         private void Subscribe(IEnumerable<Song> songs)
@@ -482,21 +495,21 @@ namespace MusicPlayer.Data
         {
             if (song?.IsEmpty ?? true) return;
 
-            song.ArtistChanged += OnArtistChanged;
-            song.DurationChanged += OnDurationChanged;
-            song.TitleChanged += OnTitleChanged;
+            song.ArtistChanged += OnSongChanged;
+            song.DurationChanged += OnSongChanged;
+            song.TitleChanged += OnSongChanged;
         }
 
         private void Unsubscribe(Song song)
         {
             if (song?.IsEmpty ?? true) return;
 
-            song.ArtistChanged -= OnArtistChanged;
-            song.DurationChanged -= OnDurationChanged;
-            song.TitleChanged -= OnTitleChanged;
+            song.ArtistChanged -= OnSongChanged;
+            song.DurationChanged -= OnSongChanged;
+            song.TitleChanged -= OnSongChanged;
         }
 
-        private void OnPlaylistsChanged(IPlaylistCollection sender, PlaylistsChangedEventArgs args)
+        private void OnPlaylistsChanged(IPlaylistCollection sender, PlaylistCollectionChangedEventArgs args)
         {
             Unsubscribe(args.GetRemoved());
             Subscribe(args.GetAdded());
@@ -540,17 +553,7 @@ namespace MusicPlayer.Data
             Save();
         }
 
-        private void OnArtistChanged(Song sender, SongArtistChangedEventArgs args)
-        {
-            Save();
-        }
-
-        private void OnDurationChanged(Song sender, SongDurationChangedEventArgs args)
-        {
-            Save();
-        }
-
-        private void OnTitleChanged(Song sender, SongTitleChangedEventArgs args)
+        private void OnSongChanged(Song sender, EventArgs args)
         {
             Save();
         }

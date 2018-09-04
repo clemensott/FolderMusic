@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -14,6 +15,9 @@ namespace MobileDebug
     /// </summary>
     public sealed partial class DebugPage : Page
     {
+        private static readonly TimeSpan minHoldingTimeSpan = TimeSpan.FromMilliseconds(300);
+
+        private bool isHolding;
         private ViewModelDebug viewModel;
 
         public DebugPage()
@@ -57,6 +61,33 @@ namespace MobileDebug
         private void AbtbFind_Holding(object sender, HoldingRoutedEventArgs e)
         {
             Frame.Navigate(typeof(DebugFilterPage), viewModel);
+        }
+
+        private void ShowBackground_Click(object sender, RoutedEventArgs e)
+        {
+            ScrollToFirstSelectedItem();
+        }
+
+        private void ShowForeground_Click(object sender, RoutedEventArgs e)
+        {
+            ScrollToFirstSelectedItem();
+        }
+
+        private void Find_Click(object sender, RoutedEventArgs e)
+        {
+            ScrollToFirstSelectedItem();
+        }
+
+        private void ScrollToFirstSelectedItem()
+        {
+            try
+            {
+                if (lbxEvents.SelectedItems.Count == 0) return;
+
+                object firstSelectedItem = lbxEvents.Items.First(i => lbxEvents.SelectedItems.Contains(i));
+                lbxEvents.ScrollIntoView(firstSelectedItem);
+            }
+            catch { }
         }
     }
 }

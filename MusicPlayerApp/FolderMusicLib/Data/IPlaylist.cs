@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using MusicPlayer.Data.Loop;
+﻿using MusicPlayer.Data.Loop;
 using MusicPlayer.Data.Shuffle;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace MusicPlayer.Data
 {
-    //public delegate void SongsPropertyChangedEventHandler(IPlaylist sender, SongsChangedEventArgs args);
     public delegate void CurrentSongPropertyChangedEventHandler(IPlaylist sender, CurrentSongChangedEventArgs args);
     public delegate void CurrentSongPositionPropertyChangedEventHandler(IPlaylist sender, CurrentSongPositionChangedEventArgs args);
     public delegate void ShufflePropertyChangedEventHandler(IPlaylist sender, ShuffleChangedEventArgs args);
@@ -14,7 +12,6 @@ namespace MusicPlayer.Data
 
     public interface IPlaylist : IXmlSerializable
     {
-        //event SongsPropertyChangedEventHandler SongsChanged;
         event CurrentSongPropertyChangedEventHandler CurrentSongChanged;
         event CurrentSongPositionPropertyChangedEventHandler CurrentSongPositionChanged;
         event ShufflePropertyChangedEventHandler ShuffleChanged;

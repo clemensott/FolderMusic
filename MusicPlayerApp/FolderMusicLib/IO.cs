@@ -4,13 +4,12 @@ using Windows.Storage;
 
 namespace MusicPlayer
 {
-    class IO
+    static class IO
     {
         public static T LoadObject<T>(string filenameWithExtention)
         {
             string xmlText = LoadText(filenameWithExtention);
 
-            //FolderMusicDebug.DebugEvent.SaveText("LoadObject", typeof(T).Name, filenameWithExtention, xmlText, xmlText.Length);
             return XmlConverter.Deserialize<T>(xmlText);
         }
 
@@ -18,11 +17,14 @@ namespace MusicPlayer
         {
             try
             {
-                string path = ApplicationData.Current.LocalFolder.Path + "\\" + filenameWithExtention;
-                Task<string> load = PathIO.ReadTextAsync(path).AsTask();
-                load.Wait();
+                //string path = ApplicationData.Current.LocalFolder.Path + "\\" + filenameWithExtention;
+                //Task<string> load = PathIO.ReadTextAsync(path).AsTask();
+                //load.Wait();
+                StorageFile file = GetStorageFile(filenameWithExtention);
+                var read = FileIO.ReadTextAsync(file);
+                read.AsTask().Wait();
 
-                return load.Result;
+                return read.GetResults();
             }
             catch (Exception e)
             {
@@ -35,9 +37,9 @@ namespace MusicPlayer
         public static void SaveObject(string filenameWithExtention, object obj)
         {
             string xmlText = XmlConverter.Serialize(obj);
-            if (xmlText == string.Empty) return;
 
-            SaveText(filenameWithExtention, xmlText);
+            if (xmlText != string.Empty) SaveText(filenameWithExtention, xmlText);
+            else MobileDebug.Manager.WriteEvent("SaveObject", obj.GetType());
         }
 
         public static void SaveText(string filenameWithExtention, string text)
@@ -98,6 +100,66 @@ namespace MusicPlayer
             {
                 MobileDebug.Manager.WriteEvent("IODeleteFail", e, filenameWithExtention);
             }
+        }
+
+        public static void Copy(string srcFileName, string destFileName)
+        {
+            Copy(srcFileName, ApplicationData.Current.LocalFolder, destFileName);
+        }
+
+        public static void Copy(string srcFileName, StorageFolder destFolder, string destFileName)
+        {
+            try
+            {
+                StorageFile srcFile = GetStorageFile(srcFileName);
+
+                try
+                {
+                    StorageFile destFile = GetStorageFile(destFileName);
+
+                    srcFile.CopyAndReplaceAsync(destFile);
+                }
+                catch
+                {
+                    srcFile.CopyAsync(destFolder, destFileName);
+                }
+            }
+            catch { }
+        }
+
+        private static StorageFile GetStorageFile(string fileName)
+        {
+            return GetStorageFile(ApplicationData.Current.LocalFolder, fileName);
+        }
+
+        private static StorageFile GetStorageFile(StorageFolder folder, string fileName)
+        {
+            var fileOp = folder.GetFileAsync(fileName);
+            fileOp.AsTask().Wait();
+
+            return fileOp.GetResults();
+        }
+
+        private static StorageFile GetOrCreateStorageFile(string fileName)
+        {
+            return GetOrCreateStorageFile(ApplicationData.Current.LocalFolder, fileName);
+        }
+
+        private static StorageFile GetOrCreateStorageFile(StorageFolder folder, string fileName)
+        {
+            try
+            {
+                var fileOp = folder.GetFileAsync(fileName);
+                fileOp.AsTask().Wait();
+
+                return fileOp.GetResults();
+            }
+            catch { }
+
+            var createFileOp = folder.CreateFileAsync(fileName);
+            createFileOp.AsTask().Wait();
+
+            return createFileOp.GetResults();
         }
     }
 }

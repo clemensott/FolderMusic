@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Schema;
-using System.Xml.Serialization;
 
 namespace MusicPlayer.Data
 {
     public class SongCollection : ISongCollection
     {
-        public event SongCollectionChangedEventHandler CollectionChanged;
+        public event SongCollectionChangedEventHandler Changed;
 
         private List<Song> list;
 
@@ -27,20 +22,16 @@ namespace MusicPlayer.Data
             list = new List<Song>();
         }
 
-        public SongCollection(IPlaylist parent, XmlReader reader)
+        public SongCollection(IPlaylist parent, string xmlText)
         {
             Parent = parent;
-            ReadXml(reader);
-        }
-
-        public SongCollection(IPlaylist parent, string xmlText)
-            : this(parent, XmlConverter.GetReader(xmlText))
-        {
+            ReadXml(XmlConverter.GetReader(xmlText));
         }
 
         public void Reset(IEnumerable<Song> newSongs)
         {
-            list = new List<Song>(newSongs);
+            Change(newSongs, this);
+            //list = new List<Song>(newSongs);
         }
 
         public int IndexOf(Song song)
@@ -80,7 +71,7 @@ namespace MusicPlayer.Data
             }
 
             var args = new SongCollectionChangedEventArgs(added, removed, oldCurrentSong, newCurrentSong);
-            CollectionChanged?.Invoke(this, args);
+            Changed?.Invoke(this, args);
         }
 
         private IEnumerable<ChangedSong> GetAddedChangedSongs(IEnumerable<Song> adds)
@@ -129,9 +120,7 @@ namespace MusicPlayer.Data
 
             while (reader.NodeType == XmlNodeType.Element)
             {
-                list.Add(new Song(this, reader));
-
-                reader.Read();
+                list.Add(new Song(this, reader.ReadOuterXml()));
             }
         }
 

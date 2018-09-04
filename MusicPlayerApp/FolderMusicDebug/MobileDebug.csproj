@@ -94,6 +94,7 @@
     <Compile Include="DebugFilterPage.xaml.cs">
       <DependentUpon>DebugFilterPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="VisibilityConverter.cs" />
     <Compile Include="Manager.cs" />
     <Compile Include="DebugPage.xaml.cs">
       <DependentUpon>DebugPage.xaml</DependentUpon>

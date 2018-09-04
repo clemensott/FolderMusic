@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
 
 namespace MusicPlayer.Data.Shuffle
 {
@@ -17,13 +12,8 @@ namespace MusicPlayer.Data.Shuffle
         {
         }
 
-        public ShuffleOneTimeCollection(IPlaylist parent, ISongCollection songs, XmlReader reader)
-            : base(parent, songs, reader)
-        {
-        }
-
         public ShuffleOneTimeCollection(IPlaylist parent, ISongCollection songs, string xmlText)
-            : this(parent, songs, XmlConverter.GetReader(xmlText))
+            : base(parent, songs, xmlText)
         {
         }
 
@@ -50,20 +40,19 @@ namespace MusicPlayer.Data.Shuffle
         protected override void UpdateCollection(SongCollectionChangedEventArgs args)
         {
             bool changed = false;
-            var collection = GetCollection();
 
             foreach (Song addSong in args.GetAdded())
             {
                 changed = true;
 
-                collection.Insert(random.Next(collection.Count + 1), addSong);
+                list.Insert(random.Next(list.Count + 1), addSong);
             }
 
             foreach (Song removeSong in args.GetRemoved())
             {
                 changed = true;
 
-                collection.Remove(removeSong);
+                list.Remove(removeSong);
             }
 
             if (changed) RaiseChange();

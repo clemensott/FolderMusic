@@ -28,15 +28,13 @@ namespace MusicPlayer.Data.NonLoaded
 
         public SkipSongs SkippedSongs { get; private set; }
 
-        private NonLoadedLibrary(XmlReader reader)
+        public bool IsLoadedComplete { get { return false; } }
+
+        private NonLoadedLibrary(string xmlText)
         {
             SkippedSongs = new SkipSongs(this);
             IsPlaying = false;
-            ReadXml(reader);
-        }
-
-        private NonLoadedLibrary(string xmlText) : this(XmlConverter.GetReader(xmlText))
-        {
+            ReadXml(XmlConverter.GetReader(xmlText));
         }
 
         public NonLoadedLibrary(ILibrary actualLibrary)
@@ -98,9 +96,7 @@ namespace MusicPlayer.Data.NonLoaded
         {
             string currentPlaylistPath = reader.GetAttribute("CurrentPlaylistPath");
 
-            reader.ReadStartElement();
-            Playlists = new NonLoadedPlaylistCollection(this, reader);
-            reader.ReadEndElement();
+            Playlists = new NonLoadedPlaylistCollection(this, reader.ReadInnerXml());
 
             CurrentPlaylist = Playlists.FirstOrDefault(p => p.AbsolutePath == currentPlaylistPath) ?? Playlists.FirstOrDefault();
         }
@@ -112,6 +108,10 @@ namespace MusicPlayer.Data.NonLoaded
             writer.WriteStartElement("Playlists");
             Playlists.WriteXml(writer);
             writer.WriteEndElement();
+        }
+
+        public void LoadComplete()
+        {
         }
     }
 }

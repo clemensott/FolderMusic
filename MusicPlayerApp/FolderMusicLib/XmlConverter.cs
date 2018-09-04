@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -25,33 +24,6 @@ namespace MusicPlayer
 
             return (T)deObj;
         }
-
-        //public static string Serialize(object obj)
-        //{
-        //    Type type = obj.GetType();
-
-        //    try
-        //    {
-        //        XmlSerializer serializer = new XmlSerializer(type);
-        //        try
-        //        {
-        //            TextWriter tw = new StringWriter();
-        //            serializer.Serialize(tw, obj);
-
-        //            return tw.ToString();
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            FolderMusicDebug.DebugEvent.SaveText("XmlTypeFail", e);
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        FolderMusicDebug.DebugEvent.SaveText("XmlTypeFail", e);
-        //    }
-
-        //    return string.Empty;
-        //}
 
         public static string Serialize(object obj)
         {

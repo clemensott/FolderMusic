@@ -1,9 +1,6 @@
 ﻿using MusicPlayer.Data;
-using MusicPlayer.Data.Shuffle;
-using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
 
@@ -13,9 +10,11 @@ namespace FolderMusic
     {
         private static bool playlistPageOpen;
 
-        public IPlaylist Playlist { get; private set; }
-
         public static bool Open { get { return playlistPageOpen; } }
+
+        private PlaylistViewModel viewModel;
+
+        public IPlaylist Playlist { get; private set; }
 
         public PlaylistPage()
         {
@@ -25,7 +24,8 @@ namespace FolderMusic
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            DataContext = Playlist = e.Parameter as IPlaylist;
+            Playlist = e.Parameter as IPlaylist;
+            DataContext = viewModel = new PlaylistViewModel(Playlist);
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -73,6 +73,23 @@ namespace FolderMusic
         private void DeleteThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
             Playlist.Parent.Remove(Playlist);
+
+            Frame.GoBack();
+        }
+
+        private void OnSelectedSongChangedManually(object sender, SelectedSongChangedManuallyEventArgs e)
+        {
+            MobileDebug.Manager.WriteEventPair("OnSelectedSongChangedManually1", "OldCurrentSong: ", e.OldCurrentSong,
+                "NewCurrentSong: ", e.NewCurrentSong, "CurrentPlaylist: ", Playlist?.Parent?.Parent?.CurrentPlaylist);
+            try
+            {
+                Playlist.Parent.Parent.CurrentPlaylist = Playlist;
+                MobileDebug.Manager.WriteEventPair("OnSelectedSongChangedManually2", "CurrentPlaylist: ", Playlist?.Parent?.Parent?.CurrentPlaylist);
+            }
+            catch (System.Exception exc)
+            {
+                MobileDebug.Manager.WriteEventPair("OnSelectedSongChangedManuallyFail", exc, "CurrentPlaylist: ", Playlist?.Parent?.Parent?.CurrentPlaylist);
+            }
 
             Frame.GoBack();
         }

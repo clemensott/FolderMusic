@@ -1,0 +1,39 @@
+﻿<UserControl
+    x:Class="FolderMusic.Slider"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FolderMusic"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:con="using:FolderMusic.Converters"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400"
+    x:Name="control"
+    Loaded="UserControl_Loaded">
+
+    <UserControl.Resources>
+        <con:IsIndeterminateToHideConverter x:Key="toHideConverter"/>
+        <con:IsIndeterminateToShowConverter x:Key="toShowConverter"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Slider Name="sld" Height="60" VerticalAlignment="Top" Minimum="0" 
+                Maximum="1" Value="0" SnapsTo="StepValues" StepFrequency="0.001" 
+                Visibility="{Binding ElementName=control,Path=IsIndeterminate,Converter={StaticResource toHideConverter}}"
+                Holding="sld_Holding" ValueChanged="sld_ValueChanged" PointerEntered="sld_PointerEntered"/>
+
+        <ProgressBar IsIndeterminate="True" Height="60" VerticalAlignment="Top"
+                Visibility="{Binding ElementName=control,Path=IsIndeterminate,Converter={StaticResource toShowConverter}}"/>
+
+        <TextBlock Name="tblPosition" Grid.Row="1" Text="0:00"
+                   VerticalAlignment="Bottom" HorizontalAlignment="Left" FontSize="20"/>
+        <TextBlock Name="tblDuration" Grid.Row="1" Text="0:00"
+                   VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="20"/>
+    </Grid>
+</UserControl>

@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Xml;
-using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace MusicPlayer.Data
@@ -12,7 +10,7 @@ namespace MusicPlayer.Data
         int Count { get; }
         IPlaylist Parent { get; }
 
-        event SongCollectionChangedEventHandler CollectionChanged;
+        event SongCollectionChangedEventHandler Changed;
 
         void Add(Song song);
         void Remove(Song song);

@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MusicPlayer.Data
 {
@@ -17,6 +18,11 @@ namespace MusicPlayer.Data
         internal SkipSongs(ILibrary library)
         {
             this.library = library;
+        }
+
+        public bool HasSongs()
+        {
+            return GetSongs().Count() > 0;
         }
 
         public void Add(Song song)
@@ -42,9 +48,9 @@ namespace MusicPlayer.Data
             IO.SaveText(skipSongsFileName, text);
         }
 
-        public void Delete()
+        public IEnumerator<SkipSong> GetEnumerator()
         {
-            IO.Delete(skipSongsFileName);
+            return new SkipSongsEnumerator(library);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -52,9 +58,16 @@ namespace MusicPlayer.Data
             return new SkipSongsEnumerator(library);
         }
 
-        IEnumerator<SkipSong> IEnumerable<SkipSong>.GetEnumerator()
+        public IEnumerable<Song> GetSongs()
         {
-            return new SkipSongsEnumerator(library);
+            List<string> ssps = GetSkipSongsPaths();
+            var selected = ssps.Select(ssp => library.Playlists.SelectMany(p => p.Songs).FirstOrDefault(s => s.Path == ssp));
+            return selected.Where(s => s != null);
+        }
+
+        internal void Raise()
+        {
+            SkippedSong?.Invoke(this);
         }
     }
 }

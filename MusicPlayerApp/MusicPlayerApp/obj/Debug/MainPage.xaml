@@ -17,112 +17,47 @@
         </Grid.RowDefinitions>
 
         <Hub Grid.Row="0" Name="hub" Header="FolderMusic" Style="{StaticResource HHeader}" Margin="0,5,0,0">
-            <HubSection Background="Transparent" Margin="0,-10,0,0"
-                        Header="{Binding CurrentPlaylistName}" Style="{StaticResource HSHeader}">
+            <HubSection Background="Transparent" Margin="0,-10,0,0" 
+                        DataContext="{Binding CurrentPlaylist,Converter={StaticResource playlistViewModelConverter}}"
+                        Header="{Binding Name}" Style="{StaticResource HSHeader}">
                 <DataTemplate>
-                    <local:ShuffleSongsView x:ConnectionId='13' Margin="0,-30,0,0" Source="{Binding CurrentPlaylist}"
-                                                                                            />
+                    <local:ShuffleSongsView x:ConnectionId='5' Margin="0,-30,0,0" Source="{Binding Source}"
+                                                                                                />
                 </DataTemplate>
             </HubSection>
 
             <HubSection Header="Playlists" Style="{StaticResource HSHeader}" Margin="0,-10,0,0">
                 <DataTemplate>
-                    <ListBox SelectionMode="Single" Background="Transparent" Margin="0,-30,0,0"
-                             ItemsSource="{Binding Playlists,Converter={StaticResource playlistsConverter}}"
-                             SelectedItem="{Binding CurrentPlaylist,Mode=TwoWay}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid x:ConnectionId='5'                                    >
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <FlyoutBase.AttachedFlyout>
-                                        <MenuFlyout>
-                                            <MenuFlyoutItem x:ConnectionId='6' Text="Refresh"                              />
-                                            <MenuFlyoutItem x:ConnectionId='7' Text="Update"                             />
-                                            <MenuFlyoutItem x:ConnectionId='8' Text="Search for New Songs"                                        />
-                                            <MenuFlyoutItem x:ConnectionId='9' Text="Delete"                             />
-                                        </MenuFlyout>
-                                    </FlyoutBase.AttachedFlyout>
-
-                                    <StackPanel Orientation="Vertical">
-                                        <Image x:ConnectionId='11' Source="{Binding Converter={StaticResource playConverter}}"
-                                                   Margin="0,0,0,5" Width="30" Height="30"                             />
-                                        <Image x:ConnectionId='12' Source="{Binding Converter={StaticResource detailConverter}}"
-                                                   Width="30" Height="30"                               />
-                                    </StackPanel>
-
-                                    <Grid x:ConnectionId='10' Grid.Column="1"                         >
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <StackPanel Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Name}" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"
-                                                       TextWrapping="WrapWholeWords"
-                                                       Margin="10,0,0,0" FontSize="20" VerticalAlignment="Center"/>
-                                            <TextBlock Text="{Binding SongsCount,Converter={StaticResource songsCountConverter}}" 
-                                                       Foreground="{ThemeResource ApplicationPointerOverForegroundThemeBrush}"
-                                                       Margin="10,0,0,0" FontSize="10" VerticalAlignment="Center"/>
-                                        </StackPanel>
-
-                                        <Rectangle Grid.Column="1" Fill="Transparent" Width="1500"/>
-                                    </Grid>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <local:PlaylistsView Margin="0,-30,0,0" Source="{Binding Library}"/>
                 </DataTemplate>
             </HubSection>
         </Hub>
 
-        <Grid Grid.Row="1">
+        <Grid x:ConnectionId='2' Grid.Row="1"                             HorizontalAlignment="Stretch"
+              DataContext="{Binding CurrentPlaylist,Converter={StaticResource playlistViewModelConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Grid x:ConnectionId='4'                            >
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="{Binding CurrentSongTitle}" FontSize="25" Margin="10,0" 
+                       TextWrapping="Wrap" HorizontalAlignment="Stretch"
+                       Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"/>
 
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Text="{Binding CurrentSongTitle}" FontSize="25" Margin="10,0" TextWrapping="Wrap" 
-                               Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"/>
-                    <Rectangle Fill="Transparent" Width="1500"/>
-                </Grid>
-
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Text="{Binding CurrentSongArtist}" FontSize="20" Margin="10,0" FontStyle="Italic"
-                               Foreground="{ThemeResource ApplicationPointerOverForegroundThemeBrush}"/>
-                    <Rectangle Fill="Transparent" Width="1500"/>
-                </Grid>
-            </Grid>
+            <TextBlock Grid.Row="1" Text="{Binding CurrentSongArtist}" FontSize="20" Margin="10,0"
+                       FontStyle="Italic" TextWrapping="Wrap" HorizontalAlignment="Stretch"
+                       Foreground="{ThemeResource ApplicationPointerOverForegroundThemeBrush}"/>
         </Grid>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="2" x:Name="dg">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="4*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0">
+            <Grid Grid.Column="0"
+                  DataContext="{Binding CurrentPlaylist,Converter={StaticResource playlistViewModelConverter}}">
                 <Grid.Resources>
                     <Storyboard x:Name="ShuffleImageTap">
                         <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateY)"
@@ -133,8 +68,10 @@
                     </Storyboard>
                 </Grid.Resources>
 
-                <Image x:ConnectionId='3' Grid.Column="0" x:Name="ShuffleImage" Source="{Binding CurrentPlaylistShuffleIcon}"
-                                                                                                                                      >
+                <Image x:ConnectionId='4' Grid.Column="0" x:Name="ShuffleImage" 
+                       Source="{Binding Shuffle,Converter={StaticResource shuffleConverter}}"
+                                                                                            
+                                                                 >
                     <Image.RenderTransform>
                         <CompositeTransform TranslateY="0"/>
                     </Image.RenderTransform>
@@ -143,7 +80,8 @@
 
             <local:Slider Grid.Column="1" Height="60" Library="{Binding Library}" Player="{Binding BackgroundPlayer}"/>
 
-            <Grid Grid.Column="2">
+            <Grid Grid.Column="2"
+                  DataContext="{Binding CurrentPlaylist,Converter={StaticResource playlistViewModelConverter}}">
                 <Grid.Resources>
                     <Storyboard x:Name="LoopImageTap">
                         <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateY)" 
@@ -154,8 +92,10 @@
                     </Storyboard>
                 </Grid.Resources>
 
-                <Image x:ConnectionId='2' Grid.Column="2" x:Name="LoopImage" Source="{Binding CurrentPlaylistLoopIcon}"                     
-                                                                                                        >
+                <Image x:ConnectionId='3' Grid.Column="2" x:Name="LoopImage" 
+                       Source="{Binding Loop,Converter={StaticResource loopConverter}}"
+                                                                                      
+                                                              >
                     <Image.RenderTransform>
                         <CompositeTransform TranslateY="0"/>
                     </Image.RenderTransform>
@@ -167,21 +107,22 @@
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
-                <AppBarButton x:ConnectionId='14' Label="Previous" Icon="Previous"                       />
-                <AppBarButton x:ConnectionId='15' Label="{Binding PlayPauseText}" Icon="{Binding PlayPauseIcon}"                        />
-                <AppBarButton x:ConnectionId='16' Label="Next" Icon="Next"                   />
+                <AppBarButton x:ConnectionId='6' Label="Previous" Icon="Previous"                       />
+                <AppBarButton x:ConnectionId='7' Label="{Binding IsPlaying,Converter={StaticResource playPauseTextConverter}}" 
+                              Icon="{Binding IsPlaying,Converter={StaticResource playPauseIconConverter}}" 
+                                                     />
+                <AppBarButton x:ConnectionId='8' Label="Next" Icon="Next"                   />
             </CommandBar.PrimaryCommands>
 
             <CommandBar.SecondaryCommands>
-                <AppBarButton x:ConnectionId='17' Label="Refresh Library"                                      />
-                <AppBarButton x:ConnectionId='18' Label="Update existing playlists"                                      />
-                <AppBarButton x:ConnectionId='19' Label="Add not existing playlists"                                      />
-                <AppBarButton x:ConnectionId='20' Label="Settings"                       />
-                <AppBarButton x:ConnectionId='21' Label="Debug Site"                           />
-                <AppBarButton x:ConnectionId='22' Label="Music Properties"                            />
-                <AppBarButton x:ConnectionId='23' Label="Foreground Debug Data"                           />
-                <AppBarButton x:ConnectionId='24' Label="Add false Playlist"                            />
-                <AppBarButton x:ConnectionId='25' Label="Ask for Reply"                            />
+                <AppBarButton x:ConnectionId='9' Label="Refresh Library"                                      />
+                <AppBarButton x:ConnectionId='10' Label="Update all playlists"                                      />
+                <AppBarButton x:ConnectionId='11' Label="Add new playlists"                                      />
+                <AppBarButton x:ConnectionId='12' Label="Settings"                       />
+                <AppBarButton x:ConnectionId='13' Label="Debug Site"                           />
+                <AppBarButton x:ConnectionId='14' Label="Music Properties"                                 />
+                <AppBarButton x:ConnectionId='15' Label="Test0"                       />
+                <AppBarButton x:ConnectionId='16' Label="Test1"                       />
             </CommandBar.SecondaryCommands>
         </CommandBar>
     </Page.BottomAppBar>

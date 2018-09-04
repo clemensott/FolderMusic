@@ -6,10 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using Windows.ApplicationModel.Core;
 using Windows.Media.Playback;
-using Windows.UI.Core;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
 
@@ -17,16 +14,9 @@ namespace FolderMusic
 {
     public class ViewModel : INotifyPropertyChanged
     {
-        private bool playerPositionEnabled = true;
         private SymbolIcon playIcon, pauseIcon;
 
-        public string PlayPauseText
-        {
-            get
-            {
-                return BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing ? "Pause" : "Play";
-            }
-        }
+        public bool IsPlaying { get { return Library.IsPlaying; } }
 
         public IconElement PlayPauseIcon { get { return Library.IsPlaying ? GetPauseIcon() : GetPlayIcon(); } }
 
@@ -61,19 +51,23 @@ namespace FolderMusic
             Subscribe(library.CurrentPlaylist);
         }
 
-        private void Subscribe(IEnumerable<IPlaylist> playlists)
+        private void Subscribe(IPlaylistCollection playlists)
         {
+            playlists.Changed += OnPlaylistCollectionChanged;
+
             foreach (IPlaylist playlist in playlists ?? Enumerable.Empty<IPlaylist>())
             {
-                //Subscribe(playlist);
+                //playlist.Songs.CollectionChanged += Songs_CollectionChanged;
             }
         }
 
-        private void Unsubscribe(IEnumerable<IPlaylist> playlists)
+        private void Unsubscribe(IPlaylistCollection playlists)
         {
+            playlists.Changed -= OnPlaylistCollectionChanged;
+
             foreach (IPlaylist playlist in playlists ?? Enumerable.Empty<IPlaylist>())
             {
-                //Unsubscribe(playlist);
+                //playlist.Songs.CollectionChanged -= Songs_CollectionChanged;
             }
         }
 
@@ -200,6 +194,7 @@ namespace FolderMusic
 
         public void UpdatePlayPauseIconAndText()
         {
+            NotifyPropertyChanged("IsPlaying");
             NotifyPropertyChanged("PlayPauseIcon");
             NotifyPropertyChanged("PlayPauseText");
         }
@@ -207,11 +202,6 @@ namespace FolderMusic
         public void UpdatePlaylists()
         {
             NotifyPropertyChanged("Playlists");
-        }
-
-        public void UpdatePlaylistIndex()
-        {
-            NotifyPropertyChanged("PlaylistsIndex");
         }
 
         public void UpdateCurrentPlaylistAndRest()
@@ -247,9 +237,18 @@ namespace FolderMusic
 
         private void OnPlaylistsChanged(ILibrary sender, PlaylistsChangedEventArgs args)
         {
-            Unsubscribe(args.GetRemoved());
-            Subscribe(args.GetAdded());
+            Unsubscribe(args.OldPlaylists);
+            Subscribe(args.NewPlaylists);
 
+            Unsubscribe(args.OldCurrentPlaylist);
+            Subscribe(args.NewCurrentPlaylist);
+
+            UpdatePlaylists();
+            UpdateCurrentPlaylistAndRest();
+        }
+
+        private void OnPlaylistCollectionChanged(IPlaylistCollection sender, PlaylistCollectionChangedEventArgs args)
+        {
             Unsubscribe(args.OldCurrentPlaylist);
             Subscribe(args.NewCurrentPlaylist);
 
@@ -264,6 +263,7 @@ namespace FolderMusic
 
             UpdateCurrentPlaylistAndRest();
         }
+
 
         private void OnSkippedSongsChanged(SkipSongs sender)
         {
@@ -288,13 +288,11 @@ namespace FolderMusic
         private void OnTitleChanged(Song sender, SongTitleChangedEventArgs args)
         {
             if (sender == CurrentPlaylist.CurrentSong) NotifyPropertyChanged("CurrentSongTitle");
-            else if (CurrentPlaylist.Songs.Contains(sender)) NotifyPropertyChanged("CurrentPlaylistShuffleIcon");
         }
 
         private void OnArtistChanged(Song sender, SongArtistChangedEventArgs args)
         {
             if (sender == CurrentPlaylist.CurrentSong) NotifyPropertyChanged("CurrentSongArtist");
-            else if (CurrentPlaylist.Songs.Contains(sender)) NotifyPropertyChanged("CurrentPlaylistShuffleIcon");
         }
 
         private void OnPlayStateChanged(ILibrary sender, PlayStateChangedEventArgs args)
@@ -310,15 +308,7 @@ namespace FolderMusic
             {
                 if (null == PropertyChanged) return;
 
-                if (CoreApplication.MainView.CoreWindow.Dispatcher.HasThreadAccess)
-                {
-                    PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-                }
-                else
-                {
-                    CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                        () => { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); });
-                }
+                MainPage.DoSafe(() => { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); });
             }
             catch (Exception e)
             {

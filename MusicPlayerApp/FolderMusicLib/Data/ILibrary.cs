@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace MusicPlayer.Data
@@ -23,12 +21,14 @@ namespace MusicPlayer.Data
 
         bool CanceledLoading { get; }
         IPlaylist CurrentPlaylist { get; set; }
+        bool IsLoadedComplete { get; }
         bool IsPlaying { get; set; }
         IPlaylistCollection Playlists { get; }
         SkipSongs SkippedSongs { get; }
 
         Task AddNew();
         void CancelLoading();
+        void LoadComplete();
         Task Refresh();
         void Save();
         Task SaveAsync();

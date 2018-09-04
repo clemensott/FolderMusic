@@ -27,10 +27,18 @@ namespace MusicPlayer.Data.NonLoaded
                 ToList<IPlaylist>();
         }
 
-        public NonLoadedPlaylistCollection(ILibrary parent, XmlReader reader)
+        public NonLoadedPlaylistCollection(ILibrary parent, string xmlText)
         {
             Parent = parent;
-            ReadXml(reader);
+            ReadXml(XmlConverter.GetReader(xmlText));
+        }
+
+        public NonLoadedPlaylistCollection(ILibrary parent, CurrentPlaySong currentPlaySong)
+        {
+            Parent = parent;
+
+            list = new List<IPlaylist>();
+            list.Add(new NonLoadedPlaylist(this, currentPlaySong));
         }
 
         public int IndexOf(IPlaylist item)
@@ -82,15 +90,13 @@ namespace MusicPlayer.Data.NonLoaded
             {
                 try
                 {
-                    list.Add(new NonLoadedPlaylist(this, reader));
+                    list.Add(new NonLoadedPlaylist(this, reader.ReadOuterXml()));
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Manager.WriteEvent("XmlReadNonLodedPlaylistCollectionFail",
-                        e, list.Count, "Node: " + reader.NodeType);
+                    MobileDebug.Manager.WriteEventPair("XmlReadNonLoadedPlaylistCollectionFail",
+                        e, "Count: ", list.Count, "Node: ", reader.NodeType, "Name: ", reader.Name);
                 }
-
-                reader.Read();
             }
         }
 

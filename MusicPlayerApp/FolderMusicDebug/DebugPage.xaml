@@ -6,33 +6,60 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
+    x:Name="page"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <ListBox Name="lbxEvents" Background="Transparent" SelectionMode="Multiple"
-             ItemsSource="{Binding FilterEvents}">
-        <ListBox.ItemTemplate>
-            <DataTemplate>
-                <Grid Margin="10">
-                    <TextBlock Text="{Binding}" TextWrapping="WrapWholeWords" Margin="-10"
-                           Foreground="{StaticResource AppBarItemForegroundThemeBrush}"/>
-                </Grid>
-            </DataTemplate>
-        </ListBox.ItemTemplate>
-    </ListBox>
+    <Page.Resources>
+        <local:VisibilityConverter x:Key="visCon"/>
+    </Page.Resources>
+
+    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="{Binding LoadingLog}" TextWrapping="Wrap"
+                   Visibility="{Binding ShowLog,Converter={StaticResource visCon}}"/>
+
+        <ListBox Grid.Row="1" Name="lbxEvents" Background="Transparent" 
+                 SelectionMode="Multiple" ItemsSource="{Binding FilterEvents}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="5">
+                        <TextBlock Text="{Binding}" TextWrapping="WrapWholeWords" Margin="-10"
+                                   Foreground="{StaticResource AppBarItemForegroundThemeBrush}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Grid Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+              Visibility="{Binding IsLoading,Converter={StaticResource visCon}}">
+            <Rectangle Fill="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+
+            <ProgressBar VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                         IsIndeterminate="True" />
+        </Grid>
+    </Grid>
 
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
                 <AppBarButton Label="Refresh" Icon="Refresh" Click="Ref_Click"/>
-                <AppBarToggleButton Label="Background" Icon="Back" IsChecked="{Binding ShowBackground,Mode=TwoWay}"/>
-                <AppBarToggleButton Label="Foreground" Icon="Forward" IsChecked="{Binding ShowForeground,Mode=TwoWay}"/>
-                <AppBarToggleButton Label="Find" Icon="Find" Holding="AbtbFind_Holding"
-                                    IsChecked="{Binding IsFinding,Mode=TwoWay}"/>
+                <AppBarToggleButton Label="Background" Icon="Back" IsChecked="{Binding ShowBackground,Mode=TwoWay}"
+                                    Click="ShowBackground_Click"/>
+                <AppBarToggleButton Label="Foreground" Icon="Forward" IsChecked="{Binding ShowForeground,Mode=TwoWay}"
+                                    Click="ShowForeground_Click"/>
+                <AppBarToggleButton Label="Find" Icon="Find" IsChecked="{Binding IsFinding,Mode=TwoWay}"
+                                    Click="Find_Click"/>
             </CommandBar.PrimaryCommands>
 
             <CommandBar.SecondaryCommands>
                 <AppBarButton Label="Filter" Click="Filter_Click"/>
                 <AppBarButton Label="Delete" Click="Delete_Click"/>
+                <AppBarToggleButton Label="View metadata" IsChecked="{Binding ForceLog,Mode=TwoWay}"/>
             </CommandBar.SecondaryCommands>
         </CommandBar>
     </Page.BottomAppBar>

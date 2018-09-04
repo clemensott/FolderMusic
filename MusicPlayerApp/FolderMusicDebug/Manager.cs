@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -34,22 +36,40 @@ namespace MobileDebug
             Id = id;
         }
 
-        public static void WriteEvent(string name, IEnumerable<object> data)
+        public static void WriteEvent(string name, IEnumerable data)
         {
             //System.Diagnostics.Debug.WriteLine(name);
             Event debugEvent = new Event(name, data);
 
-            new Task(new Action<object>(Append), debugEvent.ToDataString()).Start();
+            Task.Factory.StartNew(new Action<object>(Append), debugEvent.ToDataString());
         }
 
         public static void WriteEvent(string name, params object[] data)
         {
-            WriteEvent(name, (IEnumerable<object>)data);
+            WriteEvent(name, (IEnumerable)data);
         }
 
         public static void WriteEvent(string name, Exception exc, params object[] data)
         {
             WriteEvent(name, data.Concat(GetMessages(exc)));
+        }
+
+        public static void WriteEventPair(string name, IEnumerable data)
+        {
+            //System.Diagnostics.Debug.WriteLine(name);
+            Event debugEvent = Event.GetPair(name, data);
+
+            Task.Factory.StartNew(new Action<object>(Append), debugEvent.ToDataString());
+        }
+
+        public static void WriteEventPair(string name, params object[] data)
+        {
+            WriteEventPair(name, (IEnumerable)data);
+        }
+
+        public static void WriteEventPair(string name, Exception exc, params object[] data)
+        {
+            WriteEvent(name, data.Concat(GetMessagesPair(exc)));
         }
 
         private static IEnumerable<string> GetMessages(Exception e)
@@ -58,6 +78,20 @@ namespace MobileDebug
             {
                 yield return "Typ: " + e.GetType().Name;
                 yield return "Mes: " + e.Message;
+
+                e = e.InnerException;
+            }
+        }
+
+        private static IEnumerable<string> GetMessagesPair(Exception e)
+        {
+            while (e != null)
+            {
+                yield return "Typ: ";
+                yield return e.GetType().Name;
+                yield return "Mes: ";
+                yield return e.Message;
+
                 e = e.InnerException;
             }
         }
@@ -66,11 +100,7 @@ namespace MobileDebug
         {
             string text = parameter.ToString();
 
-            lock (lockObj)
-            {
-                while (isAppending) Task.Delay(10).Wait(20);
-                isAppending = true;
-            }
+            SetIsAppending();
 
             try
             {
@@ -93,7 +123,27 @@ namespace MobileDebug
             }
             catch { }
 
-            isAppending = false;
+            UnsetIsAppending();
+        }
+
+        private static void SetIsAppending()
+        {
+            lock (lockObj)
+            {
+                if (isAppending) Monitor.Wait(lockObj);
+
+                isAppending = true;
+            }
+        }
+
+        private static void UnsetIsAppending()
+        {
+            lock (lockObj)
+            {
+                isAppending = false;
+
+                Monitor.Pulse(lockObj);
+            }
         }
 
         internal static async Task<StorageFile> GetBackDebugDataFile()
@@ -129,7 +179,7 @@ namespace MobileDebug
             return foreDebugDataFile;
         }
 
-        internal static IEnumerable<string> Split(string dataString, char seperator)
+        internal static IEnumerable<string> Split(StringBuilder dataString, char seperator)
         {
             while (dataString.Length > 0)
             {
@@ -137,30 +187,28 @@ namespace MobileDebug
             }
         }
 
-        internal static string GetUntil(ref string text, char seperator)
+        internal static string GetUntil(ref StringBuilder text, char seperator)
         {
-            int lenght = 0;
-            string part = string.Empty;
+            int length;
+            StringBuilder part = new StringBuilder(text.Length);
 
-            while (true)
+            for (length = 0; length < text.Length; length++)
             {
-                char c = text.ElementAtOrDefault(lenght);
-                if (c == seperator)
-                {
-                    lenght++;
+                char c = text[length];
 
-                    if (text.ElementAtOrDefault(lenght) != addChar) break;
+                if (text[length] == seperator)
+                {
+                    length++;
+
+                    if (length >= text.Length || text[length] != addChar) break;
                 }
 
-                part += c;
-                lenght++;
-
-                if (lenght >= text.Length) break;
+                part.Append(c);
             }
 
-            text = text.Remove(0, lenght);
+            text.Remove(0, length);
 
-            return part;
+            return part.ToString();
         }
 
         internal static void AddToDataString(ref string dataString, object add, char dataSplitter, params char[] splitters)

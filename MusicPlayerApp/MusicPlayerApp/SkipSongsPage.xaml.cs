@@ -1,6 +1,5 @@
 ﻿using MusicPlayer.Data;
 using System.Collections.Generic;
-using System.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -13,7 +12,7 @@ namespace FolderMusic
 
         public static bool Open { get { return open; } }
 
-        private IEnumerator<SkipSong> enumerator;
+        private SkipSongs list;
 
         public SkipSongsPage()
         {
@@ -22,60 +21,68 @@ namespace FolderMusic
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            open = true;
+            list = e.Parameter as SkipSongs;
+            list.SkippedSong += List_SkippedSong;
+
+            lbxSongs.ItemsSource = list.GetSongs();
+
             base.OnNavigatedTo(e);
-
-            IEnumerable<SkipSong> skippedSongs = e.Parameter as IEnumerable<SkipSong>;
-            enumerator = skippedSongs?.GetEnumerator();
-
-            if (enumerator?.MoveNext() != true) Frame.GoBack();
-            else SetCurrentSongPath();
         }
 
-        private void SetCurrentSongPath()
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            do
+            open = false;
+
+            base.OnNavigatedFrom(e);
+        }
+
+        private void List_SkippedSong(SkipSongs sender)
+        {
+            IList<object> selectedItems = lbxSongs.SelectedItems;
+
+            lbxSongs.ItemsSource = list.GetSongs();
+
+            foreach (object selectedItem in selectedItems) lbxSongs.SelectedItems.Add(selectedItem);
+        }
+
+        private void Keep_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (SkipSong skipSong in list)
             {
-                if (!enumerator.Current.Song.IsEmpty)
-                {
-                    tbl_Path.Text = enumerator.Current.Song.Path;
-                }
+                skipSong.Handle = lbxSongs.SelectedItems.Contains(skipSong.Song) ? HandleType.Keep : HandleType.Skip;
+            }
 
-            } while (enumerator.MoveNext());
+            lbxSongs.ItemsSource = list.GetSongs();
 
-            enumerator.Dispose();
-            Frame.GoBack();
+            if (lbxSongs.Items.Count == 0) Frame.GoBack();
         }
 
-        private void Yes_Click(object sender, RoutedEventArgs e)
+        private void Remove_Click(object sender, RoutedEventArgs e)
         {
-            enumerator.Current.Handle = ProgressType.Remove;
+            foreach (SkipSong skipSong in list)
+            {
+                skipSong.Handle = lbxSongs.SelectedItems.Contains(skipSong.Song) ? HandleType.Remove : HandleType.Skip;
+            }
 
-            if (!enumerator.MoveNext()) Frame.GoBack();
+            lbxSongs.ItemsSource = list.GetSongs();
 
-            SetCurrentSongPath();
+            if (lbxSongs.Items.Count == 0) Frame.GoBack();
         }
 
-        private void No_Click(object sender, RoutedEventArgs e)
+        private void Toggle_Click(object sender, RoutedEventArgs e)
         {
-            enumerator.Current.Handle = ProgressType.Leave;
-
-            if (!enumerator.MoveNext()) Frame.GoBack();
-
-            SetCurrentSongPath();
-        }
-
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            Frame.GoBack();
-        }
-
-        private void Skip_Click(object sender, RoutedEventArgs e)
-        {
-            enumerator.Current.Handle = ProgressType.Skip;
-
-            if (!enumerator.MoveNext()) Frame.GoBack();
-
-            SetCurrentSongPath();
+            if (lbxSongs.SelectedItems.Count == 0) lbxSongs.SelectAll();
+            else lbxSongs.SelectedItems.Clear();
+            //foreach (object item in lbxSongs.Items)
+            //{
+            //    try
+            //    {
+            //        if (lbxSongs.SelectedItems.Contains(item)) lbxSongs.SelectedItems.Remove(item);
+            //        else lbxSongs.SelectedItems.Add(item);
+            //    }
+            //    catch { }
+            //}
         }
     }
 }
