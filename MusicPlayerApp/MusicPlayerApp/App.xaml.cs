@@ -2,6 +2,7 @@
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.Media.Playback;
 using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -18,10 +19,10 @@ namespace MusicPlayerApp
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
 
-            Library.Current.LoadCurrentSong();
-            Library.SavePlayCommand(false);
+            CurrentSong.Current.Load();
 
             Library.Current.SetIsForeground();
+            var player = BackgroundMediaPlayer.Current;
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs e)

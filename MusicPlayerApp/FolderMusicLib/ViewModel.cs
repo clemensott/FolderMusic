@@ -12,11 +12,9 @@ namespace FolderMusicLib
     {
         private static ViewModel instance;
 
-        private bool mainPageLoaded, sliderEntered = false, scrollLbxCurrentPlaylist = true;
-        private int openPlaylistsIndex = 0;
-        private double sliderMaximum;
+        private bool mainPageLoaded, sliderEntered = false;
+        private int openPlaylistIndex = 0;
         private SymbolIcon playIcon, pauseIcon;
-        private ListBox lbxCurrentPlaylist;
 
         public static ViewModel Current
         {
@@ -36,15 +34,15 @@ namespace FolderMusicLib
             get { return Library.Current.CurrentPlaylistIndex; }
             set
             {
-                openPlaylistsIndex = value;
+                openPlaylistIndex = value;
                 UpdatePlaylistIndex();
             }
         }
 
         public int OpenPlaylistIndex
         {
-            get { return openPlaylistsIndex; }
-            set { openPlaylistsIndex = value; }
+            get { return openPlaylistIndex != -1 ? openPlaylistIndex : PlaylistsIndex; }
+            set { openPlaylistIndex = value; }
         }
 
         public double BackgroundPlayerPositionMilliseconds
@@ -62,14 +60,26 @@ namespace FolderMusicLib
             get { return CurrentPlaylist.SongPositionMilliseconds; }
             set
             {
-                if (Math.Abs(SliderValue - value) < 100) return;
+                if (Math.Abs(SliderValue - value) < 100 || value >= CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds) return;
                 
                 CurrentPlaylist.SongPositionMilliseconds = value;
-                UpdateSliderValueText();
+
+                if (sliderEntered) UpdateSliderValueText();
+                else UpdateSliderValue();
             }
         }
 
-        public double SliderMaximum { get { return sliderMaximum; } }
+        public double SliderMaximum
+        {
+            get { return Library.Current.CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds; }
+            set
+            {
+                if (SliderMaximum == value) return;
+
+                CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds = value;
+                UpdateSliderMaximum();
+            }
+        }
 
         public string SliderValueText { get { return GetShowTime(SliderValue); } }
 
@@ -90,7 +100,7 @@ namespace FolderMusicLib
         {
             get
             {
-                return BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing ? pauseIcon : playIcon;
+                return BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing ? GetPauseIcon() : GetPlayIcon();
             }
         }
 
@@ -98,52 +108,67 @@ namespace FolderMusicLib
 
         public Playlist OpenPlaylist
         {
-            get { return Library.Current[openPlaylistsIndex]; }
+            get { return Library.Current[OpenPlaylistIndex]; }
             set
             {
                 if (Library.Current.IsEmpty) return;
 
-                openPlaylistsIndex = value.PlaylistIndex;
+                openPlaylistIndex = value.PlaylistIndex;
 
-                if (openPlaylistsIndex == -1) openPlaylistsIndex = Library.Current.CurrentPlaylistIndex;
+                if (openPlaylistIndex == -1) openPlaylistIndex = Library.Current.CurrentPlaylistIndex;
             }
         }
 
         public List<Playlist> Playlists { get { return Library.Current.Playlists; } }
 
-        private ViewModel()
+        private ViewModel() { }
+
+        private SymbolIcon GetPlayIcon()
         {
             try
             {
-                Windows.ApplicationModel.Core.CoreApplication.MainView.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, 
-                    ()=> {
-                        playIcon = new SymbolIcon(Symbol.Play);
-                        pauseIcon = new SymbolIcon(Symbol.Pause);
-                    });
+                if (playIcon == null) playIcon = new SymbolIcon(Symbol.Play);
             }
-            catch { }
-        }
-
-        private void LoadPlayPauseSymbols()
-        {
-            playIcon = new SymbolIcon(Symbol.Play);
-            pauseIcon = new SymbolIcon(Symbol.Pause);
-        }
-
-        private void ChangeSliderValue()
-        {
-            if (CurrentPlaylist.CurrentSong.IsEmptyOrLoading) CurrentPlaylist.SongPositionMilliseconds = 0;
-            else if (BackgroundMediaPlayer.Current.Position.TotalMilliseconds == 0) return;
-            else if (!sliderEntered) CurrentPlaylist.SongPositionMilliseconds = BackgroundPlayerPositionMilliseconds;
-        }
-
-        private void ChangeSliderMaximum()
-        {
-            if (CurrentPlaylist.CurrentSong.IsEmptyOrLoading) sliderMaximum = 2;
-            else
+            catch
             {
-                sliderMaximum = BackgroundPlayerNaturalDurationMilliseconds != 0 ?
-                    BackgroundPlayerNaturalDurationMilliseconds : CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds;
+                return new SymbolIcon(Symbol.Play);
+            }
+
+            return playIcon;
+        }
+
+        private SymbolIcon GetPauseIcon()
+        {
+            try
+            {
+                if (pauseIcon == null) pauseIcon = new SymbolIcon(Symbol.Pause);
+            }
+            catch
+            {
+                return new SymbolIcon(Symbol.Pause);
+            }
+
+            return pauseIcon;
+        }
+
+        public void ChangeSliderMaximumAndSliderValue()
+        {
+            ChangeSliderMaximum();
+            ChangeSliderValue();
+        }
+
+        public void ChangeSliderValue()
+        {
+            if (CurrentPlaylist.CurrentSong.IsEmptyOrLoading|| BackgroundPlayerPositionMilliseconds == 0) return;
+            else if (!sliderEntered) SliderValue = BackgroundPlayerPositionMilliseconds;
+        }
+
+        public void ChangeSliderMaximum()
+        {
+            if (CurrentPlaylist.CurrentSong.IsEmptyOrLoading || BackgroundPlayerNaturalDurationMilliseconds == 0) return;
+            else if (BackgroundPlayerNaturalDurationMilliseconds != 0)
+            {
+                SliderMaximum = BackgroundPlayerNaturalDurationMilliseconds;
             }
         }
 
@@ -163,28 +188,6 @@ namespace FolderMusicLib
         public void SetMainPageLoaded()
         {
             mainPageLoaded = Library.Current.IsForeground;
-        }
-
-        public void SetLbxCurrentPlaylist(ListBox lbx)
-        {
-           lbxCurrentPlaylist = lbx;
-            scrollLbxCurrentPlaylist = true;
-        }
-
-        public void SetScrollLbxCurrentPlaylist()
-        {
-            scrollLbxCurrentPlaylist = true;
-        }
-
-        public void DoScrollLbxCurrentPlaylist()
-        {
-            if (!scrollLbxCurrentPlaylist) return;
-
-            scrollLbxCurrentPlaylist = false;
-
-            if (lbxCurrentPlaylist == null || !lbxCurrentPlaylist.Items.Contains(CurrentPlaylist.CurrentSong)) return;
-
-            lbxCurrentPlaylist.ScrollIntoView(CurrentPlaylist.CurrentSong);
         }
 
         public void EnteredSlider()
@@ -210,19 +213,16 @@ namespace FolderMusicLib
             if (Library.Current.IsForeground) BackgroundCommunicator.SendPause();
         }
 
-        public void UpdateSliderMaximumAndSliderValue()
+        private void UpdateSliderValue()
         {
-            UpdateSliderMaximum();
-            UpdateSliderValue();
-        }
+            if (Library.Current.CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds ==
+                BackgroundPlayerNaturalDurationMilliseconds || SliderMaximum < 2)
+            {
+                UpdateSliderMaximum();
+            }
 
-        public void UpdateSliderValue()
-        {
-            ChangeSliderValue();
             NotifyPropertyChanged("SliderValue");
             UpdateSliderValueText();
-
-            if (SliderMaximum < 2) UpdateSliderMaximum();
         }
 
         private void UpdateSliderValueText()
@@ -230,9 +230,8 @@ namespace FolderMusicLib
             NotifyPropertyChanged("SliderValueText");
         }
 
-        public void UpdateSliderMaximum()
+        private void UpdateSliderMaximum()
         {
-            ChangeSliderMaximum();
             NotifyPropertyChanged("SliderMaximum");
             NotifyPropertyChanged("SliderMaximumText");
         }
@@ -243,10 +242,9 @@ namespace FolderMusicLib
             NotifyPropertyChanged("PlayPauseText");
         }
 
-        public void UpdatePlaylistsAndIndex()
+        public void UpdatePlaylists()
         {
             NotifyPropertyChanged("Playlists");
-            NotifyPropertyChanged("PlaylistsIndex");
         }
 
         public void UpdatePlaylistIndex()
@@ -256,7 +254,6 @@ namespace FolderMusicLib
 
         public void UpdateCurrentPlaylistIndexAndRest()
         {
-            SetScrollLbxCurrentPlaylist();
             UpdatePlaylistIndex();
 
             NotifyPropertyChanged("CurrentPlaylist");

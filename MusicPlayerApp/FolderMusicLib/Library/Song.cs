@@ -14,7 +14,7 @@ namespace LibraryLib
     public sealed class Song : INotifyPropertyChanged
     {
         private bool isLoading, failed = false;
-        private double naturalDurationMilliseconds;
+        private double naturalDurationMilliseconds = 1;
         private string title, artist, path;
 
         [XmlIgnore]
@@ -60,6 +60,8 @@ namespace LibraryLib
         {
             isLoading = true;
             path = absolutePath;
+
+            SetTitleAndArtistByPath();
         }
 
         private void SetEmptyOrLoading()
@@ -101,19 +103,12 @@ namespace LibraryLib
                 tagFile = File.Create(new StreamFileAbstraction(file.Name, fileStream, fileStream));
                 tags = tagFile.GetTag(TagTypes.Id3v2);
 
-                if (tags == null || tags.IsEmpty)
-                {
-                    SetTitleAndArtistByPath();
-                    return;
-                }
+                if (tags == null || tags.IsEmpty) return;
 
                 title = tags != null && tags.Title != null && tags.Title != "" ? tags.Title : GetTitleFromPath();
                 artist = tags != null && tags.FirstPerformer != null ? tags.FirstPerformer : "";
             }
-            catch
-            {
-                SetTitleAndArtistByPath();
-            }
+            catch { }
         }
 
         private void SetTitleAndArtistByPath()
@@ -124,7 +119,7 @@ namespace LibraryLib
 
         private string GetTitleFromPath()
         {
-            return System.IO.Path.GetFileNameWithoutExtension(Path);
+            return System.IO.Path.GetFileName(Path);
         }
 
         public StorageFile GetStorageFile()
@@ -176,7 +171,7 @@ namespace LibraryLib
 
         public override string ToString()
         {
-            return Artist != "" ? Artist + " - " + Title : Title;
+            return Artist != null && Artist != "" ? Artist + " - " + Title : Title;
         }
     }
 }

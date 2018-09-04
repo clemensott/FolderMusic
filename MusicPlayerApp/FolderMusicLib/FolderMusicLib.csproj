@@ -80,13 +80,23 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BackgroundCommunicator.cs" />
+    <Compile Include="Library\Loop\LoopAll.cs" />
+    <Compile Include="Library\Loop\LoopCurrent.cs" />
+    <Compile Include="Library\Loop\LoopOff.cs" />
+    <Compile Include="Library\Shuffle\ShuffleComplete.cs" />
+    <Compile Include="Library\Loop\ILoop.cs" />
+    <Compile Include="Library\Shuffle\IShuffle.cs" />
+    <Compile Include="Library\CurrentSong.cs" />
     <Compile Include="Library\Library.cs" />
     <Compile Include="Library\Playlist.cs" />
-    <Compile Include="Library\SaveClass.cs" />
+    <Compile Include="Library\SaveLibrary.cs" />
     <Compile Include="Library\Song.cs" />
+    <Compile Include="Library\Shuffle\ShuffleOff.cs" />
+    <Compile Include="Library\Shuffle\ShuffleOneTime.cs" />
+    <Compile Include="Library\LibraryIO.cs" />
     <Compile Include="ViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SkipSongs.cs" />
+    <Compile Include="Library\SkipSongs.cs" />
     <Compile Include="XmlConverter.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -97,7 +107,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TagLib.Portable, Version=2.2.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
-      <HintPath>..\packages\TagLib.Portable.1.0.3\lib\portable-net45+win+wpa81+wp8+MonoAndroid10+xamarinios10+MonoTouch10\TagLib.Portable.dll</HintPath>
+      <HintPath>..\packages\TagLib.Portable.1.0.4\lib\portable-net45+win+wpa81+wp8+MonoAndroid10+xamarinios10+MonoTouch10\TagLib.Portable.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

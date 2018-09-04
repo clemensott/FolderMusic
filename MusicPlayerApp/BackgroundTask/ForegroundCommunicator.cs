@@ -1,6 +1,7 @@
 ﻿using FolderMusicLib;
 using LibraryLib;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Windows.Foundation.Collections;
 using Windows.Media.Playback;
 
@@ -12,7 +13,7 @@ namespace BackgroundTask
 
         public static void SendPause()
         {
-            BackgroundMediaPlayer.SendMessageToForeground(new ValueSet { { "Pause", "" } });
+            Send(new ValueSet { { "Pause", "" } });
         }
 
         public static void SendSongsIndexAndShuffleIfComplete()
@@ -27,83 +28,110 @@ namespace BackgroundTask
             }
             else valueSet.Add("SongsIndex", Library.Current.CurrentPlaylist.SongsIndex.ToString());
 
-            BackgroundMediaPlayer.SendMessageToForeground(valueSet);
+            valueSet.Add("Position", BackgroundMediaPlayer.Current.Position.TotalMilliseconds.ToString());
+            valueSet.Add("NaturalDuration", Library.Current.CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds.ToString());
+
+            Send(valueSet);
         }
 
         public static void SendXmlText()
         {
-            if (Library.IsLoaded)
+            string text;
+
+            if (!Library.IsLoaded) text = "NotLoaded";
+            else
             {
-                BackgroundMediaPlayer.SendMessageToForeground(new ValueSet { { "XmlText", Library.Current.GetXmlText() } });
+                if (Library.Current.IsEmpty) text = "LoadedButEmpty";
+                else text = Library.Current.GetXmlText();
             }
+
+            Send(new ValueSet { { "XmlText", text } });
         }
 
         public static void SendSkip()
         {
-            BackgroundMediaPlayer.SendMessageToForeground(new ValueSet { { "Skip", "" } });
+            Send(new ValueSet { { "Skip", "" } });
         }
 
-        public static void MessageReceivedFromForeground(object sender, MediaPlayerDataReceivedEventArgs e)
+        private static void Send(ValueSet valueSet)
         {
-            ValueSet valueSet = e.Data;
+            BackgroundMediaPlayer.SendMessageToForeground(valueSet);
+        }
 
-            foreach (string key in valueSet.Keys)
+        public static void SetReceivedEvent()
+        {
+            BackgroundMediaPlayer.MessageReceivedFromForeground += MessageReceivedFromForeground;
+        }
+
+        private static void MessageReceivedFromForeground(object sender, MediaPlayerDataReceivedEventArgs e)
+        {
+            try
             {
-                switch (key)
-                {
-                    case "PlaylistsAndSongsIndex":
-                        GetPlaylistsAndSongsIndex(valueSet);
-                        return;
+                ValueSet valueSet = e.Data;
 
-                    case "PlaylistsAndSongsIndexAndShuffle":
-                        GetPlaylistsAndSongsIndexAndShuffle(valueSet);
-                        return;
-
-                    case "Play":
-                        BackgroundAudioTask.Current.Play();
-                        return;
-
-                    case "Pause":
-                        BackgroundAudioTask.Current.Pause();
-                        return;
-
-                    case "Loop":
-                        GetLoop(valueSet);
-                        return;
-
-                    case "Shuffle":
-                        GetShuffle(valueSet);
-                        return;
-
-                    case "CurrentPlaylistIndex":
-                        GetCurrentPlaylistIndex(valueSet);
-                        return;
-
-                    case "GetXmlText":
-                        SendXmlText();
-                        return;
-
-                    case "PlaylistXML":
-                        GetPlaylistXML(valueSet);
-                        return;
-
-                    case "LoadXML":
-                        GetLoadXML(valueSet);
-                        return;
-
-                    case "SongXML":
-                        GetSongXML(valueSet);
-                        return;
-
-                    case "RemoveSong":
-                        GetRemoveSong(valueSet);
-                        return;
-
-                    case "RemovePlaylist":
-                        GetRemovePlaylist(valueSet);
-                        return;
-                }
+                foreach (string key in valueSet.Keys) if (MessageReceivedSwitchCase(key, valueSet)) return;
             }
+            catch { }
+        }
+
+        private static bool MessageReceivedSwitchCase(string key, ValueSet valueSet)
+        {
+            switch (key)
+            {
+                case "PlaylistsAndSongsIndex":
+                    GetPlaylistsAndSongsIndex(valueSet);
+                    return true;
+
+                case "PlaylistsAndSongsIndexAndShuffle":
+                    GetPlaylistsAndSongsIndexAndShuffle(valueSet);
+                    return true;
+
+                case "Play":
+                    BackgroundAudioTask.Current.Play();
+                    return true;
+
+                case "Pause":
+                    BackgroundAudioTask.Current.Pause();
+                    return true;
+
+                case "Loop":
+                    GetLoop(valueSet);
+                    return true;
+
+                case "Shuffle":
+                    GetShuffle(valueSet);
+                    return true;
+
+                case "CurrentPlaylistIndex":
+                    GetCurrentPlaylistIndex(valueSet);
+                    return true;
+
+                case "GetXmlText":
+                    SendXmlText();
+                    return true;
+
+                case "PlaylistXML":
+                    GetPlaylistXML(valueSet);
+                    return true;
+
+                case "LoadXML":
+                    GetLoadXML(valueSet);
+                    return true;
+
+                case "SongXML":
+                    GetSongXML(valueSet);
+                    return true;
+
+                case "RemoveSong":
+                    GetRemoveSong(valueSet);
+                    return true;
+
+                case "RemovePlaylist":
+                    GetRemovePlaylist(valueSet);
+                    return true;
+            }
+
+            return false;
         }
 
         private static void GetPlaylistsAndSongsIndex(ValueSet valueSet)
@@ -113,8 +141,6 @@ namespace BackgroundTask
             string[] parts = valueSet["PlaylistsAndSongsIndex"].ToString().Split(';');
             int playlistIndex = int.Parse(parts[0]);
             int songsIndex = int.Parse(parts[1]);
-
-            if (playlistIndex == -1 || songsIndex == -1) return;
 
             Library.Current.CurrentPlaylistIndex = playlistIndex;
             Library.Current.CurrentPlaylist.SongsIndex = songsIndex;
@@ -130,8 +156,6 @@ namespace BackgroundTask
             int playlistIndex = int.Parse(parts[0]);
             int songsIndex = int.Parse(parts[1]);
 
-            if (playlistIndex == -1 || songsIndex == -1) return;
-
             Library.Current.CurrentPlaylistIndex = playlistIndex;
             Library.Current.CurrentPlaylist.SongsIndex = songsIndex;
             Library.Current.CurrentPlaylist.Shuffle = XmlConverter.Deserialize<ShuffleKind>(valueSet["ShuffleKind"].ToString());
@@ -144,8 +168,6 @@ namespace BackgroundTask
         {
             int playlistIndex = int.Parse(valueSet["Loop"].ToString());
 
-            if (playlistIndex == -1) return;
-
             Library.Current[playlistIndex].Loop = XmlConverter.Deserialize<LoopKind>(valueSet["Kind"].ToString());
             BackgroundAudioTask.Current.SetLoopToBackgroundPlayer();
 
@@ -156,8 +178,6 @@ namespace BackgroundTask
         {
             int playlistIndex = int.Parse(valueSet["Shuffle"].ToString());
 
-            if (playlistIndex == -1) return;
-
             Library.Current[playlistIndex].Shuffle = XmlConverter.Deserialize<ShuffleKind>(valueSet["Kind"].ToString());
             Library.Current[playlistIndex].ShuffleList = XmlConverter.Deserialize<List<int>>(valueSet["List"].ToString());
 
@@ -166,8 +186,11 @@ namespace BackgroundTask
 
         private async static void GetCurrentPlaylistIndex(ValueSet valueSet)
         {
+            string currentSongPath = CurrentSong.Path;
+
             Library.Current.CurrentPlaylistIndex = int.Parse(valueSet["CurrentPlaylistIndex"].ToString());
-            BackgroundAudioTask.Current.SetCurrentSong(false);
+
+            PlaySongIfOther(currentSongPath);
 
             await Library.Current.SaveAsync();
         }
@@ -178,8 +201,6 @@ namespace BackgroundTask
 
             int playlistIndex = int.Parse(valueSet["PlaylistXML"].ToString());
 
-            if (playlistIndex == -1) return;
-
             Library.Current[playlistIndex] = XmlConverter.Deserialize<Playlist>(valueSet["XML"].ToString());
             PlaySongIfOther(currentSongPath);
 
@@ -188,10 +209,8 @@ namespace BackgroundTask
 
         private async static void GetLoadXML(ValueSet valueSet)
         {
-            string currentSongPath = CurrentSong.Path;
-
             Library.Current.Load(valueSet["LoadXML"].ToString());
-            PlaySongIfOther(currentSongPath);
+            BackgroundAudioTask.Current.SetCurrentSong();
 
             await Library.Current.SaveAsync();
         }
@@ -203,8 +222,6 @@ namespace BackgroundTask
             string[] parts = valueSet["SongXML"].ToString().Split(';');
             int playlistIndex = int.Parse(parts[0]);
             int songsIndex = int.Parse(parts[1]);
-
-            if (playlistIndex == -1 || songsIndex == -1) return;
 
             Library.Current[playlistIndex][songsIndex] = XmlConverter.Deserialize<Song>(valueSet["XML"].ToString());
             PlaySongIfOther(currentSongPath);
@@ -220,8 +237,6 @@ namespace BackgroundTask
             int playlistIndex = int.Parse(parts[0]);
             int songsIndex = int.Parse(parts[1]);
 
-            if (playlistIndex == -1 || songsIndex == -1) return;
-
             Library.Current.RemoveSongFromPlaylist(Library.Current[playlistIndex], songsIndex);
             PlaySongIfOther(currentSongPath);
 
@@ -234,7 +249,7 @@ namespace BackgroundTask
 
             Library.Current.DeleteAt(int.Parse(valueSet["RemovePlaylist"].ToString()));
             PlaySongIfOther(currentSongPath);
-
+            
             await Library.Current.SaveAsync();
         }
 

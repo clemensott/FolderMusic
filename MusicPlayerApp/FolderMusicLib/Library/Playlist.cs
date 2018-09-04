@@ -11,33 +11,26 @@ using Windows.Storage;
 using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 
 namespace LibraryLib
 {
-    public enum LoopKind { Off, On, Current };
+    public enum LoopKind { Off, All, Current };
 
     public enum ShuffleKind { Off, OneTime, Complete };
 
     public class Playlist : INotifyPropertyChanged
     {
-        private const int shuffleCompleteListNextCount = 5, shuffleCompleteListPreviousCount = 3;
         private const string emptyOrLoadingPath = "None";
-
-        private Random ran = new Random();
 
         private int songsIndex = 0;
         private double songPostionMilliseconds;
         private string name, absolutePath;
-        private LoopKind loop;
-        private ShuffleKind shuffle;
+        private ILoop iLoop = new LoopOff();
+        private IShuffle iShuffle = new ShuffleOff();
         private List<int> shuffleList;
         private List<Song> songs;
-
-        private bool scrollDefaultAndShuffleSongsLbx;
-        private ListBox defaultSongsLbx, shuffleSongsLbx;
 
         [XmlIgnore]
         public Song this[int index]
@@ -52,6 +45,7 @@ namespace LibraryLib
         [XmlIgnore]
         public int Length { get { return Songs.Count; } }
 
+        [XmlIgnore]
         public int PlaylistIndex { get { return Library.Current.GetPlaylistIndex(this); } }
 
         public int SongsIndex
@@ -59,32 +53,30 @@ namespace LibraryLib
             get { return GetPossibleSongsIndex(songsIndex); }
             set
             {
-                DoScrollLbx();
-                if (songsIndex == value) return;
+                if (SongsIndex == value) return;
 
                 if (!IsEmptyOrLoading)
                 {
-                    ChangeShuffleListBecauseOfChangedSongIndex(value);
+                    shuffleList = iShuffle.GetChangedShuffleListBecauseOfAnotherSongsIndex(value, shuffleList, Songs.Count);
                     songPostionMilliseconds = 0;
                 }
 
                 songsIndex = value;
 
-                if (Library.Current.IsForeground)
+                if (Library.Current.IsForeground && Library.IsLoaded && !IsEmptyOrLoading)
                 {
-                    if (Library.IsLoaded) BackgroundCommunicator.SendPlaylistsAndSongsIndexAndShuffleIfComplete(this);
+                    BackgroundCommunicator.SendPlaylistsAndSongsIndexAndShuffleIfComplete(this);
+                    Library.Current.CurrentPlaylistIndex = PlaylistIndex;
 
                     UpdateCurrentSong();
                 }
-                else { }
             }
         }
 
         [XmlIgnore]
         public int ShuffleListIndex
         {
-            get { return Shuffle != ShuffleKind.Complete ? ShuffleList.IndexOf(songsIndex) :
-                    GetShuffleCompleteCurrentIndex(Songs.Count); }
+            get { return iShuffle.GetShuffleListIndex(SongsIndex, ShuffleList, Songs.Count); }
             set
             {
                 if (!IsShuffleListIndex(value)) return;
@@ -94,13 +86,7 @@ namespace LibraryLib
         }
 
         [XmlIgnore]
-        public string SongCount
-        {
-            get
-            {
-                return songs.Count != 1 ? songs.Count.ToString() + " Songs" : "1 Song";
-            }
-        }
+        public string SongCount { get { return songs.Count != 1 ? songs.Count.ToString() + " Songs" : "1 Song"; } }
 
         public double SongPositionMilliseconds
         {
@@ -140,54 +126,10 @@ namespace LibraryLib
         }
 
         [XmlIgnore]
-        public BitmapImage LoopIcon
-        {
-            get
-            {
-                try
-                {
-                    switch (Loop)
-                    {
-                        case LoopKind.Off:
-                            return Icons.LoopOff;
-
-                        case LoopKind.On:
-                            return Icons.LoopOn;
-
-                        case LoopKind.Current:
-                            return Icons.LoopCurrent;
-                    }
-                }
-                catch { }
-
-                return new BitmapImage();
-            }
-        }
+        public BitmapImage LoopIcon { get { return iLoop.GetIcon(); } }
 
         [XmlIgnore]
-        public BitmapImage ShuffleIcon
-        {
-            get
-            {
-                try
-                {
-                    switch (Shuffle)
-                    {
-                        case ShuffleKind.Off:
-                            return Icons.ShuffleOff;
-
-                        case ShuffleKind.OneTime:
-                            return Icons.ShuffleOneTime;
-
-                        case ShuffleKind.Complete:
-                            return Icons.ShuffleComplete;
-                    }
-                }
-                catch { }
-
-                return new BitmapImage();
-            }
-        }
+        public BitmapImage ShuffleIcon { get { return iShuffle.GetIcon(); } }
 
         [XmlIgnore]
         public BitmapImage PlayIcon { get { return Library.Current.IsEmpty ? new BitmapImage() : Icons.PlayImage; } }
@@ -195,11 +137,9 @@ namespace LibraryLib
         [XmlIgnore]
         public Song CurrentSong { get { return !IsEmptyOrLoading ? Songs[SongsIndex] : new Song(); } }
 
-        public List<Song> Songs
-        {
-            get { return songs; }
-        }
+        public List<Song> Songs { get { return songs; } }
 
+        [XmlIgnore]
         public List<Song> ShuffleSongs
         {
             get
@@ -208,10 +148,7 @@ namespace LibraryLib
 
                 List<Song> list = new List<Song>();
 
-                foreach (int i in ShuffleList)
-                {
-                    list.Add(Songs[i]);
-                }
+                foreach (int i in ShuffleList) list.Add(Songs[i]);
 
                 return list;
             }
@@ -219,24 +156,52 @@ namespace LibraryLib
 
         public LoopKind Loop
         {
-            get { return loop; }
+            get { return iLoop.GetKind(); }
             set
             {
-                if (loop == value) return;
+                if (Loop == value) return;
 
-                loop = value;
+                switch (value)
+                {
+                    case LoopKind.All:
+                        iLoop = new LoopAll();
+                        break;
+
+                    case LoopKind.Current:
+                        iLoop = new LoopCurrent();
+                        break;
+
+                    default:
+                        iLoop = new LoopOff();
+                        break;
+                }
+
                 UpdateLoopIcon();
             }
         }
 
         public ShuffleKind Shuffle
         {
-            get { return shuffle; }
+            get { return iShuffle.GetKind(); }
             set
             {
-                if (shuffle == value) return;
+                if (Shuffle == value) return;
 
-                shuffle = value;
+                switch (value)
+                {
+                    case ShuffleKind.Complete:
+                        iShuffle = new ShuffleComplete();
+                        break;
+
+                    case ShuffleKind.OneTime:
+                        iShuffle = new ShuffleOneTime();
+                        break;
+
+                    default:
+                        iShuffle = new ShuffleOff();
+                        break;
+                }
+
                 UpdateShuffleIcon();
             }
         }
@@ -262,7 +227,7 @@ namespace LibraryLib
             shuffleList = new List<int>();
         }
 
-        public Playlist(Song currentSong, double currentSongPositionMilliseconds)
+        public Playlist(CurrentSong currentSong)
         {
             Name = Library.IsLoaded ? "None" : "Loading";
             absolutePath = emptyOrLoadingPath;
@@ -270,45 +235,11 @@ namespace LibraryLib
             Loop = LoopKind.Off;
             Shuffle = ShuffleKind.Off;
 
-            songs = new List<Song>() { currentSong };
+            songs = new List<Song>() { currentSong.Song };
             shuffleList = new List<int>() { 0 };
 
             songsIndex = 0;
-            songPostionMilliseconds = currentSongPositionMilliseconds;
-        }
-
-        public void SetDefaultSongsLbx(ListBox lbx)
-        {
-            defaultSongsLbx = lbx;
-            scrollDefaultAndShuffleSongsLbx = true;
-        }
-
-        public void SetShuffleSongsLbx(ListBox lbx)
-        {
-            shuffleSongsLbx = lbx;
-            scrollDefaultAndShuffleSongsLbx = true;
-        }
-
-        public void DoScrollLbx()
-        {
-            if (!scrollDefaultAndShuffleSongsLbx) return;
-
-            scrollDefaultAndShuffleSongsLbx = false;
-
-            ScrollListboxToCurrentSong(defaultSongsLbx);
-            ScrollListboxToCurrentSong(shuffleSongsLbx);
-        }
-
-        private void ScrollListboxToCurrentSong(ListBox lbx)
-        {
-            if (lbx == null || !lbx.Items.Contains(CurrentSong)) return;
-
-            lbx.ScrollIntoView(CurrentSong);
-        }
-
-        private void SetScrollDefaultAndShuffleSongsLbx()
-        {
-            scrollDefaultAndShuffleSongsLbx = true;
+            songPostionMilliseconds = currentSong.PositionMilliseconds;
         }
 
         public static string GetRelativePath(string absolutePath)
@@ -331,47 +262,6 @@ namespace LibraryLib
             return ShuffleList.Count > index && index >= 0;
         }
 
-        private void ChangeShuffleListBecauseOfChangedSongIndex(int index)
-        {
-            int offset, offsetAbs;
-            List<int> updatedShuffleList;
-
-            if (index == SongsIndex) return;
-
-            if (Shuffle == ShuffleKind.Complete)
-            {
-                updatedShuffleList = new List<int>(ShuffleList);
-                AddSongsIndexToShuffleListAndRemoveFirst(index, ref updatedShuffleList);
-
-                offset = updatedShuffleList.IndexOf(index) - ShuffleListIndex;
-                offsetAbs = Math.Abs(offset);
-
-                if (offset < 0) updatedShuffleList.Reverse();
-                AddRandomIndexToUpdatedShuffleListAndRemoveFirstOnes(offsetAbs, ref updatedShuffleList);
-                if (offset < 0) updatedShuffleList.Reverse();
-
-                shuffleList = updatedShuffleList;
-            }
-        }
-
-        private void AddRandomIndexToUpdatedShuffleListAndRemoveFirstOnes(int count, ref List<int> updatedShuffleList)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                updatedShuffleList.RemoveAt(0);
-                AddRandomIndexWhichIsNotInShuffleList(ref updatedShuffleList, Songs);
-            }
-        }
-
-        private void AddSongsIndexToShuffleListAndRemoveFirst(int songsIndex, ref List<int> updatedShuffleList)
-        {
-            if (!updatedShuffleList.Contains(songsIndex))
-            {
-                updatedShuffleList.RemoveAt(0);
-                updatedShuffleList.Add(songsIndex);
-            }
-        }
-
         public bool SetNextSong()
         {
             return ChangeCurrentSong(1);
@@ -384,7 +274,7 @@ namespace LibraryLib
 
         public bool ChangeCurrentSong(int offset)
         {
-            int offsetAbs = Math.Abs(offset);
+            if (ShuffleList.Count == 0) return true;
             ShuffleListIndex = GetIndexInRange(ShuffleListIndex + offset, ShuffleList.Count);
 
             if (CurrentSong.Failed)
@@ -394,7 +284,7 @@ namespace LibraryLib
                 return ChangeCurrentSong(offset);
             }
 
-            return Loop != LoopKind.On && !IsShuffleListIndex(ShuffleListIndex - offset);
+            return Loop != LoopKind.All && !IsShuffleListIndex(ShuffleListIndex - offset);
         }
 
         private int GetIndexInRange(int index, int length)
@@ -402,153 +292,38 @@ namespace LibraryLib
             return ((index) % length + length) % length;
         }
 
-        private void AddRandomIndexWhichIsNotInShuffleList(ref List<int> shuffleList, List<Song> songs)
-        {
-            int index;
-
-            do
-            {
-                index = ran.Next(songs.Count);
-
-            } while (shuffleList.Contains(index));
-
-            shuffleList.Add(index);
-        }
-
         public void SetNextShuffle()
         {
-            switch (Shuffle)
-            {
-                case ShuffleKind.Off:
-                    Shuffle = ShuffleKind.OneTime;
-                    break;
-
-                case ShuffleKind.OneTime:
-                    Shuffle = ShuffleKind.Complete;
-                    break;
-
-                case ShuffleKind.Complete:
-                    Shuffle = ShuffleKind.Off;
-                    break;
-            }
+            iShuffle = iShuffle.GetNext();
 
             GenerateShuffleList();
+            UpdateShuffleIcon();
         }
 
         public void SetNextLoop()
         {
-            switch (Loop)
+            iLoop = iLoop.GetNext();
+
+            if (Library.Current.IsForeground)
             {
-                case LoopKind.Off:
-                    Loop = LoopKind.On;
-                    break;
-
-                case LoopKind.On:
-                    Loop = LoopKind.Current;
-                    break;
-
-                case LoopKind.Current:
-                    Loop = LoopKind.Off;
-                    break;
+                BackgroundCommunicator.SendLoop(this);
+                UpdateLoopIcon();
             }
-
-            if (Library.Current.IsForeground) BackgroundCommunicator.SendLoop(this);
         }
 
         public void GenerateShuffleList()
         {
-            switch (Shuffle)
-            {
-                case ShuffleKind.Off:
-                    shuffleList = GetShuffleListOff(Songs.Count);
-                    break;
-
-                case ShuffleKind.OneTime:
-                    shuffleList = GetShuffleListOneTime(new List<int>() { SongsIndex }, Songs);
-                    break;
-
-                case ShuffleKind.Complete:
-                    shuffleList = GetShuffleListComplete();
-                    break;
-            }
+            shuffleList = iShuffle.GenerateShuffleList(SongsIndex, Songs.Count);
 
             if (Library.Current.IsForeground)
             {
                 BackgroundCommunicator.SendShuffle(this);
 
-                ViewModel.Current.SetScrollLbxCurrentPlaylist();
-                SetScrollDefaultAndShuffleSongsLbx();
+                UpdateSongsAndShuffleListSongs();
                 UpdateCurrentSongIndex();
             }
-        }
 
-        private List<int> GetShuffleListOff(int count)
-        {
-            List<int> list = new List<int>();
-
-            for (int i = 0; i < count; i++)
-            {
-                list.Add(i);
-            }
-
-            return list;
-        }
-
-        private List<int> GetShuffleListOneTime(List<int> currentShuffleList, List<Song> updatedSongs)
-        {
-            List<int> list = GetUpdatedShuffleListForUpdatedSongs(currentShuffleList, updatedSongs);
-            GetUpdatedShuffleListWithAddedSongs(currentShuffleList, ref list, updatedSongs);
-
-            return list;
-        }
-
-        private List<int> GetShuffleListComplete()
-        {
-            int shuffleCompleteCurrentIndex = GetShuffleCompleteCurrentIndex(Songs.Count);
-            int shuffleCompleteCount = GetShuffleCompleteCount(Songs.Count);
-            List<int> updatedShuffleList = new List<int>();
-
-            for (int i = 0; i < shuffleCompleteCount; i++)
-            {
-                if (i != shuffleCompleteCurrentIndex) AddRandomIndexWhichIsNotInShuffleList(ref updatedShuffleList, Songs);
-                else updatedShuffleList.Add(SongsIndex);
-            }
-
-            return updatedShuffleList;
-        }
-
-        private List<int> GetShuffleListComplete(List<Song> updatedSongs)
-        {
-            int isShuffleListIndex, willBeShuffleListIndex, willBeShuffleListCount;
-            List<int> updatedShuffleList = GetUpdatedShuffleListForUpdatedSongs(ShuffleList, updatedSongs);
-
-            if (updatedShuffleList.Count == GetShuffleCompleteCount(updatedSongs.Count)) return updatedShuffleList;
-
-            isShuffleListIndex = GetShuffleCompleteCurrentIndex(Songs.Count);
-            willBeShuffleListIndex = GetShuffleCompleteCurrentIndex(updatedSongs.Count);
-            willBeShuffleListCount = GetShuffleCompleteCount(Songs.Count);
-
-            AddRandomIndexesInFrontOfUpdatedShuffleList(willBeShuffleListIndex - isShuffleListIndex, ref updatedShuffleList);
-            AddRandomIndexesToEndOfUpdatedShuffleList(willBeShuffleListCount - updatedShuffleList.Count, ref updatedShuffleList);
-
-            return updatedShuffleList;
-        }
-
-        private void AddRandomIndexesInFrontOfUpdatedShuffleList(int count, ref List<int> updatedShuffleList)
-        {
-            if (count == 0) return;
-
-            updatedShuffleList.Reverse();
-            AddRandomIndexesToEndOfUpdatedShuffleList(count, ref updatedShuffleList);
-            updatedShuffleList.Reverse();
-        }
-
-        private void AddRandomIndexesToEndOfUpdatedShuffleList(int count, ref List<int> updatedShuffleList)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                AddRandomIndexWhichIsNotInShuffleList(ref updatedShuffleList, Songs);
-            }
+            Library.Current.FireScrollEvent(this);
         }
 
         private List<Song> SetCurrentSongsOrderedWithAddedSongs(List<Song> currentSongs, List<Song> addSongs)
@@ -561,72 +336,17 @@ namespace LibraryLib
             return updatedSongs.OrderBy(x => x.Title).ThenBy(x => x.Artist).ToList();
         }
 
-        private List<int> GetUpdatedShuffleListForUpdatedSongs(List<int> currentShuffleList, List<Song> updatedSongs)
-        {
-            List<int> updatedShuffleList = new List<int>();
-
-            foreach (int songsIndex in currentShuffleList)
-            {
-                updatedShuffleList.Add(updatedSongs.IndexOf(Songs[songsIndex]));
-            }
-
-            return updatedShuffleList;
-        }
-
-        private void GetUpdatedShuffleListWithAddedSongs(List<int> currentShuffleList,
-            ref List<int> updatedShuffleList, List<Song> updatedSongs)
-        {
-            for (int i = currentShuffleList.Count; i < updatedSongs.Count; i++)
-            {
-                AddRandomIndexWhichIsNotInShuffleList(ref updatedShuffleList, updatedSongs);
-            }
-        }
-
-        private int GetShuffleCompleteCount(int songsCount)
-        {
-            int count = shuffleCompleteListNextCount + shuffleCompleteListPreviousCount + 1;
-            return songsCount > count ? count : songsCount;
-        }
-
-        private int GetShuffleCompleteCurrentIndex(int songsCount)
-        {
-            double indexDouble = (GetShuffleCompleteCount(songsCount) - 1) /
-                Convert.ToDouble(shuffleCompleteListNextCount + shuffleCompleteListPreviousCount) *
-                shuffleCompleteListPreviousCount;
-
-            return Convert.ToInt32(indexDouble);
-        }
-
         public void RemoveSong(int songsIndex)
         {
             if (IsEmptyOrLoading) return;
 
-            int shuffleListIndex = ShuffleList.IndexOf(songsIndex);
-            List<int> updatedShuffleList = new List<int>(ShuffleList);
             List<Song> updatedSongs = new List<Song>(Songs);
-
             updatedSongs.RemoveAt(songsIndex);
+
+            shuffleList = iShuffle.RemoveSongsIndex(songsIndex, shuffleList, updatedSongs.Count);
             songs = updatedSongs;
 
-            if (shuffleListIndex != -1)
-            {
-                if (SongsIndex > songsIndex) this.songsIndex = SongsIndex - 1;
-
-                if (Shuffle == ShuffleKind.Off)
-                {
-                    shuffleList.RemoveAt(shuffleList.Count - 1);
-                }
-                else
-                {
-                    updatedShuffleList.RemoveAt(shuffleListIndex);
-
-                    if (Shuffle == ShuffleKind.OneTime)
-                    {
-                        IncreaseEveryIndexOfShuffleListOverSameIndexAndSet(updatedShuffleList, shuffleListIndex);
-                    }
-                    else AddRandomIndexToUpadetedShuffleListAndSet(updatedShuffleList, shuffleListIndex);
-                }
-            }
+            if (SongsIndex > songsIndex) this.songsIndex--;
 
             if (Library.Current.IsForeground)
             {
@@ -637,51 +357,32 @@ namespace LibraryLib
             }
         }
 
-        private void IncreaseEveryIndexOfShuffleListOverSameIndexAndSet(List<int> updatedShuffleList, int index)
-        {
-            for (int i = 0; i < updatedShuffleList.Count; i++)
-            {
-                if (updatedShuffleList[i] >= index)
-                {
-                    updatedShuffleList[i]--;
-                }
-            }
-
-            shuffleList = updatedShuffleList;
-        }
-
-        private void AddRandomIndexToUpadetedShuffleListAndSet(List<int> updatedShuffleList, int index)
-        {
-            if (updatedShuffleList.Count != songs.Count)
-            {
-                bool first = ShuffleListIndex > index;
-
-                if (first) updatedShuffleList.Reverse();
-                AddRandomIndexWhichIsNotInShuffleList(ref updatedShuffleList, Songs);
-                if (first) updatedShuffleList.Reverse();
-            }
-
-            IncreaseEveryIndexOfShuffleListOverSameIndexAndSet(updatedShuffleList, index);
-        }
-
-        public async Task<StorageFolder> GetStorageFolder()
+        private async Task<StorageFolder> GetStorageFolder()
         {
             if (absolutePath == "") return KnownFolders.MusicLibrary;
 
             return await StorageFolder.GetFolderFromPathAsync(absolutePath);
         }
 
-        private async Task<IReadOnlyList<StorageFile>> GetStorageFolderFiles()
+        private async Task<List<StorageFile>> GetStorageFolderFiles()
         {
-            var folder = await GetStorageFolder();
+            try
+            {
+                StorageFolder folder = await GetStorageFolder();
 
-            return await folder.GetFilesAsync();
+                return (await folder.GetFilesAsync()).ToList();
+            }
+            catch
+            {
+                return new List<StorageFile>();
+            }
         }
 
         public async Task LoadSongsFromStorage()
         {
-            var files = await GetStorageFolderFiles();
-            List<Song> updatedSongs = SetCurrentSongsOrderedWithAddedSongs(new List<Song>(), await GetSongsFromStorageFiles(files));
+            List<StorageFile> files = await GetStorageFolderFiles();
+            List<Song> foundSongs = await GetSongsFromStorageFiles(files);
+            List<Song> updatedSongs = SetCurrentSongsOrderedWithAddedSongs(new List<Song>(), foundSongs);
 
             if (Library.Current.CanceledLoading) return;
 
@@ -689,16 +390,13 @@ namespace LibraryLib
             Shuffle = ShuffleKind.Off;
             GenerateShuffleList();
 
-            SongsIndex = 0;
+            songsIndex = 0;
 
-            if (IsEmptyOrLoading)
-            {
-                Library.Current.Delete(this);
-                return;
-            }
+            if (IsEmptyOrLoading) Library.Current.Delete(this);
+            else UpdateAndSendToBackground();
         }
 
-        private async Task<List<Song>> GetSongsFromStorageFiles(IReadOnlyList<StorageFile> files)
+        private async Task<List<Song>> GetSongsFromStorageFiles(List<StorageFile> files)
         {
             Song addSong;
             List<Song> list = new List<Song>();
@@ -743,26 +441,8 @@ namespace LibraryLib
 
         private void SetSongsAndShuffleListWithAddSongs(List<Song> addSongs)
         {
-            List<int> updatedShuffleList;
             List<Song> updatedSongs = SetCurrentSongsOrderedWithAddedSongs(songs, addSongs);
-
-            switch (Shuffle)
-            {
-                case ShuffleKind.Off:
-                    updatedShuffleList = GetShuffleListOff(updatedSongs.Count);
-                    break;
-
-                case ShuffleKind.OneTime:
-                    updatedShuffleList = GetShuffleListOneTime(shuffleList, updatedSongs);
-                    break;
-
-                case ShuffleKind.Complete:
-                    updatedShuffleList = GetShuffleListComplete(updatedSongs);
-                    break;
-
-                default:
-                    return;
-            }
+            List<int>  updatedShuffleList = iShuffle.AddSongsToShuffleList(shuffleList, Songs, updatedSongs);
 
             songs = updatedSongs;
             shuffleList = updatedShuffleList;
@@ -770,13 +450,14 @@ namespace LibraryLib
 
         private void UpdateAndSendToBackground()
         {
-            if (Library.Current.IsForeground) BackgroundCommunicator.SendPlaylistXML(this);
+            if (!Library.Current.IsForeground) return;
 
+            BackgroundCommunicator.SendPlaylistXML(this);
             UpdateSongsAndShuffleListSongs();
             UpdateCurrentSongIndex();
             UpdateSongCount();
             UpdateCurrentSong();
-            ViewModel.Current.UpdateSliderMaximumAndSliderValue();
+            ViewModel.Current.ChangeSliderMaximumAndSliderValue();
         }
 
         public void UpdateName()
@@ -806,8 +487,7 @@ namespace LibraryLib
             NotifyPropertyChanged("CurrentSong");
             CurrentSong.UpdateTitleAndArtist();
 
-            if (Library.Current.IsForeground) ViewModel.Current.UpdateSliderMaximumAndSliderValue();
-            else { }
+            ViewModel.Current.ChangeSliderMaximumAndSliderValue();
         }
 
         private void UpdateCurrentSongIndex()
@@ -826,13 +506,17 @@ namespace LibraryLib
 
         private async void NotifyPropertyChanged(string propertyName)
         {
+            if (null == PropertyChanged) return;
+
             try
             {
-                if (null == PropertyChanged) return;
+                await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.
+                    RunAsync(CoreDispatcherPriority.Normal, () => 
+                    {
+                        if (null == PropertyChanged) return;
 
-                await Windows.ApplicationModel.Core.CoreApplication.MainView.
-                    CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                    () => { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); });
+                        PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                    });
             }
             catch { }
         }

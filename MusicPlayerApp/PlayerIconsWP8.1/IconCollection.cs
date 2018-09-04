@@ -17,7 +17,7 @@ namespace PlayerIcons
 
         public BitmapImage LoopOff { get { return Get(ref loopOff, "loopOff"); } }
 
-        public BitmapImage LoopOn { get { return Get(ref loopOn, "loopAll"); } }
+        public BitmapImage LoopAll { get { return Get(ref loopOn, "loopAll"); } }
 
         public BitmapImage ShuffleComplete { get { return Get(ref shuffleComplete, "shuffleComplete"); } }
 

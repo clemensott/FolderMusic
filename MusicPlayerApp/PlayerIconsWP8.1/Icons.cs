@@ -17,7 +17,7 @@ namespace PlayerIcons
 
         public static BitmapImage LoopOff { get { return IconCollection.LoopOff; } }
 
-        public static BitmapImage LoopOn { get { return IconCollection.LoopOn; } }
+        public static BitmapImage LoopAll { get { return IconCollection.LoopAll; } }
 
         public static BitmapImage ShuffleComplete { get { return IconCollection.ShuffleComplete; } }
 

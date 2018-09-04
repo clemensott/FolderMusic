@@ -1,5 +1,6 @@
 ﻿using FolderMusicLib;
 using LibraryLib;
+using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -14,6 +15,8 @@ namespace MusicPlayerApp
 
         private Playlist playlist;
 
+        private ListBox lbxDefault, lbxShuffle;
+
         public static bool Open { get { return playlistPageOpen; } }
 
         public static PlaylistPage Current { get { return Open ? page : null; } }
@@ -26,6 +29,8 @@ namespace MusicPlayerApp
 
             playlist = ViewModel.Current.OpenPlaylist;
             DataContext = playlist;
+
+            Library.Current.ScrollToIndex += Library_SrcollToIndex;
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -36,9 +41,6 @@ namespace MusicPlayerApp
         public static void GoBack()
         {
             playlistPageOpen = false;
-
-            page.playlist.SetDefaultSongsLbx(null);
-            page.playlist.SetShuffleSongsLbx(null);
 
             page.Frame.GoBack();
         }
@@ -83,20 +85,40 @@ namespace MusicPlayerApp
 
         private void LbxDefaultSongs_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
-            playlist.SetDefaultSongsLbx(sender as ListBox);
+            lbxDefault = sender as ListBox;
+            ScrollToCurrentSong(lbxDefault);
         }
 
         private void LbxShuffleSongs_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
-            playlist.SetShuffleSongsLbx(sender as ListBox);
+            lbxShuffle = sender as ListBox;
+            ScrollToCurrentSong(lbxShuffle);
+        }
+
+        private void ScrollToCurrentSong(ListBox lbx)
+        {
+            if (lbx == null || !lbx.Items.Contains(playlist.CurrentSong)) return;
+
+            lbx.ScrollIntoView(playlist.CurrentSong);
+        }
+
+        private async void Library_SrcollToIndex(object sender, Playlist e)
+        {
+            if (lbxDefault == null || lbxShuffle == null) return;
+
+            while (lbxDefault.Items.Count < e.SongsIndex || lbxShuffle.Items.Count < e.ShuffleListIndex)
+            {
+                await Task.Delay(10);
+            }
+
+            lbxDefault.ScrollIntoView(lbxDefault.Items[e.SongsIndex]);
+            lbxShuffle.ScrollIntoView(lbxShuffle.Items[e.ShuffleListIndex]);
         }
 
         private async void RefreshThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
             LoadingPage.OpenLoading(Frame);
-
             await playlist.LoadSongsFromStorage();
-
             LoadingPage.GoBack();
 
             if (playlist.IsEmptyOrLoading) GoBack();

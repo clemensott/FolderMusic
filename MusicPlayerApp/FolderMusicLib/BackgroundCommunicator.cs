@@ -2,6 +2,7 @@
 using Windows.Media.Playback;
 using System.Collections.Generic;
 using LibraryLib;
+using System;
 
 namespace FolderMusicLib
 {
@@ -9,6 +10,8 @@ namespace FolderMusicLib
     {
         public static void SendPlaylistsAndSongsIndexAndShuffleIfComplete(Playlist playlist)
         {
+            if (playlist.PlaylistIndex == -1 || playlist.SongsIndex == -1) return;
+
             ValueSet valueSet = new ValueSet();
 
             if (playlist.Shuffle == ShuffleKind.Complete)
@@ -20,40 +23,46 @@ namespace FolderMusicLib
             }
             else valueSet.Add("PlaylistsAndSongsIndex", string.Format("{0};{1}", playlist.PlaylistIndex, playlist.SongsIndex));
 
-            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
+            Send(valueSet);
         }
 
         public static void SendCurrentPlaylistIndex()
         {
+            if (Library.Current.CurrentPlaylistIndex == -1) return;
+
             ValueSet valueSet = new ValueSet();
             valueSet.Add("CurrentPlaylistIndex", Library.Current.CurrentPlaylistIndex.ToString());
 
-            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
+            Send(valueSet);
         }
 
         public static void SendPlay()
         {
-            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "Play", "" } });
+            Send(new ValueSet { { "Play", "" } });
         }
 
         public static void SendPause()
         {
-            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "Pause", "" } });
+            Send(new ValueSet { { "Pause", "" } });
         }
 
         public static void SendLoop(Playlist playlist)
         {
+            if (playlist.PlaylistIndex == -1) return;
+
             string loopXML = XmlConverter.Serialize(playlist.Loop);
             ValueSet valueSet = new ValueSet();
 
             valueSet.Add("Loop", playlist.PlaylistIndex.ToString());
             valueSet.Add("Kind", loopXML);
 
-            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
+            Send(valueSet);
         }
 
         public static void SendShuffle(Playlist playlist)
         {
+            if (playlist.PlaylistIndex == -1) return;
+
             string shuffleXML = XmlConverter.Serialize(playlist.Shuffle);
             string shuffleListXML = XmlConverter.Serialize(playlist.ShuffleList);
             ValueSet valueSet = new ValueSet();
@@ -62,63 +71,77 @@ namespace FolderMusicLib
             valueSet.Add("Kind", shuffleXML);
             valueSet.Add("List", shuffleListXML);
 
-            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
+            Send(valueSet);
         }
 
         public static void SendPlaylistXML(Playlist playlist)
         {
+            if (playlist.PlaylistIndex == -1) return;
+
             int playlistIndex = playlist.PlaylistIndex;
             ValueSet valueSet = new ValueSet();
             valueSet.Add("PlaylistXML", playlistIndex.ToString());
             valueSet.Add("XML", XmlConverter.Serialize(Library.Current[playlistIndex]));
 
-            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
+            Send(valueSet);
         }
 
         public static void SendGetXmlText()
         {
-            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "GetXmlText", "" } });
+            Send(new ValueSet { { "GetXmlText", "" } });
         }
 
-        public static void SendLoadXML(string xmlText)
+        public static void SendLoadXML()
         {
-            ValueSet valueSet = new ValueSet();
+            ValueSet valueSet = new ValueSet { { "LoadXML", Library.Current.GetXmlText() } };
 
-            valueSet.Add("LoadXML", xmlText);
-
-            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
+            Send(valueSet);
         }
 
         public static void SendSongXML(Song song)
         {
-            int playlistIndex = Library.Current.CurrentPlaylistIndex;
-            int songsIndex = Library.Current.CurrentPlaylist.Songs.IndexOf(song);
+            Tuple<int, int> playlistsIndexAndSongsIndex = Library.Current.GetPlaylistsIndexAndSongsIndex(song);
+            int playlistIndex = playlistsIndexAndSongsIndex.Item1;
+            int songsIndex = playlistsIndexAndSongsIndex.Item2;
+
+            if (playlistIndex == -1 || songsIndex == -1) return;
 
             ValueSet valueSet = new ValueSet();
             valueSet.Add("SongXML", string.Format("{0};{1}", playlistIndex, songsIndex));
             valueSet.Add("XML", XmlConverter.Serialize(song));
 
-            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
+            Send(valueSet);
         }
 
         public static void SendSongXML(int playlistIndex, int songsIndex)
         {
+            if (playlistIndex == -1 || songsIndex == -1) return;
+
             ValueSet valueSet = new ValueSet();
             valueSet.Add("SongXML", string.Format("{0};{1}", playlistIndex, songsIndex));
             valueSet.Add("XML", XmlConverter.Serialize(Library.Current[playlistIndex][songsIndex]));
 
-            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
+            Send(valueSet);
         }
 
         public static void SendRemoveSong(int playlistIndex, int songsIndex)
         {
+            if (playlistIndex == -1 || songsIndex == -1) return;
+
             ValueSet valueSet = new ValueSet { { "RemoveSong", string.Format("{0};{1}", playlistIndex, songsIndex) } };
-            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
+            Send(valueSet);
         }
 
         public static void SendRemovePlaylist(Playlist playlist)
         {
-            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "RemovePlaylist", playlist.PlaylistIndex.ToString() } });
+            if (playlist.PlaylistIndex == -1) return;
+
+            Send(new ValueSet { { "RemovePlaylist", playlist.PlaylistIndex.ToString() } });
+        }
+
+        private static void Send(ValueSet valueSet)
+        {
+            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
         }
 
         public static void SetReceivedEvent()
@@ -128,45 +151,58 @@ namespace FolderMusicLib
 
         private static void MessageReceivedFromBackground(object sender, MediaPlayerDataReceivedEventArgs e)
         {
-            ValueSet valueSet = e.Data;
-
-            foreach (string key in valueSet.Keys)
+            try
             {
-                switch (key)
-                {
-                    case "SongsIndex":
-                        GetSongsIndex(valueSet);
-                        return;
+                ValueSet valueSet = e.Data;
 
-                    case "SongsIndexAndShuffle":
-                        GetSongsIndexAndShuffle(valueSet);
-                        return;
-
-                    case "XmlText":
-                        GetXmlText(valueSet);
-                        return;
-
-                    case "Pause":
-                        ViewModel.Current.UpdatePlayPauseIconAndText();
-                        return;
-
-                    case "Skip":
-                        SkipSongs.AskAboutSkippedSong();
-                        return;
-                }
+                foreach (string key in valueSet.Keys) if (MessageReceivedSwitchCase(key, valueSet)) return;
             }
+            catch { }
+        }
+
+        private static bool MessageReceivedSwitchCase(string key, ValueSet valueSet)
+        {
+            switch (key)
+            {
+                case "SongsIndex":
+                    GetSongsIndex(valueSet);
+                    return true;
+
+                case "SongsIndexAndShuffle":
+                    GetSongsIndexAndShuffle(valueSet);
+                    return true;
+
+                case "XmlText":
+                    GetXmlText(valueSet);
+                    return true;
+
+                case "Pause":
+                    ViewModel.Current.UpdatePlayPauseIconAndText();
+                    return true;
+
+                case "Skip":
+                    SkipSongs.AskAboutSkippedSong();
+                    return true;
+            }
+
+            return false;
         }
 
         private static void GetSongsIndex(ValueSet valueSet)
         {
             int songsIndex = int.Parse(valueSet["SongsIndex"].ToString());
+            double position = double.Parse(valueSet["Position"].ToString());
+            double naturalDuration = double.Parse(valueSet["NaturalDuration"].ToString());
 
             ViewModel.Current.CurrentPlaylist.SongsIndex = songsIndex;
+            ViewModel.Current.SliderValue = position;
+            ViewModel.Current.SliderMaximum = naturalDuration;
         }
 
         private static void GetSongsIndexAndShuffle(ValueSet valueSet)
         {
             int songsIndex = int.Parse(valueSet["SongsIndexAndShuffle"].ToString());
+            double naturalDuration = double.Parse(valueSet["NaturalDuration"].ToString());
             ShuffleKind shuffle = XmlConverter.Deserialize<ShuffleKind>(valueSet["ShuffleKind"].ToString());
             List<int> shuffleList = XmlConverter.Deserialize<List<int>>(valueSet["ShuffleList"].ToString());
 
@@ -176,11 +212,21 @@ namespace FolderMusicLib
             ViewModel.Current.CurrentPlaylist.UpdateSongsAndShuffleListSongs();
 
             ViewModel.Current.CurrentPlaylist.SongsIndex = songsIndex;
+            ViewModel.Current.CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds = naturalDuration;
         }
 
         private static void GetXmlText(ValueSet valueSet)
         {
-            Library.Current.Load(valueSet["XmlText"].ToString());
+            string text = valueSet["XmlText"].ToString();
+
+            if (text == "NotLoaded") return;
+            else if (text == "LoadedButEmpty")
+            {
+                CurrentSong.Current.Unset();
+                Library.Current.SetLoaded();
+                SkipSongs.AskAboutSkippedSong();
+            }
+            else Library.Current.Load(text);
         }
     }
 }

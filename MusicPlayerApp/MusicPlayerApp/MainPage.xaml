@@ -20,13 +20,13 @@
             <HubSection Background="Transparent" Margin="0,-10,0,0" DataContext="{Binding CurrentPlaylist}"
                         Header="{Binding Name}" Style="{StaticResource HSHeader}">
                 <DataTemplate>
-                    <ListBox x:Name="lbxCurrentPlaylist" Margin="0,-30,0,0" Background="Transparent" SelectionMode="Single"
-                             ItemsSource="{Binding ShuffleSongs}"
+                    <ListBox x:Name="lbxCurrentPlaylist" Margin="0,-30,0,0" Background="Transparent"
+                             SelectionMode="Single" ItemsSource="{Binding ShuffleSongs}"
                              SelectedIndex="{Binding ShuffleListIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                              DataContextChanged="lbxCurrentPlaylist_DataContextChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid Holding="CurrentPlaylistSong_Holding" Tapped="CurrentPlaylistSong_Tapped">
+                                <Grid Holding="CurrentPlaylistSong_Holding">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
@@ -107,14 +107,31 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Grid DataContext="{Binding CurrentSong}">
+            <Grid DataContext="{Binding CurrentSong}" Tapped="CurrentSong_Tapped">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="{Binding Title}" FontSize="25" Margin="10,0" TextWrapping="WrapWholeWords"/>
-                <TextBlock Grid.Row="1" Text="{Binding Artist}" FontSize="20" Margin="10,0" FontStyle="Italic"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="{Binding Title}" FontSize="25" Margin="10,0" TextWrapping="WrapWholeWords"/>
+                    <Rectangle Fill="Transparent" Width="1500"/>
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="{Binding Artist}" FontSize="20" Margin="10,0" FontStyle="Italic"/>
+                    <Rectangle Fill="Transparent" Width="1500"/>
+                </Grid>
             </Grid>
         </Grid>
 

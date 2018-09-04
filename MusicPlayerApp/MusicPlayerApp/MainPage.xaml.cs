@@ -13,20 +13,21 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using System.Threading.Tasks;
 
 namespace MusicPlayerApp
 {
     public sealed partial class MainPage : Page
     {
-        private bool pauseClick = false, loopImageEntered = false, shuffleImageEntered = false;
+        private bool pauseClick = false, loopImageEntered = false, shuffleImageEntered = false, doScrollCurrentLbx;
         private Timer timer;
 
-        private ListBox lbxCurrentPlaylist, lbxPlaylists;
+        private ListBox lbxCurrentPlaylist;
 
         public MainPage()
         {
             this.InitializeComponent();
-            this.NavigationCacheMode = NavigationCacheMode.Required;
+            this.NavigationCacheMode = NavigationCacheMode.Enabled;
 
             Icons.Theme = RequestedTheme = (Background as SolidColorBrush).Color.B == 0 ? ElementTheme.Dark : ElementTheme.Light;
 
@@ -36,6 +37,7 @@ namespace MusicPlayerApp
             HardwareButtons.BackPressed += HardwareButtons_BackPressed;
             Window.Current.Activated += Current_Activated;
             BackgroundMediaPlayer.Current.CurrentStateChanged += BackgroundMediaPlayer_CurrentStateChanged;
+            Library.Current.ScrollToIndex += Library_ScroolToIndex;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -45,28 +47,27 @@ namespace MusicPlayerApp
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            if (!ViewModel.Current.IsMainPageLoaded)
-            {
-                ViewModel.Current.DoScrollLbxCurrentPlaylist();
-            }
-
+            Library_ScroolToIndex(Library.Current, Library.Current.CurrentPlaylist);
             ViewModel.Current.SetMainPageLoaded();
-            //SkipSongs.AskAboutSkippedSong();
+            SkipSongs.AskAboutSkippedSong();
+
+            GetLibraryData();
+        }
+
+        private async void GetLibraryData()
+        {
+            while (!Library.IsLoaded)
+            {
+                BackgroundCommunicator.SendGetXmlText();
+                await Task.Delay(5000);
+            }
         }
 
         private void Current_Activated(object sender, WindowActivatedEventArgs e)
         {
-            if (e.WindowActivationState == CoreWindowActivationState.CodeActivated)
-            {
-                if (BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing) ChangeTimer(true);
-
-                Library.SavePlayCommand(false);
-            }
-            else if (e.WindowActivationState == CoreWindowActivationState.Deactivated)
-            {
-                Library.SavePlayCommand(true);
-                ChangeTimer(false);
-            }
+            if (e.WindowActivationState == CoreWindowActivationState.Deactivated) ChangeTimer(false);
+            else if (e.WindowActivationState == CoreWindowActivationState.CodeActivated &&
+                BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing) ChangeTimer(true);
         }
 
         private void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
@@ -80,42 +81,31 @@ namespace MusicPlayerApp
 
         private void BackgroundMediaPlayer_CurrentStateChanged(MediaPlayer sender, object args)
         {
-            if (sender.CurrentState == MediaPlayerState.Playing)
-            {
-                ViewModel.Current.UpdatePlayPauseIconAndText();
-                ViewModel.Current.UpdateSliderValue();
-                ChangeTimer(true);
-            }
-            else if (pauseClick && sender.CurrentState == MediaPlayerState.Paused)
-            {
-                ViewModel.Current.UpdatePlayPauseIconAndText();
-                pauseClick = false;
-            }
+            if (sender.CurrentState == MediaPlayerState.Playing) ChangeTimer(true);
+            else if (pauseClick && sender.CurrentState == MediaPlayerState.Paused) pauseClick = false;
+            else return;
+
+            ViewModel.Current.UpdatePlayPauseIconAndText();
         }
 
         public void ChangeTimer(bool activate)
         {
-            var timeOut = activate ? 1000 - BackgroundMediaPlayer.Current.Position.Milliseconds : Timeout.Infinite;
+            int timeOut = activate ? 1000 - BackgroundMediaPlayer.Current.Position.Milliseconds : Timeout.Infinite;
             timer.Change(timeOut, 1000);
 
-            if (activate)
-            {
-                UpdateSongPosition(new object());
-            }
+            if (activate) UpdateSongPosition(new object());
         }
 
         private void UpdateSongPosition(object state)
         {
-            ViewModel.Current.UpdateSliderValue();
+            ViewModel.Current.ChangeSliderValue();
 
-            if (BackgroundMediaPlayer.Current.CurrentState != MediaPlayerState.Playing)
-            {
-                ChangeTimer(false);
-            }
+            if (BackgroundMediaPlayer.Current.CurrentState != MediaPlayerState.Playing) ChangeTimer(false);
         }
 
         private void Shuffle_Tapped(object sender, TappedRoutedEventArgs e)
         {
+            doScrollCurrentLbx = true;
             Library.Current.CurrentPlaylist.SetNextShuffle();
         }
 
@@ -144,10 +134,7 @@ namespace MusicPlayerApp
                 ViewModel.Current.Pause();
                 pauseClick = true;
             }
-            else
-            {
-                ViewModel.Current.Play();
-            }
+            else ViewModel.Current.Play();
         }
 
         private void Next_Click(object sender, RoutedEventArgs e)
@@ -173,26 +160,9 @@ namespace MusicPlayerApp
             LoopImageTap.Begin();
         }
 
-        private void CurrentPlaylistSong_Tapped(object sender, TappedRoutedEventArgs e)
-        {
-
-        }
-
         private void Playlist_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            SetOpenPlaylist((sender as Grid).DataContext as Playlist);
-
-            if (!PlaylistPage.Open)
-            {
-                Frame.Navigate(typeof(PlaylistPage));
-            }
-        }
-
-        private void SetOpenPlaylist(Playlist playlist)
-        {
-            if (ViewModel.Current.OpenPlaylist == playlist || !ViewModel.Current.IsMainPageLoaded) return;
-
-            ViewModel.Current.OpenPlaylist = playlist;
+            if (!PlaylistPage.Open) Frame.Navigate(typeof(PlaylistPage));
         }
 
         private void PlayPlaylist_Tapped(object sender, TappedRoutedEventArgs e)
@@ -277,40 +247,49 @@ namespace MusicPlayerApp
         private async void RefreshEveryPlaylists_Click(object sender, RoutedEventArgs e)
         {
             LoadingPage.OpenLoading(Frame);
-
-            await Library.Current.LoadPlaylistsFromStorage();
-
+            await Library.Current.RefreshEveryPlaylist();
             LoadingPage.GoBack();
         }
 
         private async void SearchForNewPlaylists_Click(object sender, RoutedEventArgs e)
         {
             LoadingPage.OpenLoading(Frame);
-
             await Library.Current.SearchForNewPlaylists();
-
             LoadingPage.GoBack();
         }
 
         private void lbxCurrentPlaylist_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
-            ViewModel.Current.SetLbxCurrentPlaylist(lbxCurrentPlaylist = sender as ListBox);
+            ListBox lbx = sender as ListBox;
+            lbxCurrentPlaylist = lbx;
+
+            if (lbx == null || !lbx.Items.Contains(ViewModel.Current.CurrentPlaylist.CurrentSong)) return;
+
+            lbx.ScrollIntoView(ViewModel.Current.CurrentPlaylist.CurrentSong);
         }
 
-        private async void TestFunktion_Click(object sender, RoutedEventArgs e)
+        private async void Library_ScroolToIndex(object sender, Playlist e)
         {
-            await SkipSongs.AskAboutSkippedSong();
+            if (lbxCurrentPlaylist == null || e.IsEmptyOrLoading) return;
+
+            while (lbxCurrentPlaylist.Items.Count < e.ShuffleListIndex) await Task.Delay(10);
+
+            lbxCurrentPlaylist.ScrollIntoView(lbxCurrentPlaylist.Items[e.ShuffleListIndex]);
         }
 
-        private async void TestFunktion_Click2(object sender, RoutedEventArgs e)
+        private void CurrentSong_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            try
-            {
-                var file = await ApplicationData.Current.LocalFolder.GetFileAsync("Data.xml");
+            Library_ScroolToIndex(Library.Current, Library.Current.CurrentPlaylist);
+        }
 
-                await file.DeleteAsync();
-            }
-            catch { }
+        private void TestFunktion_Click(object sender, RoutedEventArgs e)
+        {
+            int days = BackgroundMediaPlayer.Current.NaturalDuration.Days;
+        }
+
+        private void TestFunktion_Click2(object sender, RoutedEventArgs e)
+        {
+            BackgroundCommunicator.SetReceivedEvent();
         }
 
         private void TestFunktion_Click3(object sender, RoutedEventArgs e)
@@ -319,23 +298,49 @@ namespace MusicPlayerApp
 
             beforeMilli = DateTime.Now.TimeOfDay.TotalMilliseconds;
 
+            Playlist playlist = new Playlist(@"C:\Data\Users\Public\Music\Das Känguru\TestPlaylist");
+
+            playlist.Songs.AddRange(new System.Collections.Generic.List<Song>()
+            { new Song(@"C:\Data\Users\Public\Music\Das Känguru\TestPlaylist\Ace of Base - All That She Wants.mp3"),
+                new Song(@"C:\Data\Users\Public\Music\Das Känguru\TestPlaylist\Charli Xcx - Break The Rules.mp3"),
+                new Song(@"C:\Data\Users\Public\Music\Das Känguru\TestPlaylist\Evanescence - My Immortal.mp3"),
+                new Song(@"C:\Data\Users\Public\Music\Das Känguru\TestPlaylist\Kelly Clarkson - Heartbeat Song.mp3"),
+                new Song(@"C:\Data\Users\Public\Music\Das Känguru\TestPlaylist\Ronald Bell - Celebration.mp3") });
+
+            playlist.SetNextShuffle();
+
+            Library.Current.Playlists.Add(playlist);
+            Library.Current.Playlists = new System.Collections.Generic.List<Playlist>(Library.Current.Playlists);
+
             deltaMilli = DateTime.Now.TimeOfDay.TotalMilliseconds - beforeMilli;
             System.Diagnostics.Debug.WriteLine("deltaMilli: " + deltaMilli.ToString());
         }
 
         private async void TestFunktion_Click4(object sender, RoutedEventArgs e)
         {
+            string text;
+
             try
             {
                 StorageFile file1 = await ApplicationData.Current.LocalFolder.GetFileAsync("Text.txt");
-                StorageFile file2 = await ApplicationData.Current.LocalFolder.GetFileAsync("Text2.txt");
-
-                string text = await PathIO.ReadTextAsync(file1.Path);
-                text += "\n" + await PathIO.ReadTextAsync(file2.Path);
-
-                Windows.UI.Popups.IUICommand command = await new Windows.UI.Popups.MessageDialog(text).ShowAsync();
+                text = await PathIO.ReadTextAsync(file1.Path);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                text = ex.Message;
+            }
+
+            try
+            {
+                StorageFile file2 = await ApplicationData.Current.LocalFolder.GetFileAsync("Text2.txt");
+                text += "\n" + await PathIO.ReadTextAsync(file2.Path);
+            }
+            catch (Exception ex)
+            {
+                text = ex.Message;
+            }
+
+            Windows.UI.Popups.IUICommand command = await new Windows.UI.Popups.MessageDialog(text).ShowAsync();
         }
     }
 }
