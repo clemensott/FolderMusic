@@ -1,13 +1,11 @@
-﻿using PlayerIcons;
-using PlaylistSong;
+﻿using LibraryLib;
+using PlayerIcons;
 using System;
 using System.Threading;
-using Windows.ApplicationModel.Core;
 using Windows.Media.Playback;
 using Windows.Phone.UI.Input;
 using Windows.Storage;
 using Windows.UI.Core;
-using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -20,7 +18,6 @@ namespace MusicPlayerApp
     public sealed partial class MainPage : Page
     {
         private bool pauseClick = false, loopImageEntered = false, shuffleImageEntered = false;
-
         private Timer timer;
 
         private ListBox lbxCurrentPlaylist, lbxPlaylists;
@@ -30,18 +27,13 @@ namespace MusicPlayerApp
             this.InitializeComponent();
             this.NavigationCacheMode = NavigationCacheMode.Required;
 
+            BackgroundCommunicator.SendGetXmlText();
             Icons.Theme = RequestedTheme = (Background as SolidColorBrush).Color.B == 0 ? ElementTheme.Dark : ElementTheme.Light;
-
-            if (Library.Current.CurrentPlaylist.Shuffle == ShuffleKind.Complete)
-            {
-                BackgroundCommunicator.SendGetCurrent();
-            }
 
             DataContext = App.ViewModel;
             timer = new Timer(new TimerCallback(UpadateSongPostion), new object(), Timeout.Infinite, 1000);
 
             HardwareButtons.BackPressed += HardwareButtons_BackPressed;
-            Library.Current.Loaded += Library_Loaded;
             Window.Current.Activated += Current_Activated;
             BackgroundMediaPlayer.Current.CurrentStateChanged += BackgroundMediaPlayer_CurrentStateChanged;
         }
@@ -49,20 +41,18 @@ namespace MusicPlayerApp
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             Icons.Theme = RequestedTheme;
-            rtLoading.Fill = Background;
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             if (!App.ViewModel.MainPageLoaded)
             {
-                BackgroundCommunicator.SendRun();
-
-                LbxCurrentPlaylistScollToSelectedItem();
-                LbxPlaylistsScollToSelectedItem();
+                App.ViewModel.LbxCurrentPlaylistScollToSelectedItem();
+                App.ViewModel.LbxPlaylistsScollToSelectedItem();
             }
 
             App.ViewModel.SetMainPageLoaded();
+            SkipSongs.AskAboutSkippedSong();
         }
 
         private void Current_Activated(object sender, WindowActivatedEventArgs e)
@@ -86,31 +76,11 @@ namespace MusicPlayerApp
 
         private void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
         {
-            if (PlaylistPage.Open)
-            {
-                e.Handled = true;
-                PlaylistPage.GoBack();
-            }
-            else
-            {
-                Application.Current.Exit();
-            }
-        }
+            e.Handled = true;
 
-        private async void Library_Loaded()
-        {
-            BackgroundCommunicator.SendLoad();
-
-            UiUpdate.All();
-
-            BackgroundMediaPlayer.Current.CurrentStateChanged += BackgroundMediaPlayer_CurrentStateChanged;
-            BackgroundCommunicator.SetReceivedEvent();
-
-            StopLoading();
-
-            await CoreApplication.MainView.CoreWindow.Dispatcher.
-                RunAsync(CoreDispatcherPriority.Normal, async () =>
-                { await new MessageDialog("Loading Complete").ShowAsync(); });
+            if (PlaylistPage.Open) PlaylistPage.GoBack();
+            else if (LoadingPage.Open) LoadingPage.GoBack();
+            else Application.Current.Exit();
         }
 
         private void BackgroundMediaPlayer_CurrentStateChanged(MediaPlayer sender, object args)
@@ -150,15 +120,8 @@ namespace MusicPlayerApp
 
         private void Shuffle_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            try
-            {
-                Library.Current.CurrentPlaylist.SetNextShuffle();
-                BackgroundCommunicator.SendShuffle(Library.Current.CurrentPlaylistIndex);
-                UiUpdate.CurrentPlaylistSongsAndIndex();
-                UiUpdate.CurrentSongIndex();
-                Library.SaveAsync();
-            }
-            catch { }
+            App.ViewModel.SetChangedCurrentPlaylistIndex();
+            BackgroundCommunicator.SendShuffle(Library.Current.CurrentPlaylistIndex);
 
             UiUpdate.ShuffleIcon();
         }
@@ -201,13 +164,9 @@ namespace MusicPlayerApp
 
         private void Loop_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            try
-            {
-                Library.Current.CurrentPlaylist.SetNextLoop();
+            Library.Current.CurrentPlaylist.SetNextLoop();
 
-                BackgroundCommunicator.SendLoop(Library.Current.CurrentPlaylistIndex);
-            }
-            catch { }
+            BackgroundCommunicator.SendLoop(Library.Current.CurrentPlaylistIndex);
 
             UiUpdate.LoopIcon();
         }
@@ -232,14 +191,15 @@ namespace MusicPlayerApp
 
         private void SetCurrentSong(Song song)
         {
-            if (Library.Current.CurrentPlaylist.CurrentSong == song || song.IsEmpty || !App.ViewModel.MainPageLoaded) return;
+            if (Library.Current.CurrentPlaylist.CurrentSong == song ||
+                song.IsEmptyOrLoading || !App.ViewModel.MainPageLoaded) return;
 
-            int index = Library.Current.CurrentPlaylist.GetShuffleListIndex(song);
+            int songsIndex = Library.Current.CurrentPlaylist.Songs.IndexOf(song);
 
-            if (Library.Current.CurrentPlaylist.CurrentSongIndex == index) return;
+            if (Library.Current.CurrentPlaylist.SongsIndex == songsIndex) return;
 
-            BackgroundCommunicator.SendPlaySong(index);
-            Library.Current.CurrentPlaylist.CurrentSongIndex = index;
+            BackgroundCommunicator.SendPlaySong(Library.Current.CurrentPlaylistIndex, songsIndex);
+            Library.Current.CurrentPlaylist.SongsIndex = songsIndex;
             UiUpdate.CurrentSongTitleArtistNaturalDuration();
         }
 
@@ -262,40 +222,117 @@ namespace MusicPlayerApp
 
         private void PlayPlaylist_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            App.ViewModel.CurrentPlaylist = (sender as Image).DataContext as Playlist;
+            Playlist playlist = (sender as Image).DataContext as Playlist;
+
+            if (playlist.IsEmptyOrLoading) return;
+
+            App.ViewModel.CurrentPlaylist = playlist;
+            App.ViewModel.SetChangedCurrentPlaylistIndex();
 
             BackgroundCommunicator.SendCurrentPlaylistIndex(true);
-            LbxCurrentPlaylistScollToSelectedItem();
-
-            Library.SaveAsync();
         }
 
         private void PlaylistsPlaylist_Holding(object sender, HoldingRoutedEventArgs e)
         {
+            //if (((sender as Grid).DataContext as Playlist).IsEmptyOrLoading) return;
+
             FlyoutBase.ShowAttachedFlyout(sender as FrameworkElement);
         }
 
         private void CurrentPlaylistSong_Holding(object sender, HoldingRoutedEventArgs e)
         {
+            if (((sender as Grid).DataContext as Song).IsEmptyOrLoading) return;
+
             FlyoutBase.ShowAttachedFlyout(sender as FrameworkElement);
+        }
+
+        private async void RefreshSong_Click(object sender, RoutedEventArgs e)
+        {
+            Song song = (sender as MenuFlyoutItem).DataContext as Song;
+
+            await song.Refresh();
+
+            BackgroundCommunicator.SendSong(song);
+            song.UpdateTitleAndArtist();
         }
 
         private void DeleteSong_Click(object sender, RoutedEventArgs e)
         {
             Song song = (sender as MenuFlyoutItem).DataContext as Song;
-            Playlist currentPlaylist = Library.Current.CurrentPlaylist;
+            int songsIndex = Library.Current.CurrentPlaylist.Songs.IndexOf(song);
+            Playlist playlist = Library.Current.CurrentPlaylist;
 
-            Library.Current.RemoveSongFromCurrentPlaylist(song);
-            BackgroundCommunicator.SendRemoveSong(Library.Current.CurrentPlaylist.GetShuffleListIndex(song));
+            Library.Current.RemoveSongFromPlaylist(playlist, songsIndex);
+            BackgroundCommunicator.SendRemoveSong(Library.Current.CurrentPlaylistIndex, songsIndex);
 
-            if (currentPlaylist.IsEmpty())
+            if (playlist.IsEmptyOrLoading)
             {
-                UiUpdate.AfterDeleteCurrentPlaylist();
-                LbxCurrentPlaylistScollToSelectedItem();
+                UiUpdate.PlaylistsAndCurrentPlaylist();
+                App.ViewModel.LbxCurrentPlaylistScollToSelectedItem();
             }
-            else UiUpdate.CurrentPlaylistSongsAndIndex();
+            else
+            {
+                UiUpdate.CurrentPlaylistSongs();
+                Library.Current.CurrentPlaylist.UpdateSongCount();
+            }
+        }
 
-            Library.SaveAsync();
+        private async void RefreshPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            OpenLoadingPage();
+
+            Playlist playlist = (sender as MenuFlyoutItem).DataContext as Playlist;
+            bool wasCurrentPlaylist = Library.Current.CurrentPlaylist == playlist;
+            int songsCount = playlist.Length;
+            int playlistsCount = Library.Current.Length;
+
+            await playlist.LoadSongsFromStorage();
+
+            if (Library.Current.Length == playlistsCount) BackgroundCommunicator.SendPlaylistXML(playlist);
+            else BackgroundCommunicator.SendRemovePlaylist(playlist);
+
+            if (Library.Current.Length != playlistsCount) UiUpdate.Playlists();
+            if (playlist.Length != songsCount && !playlist.IsEmptyOrLoading) playlist.UpdateSongCount();
+            if (Library.Current.CurrentPlaylist == playlist || wasCurrentPlaylist) UiUpdate.CurrentPlaylistIndexAndRest();
+
+            CloseLoadingPage();
+        }
+
+        private async void SearchForNewSongsPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            OpenLoadingPage();
+
+            Playlist playlist = (sender as MenuFlyoutItem).DataContext as Playlist;
+            int songCount = playlist.Songs.Count;
+            await playlist.SearchForNewSongs();
+
+
+            if (playlist.Songs.Count != songCount)
+            {
+                BackgroundCommunicator.SendPlaylistXML(playlist);
+                UiUpdate.Playlists();
+                playlist.UpdateSongCount();
+            }
+
+            if (Library.Current.CurrentPlaylist == playlist) UiUpdate.CurrentPlaylistSongs();
+
+            CloseLoadingPage();
+        }
+
+        private void DeletePlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            Playlist playlist = (sender as MenuFlyoutItem).DataContext as Playlist;
+            bool isCurrent = Library.Current.CurrentPlaylist == playlist;
+
+            BackgroundCommunicator.SendRemovePlaylist(playlist);
+            Library.Current.Delete(playlist);
+
+            if (isCurrent)
+            {
+                UiUpdate.PlaylistsAndCurrentPlaylist();
+                App.ViewModel.LbxCurrentPlaylistScollToSelectedItem();
+            }
+            else UiUpdate.Playlists();
         }
 
         private void sld_PointerEntered(object sender, PointerRoutedEventArgs e)
@@ -308,98 +345,53 @@ namespace MusicPlayerApp
             App.ViewModel.SetSliderValue();
         }
 
-        private void DeletePlaylist_Click(object sender, RoutedEventArgs e)
+        private async void RefreshEveryPlaylists_Click(object sender, RoutedEventArgs e)
         {
-            Playlist playlist = (sender as MenuFlyoutItem).DataContext as Playlist;
-            bool isCurrent = Library.Current.CurrentPlaylist == playlist;
+            OpenLoadingPage();
 
-            BackgroundCommunicator.SendRemovePlaylist(Library.Current.GetPlaylists().IndexOf(playlist));
-            Library.Current.Delete(playlist);
+            BackgroundCommunicator.SendPause();
+            await Library.Current.LoadPlaylistsFromStorage();
+            BackgroundCommunicator.SendLoadXML(true, Library.Current.GetXmlText());
+            UiUpdate.PlaylistsAndCurrentPlaylist();
 
-            if (isCurrent)
-            {
-                UiUpdate.AfterDeleteCurrentPlaylist();
-                LbxCurrentPlaylistScollToSelectedItem();
-            }
-            else UiUpdate.PlaylistsAndCurrentPlaylistIndex();
-
-            Library.SaveAsync();
+            CloseLoadingPage();
         }
 
-        private async void RefreshPlaylist_Click(object sender, RoutedEventArgs e)
+        private async void SearchForNewPlaylists_Click(object sender, RoutedEventArgs e)
         {
-            Playlist playlist = (sender as MenuFlyoutItem).DataContext as Playlist;
-            int songsCount = playlist.Lenght;
-            int playlistsCount = Library.Current.Lenght;
+            OpenLoadingPage();
 
-            StartLoading();
-            await playlist.LoadSongsFromStorage();
+            await Library.Current.SearchForNewPlaylists();
+            BackgroundCommunicator.SendLoadXML(true, Library.Current.GetXmlText());
+            UiUpdate.PlaylistsAndCurrentPlaylist();
 
-            if (Library.Current.Lenght != playlistsCount) UiUpdate.PlaylistsAndCurrentPlaylistIndex();
-            if (Library.Current.CurrentPlaylist == playlist) UiUpdate.CurrentPlaylistIndexAndRest();
-            if (playlist.Lenght != songsCount) UiUpdate.PlaylistsAndCurrentPlaylistIndex();
-
-            StopLoading();
-            Library.Save();
-            BackgroundCommunicator.SendLoad();
+            CloseLoadingPage();
         }
 
-        private void RefreshEveryPlaylists_Click(object sender, RoutedEventArgs e)
+        private void OpenLoadingPage()
         {
-            StartLoading();
-            Library.DeleteSongIndexAndMilliseconds();
-            Library.Current.LoadPlaylistsFromStorage();
-            //BackgroundCommunicator.SendPause();
+            if (LoadingPage.Open) return;
+            Frame.Navigate(typeof(LoadingPage));
         }
 
-        private void SearchForNewPlaylists_Click(object sender, RoutedEventArgs e)
+        private void CloseLoadingPage()
         {
-            StartLoading();
-            Library.Current.SearchForNewPlaylists();
-        }
-
-        private void StartLoading()
-        {
-            App.ViewModel.IsUiEnabled = false;
-            pbLoading.IsEnabled = true;
-            gdLoading.Visibility = Visibility.Visible;
+            LoadingPage.GoBack();
         }
 
         private void lbxCurrentPlaylist_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
-            lbxCurrentPlaylist = sender as ListBox;
-        }
-
-        private void LbxCurrentPlaylistScollToSelectedItem()
-        {
-            if (lbxCurrentPlaylist == null || lbxCurrentPlaylist.SelectedIndex == -1) return;
-            System.Diagnostics.Debug.WriteLine(lbxCurrentPlaylist.SelectedItem);
-            lbxCurrentPlaylist.ScrollIntoView(lbxCurrentPlaylist.SelectedItem);
+            App.ViewModel.SetLbxCurrentPlaylist(lbxCurrentPlaylist = sender as ListBox);
         }
 
         private void lbxPlaylists_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
-            lbxPlaylists = sender as ListBox;
+            App.ViewModel.SetLbxPlaylists(lbxPlaylists = sender as ListBox);
         }
 
-        private void LbxPlaylistsScollToSelectedItem()
+        private async void TestFunktion_Click(object sender, RoutedEventArgs e)
         {
-            if (lbxPlaylists == null || lbxPlaylists.SelectedIndex == -1) return;
-
-            lbxPlaylists.ScrollIntoView(lbxPlaylists.SelectedItem);
-        }
-
-        private void StopLoading()
-        {
-            App.ViewModel.IsUiEnabled = true;
-            pbLoading.IsEnabled = false;
-            gdLoading.Visibility = Visibility.Collapsed;
-        }
-
-        private void TestFunktion_Click(object sender, RoutedEventArgs e)
-        {
-            UiUpdate.CurrentPlaylistIndex();
-            UiUpdate.CurrentSongIndex();
+            await SkipSongs.AskAboutSkippedSong();
         }
 
         private async void TestFunktion_Click2(object sender, RoutedEventArgs e)
@@ -411,6 +403,21 @@ namespace MusicPlayerApp
                 await file.DeleteAsync();
             }
             catch { }
+        }
+
+        private void TestFunktion_Click3(object sender, RoutedEventArgs e)
+        {
+            double beforeMilli, deltaMilli;
+
+            beforeMilli = DateTime.Now.TimeOfDay.TotalMilliseconds;
+
+            deltaMilli = DateTime.Now.TimeOfDay.TotalMilliseconds - beforeMilli;
+            System.Diagnostics.Debug.WriteLine("deltaMilli: " + deltaMilli.ToString());
+        }
+
+        private void TestFunktion_Click4(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

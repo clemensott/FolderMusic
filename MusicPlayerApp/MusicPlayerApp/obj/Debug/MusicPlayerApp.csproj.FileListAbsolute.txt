@@ -52,3 +52,8 @@ E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\MusicPlayerApp\o
 E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\MusicPlayerApp\obj\Debug\qualifiers.txt.intermediate
 E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\MusicPlayerApp\obj\Debug\MultipleQualifiersPerDimensionFound.txt
 E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\MusicPlayerApp\obj\Debug\ProjectArchitectures.txt
+E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\MusicPlayerApp\bin\Debug\LoadingPage.xbf
+E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.g.i.cs
+E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.g.cs
+E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.xaml
+E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\MusicPlayerApp\obj\Debug\LoadingPage.xbf

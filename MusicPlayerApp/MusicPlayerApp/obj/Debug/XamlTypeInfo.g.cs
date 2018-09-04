@@ -124,19 +124,21 @@ namespace MusicPlayerApp.MusicPlayerApp_XamlTypeInfo
 
         private void InitTypeTables()
         {
-            _typeNameTable = new string[5];
-            _typeNameTable[0] = "MusicPlayerApp.MainPage";
+            _typeNameTable = new string[6];
+            _typeNameTable[0] = "MusicPlayerApp.LoadingPage";
             _typeNameTable[1] = "Windows.UI.Xaml.Controls.Page";
             _typeNameTable[2] = "Windows.UI.Xaml.Controls.UserControl";
-            _typeNameTable[3] = "MusicPlayerApp.PlaylistPage";
-            _typeNameTable[4] = "MusicPlayerApp.SecondaryTilePage";
+            _typeNameTable[3] = "MusicPlayerApp.MainPage";
+            _typeNameTable[4] = "MusicPlayerApp.PlaylistPage";
+            _typeNameTable[5] = "MusicPlayerApp.SecondaryTilePage";
 
-            _typeTable = new global::System.Type[5];
-            _typeTable[0] = typeof(global::MusicPlayerApp.MainPage);
+            _typeTable = new global::System.Type[6];
+            _typeTable[0] = typeof(global::MusicPlayerApp.LoadingPage);
             _typeTable[1] = typeof(global::Windows.UI.Xaml.Controls.Page);
             _typeTable[2] = typeof(global::Windows.UI.Xaml.Controls.UserControl);
-            _typeTable[3] = typeof(global::MusicPlayerApp.PlaylistPage);
-            _typeTable[4] = typeof(global::MusicPlayerApp.SecondaryTilePage);
+            _typeTable[3] = typeof(global::MusicPlayerApp.MainPage);
+            _typeTable[4] = typeof(global::MusicPlayerApp.PlaylistPage);
+            _typeTable[5] = typeof(global::MusicPlayerApp.SecondaryTilePage);
         }
 
         private int LookupTypeIndexByName(string typeName)
@@ -171,9 +173,10 @@ namespace MusicPlayerApp.MusicPlayerApp_XamlTypeInfo
             return -1;
         }
 
-        private object Activate_0_MainPage() { return new global::MusicPlayerApp.MainPage(); }
-        private object Activate_3_PlaylistPage() { return new global::MusicPlayerApp.PlaylistPage(); }
-        private object Activate_4_SecondaryTilePage() { return new global::MusicPlayerApp.SecondaryTilePage(); }
+        private object Activate_0_LoadingPage() { return new global::MusicPlayerApp.LoadingPage(); }
+        private object Activate_3_MainPage() { return new global::MusicPlayerApp.MainPage(); }
+        private object Activate_4_PlaylistPage() { return new global::MusicPlayerApp.PlaylistPage(); }
+        private object Activate_5_SecondaryTilePage() { return new global::MusicPlayerApp.SecondaryTilePage(); }
 
         private global::Windows.UI.Xaml.Markup.IXamlType CreateXamlType(int typeIndex)
         {
@@ -185,9 +188,9 @@ namespace MusicPlayerApp.MusicPlayerApp_XamlTypeInfo
             switch (typeIndex)
             {
 
-            case 0:   //  MusicPlayerApp.MainPage
+            case 0:   //  MusicPlayerApp.LoadingPage
                 userType = new global::MusicPlayerApp.MusicPlayerApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_0_MainPage;
+                userType.Activator = Activate_0_LoadingPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
@@ -200,16 +203,23 @@ namespace MusicPlayerApp.MusicPlayerApp_XamlTypeInfo
                 xamlType = new global::MusicPlayerApp.MusicPlayerApp_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 3:   //  MusicPlayerApp.PlaylistPage
+            case 3:   //  MusicPlayerApp.MainPage
                 userType = new global::MusicPlayerApp.MusicPlayerApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_3_PlaylistPage;
+                userType.Activator = Activate_3_MainPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 4:   //  MusicPlayerApp.SecondaryTilePage
+            case 4:   //  MusicPlayerApp.PlaylistPage
                 userType = new global::MusicPlayerApp.MusicPlayerApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_4_SecondaryTilePage;
+                userType.Activator = Activate_4_PlaylistPage;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 5:   //  MusicPlayerApp.SecondaryTilePage
+                userType = new global::MusicPlayerApp.MusicPlayerApp_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_5_SecondaryTilePage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
@@ -547,5 +557,9 @@ namespace MusicPlayerApp.MusicPlayerApp_XamlTypeInfo
         }
     }
 }
+
+
+
+
 
 

@@ -13,8 +13,6 @@ namespace MusicPlayerApp
         private TransitionCollection transitions;
         private static ViewModel viewModel;
 
-        private static App current;
-
         public static ViewModel ViewModel
         {
             get
@@ -33,9 +31,9 @@ namespace MusicPlayerApp
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
 
-            current = this;
+            LibraryLib.Library.SavePlayCommand(false);
+            LibraryLib.Library.Current.LoadCurrentSong();
 
-            PlaylistSong.Library.SavePlayCommand(false);
             BackgroundCommunicator.SetReceivedEvent();
 
             viewModel = new ViewModel();

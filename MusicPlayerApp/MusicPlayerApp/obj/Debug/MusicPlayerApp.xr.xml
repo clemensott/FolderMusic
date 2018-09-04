@@ -18,11 +18,10 @@
     <RootPropertyPathName Name="PlayIcon" />
     <RootPropertyPathName Name="CurrentPlaylistName" />
     <RootPropertyPathName Name="CurrentPlaylistSongs" />
-    <RootPropertyPathName Name="CurrentSongIndex" />
+    <RootPropertyPathName Name="ShuffleListIndex" />
     <RootPropertyPathName Name="ArtistVisibility" />
     <RootPropertyPathName Name="Artist" />
     <RootPropertyPathName Name="Title" />
-    <RootPropertyPathName Name="IsUiEnabled" />
     <RootPropertyPathName Name="PlayPauseText" />
     <RootPropertyPathName Name="PlayPauseIcon" />
     <RootPropertyPathName Name="RelativePath" />
@@ -61,12 +60,12 @@
     <RootType FullName="Windows.UI.Xaml.Controls.TextBlock">
       <RootProperty Name="Text" />
       <RootProperty Name="FontSize" />
+      <RootProperty Name="VerticalAlignment" />
+      <RootProperty Name="HorizontalAlignment" />
       <RootProperty Name="Margin" />
       <RootProperty Name="TextWrapping" />
       <RootProperty Name="FontStyle" />
       <RootProperty Name="Visibility" />
-      <RootProperty Name="HorizontalAlignment" />
-      <RootProperty Name="VerticalAlignment" />
       <RootProperty Name="Foreground" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Data.Binding">
@@ -82,41 +81,30 @@
     </RootType>
     <RootType FullName="Microsoft.Xaml.Tools.DirectUI.ProxyTypes.ThemeResourceExtension" />
     <RootType FullName="Windows.UI.Xaml.Controls.Grid">
+      <RootProperty Name="Margin" />
+      <RootProperty Name="Visibility" />
       <RootProperty Name="RowDefinitions" />
       <RootProperty Name="Children" />
       <RootProperty Name="ColumnDefinitions" />
       <RootProperty Name="Resources" />
-      <RootProperty Name="Name" />
-      <RootProperty Name="Visibility" />
       <RootEvent Name="Holding" />
       <RootEvent Name="Tapped" />
-      <RootMethod Name="GetRow" />
-      <RootMethod Name="SetRow" />
       <RootMethod Name="GetRowSpan" />
       <RootMethod Name="SetRowSpan" />
+      <RootMethod Name="GetRow" />
+      <RootMethod Name="SetRow" />
       <RootMethod Name="GetColumn" />
       <RootMethod Name="SetColumn" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.RowDefinition">
       <RootProperty Name="Height" />
     </RootType>
-    <RootType FullName="Windows.UI.Xaml.Shapes.Rectangle">
-      <RootProperty Name="Name" />
-      <RootProperty Name="Width" />
-      <RootProperty Name="Height" />
-      <RootProperty Name="Fill" />
-    </RootType>
-    <RootType FullName="Windows.UI.Xaml.Controls.StackPanel">
-      <RootProperty Name="VerticalAlignment" />
-      <RootProperty Name="Visibility" />
-      <RootProperty Name="Children" />
-      <RootProperty Name="Orientation" />
-    </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.ProgressBar">
-      <RootProperty Name="Name" />
       <RootProperty Name="IsIndeterminate" />
+      <RootProperty Name="IsEnabled" />
       <RootProperty Name="Height" />
     </RootType>
+    <RootType FullName="MusicPlayerApp.LoadingPage" />
     <RootType FullName="Windows.UI.Xaml.Controls.ColumnDefinition">
       <RootProperty Name="Width" />
     </RootType>
@@ -178,6 +166,14 @@
       <RootProperty Name="Text" />
       <RootEvent Name="Click" />
     </RootType>
+    <RootType FullName="Windows.UI.Xaml.Controls.StackPanel">
+      <RootProperty Name="Orientation" />
+      <RootProperty Name="Children" />
+    </RootType>
+    <RootType FullName="Windows.UI.Xaml.Shapes.Rectangle">
+      <RootProperty Name="Fill" />
+      <RootProperty Name="Width" />
+    </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.CommandBar">
       <RootProperty Name="PrimaryCommands" />
       <RootProperty Name="SecondaryCommands" />
@@ -185,7 +181,6 @@
     <RootType FullName="Windows.UI.Xaml.Controls.AppBarButton">
       <RootProperty Name="Label" />
       <RootProperty Name="Icon" />
-      <RootProperty Name="IsEnabled" />
       <RootEvent Name="Click" />
     </RootType>
     <RootType FullName="MusicPlayerApp.MainPage" />

@@ -123,6 +123,9 @@
     <AppxPackagedFile Include="E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\MusicPlayerApp\bin\Debug\App.xbf">
       <PackagePath>App.xbf</PackagePath>
     </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\MusicPlayerApp\bin\Debug\LoadingPage.xbf">
+      <PackagePath>LoadingPage.xbf</PackagePath>
+    </AppxPackagedFile>
     <AppxPackagedFile Include="E:\Clemens\Dokumente\Visual Studio 2015\Projects\MusicPlayerApp\MusicPlayerApp\bin\Debug\MainPage.xbf">
       <PackagePath>MainPage.xbf</PackagePath>
     </AppxPackagedFile>

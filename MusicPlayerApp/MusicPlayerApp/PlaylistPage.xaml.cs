@@ -1,4 +1,4 @@
-﻿using PlaylistSong;
+﻿using LibraryLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,6 +22,8 @@ namespace MusicPlayerApp
 
         public static bool Open { get { return playlistPageOpen; } }
 
+        public static PlaylistPage Current { get { return Open ? page : null; } }
+
         public PlaylistPage()
         {
             this.InitializeComponent();
@@ -35,8 +37,8 @@ namespace MusicPlayerApp
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            viewModel.LoadDefault();
-            viewModel.LoadShuffle();
+            viewModel.ScrollIntoLbxDefault();
+            viewModel.ScrollIntoLbxShuffle();
         }
 
         public static void GoBack()
@@ -47,18 +49,10 @@ namespace MusicPlayerApp
 
         private void Shuffle_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            playlist.SetNextShuffle();
-            viewModel.UpdateShuffleIcon();
+            App.ViewModel.SetChangedCurrentPlaylistIndex();
+            viewModel.SetScrollLbxShuffle();
 
-            if (App.ViewModel.IsOpenPlaylistCurrentPlaylist)
-            {
-                UiUpdate.ShuffleIcon();
-                UiUpdate.CurrentPlaylistSongsAndIndex();
-            }
-
-            viewModel.LoadShuffle();
             BackgroundCommunicator.SendShuffle(App.ViewModel.OpenPlaylistIndex);
-            Library.SaveAsync();
         }
 
         private void Loop_Tapped(object sender, TappedRoutedEventArgs e)
@@ -72,44 +66,64 @@ namespace MusicPlayerApp
             }
 
             BackgroundCommunicator.SendLoop(App.ViewModel.OpenPlaylistIndex);
-            Library.SaveAsync();
+        }
+
+        private async void RefreshSong_Click(object sender, RoutedEventArgs e)
+        {
+            Song song = (sender as MenuFlyoutItem).DataContext as Song;
+
+            await song.Refresh();
+
+            BackgroundCommunicator.SendSong(song);
+            song.UpdateTitleAndArtist();
         }
 
         private void DeleteSong_Click(object sender, RoutedEventArgs e)
         {
             bool same = App.ViewModel.IsOpenPlaylistCurrentPlaylist;
             Song song = (sender as MenuFlyoutItem).DataContext as Song;
+            int songsIndex = playlist.Songs.IndexOf(song);
 
-            Library.Current.RemoveSongFromPlaylist(playlist, song);
-            BackgroundCommunicator.SendRemoveSong(playlist.GetShuffleListIndex(song));
+            Library.Current.RemoveSongFromPlaylist(playlist, songsIndex);
+            BackgroundCommunicator.SendRemoveSong(App.ViewModel.OpenPlaylistIndex, songsIndex);
 
-            UiUpdate.CurrentPlaylistSongsAndIndex();
-            viewModel.LoadDefault();
-            viewModel.LoadShuffle();
+            if (playlist.IsEmptyOrLoading)
+            {
+                UiUpdate.Playlists();
+                if (same) UiUpdate.CurrentPlaylistIndexAndRest();
+
+                GoBack();
+                return;
+            }
+
+            viewModel.UpdateDefaultSongs();
+            viewModel.UpdateShuffleSongsAndIcon();
+
+            playlist.UpdateSongCount();
+            if (same) UiUpdate.CurrentPlaylistSongs();
         }
 
         private void DefaultSong_Tapped(object sender, TappedRoutedEventArgs e)
         {
             bool same = App.ViewModel.IsOpenPlaylistCurrentPlaylist;
-            int songsIndex = playlist.GetSongs().IndexOf((sender as Grid).DataContext as Song);
+            int songsIndex = playlist.Songs.IndexOf((sender as Grid).DataContext as Song);
 
-            BackgroundCommunicator.SendPlaylistPageTap(false, songsIndex);
+            BackgroundCommunicator.SendPlaylistPageTap(songsIndex);
             DoSongTappedSame(same);
         }
 
         private void ShuffleSong_Tapped(object sender, TappedRoutedEventArgs e)
         {
             bool same = App.ViewModel.IsOpenPlaylistCurrentPlaylist;
-            playlist.CurrentSongIndex = playlist.GetShuffleListIndex((sender as Grid).DataContext as Song);
+            playlist.SongsIndex = playlist.Songs.IndexOf((sender as Grid).DataContext as Song);
 
-            BackgroundCommunicator.SendPlaylistPageTap(true, playlist.ShuffleList[playlist.CurrentSongIndex]);
+            BackgroundCommunicator.SendPlaylistPageTap(playlist.SongsIndex);
             DoSongTappedSame(same);
         }
 
         private void DoSongTappedSame(bool same)
         {
             App.ViewModel.CurrentPlaylist = playlist;
-            Library.SaveAsync();
 
             if (same) UiUpdate.CurrentPlaylistIndexAndRest();
 
@@ -118,30 +132,58 @@ namespace MusicPlayerApp
 
         private void CurrentPlaylistSong_Holding(object sender, HoldingRoutedEventArgs e)
         {
+            if (((sender as Grid).DataContext as Song).IsEmptyOrLoading) return;
             FlyoutBase.ShowAttachedFlyout(sender as FrameworkElement);
+        }
+
+        public void UpdateUi()
+        {
+            if (playlist.IsEmptyOrLoading)
+            {
+                GoBack();
+                return;
+            }
+
+            viewModel.UpdateDefaultSongs();
+            viewModel.UpdateShuffleSongsAndIcon();
+        }
+
+        private void LbxDefaultSongs_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+        {
+            viewModel.SetLbxDefault(sender as ListBox);
+        }
+
+        private void LbxShuffleSongs_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+        {
+            viewModel.SetLbxShuffle(sender as ListBox);
         }
     }
 
     class PlaylistPageViewModel : INotifyPropertyChanged
     {
-        private int lbxDefaultLastSelectedIndex, lbxShuffleLastSelectedIndex;
+        private bool scrollLbxShuffle = true;
         private Playlist playlist;
+
+        private ListBox lbxDefault,lbxShuffle;
 
         public int DefaultCurrentSongIndex
         {
-            get { return playlist.ShuffleList[playlist.CurrentSongIndex]; }
-            set
-            {
-                lbxDefaultLastSelectedIndex = value;
-            }
+            get { return playlist.SongsIndex; }
+            set { NotifyPropertyChanged("DefaultCurrentSongIndex"); }
         }
 
         public int ShuffleCurrentSongIndex
         {
-            get { return playlist.CurrentSongIndex; }
+            get { return playlist.ShuffleListIndex; }
             set
             {
-                lbxShuffleLastSelectedIndex = value;
+                NotifyPropertyChanged("ShuffleCurrentSongIndex");
+
+                if (scrollLbxShuffle)
+                {
+                    scrollLbxShuffle = false;
+                    ScrollIntoLbxShuffle();
+                }
             }
         }
 
@@ -153,7 +195,7 @@ namespace MusicPlayerApp
 
         public ImageSource LoopIcon { get { return playlist.LoopIcon; } }
 
-        public List<Song> DefaultSongs { get { return playlist.GetSongs(); } }
+        public List<Song> DefaultSongs { get { return playlist.Songs; } }
 
         public List<Song> ShuffleSongs { get { return playlist.GetShuffleSongs(); } }
 
@@ -162,24 +204,45 @@ namespace MusicPlayerApp
             this.playlist = playlist;
         }
 
-        private List<Song> GetLoadSonglist()
+        public void SetLbxDefault(ListBox listBox)
         {
-            List<Song> list = new List<Song>();
-            list.Add(new Song());
-
-            return list;
+            lbxDefault = listBox;
         }
 
-        public void LoadDefault()
+        public void ScrollIntoLbxDefault()
+        {
+            if (lbxDefault == null) return;
+
+            lbxDefault.ScrollIntoView(playlist.CurrentSong);
+        }
+
+        public void ScrollIntoLbxShuffle()
+        {
+            if (lbxShuffle == null) return;
+
+            lbxShuffle.ScrollIntoView(playlist.CurrentSong);
+        }
+
+        public void SetLbxShuffle(ListBox listBox)
+        {
+            lbxShuffle = listBox;
+        }
+
+        public void SetScrollLbxShuffle()
+        {
+            scrollLbxShuffle = true;
+            App.ViewModel.SetChangedCurrentPlaylistIndex();
+        }
+
+        public void UpdateDefaultSongs()
         {
             NotifyPropertyChanged("DefaultSongs");
-            NotifyPropertyChanged("DefaultCurrentSongIndex");
         }
 
-        public void LoadShuffle()
+        public void UpdateShuffleSongsAndIcon()
         {
             NotifyPropertyChanged("ShuffleSongs");
-            NotifyPropertyChanged("ShuffleCurrentSongIndex");
+            UpdateShuffleIcon();
         }
 
         public void UpdateShuffleIcon()

@@ -80,12 +80,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Library.cs" />
-    <Compile Include="Save\SaveClass.cs" />
-    <Compile Include="Save\SavePlaylist.cs" />
-    <Compile Include="Save\SaveSong.cs" />
+    <Compile Include="SaveClass.cs" />
     <Compile Include="Song.cs" />
     <Compile Include="Playlist.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XmlConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PlayerIconsWP8.1\PlayerIconsWP8.1.csproj">

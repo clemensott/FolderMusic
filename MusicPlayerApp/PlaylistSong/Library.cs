@@ -1,34 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.Media.Playback;
 using Windows.Storage;
 
-namespace PlaylistSong
+namespace LibraryLib
 {
-    enum LoadKind { Every, New, One};
-
-    public delegate void LoadedEventHandler();
-
     public class Library
     {
         private static Library instance;
 
-        private volatile static bool isSaveing = false, saveAgain = false;
-        private static string currentSongIndexFileName = "CurrentSongIndex.txt",
-            playCommandFileName = "PlayCommand.txt", currentSongPathFileName = "CurrentSongPath.txt";
+        private volatile bool isSaveing = false, saveAgain = false, cancelLoading = false;
+        private static bool loaded;
+        private static string currentSongMillisecondsFileName = "CurrentSongMilliseconds.txt",
+          currentSongFileName = "currentSong.xml", skipSongsFileName = "SkipSongs.xml", playCommandFileName = "PlayCommand.txt";
 
-        private int currentPlaylistIndex;
+        private int currentPlaylistIndex = 0;
+        private double currentSongPositionMilliseconds;
+        private Song currentSong = new Song();
         private List<Playlist> _playlists;
+        private readonly List<Playlist> noPlaylists = new List<Playlist>() { new Playlist() };
 
-        public static bool IsLoaded { get { return instance != null; } }
+        public bool CanceledLoading { get { return cancelLoading; } }
+
+        public bool IsEmpty { get { return _playlists.Count == 0; ; } }
+
+        public static bool IsLoaded { get { return loaded; } }
 
         public static Library Current
         {
             get
             {
-                if (!IsLoaded) Load();
+                if (instance == null) instance = new Library();
 
                 return instance;
             }
@@ -36,45 +41,42 @@ namespace PlaylistSong
 
         private List<Playlist> playlists
         {
-            get { return _playlists.Count > 0 ? _playlists :
-                    new List<Playlist>() { new Playlist() }; }
-
-            set { _playlists = value; }
+            get { return IsLoaded && !IsEmpty ? _playlists : noPlaylists; }
         }
 
-        public Playlist this[int index] { get { return playlists[index]; } }
+        public Playlist this[int index]
+        {
+            get { return playlists[index]; }
+            set { playlists[index] = value; }
+        }
 
-        public int Lenght { get { return playlists.Count; } }
-
-        public bool HaveToLoad { get; set; }
+        public int Length { get { return playlists.Count; } }
 
         public int CurrentPlaylistIndex
         {
-            get { return currentPlaylistIndex; }
+            get { return GetPossibleCurrentPlaylistIndex(currentPlaylistIndex); }
             set
             {
-                value = GetPossibleCurrentPlaylistIndex(value);
+                if (CurrentPlaylistIndex == value) return;
 
-                if (currentPlaylistIndex != value)
-                {
-                    CurrentPlaylist.SongPositionMilliseconds = BackgroundMediaPlayer.Current.Position.TotalMilliseconds;
-                    currentPlaylistIndex = value;
-                }
+                CurrentPlaylist.SongPositionMilliseconds = BackgroundMediaPlayer.Current.Position.TotalMilliseconds;
+                currentPlaylistIndex = value;
             }
         }
 
-        public Playlist CurrentPlaylist
+        public double CurrentSongPositionMilliseconds
         {
-            get { return HaveCurrentPlaylist() ? this[currentPlaylistIndex] : new Playlist(); }
+            get { return IsLoaded ? CurrentPlaylist.SongPositionMilliseconds : currentSongPositionMilliseconds; }
         }
+
+        public Song CurrentSong { get { return GetCurrentSong(); } }
+
+        public Playlist CurrentPlaylist { get { return this[CurrentPlaylistIndex]; } }
 
         private Library()
         {
-            playlists = new List<Playlist>();
-            LoadNonStatic();
+            _playlists = new List<Playlist>();
         }
-
-        public event LoadedEventHandler Loaded;
 
         private int GetPossibleCurrentPlaylistIndex(int inIndex)
         {
@@ -85,86 +87,76 @@ namespace PlaylistSong
             return inIndex < 0 ? 0 : playlists.Count - 1;
         }
 
-        public static void Load()
+        public void Load(string xmlText)
         {
-            instance = new Library();
+            SaveClass sc = XmlConverter.Deserialize<SaveClass>(xmlText);
+
+            _playlists = sc.Playlists;
+            currentPlaylistIndex = sc.CurrentPlaylistIndex;
+
+            loaded = true;
         }
 
-        private void LoadNonStatic()
+        public async Task LoadAsync()
+        {
+            await LoadCurrentSong();
+            await LoadNonStatic();
+
+            SetCurrentSong();
+            CurrentPlaylist.SongPositionMilliseconds = currentSongPositionMilliseconds;
+        }
+
+        private void SetCurrentSong()
+        {
+            Song[] songs = CurrentPlaylist.Songs.Where(x => x.Path == currentSong.Path).ToArray();
+
+            if (songs.Length != 1) return;
+
+            CurrentPlaylist.SongsIndex = CurrentPlaylist.Songs.IndexOf(songs[0]);
+        }
+
+        private async Task LoadNonStatic()
+        {
+            SaveClass sc = await SaveClass.Load();
+            _playlists = sc.Playlists;
+
+            loaded = true;
+            currentPlaylistIndex = sc.CurrentPlaylistIndex == -2 ? 0 : sc.CurrentPlaylistIndex;
+        }
+
+        private async Task LoadCurrentSongMilliseconds()
         {
             try
             {
-                Task<SaveClass> loadXmlTask = SaveClass.Load();
-                Task<Tuple<int, double>> loadIndexMilliseconds = LoadIndexMilliseconds();
+                StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(currentSongMillisecondsFileName);
+                string text = await PathIO.ReadTextAsync(file.Path);
 
-                Tuple<int, double> indexMilliseconds = loadIndexMilliseconds.Result;
-                SaveClass sc = loadXmlTask.Result;
-
-                try
-                {
-                    foreach (SavePlaylist savePlaylist in sc.Playlists)
-                    {
-                        _playlists.Add(new Playlist(savePlaylist));
-                    }
-                }
-                catch (Exception e) { }
-
-                try
-                {
-                    HaveToLoad = sc.CurrentPlaylistIndex == -2;
-                    CurrentPlaylistIndex = HaveToLoad ? 0 : sc.CurrentPlaylistIndex;
-
-                    if (CurrentPlaylist != null)
-                    {
-                        CurrentPlaylist.CurrentSongIndex = indexMilliseconds.Item1;
-                        CurrentPlaylist.SongPositionMilliseconds = indexMilliseconds.Item2;
-                    }
-                }
-                catch (Exception e) { }
-            }
-            catch (Exception e) { }
-        }
-
-        private async Task<Tuple<int, double>> LoadIndexMilliseconds()
-        {
-            try
-            {
-                int index;
-                double milliseconds;
-                string text;
-                string[] parts;
-                StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(currentSongIndexFileName);
-
-                text = await PathIO.ReadTextAsync(file.Path);
-                parts = text.Split(';');
-
-                if (int.TryParse(parts[0], out index) && double.TryParse(parts[1], out milliseconds))
-                {
-                    return new Tuple<int, double>(index, milliseconds);
-                }
+                if (double.TryParse(text, out currentSongPositionMilliseconds)) { }
             }
             catch { }
-
-            return new Tuple<int, double>(0, 0);
         }
 
-        public async void LoadPlaylistsFromStorage()
+        public async Task LoadPlaylistsFromStorage()
         {
+            await DeleteCurrentSongMillisecondsFile();
+            await DeleteCurrentSongFile();
             List<Playlist> list = new List<Playlist>(await LoadPlaylistsFromStorage(KnownFolders.MusicLibrary));
 
             foreach (Playlist playlist in list)
             {
                 await playlist.LoadSongsFromStorage();
+
+                if (CanceledLoading)
+                {
+                    cancelLoading = false;
+                    return;
+                }
             }
 
-            playlists = new List<Playlist>(list);
+            _playlists = new List<Playlist>(list);
             DeleteEmptyPlaylists();
 
             currentPlaylistIndex = 0;
-            CurrentPlaylist.CurrentSongIndex = 0;
-            Save();
-
-            Loaded();
         }
 
         private async Task<List<Playlist>> LoadPlaylistsFromStorage(StorageFolder folder)
@@ -182,38 +174,35 @@ namespace PlaylistSong
                     list.AddRange(await LoadPlaylistsFromStorage(listFolder));
                 }
             }
-            catch (Exception e) { }
+            catch { }
 
             return list;
         }
 
-        public static void Save()
+        public string GetXmlText()
         {
-            if (IsEmpty()) return;
+            SaveClass sc = new SaveClass(CurrentPlaylistIndex, playlists);
+
+            return XmlConverter.Serialize(sc);
+        }
+
+        public async Task SaveAsync()
+        {
+            if (IsEmpty) return;
             saveAgain = true;
 
-            if (!isSaveing)
+            if (isSaveing) return;
+            isSaveing = true;
+
+            while (saveAgain)
             {
-                while (saveAgain)
-                {
-                    saveAgain = false;
-                    Current.SaveNonStatic();
-                }
+                saveAgain = false;
+                SaveClass sc = new SaveClass(CurrentPlaylistIndex, playlists);
 
-                SaveCurrentSongPath();
-                isSaveing = false;
+                await sc.Save();
             }
-        }
 
-        public static async void SaveAsync()
-        {
-            Save();
-        }
-
-        private void SaveNonStatic()
-        {
-            SaveClass sc = new SaveClass(currentPlaylistIndex, playlists);
-            sc.Save();
+            isSaveing = false;
         }
 
         public static async void SavePlayCommand(bool command)
@@ -224,7 +213,7 @@ namespace PlaylistSong
             {
                 await PathIO.WriteTextAsync(path, command.ToString());
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 try
                 {
@@ -233,6 +222,7 @@ namespace PlaylistSong
                 }
                 catch { }
             }
+            catch { }
         }
 
         public static async Task<bool> LoadPlayCommand()
@@ -245,13 +235,8 @@ namespace PlaylistSong
                 text = await PathIO.ReadTextAsync(path);
             }
             catch { }
-            
-            return bool.Parse(text);
-        }
 
-        private bool HaveCurrentPlaylist()
-        {
-            return currentPlaylistIndex >= 0 && currentPlaylistIndex < playlists.Count;
+            return bool.Parse(text);
         }
 
         public List<Playlist> GetPlaylists()
@@ -259,76 +244,170 @@ namespace PlaylistSong
             return playlists;
         }
 
-        public static async void SaveSongIndexAndMilliseconds(int index, double milliseconds)
+        public int GetPlaylistIndex(Playlist playlist)
         {
-            string text = index.ToString() + ";" + milliseconds.ToString();
-            StorageFile file = await ApplicationData.Current.LocalFolder.
-                CreateFileAsync(currentSongIndexFileName, CreationCollisionOption.ReplaceExisting);
-
-            await PathIO.WriteTextAsync(file.Path, text);
-            SaveCurrentSongPath();
+            return playlists.IndexOf(playlist);
         }
 
-        public static async void DeleteSongIndexAndMilliseconds()
+        public async Task SaveCurrentSongMilliseconds()
+        {
+            if (!IsLoaded) return;
+
+            double milliseconds = BackgroundMediaPlayer.Current.Position.TotalMilliseconds;
+            string path = ApplicationData.Current.LocalFolder.Path + "\\" + currentSongMillisecondsFileName;
+
+            try
+            {
+                await PathIO.WriteTextAsync(path, milliseconds.ToString());
+            }
+            catch (FileNotFoundException)
+            {
+                try
+                {
+                    await ApplicationData.Current.LocalFolder.CreateFileAsync(currentSongMillisecondsFileName);
+                    await PathIO.WriteTextAsync(path, milliseconds.ToString());
+                }
+                catch { }
+            }
+            catch { }
+
+            await SaveCurrentSong();
+        }
+
+        private static async Task DeleteCurrentSongMillisecondsFile()
         {
             try
             {
-                var file = await ApplicationData.Current.LocalFolder.GetFileAsync(currentSongIndexFileName);
+                var file = await ApplicationData.Current.LocalFolder.GetFileAsync(currentSongMillisecondsFileName);
 
                 await file.DeleteAsync();
             }
             catch { }
         }
 
-        private static async void SaveCurrentSongPath()
+        private Song GetCurrentSong()
         {
-            string text = string.Format("{0};{1}", Current.CurrentPlaylist.CurrentSong.Path, Current.CurrentPlaylist.SongPositionMilliseconds);
-            StorageFile file = await ApplicationData.Current.LocalFolder.
-                CreateFileAsync(currentSongPathFileName, CreationCollisionOption.ReplaceExisting);
-
-            await PathIO.WriteTextAsync(file.Path, text);
+            return IsLoaded ? CurrentPlaylist.CurrentSong : currentSong;
         }
 
-        public static async Task<Tuple<string, double>> LoadCurrentSongPath()
+        private async Task SaveCurrentSong()
         {
-            double position = 0;
-            string text, path = "";
-            string[] parts;
+            string xmlFileText = XmlConverter.Serialize(CurrentPlaylist.CurrentSong);
+            string path = ApplicationData.Current.LocalFolder.Path + "\\" + currentSongFileName;
+
+            if (!IsLoaded) return;
 
             try
             {
-                StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(currentSongPathFileName);
+                await PathIO.WriteTextAsync(path, xmlFileText);
+            }
+            catch (FileNotFoundException)
+            {
+                try
+                {
+                    await ApplicationData.Current.LocalFolder.CreateFileAsync(currentSongFileName);
+                    await PathIO.WriteTextAsync(path, xmlFileText);
+                }
+                catch { }
+            }
+            catch { }
+        }
 
-                text = await PathIO.ReadTextAsync(file.Path);
-                parts = text.Split(';');
+        public async Task LoadCurrentSong()
+        {
+            string path, xmlFileText;
 
-                path = parts[0];
-                position = double.Parse(parts[1]);
+            try
+            {
+                path = ApplicationData.Current.LocalFolder.Path + "\\" + currentSongFileName;
+
+                xmlFileText = await PathIO.ReadTextAsync(path);
+                currentSong = XmlConverter.Deserialize<Song>(xmlFileText);
+            }
+            catch
+            {
+                currentSong = new Song();
+            }
+
+            await LoadCurrentSongMilliseconds();
+        }
+
+        private static async Task DeleteCurrentSongFile()
+        {
+            try
+            {
+                var file = await ApplicationData.Current.LocalFolder.GetFileAsync(currentSongFileName);
+
+                await file.DeleteAsync();
+            }
+            catch { }
+        }
+
+        public async static Task AddSkipSongAndSave(Song song)
+        {
+            List<Song> list = await LoadSkipSongs();
+
+            foreach (Song saveSong in list)
+            {
+                if (saveSong.Path == song.Path) return;
+            }
+
+            list.Add(song);
+
+            await SaveSkipSongs(list);
+        }
+
+        public async static Task RemoveSkipSongAndSave(List<Song> list, Song saveSong)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].Path == saveSong.Path) list.RemoveAt(i);
+            }
+
+            await SaveSkipSongs(list);
+        }
+
+        private async static Task SaveSkipSongs(List<Song> list)
+        {
+            string xmlFileText = XmlConverter.Serialize(list);
+            string path = ApplicationData.Current.LocalFolder.Path + "\\" + skipSongsFileName;
+
+            try
+            {
+                await PathIO.WriteTextAsync(path, xmlFileText);
+            }
+            catch (FileNotFoundException)
+            {
+                try
+                {
+                    await ApplicationData.Current.LocalFolder.CreateFileAsync(skipSongsFileName);
+                    await PathIO.WriteTextAsync(path, xmlFileText);
+                }
+                catch { }
+            }
+            catch { }
+        }
+
+        public async static Task<List<Song>> LoadSkipSongs()
+        {
+            string path, xmlFileText;
+            List<Song> saveSongsList = new List<Song>();
+
+            try
+            {
+                path = ApplicationData.Current.LocalFolder.Path + "\\" + skipSongsFileName;
+
+                xmlFileText = await PathIO.ReadTextAsync(path);
+                saveSongsList = XmlConverter.Deserialize<List<Song>>(xmlFileText);
             }
             catch { }
 
-            return new Tuple<string, double>(path, position);
+            return saveSongsList;
         }
 
-        public static bool IsEmpty()
+        public void RemoveSongFromPlaylist(Playlist playlist, int songsIndex)
         {
-            return Current._playlists.Count == 0;
-        }
-
-        public void RemoveSongFromCurrentPlaylist(int index)
-        {
-            CurrentPlaylist.RemoveSong(index);
-            DeleteEmptyPlaylists();
-        }
-
-        public void RemoveSongFromCurrentPlaylist(Song song)
-        {
-            RemoveSongFromPlaylist(CurrentPlaylist, song);
-        }
-
-        public void RemoveSongFromPlaylist(Playlist playlist, Song song)
-        {
-            playlist.RemoveSong(song);
+            playlist.RemoveSong(songsIndex);
             DeleteEmptyPlaylists();
         }
 
@@ -336,13 +415,13 @@ namespace PlaylistSong
         {
             for (int i = playlists.Count - 1; i >= 0; i--)
             {
-                if (playlists[i].IsEmpty()) DeleteAt(i);
+                if (playlists[i].IsEmptyOrLoading) DeleteAt(i);
             }
         }
 
         public void Delete(Playlist playlist)
         {
-            if (IsEmpty()) return;
+            if (IsEmpty) return;
 
             Playlist oldCurrentPlaylist = CurrentPlaylist;
             _playlists.Remove(playlist);
@@ -353,13 +432,21 @@ namespace PlaylistSong
 
         public void DeleteAt(int index)
         {
-            if (IsEmpty()) return;
+            if (IsEmpty) return;
 
             Playlist oldCurrentPlaylist = CurrentPlaylist;
             _playlists.RemoveAt(index);
             _playlists = new List<Playlist>(_playlists);
 
             SetPlaylistToCurrentPlaylist(oldCurrentPlaylist);
+        }
+
+        public int GetPlaylistIndexWhichContainsSong(Song song)
+        {
+            var playlistsWithSong = _playlists.Where(x => x.Songs.Contains(song)).ToList();
+
+            if (playlistsWithSong.Count != 1) return -1;
+            return _playlists.IndexOf(playlistsWithSong[0]);
         }
 
         private void SetPlaylistToCurrentPlaylist(Playlist playlist)
@@ -370,17 +457,15 @@ namespace PlaylistSong
             {
                 CurrentPlaylistIndex = newCurrentPlaylistIndex;
             }
-            else if(newCurrentPlaylistIndex ==-1)
-            {
-                CurrentPlaylistIndex = currentPlaylistIndex;
-            }
         }
 
-        public async void SearchForNewPlaylists()
+        public async Task SearchForNewPlaylists()
         {
             bool existsAllready;
-            int newCurrentplaylistIndex = CurrentPlaylistIndex;
+            int newCurrentPlaylistIndexCounter, newCurrentPlaylistIndex;
             string currentPlaylistAbsolutePath = CurrentPlaylist.AbsolutePath;
+
+            newCurrentPlaylistIndex = newCurrentPlaylistIndexCounter = CurrentPlaylistIndex;
 
             List<Playlist> possiblePlaylists = new List<Playlist>(await LoadPlaylistsFromStorage(KnownFolders.MusicLibrary));
             List<Playlist> exceptPlaylist = new List<Playlist>();
@@ -391,12 +476,18 @@ namespace PlaylistSong
 
                 foreach (Playlist playlist in playlists)
                 {
+                    if (CanceledLoading)
+                    {
+                        cancelLoading = false;
+                        return;
+                    }
+
                     if (possiblePlaylists[i].AbsolutePath == playlist.AbsolutePath)
                     {
                         exceptPlaylist.Add(playlist);
                         existsAllready = true;
 
-                        if (playlist.AbsolutePath == currentPlaylistAbsolutePath) CurrentPlaylistIndex = newCurrentplaylistIndex;
+                        if (playlist.AbsolutePath == currentPlaylistAbsolutePath) newCurrentPlaylistIndex = newCurrentPlaylistIndexCounter;
                         break;
                     }
                 }
@@ -405,19 +496,27 @@ namespace PlaylistSong
                 {
                     await possiblePlaylists[i].LoadSongsFromStorage();
 
-                    if (!possiblePlaylists[i].IsEmpty())
+                    if (CanceledLoading)
                     {
-                        newCurrentplaylistIndex++;
+                        cancelLoading = false;
+                        return;
+                    }
+
+                    if (!possiblePlaylists[i].IsEmptyOrLoading)
+                    {
+                        newCurrentPlaylistIndexCounter++;
                         exceptPlaylist.Add(possiblePlaylists[i]);
                     }
                 }
             }
 
             _playlists = exceptPlaylist;
-            CurrentPlaylistIndex = newCurrentplaylistIndex;
+            CurrentPlaylistIndex = newCurrentPlaylistIndex;
+        }
 
-            Save();
-            Loaded();
+        public void CancelLoading()
+        {
+            cancelLoading = true;
         }
     }
 }

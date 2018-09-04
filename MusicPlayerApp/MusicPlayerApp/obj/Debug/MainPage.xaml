@@ -25,12 +25,13 @@
             <HubSection Background="Transparent" Margin="0,-10,0,0"
                         Header="{Binding CurrentPlaylistName}" Style="{StaticResource HSHeader}">
                 <DataTemplate>
-                    <ListBox x:ConnectionId='11' x:Name="lbxCurrentPlaylist" Margin="0,-30,0,0" Background="Transparent" SelectionMode="Single"
-                             ItemsSource="{Binding CurrentPlaylistSongs}" SelectedIndex="{Binding CurrentSongIndex,Mode=TwoWay}"
+                    <ListBox x:ConnectionId='12' x:Name="lbxCurrentPlaylist" Margin="0,-30,0,0" Background="Transparent" SelectionMode="Single"
+                             ItemsSource="{Binding CurrentPlaylistSongs}" 
+                             SelectedIndex="{Binding ShuffleListIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                                                                                        >
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid x:ConnectionId='12'                                                                          >
+                                <Grid x:ConnectionId='13'                                                                          >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
@@ -38,7 +39,8 @@
 
                                     <FlyoutBase.AttachedFlyout>
                                         <MenuFlyout>
-                                            <MenuFlyoutItem x:ConnectionId='13' Text="Delete"                         />
+                                            <MenuFlyoutItem x:ConnectionId='14' Text="Refresh"                          />
+                                            <MenuFlyoutItem x:ConnectionId='15' Text="Delete"                         />
                                         </MenuFlyout>
                                     </FlyoutBase.AttachedFlyout>
 
@@ -73,14 +75,15 @@
                                     <FlyoutBase.AttachedFlyout>
                                         <MenuFlyout>
                                             <MenuFlyoutItem x:ConnectionId='7' Text="Refresh"                              />
-                                            <MenuFlyoutItem x:ConnectionId='8' Text="Delete"                             />
+                                            <MenuFlyoutItem x:ConnectionId='8' Text="Search for New Songs"                                        />
+                                            <MenuFlyoutItem x:ConnectionId='9' Text="Delete"                             />
                                         </MenuFlyout>
                                     </FlyoutBase.AttachedFlyout>
 
-                                    <Image x:ConnectionId='9' Grid.Column="0" Source="{Binding PlayIcon}" 
+                                    <Image x:ConnectionId='10' Grid.Column="0" Source="{Binding PlayIcon}" 
                                            Width="55" Height="55"                             />
 
-                                    <Grid x:ConnectionId='10' Grid.Column="1"                         >
+                                    <Grid x:ConnectionId='11' Grid.Column="1"                         >
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
@@ -156,32 +159,23 @@
                 </Image.RenderTransform>
             </Image>
         </Grid>
-
-        <Grid Name="gdLoading" Grid.RowSpan="8" Visibility="Collapsed">
-            <Rectangle Name="rtLoading" Width="768" Height="1280" Fill="White"/>
-            <StackPanel  VerticalAlignment="Center" Visibility="Collapsed">
-                <ProgressBar Name="pbLoading" IsIndeterminate="True" Height="4"/>
-                <TextBlock Text="Loading..." HorizontalAlignment="Center" FontSize="30"/>
-            </StackPanel>
-        </Grid>
     </Grid>
 
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
-                <AppBarButton x:ConnectionId='14' Label="Previous" Icon="Previous" IsEnabled="{Binding IsUiEnabled}"                       />
-                <AppBarButton x:ConnectionId='15' Label="{Binding PlayPauseText}" Icon="{Binding PlayPauseIcon}"
-                              IsEnabled="{Binding IsUiEnabled}"                        />
-                <AppBarButton x:ConnectionId='16' Label="Next" Icon="Next" IsEnabled="{Binding IsUiEnabled}"                   />
+                <AppBarButton x:ConnectionId='16' Label="Previous" Icon="Previous"                       />
+                <AppBarButton x:ConnectionId='17' Label="{Binding PlayPauseText}" Icon="{Binding PlayPauseIcon}"                        />
+                <AppBarButton x:ConnectionId='18' Label="Next" Icon="Next"                   />
             </CommandBar.PrimaryCommands>
             
             <CommandBar.SecondaryCommands>
-                <AppBarButton x:ConnectionId='17' Label="Refresh every playlists" IsEnabled="{Binding IsUiEnabled}" 
-                                                                 />
-                <AppBarButton x:ConnectionId='18' Label="Search for new playlists" IsEnabled="{Binding IsUiEnabled}"
-                                                                 />
-                <AppBarButton x:ConnectionId='19' Label="TestFunktion"                           />
-                <AppBarButton x:ConnectionId='20' Label="TestFunktion2"                            />
+                <AppBarButton x:ConnectionId='19' Label="Refresh every playlists"                                    />
+                <AppBarButton x:ConnectionId='20' Label="Search for new playlists"                                    />
+                <AppBarButton x:ConnectionId='21' Label="TestFunktion"                           />
+                <AppBarButton x:ConnectionId='22' Label="TestFunktion2"                            />
+                <AppBarButton x:ConnectionId='23' Label="TestFunktion3"                            />
+                <AppBarButton x:ConnectionId='24' Label="TestFunktion4"                            />
             </CommandBar.SecondaryCommands>
         </CommandBar>
     </Page.BottomAppBar>

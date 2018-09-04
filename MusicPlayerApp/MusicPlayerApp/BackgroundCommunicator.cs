@@ -1,26 +1,25 @@
-﻿using System;
-using PlaylistSong;
-using Windows.ApplicationModel.Core;
-using Windows.Foundation.Collections;
+﻿using Windows.Foundation.Collections;
 using Windows.Media.Playback;
-using Windows.UI.Core;
-using Windows.UI.Popups;
+using System.Collections.Generic;
+using LibraryLib;
 
 namespace MusicPlayerApp
 {
-    public class BackgroundCommunicator
+    class BackgroundCommunicator
     {
-        private static int skipIndex = -1;
-
-        public static void SendPlaySong(int index)
+        public static void SendPlaySong(int playlistIndex, int songsIndex)
         {
-            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "PlaySong", index.ToString() } });
+            ValueSet valueSet = new ValueSet { { "PlaySong", string.Format("{0};{1}", playlistIndex, songsIndex) } };
+            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
         }
 
         public static void SendCurrentPlaylistIndex(bool play)
         {
-            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "CurrentPlaylistIndex",
-                    Library.Current.CurrentPlaylistIndex.ToString() }, { "Play", play.ToString() } });
+            ValueSet valueSet = new ValueSet();
+            valueSet.Add("CurrentPlaylistIndex", Library.Current.CurrentPlaylistIndex.ToString());
+            valueSet.Add("DoPlay", play.ToString());
+
+            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
         }
 
         public static void SendPlay()
@@ -43,47 +42,70 @@ namespace MusicPlayerApp
             BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "Next", "" } });
         }
 
-        public static void SendLoop(int index)
+        public static void SendLoop(int playlistIndex)
         {
-            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "Loop", index.ToString() } });
+            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "Loop", playlistIndex.ToString() } });
         }
 
-        public static void SendShuffle(int index)
+        public static void SendShuffle(int playlistIndex)
         {
-            BackgroundMediaPlayer.SendMessageToBackground(Library.Current[index].GetShuffleAsValueSet(index));
+            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "Shuffle", playlistIndex.ToString() } });
         }
 
-        public static void SendPlaylistPageTap(bool fromShuffleList, int songsIndex)
+        public static void SendPlaylistPageTap(int songsIndex)
         {
-            BackgroundMediaPlayer.SendMessageToBackground(
-                new ValueSet { { "PlaylistPageTap", App.ViewModel.OpenPlaylistIndex.ToString() },
-                    { "CurrentSongIndex", songsIndex.ToString() },
-                    { "FromShuffleList", fromShuffleList.ToString() } });
+            ValueSet valueSet = new ValueSet();
+            valueSet.Add("PlaylistPageTap", string.Format("{0};{1}", App.ViewModel.OpenPlaylistIndex, songsIndex));
+
+            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
         }
 
-        public static void SendRun()
+        public static void SendPlaylistXML(Playlist playlist)
         {
-            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "Run", "" } });
+            int playlistIndex = Library.Current.GetPlaylistIndex(playlist);
+            ValueSet valueSet = new ValueSet();
+            valueSet.Add("PlaylistXML", playlistIndex.ToString());
+            valueSet.Add("XML", XmlConverter.Serialize(Library.Current[playlistIndex]));
+
+            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
         }
 
-        public static void SendGetCurrent()
+        public static void SendGetXmlText()
         {
-            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "GetCurrent", "" } });
+            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "GetXmlText", "" } });
         }
 
-        public static void SendLoad()
+        public static void SendLoadXML(bool fix, string xmlText)
         {
-            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "Load", "" } });
+            ValueSet valueSet = new ValueSet();
+
+            valueSet.Add("LoadXML", xmlText);
+            valueSet.Add("Fix", fix.ToString());
+
+            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
         }
 
-        public static void SendRemoveSong(int index)
+        public static void SendSong(Song song)
         {
-            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "RemoveSong", index.ToString() } });
+            int playlistIndex = Library.Current.CurrentPlaylistIndex;
+            int songsIndex = Library.Current.CurrentPlaylist.Songs.IndexOf(song);
+
+            ValueSet valueSet = new ValueSet();
+            valueSet.Add("RefreshSong", string.Format("{0};{1}", playlistIndex, songsIndex));
+            valueSet.Add("XML", XmlConverter.Serialize(song));
+
+            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
         }
 
-        public static void SendRemovePlaylist(int index)
+        public static void SendRemoveSong(int playlistIndex, int songsIndex)
         {
-            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "RemovePlaylist", index.ToString() } });
+            ValueSet valueSet = new ValueSet { { "RemoveSong", string.Format("{0};{1}", playlistIndex, songsIndex) } };
+            BackgroundMediaPlayer.SendMessageToBackground(valueSet);
+        }
+
+        public static void SendRemovePlaylist(Playlist playlist)
+        {
+            BackgroundMediaPlayer.SendMessageToBackground(new ValueSet { { "RemovePlaylist", Library.Current.GetPlaylistIndex(playlist).ToString() } });
         }
 
         public static void SetReceivedEvent()
@@ -93,109 +115,73 @@ namespace MusicPlayerApp
 
         private static void MessageReceivedFromBackground(object sender, MediaPlayerDataReceivedEventArgs e)
         {
-            ValueSet valueSet;
+            bool same;
+            int songsIndex;
+            List<int> shuffleList;
+            double position, duration;
+            string shuffleKindXml, currentSongPath;
+            ShuffleKind shuffle;
+            Playlist playlist;
+            ValueSet valueSet = e.Data;
 
-            try
+            foreach (string key in valueSet.Keys)
             {
-                valueSet = e.Data;
-            }
-            catch
-            {
-                return;
-            }
-
-            try
-            {
-                foreach (string key in valueSet.Keys)
+                switch (key)
                 {
-                    switch (key)
-                    {
-                        case "Current":
-                            int index = int.Parse(valueSet[key].ToString());
-                            double position = double.Parse(valueSet["Position"].ToString());
-                            double duration = double.Parse(valueSet["Duration"].ToString());
+                    case "Current":
+                        songsIndex = int.Parse(valueSet[key].ToString());
+                        position = double.Parse(valueSet["Position"].ToString());
+                        duration = double.Parse(valueSet["Duration"].ToString());
 
-                            bool same = Library.Current.CurrentPlaylist.CurrentSongIndex == index &&
-                                Library.Current.CurrentPlaylist.SongPositionMilliseconds == position &&
-                                Library.Current.CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds == duration;
+                        same = Library.Current.CurrentPlaylist.SongsIndex == songsIndex &&
+                            Library.Current.CurrentPlaylist.SongPositionMilliseconds == position &&
+                            Library.Current.CurrentSong.NaturalDurationMilliseconds == duration;
 
-                            Library.Current.CurrentPlaylist.CurrentSongIndex = index;
-                            Library.Current.CurrentPlaylist.SongPositionMilliseconds = position;
-                            Library.Current.CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds = duration;
+                        Library.Current.CurrentPlaylist.SongsIndex = songsIndex;
+                        Library.Current.CurrentPlaylist.SongPositionMilliseconds = position;
+                        Library.Current.CurrentSong.NaturalDurationMilliseconds = duration;
 
-                            if (!same) UiUpdate.CurrentSongTitleArtistNaturalDuration();
-                            return;
+                        if (!same) UiUpdate.CurrentSongTitleArtistNaturalDuration();
+                        return;
 
-                        case "New":
-                            bool first = bool.Parse(valueSet[key].ToString());
-                            string pathNew = valueSet["Path"].ToString();
+                    case "XmlText":
+                        Library.Current.Load(valueSet[key].ToString());
+                        App.ViewModel.SetChangedCurrentPlaylistIndex();
+                        UiUpdate.PlaylistsAndCurrentPlaylist();
 
-                            Library.Current.CurrentPlaylist.AddShuffleCompleteSong(first, pathNew);
+                        if (PlaylistPage.Open) PlaylistPage.Current.UpdateUi();
+                        return;
 
-                            UiUpdate.CurrentPlaylistSongsAndIndex();
-                            UiUpdate.CurrentSongTitleArtistNaturalDuration();
-                            return;
+                    case "Shuffle":
+                        currentSongPath = Library.Current.CurrentSong.Path;
+                        playlist = PlaylistPage.Open ? App.ViewModel.OpenPlaylist : App.ViewModel.CurrentPlaylist;
+                        shuffleKindXml = valueSet["Kind"].ToString();
 
-                        case "Skip":
-                            skipIndex = int.Parse(valueSet[key].ToString());
+                        shuffleList = XmlConverter.Deserialize<List<int>>(valueSet[key].ToString());
+                        shuffle = XmlConverter.Deserialize<ShuffleKind>(shuffleKindXml);
+                        same = playlist.Shuffle == shuffle;
 
-                            AskAboutSkippedSong();
-                            return;
+                        if (ShuffleKind.Complete == shuffle)
+                        {
+                            Library.Current.CurrentPlaylist.ShuffleListIndex = Library.Current.CurrentPlaylist.ShuffleListIndex;
+                        }
 
-                        case "Shuffle":
-                            Library.Current.CurrentPlaylist.SetShuffleList(valueSet);
+                        playlist.SetShuffle(shuffle, shuffleList);
+                        UiUpdate.CurrentPlaylistSongs();
 
-                            UiUpdate.CurrentPlaylistSongsAndIndex();
-                            UiUpdate.ShuffleIcon();
-                            UiUpdate.CurrentSongTitleArtistNaturalDuration();
-                            return;
+                        if (Library.Current.CurrentSong.Path == currentSongPath) UiUpdate.CurrentSongTitleArtistNaturalDuration();
+                        if (!same) UiUpdate.ShuffleIcon();
+                        if (PlaylistPage.Open) PlaylistPage.Current.UpdateUi();
+                        return;
 
-                        case "Pause":
-                            UiUpdate.PlayPauseIcon();
-                            return;
-                    }
+                    case "Pause":
+                        UiUpdate.PlayPauseIcon();
+                        return;
+
+                    case "Skip":
+                        SkipSongs.AskAboutSkippedSong();
+                        return;
                 }
-            }
-            catch { }
-        }
-
-        public static async void AskAboutSkippedSong()
-        {
-            string dialogContent = "Couldn't play following Song. Do you want to remove this Song from the Playlist?\n";
-            dialogContent += Library.Current.CurrentPlaylist[skipIndex].Path;
-
-            MessageDialog messageDialog = new MessageDialog(dialogContent);
-
-            try
-            {
-                messageDialog.Commands.Add(new UICommand("Yes", new UICommandInvokedHandler(CommandHandlers)));
-                messageDialog.Commands.Add(new UICommand("No", new UICommandInvokedHandler(CommandHandlers)));
-            }
-            catch { }
-
-            await CoreApplication.MainView.CoreWindow.Dispatcher.
-                RunAsync(CoreDispatcherPriority.Normal, async () =>
-                { await messageDialog.ShowAsync(); });
-        }
-
-        private static void CommandHandlers(IUICommand commandLabel)
-        {
-            var Actions = commandLabel.Label;
-            switch (Actions)
-            {
-                case "Yes":
-                    Library.Current.CurrentPlaylist.RemoveSong(skipIndex);
-                    SendRemoveSong(skipIndex);
-
-                    UiUpdate.CurrentPlaylistSongsAndIndex();
-                    UiUpdate.CurrentSongIndex();
-
-                    Library.SaveAsync();
-                    break;
-
-                case "No":
-
-                    break;
             }
         }
     }

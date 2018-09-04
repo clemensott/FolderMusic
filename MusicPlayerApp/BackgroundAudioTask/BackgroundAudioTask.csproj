@@ -80,6 +80,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BackgroundAudioTask.cs" />
+    <Compile Include="ForegroundCommunicator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

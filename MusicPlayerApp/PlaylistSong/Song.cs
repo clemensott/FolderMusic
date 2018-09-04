@@ -1,20 +1,24 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
+using TagLib;
 using Windows.Storage;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
 
-namespace PlaylistSong
+namespace LibraryLib
 {
-    public class Song
+    public class Song : INotifyPropertyChanged
     {
-        private bool isEmpty;
-        private double naturalDurationMilliseconds = 1;
-        private string title, artist;
-        private Uri uri;
+        private bool isLoading;
+        private double naturalDurationMilliseconds;
+        private string title, artist, path;
 
-        public bool IsEmpty { get { return isEmpty; } }
+        [XmlIgnore]
+        public bool IsEmptyOrLoading { get { return path == "" || isLoading; } }
 
         public double NaturalDurationMilliseconds
         {
@@ -22,84 +26,136 @@ namespace PlaylistSong
             set { naturalDurationMilliseconds = value; }
         }
 
-        public string Title { get { return title; } }
+        public string Title
+        {
+            get { return title; }
+            set { title = value; }
+        }
 
-        public string Artist { get { return artist; } }
+        public string Artist
+        {
+            get { return artist; }
+            set { artist = value; }
+        }
 
-        public string Path { get { return uri != null ? uri.OriginalString : ""; } }
+        public string Path
+        {
+            get { return path; }
+            set { path = value; }
+        }
 
-        public Uri Uri { get { return uri; } }
-
+        [XmlIgnore]
         public Brush TextBrush { get { return Playlist.TextBrush; } }
 
+        [XmlIgnore]
         public Visibility ArtistVisibility { get { return artist != "" ? Visibility.Visible : Visibility.Collapsed; } }
 
         public Song()
         {
-            isEmpty = true;
-            title = "Empty";
-            artist = "";
+            isLoading = false;
+            SetEmptyOrLoading();
         }
 
         public Song(string absolutePath)
         {
-            uri = new Uri(absolutePath, UriKind.Absolute);
-            SetTitelAndArtist();
+            isLoading = true;
+            path = absolutePath;
         }
 
-        public Song(string keyTitle, string pathArtist)
+        private void SetEmptyOrLoading()
         {
-            int semicolonTitleIndex = keyTitle.IndexOf(";");
-            int semicolonArtistIndex = pathArtist.IndexOf(";");
-
-            uri = new Uri(semicolonArtistIndex != -1 ? pathArtist.Remove(semicolonArtistIndex) : pathArtist);
-            title = semicolonTitleIndex != -1 ? keyTitle.Remove(0, semicolonTitleIndex + 1) : "";
-            artist = semicolonArtistIndex != -1 ? pathArtist.Remove(0, semicolonArtistIndex + 1) : "";
+            title = Library.IsLoaded ? "Empty" : "Loading";
+            artist = path = "";
         }
 
-        public Song(SaveSong saveSong)
+        public async Task Refresh()
         {
-            title = saveSong.Title;
-            artist = saveSong.Artist;
-            uri = new Uri(saveSong.Path, UriKind.Absolute);
-            naturalDurationMilliseconds = saveSong.NaturalDurationMilliseconds;
-        }
-
-        private void SetTitelAndArtist()
-        {
-            title = System.IO.Path.GetFileNameWithoutExtension(Path);
-            artist = "Unkown";
+            naturalDurationMilliseconds = 1;
 
             try
             {
-                var fileTask = StorageFile.GetFileFromPathAsync(Path);
-                fileTask.AsTask().Wait();
-                StorageFile file = fileTask.GetResults();
-
-                var fileStreamTask = file.OpenStreamForReadAsync();
-                fileStreamTask.Wait();
-
-                Stream fileStream = fileStreamTask.Result;
-
-                TagLib.File tagFile = TagLib.File.Create(new TagLib.StreamFileAbstraction(file.Name, fileStream, fileStream));
-
-                var tags = tagFile.GetTag(TagLib.TagTypes.Id3v2);
-
-                title = tags != null && tags.Title != null && tags.Title != "" ? tags.Title : title;
-                artist = tags != null && tags.Artists != null && tags.Artists.Length > 0 ? tags.Artists[0] : "";
+                StorageFile file = await GetStorageFileAsync();
+                await SetTitleAndArtist(file);
             }
-            catch (Exception e) { }
+            catch
+            {
+                SetEmptyOrLoading();
+            }
+
+            isLoading = false;
         }
 
-        public async Task<StorageFile> GetStorageFile()
+        private async Task SetTitleAndArtist(StorageFile file)
+        {
+            File tagFile;
+            Tag tags;
+            Stream fileStream;
+
+            try
+            {
+                fileStream = await file.OpenStreamForReadAsync();
+
+                tagFile = File.Create(new StreamFileAbstraction(file.Name, fileStream, fileStream));
+                tags = tagFile.GetTag(TagTypes.Id3v2);
+
+                if (tags == null || tags.IsEmpty)
+                {
+                    SetTitleAndArtistByPath();
+                    return;
+                }
+
+                title = tags != null && tags.Title != null && tags.Title != "" ? tags.Title : GetTitleFromPath();
+                artist = tags != null && tags.FirstPerformer != null ? tags.FirstPerformer : "";
+            }
+            catch
+            {
+                SetTitleAndArtistByPath();
+            }
+        }
+
+        private void SetTitleAndArtistByPath()
+        {
+            title = GetTitleFromPath();
+            artist = "Unkown";
+        }
+
+        private string GetTitleFromPath()
+        {
+            return System.IO.Path.GetFileNameWithoutExtension(Path);
+        }
+
+        public StorageFile GetStorageFile()
+        {
+            Task<StorageFile> storageFileTask = GetStorageFileAsync();
+            storageFileTask.Wait();
+
+            return storageFileTask.Result;
+        }
+
+        public async Task<StorageFile> GetStorageFileAsync()
+        {
+            return await StorageFile.GetFileFromPathAsync(Path);
+        }
+
+        public void UpdateTitleAndArtist()
+        {
+            NotifyPropertyChanged("Title");
+            NotifyPropertyChanged("Artist");
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public async void NotifyPropertyChanged(string propertyName)
         {
             try
             {
-                return await StorageFile.GetFileFromPathAsync(Path);
+                if (null == PropertyChanged) return;
+
+                await Windows.ApplicationModel.Core.CoreApplication.MainView.
+                    CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                    () => { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); });
             }
             catch { }
-
-            return null;
         }
 
         public override string ToString()

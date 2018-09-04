@@ -1,9 +1,8 @@
-﻿using PlayerIcons;
-using PlaylistSong;
+﻿using LibraryLib;
+using PlayerIcons;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using Windows.Media.Playback;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -14,9 +13,11 @@ namespace MusicPlayerApp
 {
     public class ViewModel : INotifyPropertyChanged
     {
-        private bool mainPageLoaded = false, sliderEntered = false, isUiEnabled = true;
+        private bool mainPageLoaded = false, sliderEntered = false, scrollLbxCurrentPlaylistChanged = true;
         private int openPlaylistsIndex = 0;
         private double sliderValue = 0;
+        private ListBox lbxCurrentPlaylist, lbxPlaylists;
+        private SymbolIcon playIcon = new SymbolIcon(Symbol.Play), pausIcon = new SymbolIcon(Symbol.Pause);
 
         public bool MainPageLoaded { get { return mainPageLoaded; } }
 
@@ -25,24 +26,21 @@ namespace MusicPlayerApp
             get { return CurrentPlaylistIndex == openPlaylistsIndex; }
         }
 
-        public bool IsUiEnabled
-        {
-            get { return isUiEnabled; }
-            set
-            {
-                if (isUiEnabled == value) return;
-
-                isUiEnabled = value;
-                NotifyPropertyChanged("IsUiEnabled");
-            }
-        }
-
         public int OpenPlaylistIndex { get { return openPlaylistsIndex; } }
 
-        public int CurrentSongIndex
+        public int ShuffleListIndex
         {
-            get { return CurrentPlaylist.CurrentSongIndex; }
-            set { UiUpdate.CurrentSongIndex(); }
+            get { return CurrentPlaylist.ShuffleListIndex; }
+            set
+            {
+                UiUpdate.ShuffleListIndex();
+
+                if (scrollLbxCurrentPlaylistChanged)
+                {
+                    scrollLbxCurrentPlaylistChanged = false;
+                    LbxCurrentPlaylistScollToSelectedItem();
+                }
+            }
         }
 
         public int CurrentPlaylistIndex
@@ -55,9 +53,16 @@ namespace MusicPlayerApp
         {
             get
             {
-                if (CurrentPlaylist.CurrentSong.IsEmpty) return 0;
+                if (Library.Current.CurrentSong.IsEmptyOrLoading) return 0;
+                if (BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Closed ||
+                    BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Stopped)
+                {
+                    return Library.Current.CurrentPlaylist.SongPositionMilliseconds;
+                }
+
                 return sliderEntered ? sliderValue : BackgroundMediaPlayer.Current.Position.TotalMilliseconds;
             }
+
             set
             {
                 if (sliderValue == value) return;
@@ -71,18 +76,18 @@ namespace MusicPlayerApp
         {
             get
             {
-                if (CurrentPlaylist.CurrentSong.IsEmpty) return 1;
+                if (Library.Current.CurrentSong.IsEmptyOrLoading) return 1;
                 return BackgroundMediaPlayer.Current.NaturalDuration.TotalMilliseconds != 0 ?
                     BackgroundMediaPlayer.Current.NaturalDuration.TotalMilliseconds :
-                    CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds;
+                    Library.Current.CurrentSong.NaturalDurationMilliseconds;
             }
         }
 
         public string CurrentPlaylistName { get { return CurrentPlaylist.Name; } }
 
-        public string CurrentSongTitle { get { return CurrentPlaylist.CurrentSong.Title; } }
+        public string CurrentSongTitle { get { return Library.Current.CurrentSong.Title; } }
 
-        public string CurrentSongArtist { get { return CurrentPlaylist.CurrentSong.Artist; } }
+        public string CurrentSongArtist { get { return Library.Current.CurrentSong.Artist; } }
 
         public string CurrentSongPostionText { get { return GetShowTime(CurrentSongPositionMilliseconds); } }
 
@@ -103,14 +108,11 @@ namespace MusicPlayerApp
         {
             get
             {
-                IconElement icon = BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing ?
-                    new SymbolIcon(Symbol.Pause) : new SymbolIcon(Symbol.Play);
-
-                return icon;
+                return BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing ? pausIcon : playIcon;
             }
         }
 
-        public Visibility CurrentSongArtistVisibility { get { return CurrentPlaylist.CurrentSong.ArtistVisibility; } }
+        public Visibility CurrentSongArtistVisibility { get { return Library.Current.CurrentSong.ArtistVisibility; } }
 
         public ImageSource LoopIcon { get { return CurrentPlaylist != null ? CurrentPlaylist.LoopIcon : Icons.LoopOff; } }
 
@@ -123,13 +125,13 @@ namespace MusicPlayerApp
             get { return Library.Current.CurrentPlaylist; }
             set
             {
-                if (Library.IsEmpty()) return;
+                if (Library.Current.IsEmpty) return;
                 int index = GetIndexOfPlaylist(value);
 
                 if (index != -1) Library.Current.CurrentPlaylistIndex = index;
                 if (Library.Current.CurrentPlaylistIndex != index) return;
 
-                UiUpdate.CurrentPlaylistIndexAndRest();   
+                UiUpdate.CurrentPlaylistIndexAndRest();
             }
         }
 
@@ -138,20 +140,16 @@ namespace MusicPlayerApp
             get { return Library.Current[openPlaylistsIndex]; }
             set
             {
-                if (Library.IsEmpty()) return;
+                if (Library.Current.IsEmpty) return;
                 int index = GetIndexOfPlaylist(value);
 
                 openPlaylistsIndex = index != -1 ? index : CurrentPlaylistIndex;
-                //NotifyPropertyChanged("CurrentPlaylistIndex");
             }
         }
 
         public List<Playlist> Playlists { get { return Library.Current.GetPlaylists(); } }
 
-        public ViewModel()
-        {
-            Library.Load();
-        }
+        public ViewModel() { }
 
         private string GetShowTime(double totalMilliseconds)
         {
@@ -164,6 +162,30 @@ namespace MusicPlayerApp
             time += string.Format(":{0,2}", seconds);
 
             return time.Replace(" ", "0");
+        }
+
+        public void SetLbxCurrentPlaylist(ListBox listBox)
+        {
+            lbxCurrentPlaylist = listBox;
+        }
+
+        public void LbxCurrentPlaylistScollToSelectedItem()
+        {
+            if (lbxCurrentPlaylist == null) return;
+
+            lbxCurrentPlaylist.ScrollIntoView(CurrentPlaylist.CurrentSong);
+        }
+
+        public void SetLbxPlaylists(ListBox listBox)
+        {
+            lbxPlaylists = listBox;
+        }
+
+        public void LbxPlaylistsScollToSelectedItem()
+        {
+            if (lbxPlaylists == null || lbxPlaylists.SelectedIndex == -1) return;
+
+            lbxPlaylists.ScrollIntoView(lbxPlaylists.SelectedItem);
         }
 
         public void SetMainPageLoaded()
@@ -186,14 +208,17 @@ namespace MusicPlayerApp
             UiUpdate.CurrentSongPosition();
         }
 
-        private int GetIndexOfPlaylist(Playlist playlist)
+        public void SetChangedCurrentPlaylistIndex()
         {
-            int index = Library.Current.GetPlaylists().IndexOf(playlist);
-
-            return index < 0 && index >= Library.Current.Lenght ? -1 : index;
+            scrollLbxCurrentPlaylistChanged = true;
         }
 
+        private int GetIndexOfPlaylist(Playlist playlist)
+        {
+            int index = Library.Current.GetPlaylistIndex(playlist);
 
+            return index < 0 && index >= Library.Current.Length ? -1 : index;
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -207,11 +232,7 @@ namespace MusicPlayerApp
                     CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                     () => { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); });
             }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.Message);
-                Debug.WriteLine(propertyName);
-            }
+            catch { }
         }
     }
 }

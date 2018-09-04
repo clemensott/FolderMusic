@@ -4,7 +4,7 @@
     {
         public static void CurrentSongTitleArtistNaturalDuration()
         {
-            CurrentSongIndex();
+            ShuffleListIndex();
             App.ViewModel.NotifyPropertyChanged("CurrentSongTitle");
             App.ViewModel.NotifyPropertyChanged("CurrentSongArtist");
 
@@ -16,7 +16,7 @@
         {
             if (App.ViewModel.CurrentSongNaturalDurationMilliseconds < 2) return;
 
-            App.ViewModel.CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds = App.ViewModel.CurrentSongNaturalDurationMilliseconds;
+            LibraryLib.Library.Current.CurrentSong.NaturalDurationMilliseconds = App.ViewModel.CurrentSongNaturalDurationMilliseconds;
 
             App.ViewModel.NotifyPropertyChanged("CurrentSongNaturalDurationText");
             App.ViewModel.NotifyPropertyChanged("CurrentSongNaturalDurationMilliseconds");
@@ -43,10 +43,9 @@
             App.ViewModel.NotifyPropertyChanged("LoopIcon");
         }
 
-        public static void PlaylistsAndCurrentPlaylistIndex()
+        public static void Playlists()
         {
             App.ViewModel.NotifyPropertyChanged("Playlists");
-            CurrentPlaylistIndex();
         }
 
         public static void CurrentPlaylistIndex()
@@ -59,19 +58,18 @@
             App.ViewModel.NotifyPropertyChanged("CurrentPlaylistName");
             LoopIcon();
             ShuffleIcon();
+            CurrentPlaylistSongs();
             CurrentSongTitleArtistNaturalDuration();
-            CurrentPlaylistSongsAndIndex();
         }
 
-        public static void CurrentPlaylistSongsAndIndex()
+        public static void CurrentPlaylistSongs()
         {
             App.ViewModel.NotifyPropertyChanged("CurrentPlaylistSongs");
-            CurrentPlaylistIndex();
         }
 
-        public static void CurrentSongIndex()
+        public static void ShuffleListIndex()
         {
-            App.ViewModel.NotifyPropertyChanged("CurrentSongIndex");
+            App.ViewModel.NotifyPropertyChanged("ShuffleListIndex");
         }
 
         public static void AfterActivating()
@@ -80,9 +78,9 @@
             PlayPauseIcon();
         }
 
-        public static void AfterDeleteCurrentPlaylist()
+        public static void PlaylistsAndCurrentPlaylist()
         {
-            PlaylistsAndCurrentPlaylistIndex();
+            Playlists();
             CurrentPlaylistIndexAndRest();
         }
 
@@ -91,7 +89,7 @@
             App.ViewModel.NotifyPropertyChanged("CurrentPlaylistSongs");
             App.ViewModel.NotifyPropertyChanged("Playlists");
 
-            App.ViewModel.NotifyPropertyChanged("CurrentSongIndex");
+            App.ViewModel.NotifyPropertyChanged("ShuffleListIndex");
             App.ViewModel.NotifyPropertyChanged("CurrentPlaylistIndex");
             App.ViewModel.NotifyPropertyChanged("CurrentPlaylistName");
 
@@ -108,8 +106,6 @@
             App.ViewModel.NotifyPropertyChanged("PlayPauseIcon");
             App.ViewModel.NotifyPropertyChanged("PreviousIcon");
             App.ViewModel.NotifyPropertyChanged("ShuffleIcon");
-
-            App.ViewModel.NotifyPropertyChanged("IsUiEnabled");
         }
     }
 }

@@ -26,7 +26,8 @@
                         Header="{Binding CurrentPlaylistName}" Style="{StaticResource HSHeader}">
                 <DataTemplate>
                     <ListBox x:Name="lbxCurrentPlaylist" Margin="0,-30,0,0" Background="Transparent" SelectionMode="Single"
-                             ItemsSource="{Binding CurrentPlaylistSongs}" SelectedIndex="{Binding CurrentSongIndex,Mode=TwoWay}"
+                             ItemsSource="{Binding CurrentPlaylistSongs}" 
+                             SelectedIndex="{Binding ShuffleListIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                              DataContextChanged="lbxCurrentPlaylist_DataContextChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -38,6 +39,7 @@
 
                                     <FlyoutBase.AttachedFlyout>
                                         <MenuFlyout>
+                                            <MenuFlyoutItem Text="Refresh" Click="RefreshSong_Click"/>
                                             <MenuFlyoutItem Text="Delete" Click="DeleteSong_Click"/>
                                         </MenuFlyout>
                                     </FlyoutBase.AttachedFlyout>
@@ -73,6 +75,7 @@
                                     <FlyoutBase.AttachedFlyout>
                                         <MenuFlyout>
                                             <MenuFlyoutItem Text="Refresh" Click="RefreshPlaylist_Click"/>
+                                            <MenuFlyoutItem Text="Search for New Songs" Click="SearchForNewSongsPlaylist_Click"/>
                                             <MenuFlyoutItem Text="Delete" Click="DeletePlaylist_Click"/>
                                         </MenuFlyout>
                                     </FlyoutBase.AttachedFlyout>
@@ -156,32 +159,23 @@
                 </Image.RenderTransform>
             </Image>
         </Grid>
-
-        <Grid Name="gdLoading" Grid.RowSpan="8" Visibility="Collapsed">
-            <Rectangle Name="rtLoading" Width="768" Height="1280" Fill="White"/>
-            <StackPanel  VerticalAlignment="Center" Visibility="Collapsed">
-                <ProgressBar Name="pbLoading" IsIndeterminate="True" Height="4"/>
-                <TextBlock Text="Loading..." HorizontalAlignment="Center" FontSize="30"/>
-            </StackPanel>
-        </Grid>
     </Grid>
 
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
-                <AppBarButton Label="Previous" Icon="Previous" IsEnabled="{Binding IsUiEnabled}" Click="Previous_Click"/>
-                <AppBarButton Label="{Binding PlayPauseText}" Icon="{Binding PlayPauseIcon}"
-                              IsEnabled="{Binding IsUiEnabled}" Click="PlayPause_Click"/>
-                <AppBarButton Label="Next" Icon="Next" IsEnabled="{Binding IsUiEnabled}" Click="Next_Click"/>
+                <AppBarButton Label="Previous" Icon="Previous" Click="Previous_Click"/>
+                <AppBarButton Label="{Binding PlayPauseText}" Icon="{Binding PlayPauseIcon}" Click="PlayPause_Click"/>
+                <AppBarButton Label="Next" Icon="Next" Click="Next_Click"/>
             </CommandBar.PrimaryCommands>
             
             <CommandBar.SecondaryCommands>
-                <AppBarButton Label="Refresh every playlists" IsEnabled="{Binding IsUiEnabled}" 
-                              Click="RefreshEveryPlaylists_Click"/>
-                <AppBarButton Label="Search for new playlists" IsEnabled="{Binding IsUiEnabled}"
-                              Click="SearchForNewPlaylists_Click"/>
+                <AppBarButton Label="Refresh every playlists" Click="RefreshEveryPlaylists_Click"/>
+                <AppBarButton Label="Search for new playlists" Click="SearchForNewPlaylists_Click"/>
                 <AppBarButton Label="TestFunktion" Click="TestFunktion_Click"/>
                 <AppBarButton Label="TestFunktion2" Click="TestFunktion_Click2"/>
+                <AppBarButton Label="TestFunktion3" Click="TestFunktion_Click3"/>
+                <AppBarButton Label="TestFunktion4" Click="TestFunktion_Click4"/>
             </CommandBar.SecondaryCommands>
         </CommandBar>
     </Page.BottomAppBar>
