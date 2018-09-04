@@ -10,7 +10,6 @@ namespace PlayerIcons
         private BitmapImage play;
         private BitmapImage loopCurrent, loopOff, loopOn;
         private BitmapImage shuffleComplete, shuffleOff, shuffleOneTime;
-        private BitmapImage detail;
 
         public BitmapImage Play { get { return Get(ref play, "PlayButton"); } }
 
@@ -18,15 +17,13 @@ namespace PlayerIcons
 
         public BitmapImage LoopOff { get { return Get(ref loopOff, "loopOff"); } }
 
-        public BitmapImage LoopAll { get { return Get(ref loopOn, "loopAll"); } }
+        public BitmapImage LoopOn { get { return Get(ref loopOn, "loopAll"); } }
 
         public BitmapImage ShuffleComplete { get { return Get(ref shuffleComplete, "shuffleComplete"); } }
 
         public BitmapImage ShuffleOff { get { return Get(ref shuffleOff, "shuffleOff"); } }
 
         public BitmapImage ShuffleOneTime { get { return Get(ref shuffleOneTime, "shuffleOn"); } }
-
-        public BitmapImage Detail { get { return Get(ref detail, "DetailButton"); } }
 
         public IconCollection(ElementTheme theme)
         {

@@ -1,4 +1,3 @@
-Assets\Dark\DetailButton.png
 Assets\Dark\loopAll.png
 Assets\Dark\loopCurrent.png
 Assets\Dark\loopOff.png
@@ -9,8 +8,6 @@ Assets\Dark\PreviousButton.png
 Assets\Dark\shuffleComplete.png
 Assets\Dark\shuffleOff.png
 Assets\Dark\shuffleOn.png
-Assets\Glockenschlag.mp3
-Assets\Light\DetailButton.png
 Assets\Light\loopAll.png
 Assets\Light\loopCurrent.png
 Assets\Light\loopOff.png
@@ -32,4 +29,4 @@ LoadingPage.xbf
 MainPage.xbf
 MusicPlayerApp.xr.xml
 PlaylistPage.xbf
-Settings.xbf
+SecondaryTilePage.xbf

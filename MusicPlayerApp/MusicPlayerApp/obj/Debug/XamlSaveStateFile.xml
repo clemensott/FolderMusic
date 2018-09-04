@@ -1,9 +1,8 @@
 <XamlCompilerSaveState>
   <ReferenceAssemblyList>
-    <LocalAssembly PathName="c:\users\clemens\documents\visual studio 2015\projects\foldermusic\musicplayerapp\musicplayerapp\obj\debug\intermediatexaml\musicplayerapp.exe" HashGuid="e3694a02-56b5-6998-b8a7-3eb0bf52b662" />
-    <ReferenceAssembly PathName="c:\users\clemens\documents\visual studio 2015\projects\foldermusic\musicplayerapp\backgroundtask\bin\debug\backgroundtask.winmd" HashGuid="6699a76e-90d4-3434-0a91-28d392da4de9" />
-    <ReferenceAssembly PathName="c:\users\clemens\documents\visual studio 2015\projects\foldermusic\musicplayerapp\foldermusicdebug\bin\debug\foldermusicdebug.dll" HashGuid="8975989f-40c7-9ca0-f9d5-2d90ed130a61" />
-    <ReferenceAssembly PathName="c:\users\clemens\documents\visual studio 2015\projects\foldermusic\musicplayerapp\foldermusiclib\bin\debug\foldermusiclib.dll" HashGuid="6d007c2f-5821-354e-7b06-47bb3494752e" />
-    <ReferenceAssembly PathName="c:\users\clemens\documents\visual studio 2015\projects\foldermusic\musicplayerapp\playericonswp8.1\bin\debug\playericonswp8.1.dll" HashGuid="d96dc5c9-05ce-1493-e446-a9a2a1bc603d" />
+    <LocalAssembly PathName="c:\users\clemens\documents\visual studio 2015\projects\musicplayerapp\musicplayerapp\obj\debug\intermediatexaml\musicplayerapp.exe" HashGuid="e9c4c2e2-107b-7e21-f8b3-b7eafe767860" />
+    <ReferenceAssembly PathName="c:\users\clemens\documents\visual studio 2015\projects\musicplayerapp - autokommunikation\backgroundtask\bin\debug\backgroundtask.winmd" HashGuid="fafb41c5-39af-201a-2089-6cd939728a28" />
+    <ReferenceAssembly PathName="c:\users\clemens\documents\visual studio 2015\projects\musicplayerapp - autokommunikation\foldermusiclib\bin\debug\foldermusiclib.dll" HashGuid="bce4deef-915b-45aa-4d80-ea80469ed5a6" />
+    <ReferenceAssembly PathName="c:\users\clemens\documents\visual studio 2015\projects\musicplayerapp - autokommunikation\playericonswp8.1\bin\debug\playericonswp8.1.dll" HashGuid="66384ac4-bd26-70a8-901c-c9d0b1d0fd62" />
   </ReferenceAssemblyList>
 </XamlCompilerSaveState>

@@ -24,56 +24,29 @@ C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\Background
 C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\BackgroundTask\obj\Debug\qualifiers.txt
 C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\BackgroundTask\obj\Debug\qualifiers.txt.intermediate
 C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp\BackgroundTask\obj\Debug\MultipleQualifiersPerDimensionFound.txt
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\BackgroundTask.winmd
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\BackgroundTask.pdb
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\BackgroundTask.pri
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\FolderMusicLib.dll
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\PlayerIconsWP8.1.dll
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\FolderMusicLib.pdb
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\FolderMusicLib.pri
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\PlayerIconsWP8.1.pdb
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\PlayerIconsWP8.1.pri
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\BackgroundTask.csprojResolveAssemblyReference.cache
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\BackgroundTask.winmd
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\BackgroundTask.pdb
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\BackgroundTask.winmdobj
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\BackgroundTask.compile.pdb
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\priconfig.xml
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\priconfig.xml.intermediate
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\layout.resfiles
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\layout.resfiles.intermediate
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\resources.resfiles
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\resources.resfiles.intermediate
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\pri.resfiles
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\pri.resfiles.intermediate
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\qualifiers.txt
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\qualifiers.txt.intermediate
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\MultipleQualifiersPerDimensionFound.txt
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\BackgroundTask.winmd
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\BackgroundTask.pdb
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\BackgroundTask.pri
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\FolderMusicLib.dll
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\PlayerIconsWP8.1.dll
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\FolderMusicLib.pdb
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\FolderMusicLib.pri
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\PlayerIconsWP8.1.pdb
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\PlayerIconsWP8.1.pri
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\BackgroundTask.csprojResolveAssemblyReference.cache
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\BackgroundTask.winmd
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\BackgroundTask.pdb
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\BackgroundTask.winmdobj
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\BackgroundTask.compile.pdb
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\priconfig.xml
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\priconfig.xml.intermediate
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\layout.resfiles
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\layout.resfiles.intermediate
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\resources.resfiles
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\resources.resfiles.intermediate
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\pri.resfiles
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\pri.resfiles.intermediate
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\qualifiers.txt
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\qualifiers.txt.intermediate
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\obj\Debug\MultipleQualifiersPerDimensionFound.txt
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\FolderMusicDebug.dll
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\FolderMusicDebug.pdb
-C:\Users\Clemens\Documents\Visual Studio 2015\Projects\FolderMusic\MusicPlayerApp\BackgroundTask\bin\Debug\FolderMusicDebug.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\bin\Debug\BackgroundTask.winmd
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\bin\Debug\BackgroundTask.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\bin\Debug\BackgroundTask.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\bin\Debug\FolderMusicLib.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\bin\Debug\TagLib.Portable.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\bin\Debug\PlayerIconsWP8.1.dll
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\bin\Debug\FolderMusicLib.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\bin\Debug\FolderMusicLib.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\bin\Debug\PlayerIconsWP8.1.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\bin\Debug\PlayerIconsWP8.1.pri
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\BackgroundTask.csprojResolveAssemblyReference.cache
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\BackgroundTask.winmd
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\BackgroundTask.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\BackgroundTask.winmdobj
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\BackgroundTask.compile.pdb
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\priconfig.xml
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\priconfig.xml.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\layout.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\layout.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\resources.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\resources.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\pri.resfiles
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\pri.resfiles.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\qualifiers.txt
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\qualifiers.txt.intermediate
+C:\Users\Clemens\Documents\Visual Studio 2015\Projects\MusicPlayerApp - Autokommunikation\BackgroundTask\obj\Debug\MultipleQualifiersPerDimensionFound.txt

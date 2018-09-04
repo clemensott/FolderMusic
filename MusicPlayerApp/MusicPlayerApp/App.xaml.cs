@@ -2,6 +2,7 @@
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
@@ -17,11 +18,10 @@ namespace MusicPlayerApp
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
 
-            FolderMusicDebug.SaveTextClass.Id = "Foreground";
-            CurrentSong.Current.Load();
+            Library.Current.LoadCurrentSong();
+            Library.SavePlayCommand(false);
 
             Library.Current.SetIsForeground();
-            Library.Current.UpdatePlaylistsObjectANdCurrentPlaylistSongsObject();
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs e)

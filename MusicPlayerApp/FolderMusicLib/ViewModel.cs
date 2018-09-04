@@ -12,8 +12,11 @@ namespace FolderMusicLib
     {
         private static ViewModel instance;
 
-        private bool playerPositionEnabled = true, mainPageLoaded;
+        private bool mainPageLoaded, sliderEntered = false, scrollLbxCurrentPlaylist = true;
+        private int openPlaylistsIndex = 0;
+        private double sliderMaximum;
         private SymbolIcon playIcon, pauseIcon;
+        private ListBox lbxCurrentPlaylist;
 
         public static ViewModel Current
         {
@@ -26,59 +29,53 @@ namespace FolderMusicLib
             }
         }
 
-        public bool PlayerPositionEnabled
-        {
-            get { return playerPositionEnabled; }
-            set
-            {
-                if (value == playerPositionEnabled) return;
-
-                playerPositionEnabled = value;
-
-                if (playerPositionEnabled) BackgroundMediaPlayer.Current.Position = TimeSpan.FromMilliseconds(PlayerPositionMillis);
-            }
-        }
-
         public bool IsMainPageLoaded { get { return mainPageLoaded; } }
 
         public int PlaylistsIndex
         {
             get { return Library.Current.CurrentPlaylistIndex; }
-            set { UpdatePlaylistIndex(); }
-        }
-
-        public double PlayerPostionPercent
-        {
-            get { return CurrentPlaylist.SongPositionPercent; }
             set
             {
-                if (value > 0 && value < 1) { }
-
-                if (value == PlayerPostionPercent && Math.Abs(value * PlayerDurationMillis - PlayerPositionMillis) < 100) return;
-
-                CurrentPlaylist.SongPositionPercent = value;
-                UpdatePlayerPositionAndDuration();
-
-                if (playerPositionEnabled) BackgroundMediaPlayer.Current.Position = TimeSpan.FromMilliseconds(PlayerPositionMillis);
+                openPlaylistsIndex = value;
+                UpdatePlaylistIndex();
             }
         }
 
-        public double PlayerPositionMillis
+        public int OpenPlaylistIndex
         {
-            get { return PlayerPostionPercent * PlayerDurationMillis; }
+            get { return openPlaylistsIndex; }
+            set { openPlaylistsIndex = value; }
         }
 
-        public double PlayerDurationMillis
+        public double BackgroundPlayerPositionMilliseconds
         {
-            get { return CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds; }
-            set { CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds = value; }
+            get { return BackgroundMediaPlayer.Current.Position.TotalMilliseconds; }
         }
 
-        public string PlayerPositionText { get { return GetShowTime(PlayerPositionMillis); } }
-
-        public string PlayerDurationText
+        public double BackgroundPlayerNaturalDurationMilliseconds
         {
-            get { return GetShowTime(PlayerDurationMillis); }
+            get { return BackgroundMediaPlayer.Current.NaturalDuration.TotalMilliseconds; }
+        }
+
+        public double SliderValue
+        {
+            get { return CurrentPlaylist.SongPositionMilliseconds; }
+            set
+            {
+                if (Math.Abs(SliderValue - value) < 100) return;
+                
+                CurrentPlaylist.SongPositionMilliseconds = value;
+                UpdateSliderValueText();
+            }
+        }
+
+        public double SliderMaximum { get { return sliderMaximum; } }
+
+        public string SliderValueText { get { return GetShowTime(SliderValue); } }
+
+        public string SliderMaximumText
+        {
+            get { return GetShowTime(SliderMaximum); }
         }
 
         public string PlayPauseText
@@ -93,42 +90,61 @@ namespace FolderMusicLib
         {
             get
             {
-                return BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing ? GetPauseIcon() : GetPlayIcon();
+                return BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing ? pauseIcon : playIcon;
             }
         }
 
         public Playlist CurrentPlaylist { get { return Library.Current.CurrentPlaylist; } }
 
-        public List<Playlist> Playlists { get { return Library.Current.Playlists; } }
-
-        private ViewModel() { }
-
-        private SymbolIcon GetPlayIcon()
+        public Playlist OpenPlaylist
         {
-            try
+            get { return Library.Current[openPlaylistsIndex]; }
+            set
             {
-                if (playIcon == null) playIcon = new SymbolIcon(Symbol.Play);
-            }
-            catch
-            {
-                return new SymbolIcon(Symbol.Play);
-            }
+                if (Library.Current.IsEmpty) return;
 
-            return playIcon;
+                openPlaylistsIndex = value.PlaylistIndex;
+
+                if (openPlaylistsIndex == -1) openPlaylistsIndex = Library.Current.CurrentPlaylistIndex;
+            }
         }
 
-        private SymbolIcon GetPauseIcon()
+        public List<Playlist> Playlists { get { return Library.Current.Playlists; } }
+
+        private ViewModel()
         {
             try
             {
-                if (pauseIcon == null) pauseIcon = new SymbolIcon(Symbol.Pause);
+                Windows.ApplicationModel.Core.CoreApplication.MainView.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, 
+                    ()=> {
+                        playIcon = new SymbolIcon(Symbol.Play);
+                        pauseIcon = new SymbolIcon(Symbol.Pause);
+                    });
             }
-            catch
-            {
-                return new SymbolIcon(Symbol.Pause);
-            }
+            catch { }
+        }
 
-            return pauseIcon;
+        private void LoadPlayPauseSymbols()
+        {
+            playIcon = new SymbolIcon(Symbol.Play);
+            pauseIcon = new SymbolIcon(Symbol.Pause);
+        }
+
+        private void ChangeSliderValue()
+        {
+            if (CurrentPlaylist.CurrentSong.IsEmptyOrLoading) CurrentPlaylist.SongPositionMilliseconds = 0;
+            else if (BackgroundMediaPlayer.Current.Position.TotalMilliseconds == 0) return;
+            else if (!sliderEntered) CurrentPlaylist.SongPositionMilliseconds = BackgroundPlayerPositionMilliseconds;
+        }
+
+        private void ChangeSliderMaximum()
+        {
+            if (CurrentPlaylist.CurrentSong.IsEmptyOrLoading) sliderMaximum = 2;
+            else
+            {
+                sliderMaximum = BackgroundPlayerNaturalDurationMilliseconds != 0 ?
+                    BackgroundPlayerNaturalDurationMilliseconds : CurrentPlaylist.CurrentSong.NaturalDurationMilliseconds;
+            }
         }
 
         private string GetShowTime(double totalMilliseconds)
@@ -149,6 +165,41 @@ namespace FolderMusicLib
             mainPageLoaded = Library.Current.IsForeground;
         }
 
+        public void SetLbxCurrentPlaylist(ListBox lbx)
+        {
+           lbxCurrentPlaylist = lbx;
+            scrollLbxCurrentPlaylist = true;
+        }
+
+        public void SetScrollLbxCurrentPlaylist()
+        {
+            scrollLbxCurrentPlaylist = true;
+        }
+
+        public void DoScrollLbxCurrentPlaylist()
+        {
+            if (!scrollLbxCurrentPlaylist) return;
+
+            scrollLbxCurrentPlaylist = false;
+
+            if (lbxCurrentPlaylist == null || !lbxCurrentPlaylist.Items.Contains(CurrentPlaylist.CurrentSong)) return;
+
+            lbxCurrentPlaylist.ScrollIntoView(CurrentPlaylist.CurrentSong);
+        }
+
+        public void EnteredSlider()
+        {
+            sliderEntered = true;
+        }
+
+        public void SetSliderValue()
+        {
+            if (!sliderEntered) return;
+
+            sliderEntered = false;
+            BackgroundMediaPlayer.Current.Position = TimeSpan.FromMilliseconds(SliderValue);
+        }
+
         public void Play()
         {
             if (Library.Current.IsForeground) BackgroundCommunicator.SendPlay();
@@ -159,26 +210,31 @@ namespace FolderMusicLib
             if (Library.Current.IsForeground) BackgroundCommunicator.SendPause();
         }
 
-        public void UpdatePlayerPositionAndDuration()
+        public void UpdateSliderMaximumAndSliderValue()
         {
-            UpdatePlayerPosition();
-            UpdatePlayerDurationText();
+            UpdateSliderMaximum();
+            UpdateSliderValue();
         }
 
-        private void UpdatePlayerPosition()
+        public void UpdateSliderValue()
         {
-            NotifyPropertyChanged("PlayerPostionPercent");
-            UpdatePlayerPositionText();
+            ChangeSliderValue();
+            NotifyPropertyChanged("SliderValue");
+            UpdateSliderValueText();
+
+            if (SliderMaximum < 2) UpdateSliderMaximum();
         }
 
-        private void UpdatePlayerPositionText()
+        private void UpdateSliderValueText()
         {
-            NotifyPropertyChanged("PlayerPositionText");
+            NotifyPropertyChanged("SliderValueText");
         }
 
-        private void UpdatePlayerDurationText()
+        public void UpdateSliderMaximum()
         {
-            NotifyPropertyChanged("PlayerDurationText");
+            ChangeSliderMaximum();
+            NotifyPropertyChanged("SliderMaximum");
+            NotifyPropertyChanged("SliderMaximumText");
         }
 
         public void UpdatePlayPauseIconAndText()
@@ -187,9 +243,10 @@ namespace FolderMusicLib
             NotifyPropertyChanged("PlayPauseText");
         }
 
-        public void UpdatePlaylists()
+        public void UpdatePlaylistsAndIndex()
         {
             NotifyPropertyChanged("Playlists");
+            NotifyPropertyChanged("PlaylistsIndex");
         }
 
         public void UpdatePlaylistIndex()
@@ -199,6 +256,7 @@ namespace FolderMusicLib
 
         public void UpdateCurrentPlaylistIndexAndRest()
         {
+            SetScrollLbxCurrentPlaylist();
             UpdatePlaylistIndex();
 
             NotifyPropertyChanged("CurrentPlaylist");
@@ -206,7 +264,7 @@ namespace FolderMusicLib
             CurrentPlaylist.UpdateName();
             CurrentPlaylist.UpdateSongsAndShuffleListSongs();
             CurrentPlaylist.UpdateCurrentSong();
-
+            
             CurrentPlaylist.UpdateLoopIcon();
             CurrentPlaylist.UpdateShuffleIcon();
         }

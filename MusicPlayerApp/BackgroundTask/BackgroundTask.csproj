@@ -80,10 +80,6 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <ProjectReference Include="..\FolderMusicDebug\FolderMusicDebug.csproj">
-      <Project>{ee2e4620-7d8d-4d75-a8a4-157e652449e2}</Project>
-      <Name>FolderMusicDebug</Name>
-    </ProjectReference>
     <ProjectReference Include="..\FolderMusicLib\FolderMusicLib.csproj">
       <Project>{a1d5db9a-4dea-44dd-b754-bd68ee5ada43}</Project>
       <Name>FolderMusicLib</Name>
@@ -93,7 +89,6 @@
     <Compile Include="BackgroundAudioTask.cs" />
     <Compile Include="ForegroundCommunicator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Ringer.cs" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>

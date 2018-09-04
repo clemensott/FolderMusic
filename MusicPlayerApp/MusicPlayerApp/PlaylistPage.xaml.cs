@@ -1,45 +1,46 @@
-﻿using LibraryLib;
-using System.Threading.Tasks;
+﻿using FolderMusicLib;
+using LibraryLib;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Navigation;
 
 namespace MusicPlayerApp
 {
     public sealed partial class PlaylistPage : Page
     {
         private static bool playlistPageOpen;
+        private static PlaylistPage page;
 
         private Playlist playlist;
 
-        private ListBox lbxDefault, lbxShuffle;
-
         public static bool Open { get { return playlistPageOpen; } }
+
+        public static PlaylistPage Current { get { return Open ? page : null; } }
 
         public PlaylistPage()
         {
             this.InitializeComponent();
+            page = this;
             playlistPageOpen = true;
 
-            Library.Current.ScrollToIndex += Library_SrcollToIndex;
-        }
-
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            DataContext = playlist = e.Parameter as Playlist;
-        }
-
-        protected override void OnNavigatedFrom(NavigationEventArgs e)
-        {
-            playlistPageOpen = false;
+            playlist = ViewModel.Current.OpenPlaylist;
+            DataContext = playlist;
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            ScrollToCurrentSong(lbxDefault);
-            ScrollToCurrentSong(lbxShuffle);
+
+        }
+
+        public static void GoBack()
+        {
+            playlistPageOpen = false;
+
+            page.playlist.SetDefaultSongsLbx(null);
+            page.playlist.SetShuffleSongsLbx(null);
+
+            page.Frame.GoBack();
         }
 
         private void Shuffle_Tapped(object sender, TappedRoutedEventArgs e)
@@ -52,25 +53,26 @@ namespace MusicPlayerApp
             playlist.SetNextLoop();
         }
 
-        private void RefreshSong_Click(object sender, RoutedEventArgs e)
+        private async void RefreshSong_Click(object sender, RoutedEventArgs e)
         {
             Song song = (sender as MenuFlyoutItem).DataContext as Song;
 
-            song.Refresh();
+            await song.Refresh();
         }
 
         private void DeleteSong_Click(object sender, RoutedEventArgs e)
         {
             Song song = (sender as MenuFlyoutItem).DataContext as Song;
+            int songsIndex = playlist.Songs.IndexOf(song);
 
-            playlist.RemoveSong(playlist.Songs.IndexOf(song));
+            Library.Current.RemoveSongFromPlaylist(playlist, songsIndex);
 
-            if (playlist.IsEmptyOrLoading) Frame.GoBack();
+            if (playlist.IsEmptyOrLoading) GoBack();
         }
 
         private void Song_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            Frame.GoBack();
+            GoBack();
         }
 
         private void CurrentPlaylistSong_Holding(object sender, HoldingRoutedEventArgs e)
@@ -81,62 +83,38 @@ namespace MusicPlayerApp
 
         private void LbxDefaultSongs_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
-            lbxDefault = sender as ListBox;
+            playlist.SetDefaultSongsLbx(sender as ListBox);
         }
 
         private void LbxShuffleSongs_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
-            lbxShuffle = sender as ListBox;
-        }
-
-        private void ScrollToCurrentSong(ListBox lbx)
-        {
-            if (lbx == null || !lbx.Items.Contains(playlist.CurrentSong)) return;
-
-            lbx.ScrollIntoView(playlist.CurrentSong);
-        }
-
-        private async void Library_SrcollToIndex(object sender, Playlist e)
-        {
-            if (lbxDefault == null || lbxShuffle == null) return;
-
-            while (lbxDefault.Items.Count < e.SongsIndex || lbxShuffle.Items.Count < e.ShuffleListIndex)
-            {
-                await Task.Delay(10);
-            }
-
-            lbxDefault.ScrollIntoView(lbxDefault.Items[e.SongsIndex]);
-            lbxShuffle.ScrollIntoView(lbxShuffle.Items[e.ShuffleListIndex]);
+            playlist.SetShuffleSongsLbx(sender as ListBox);
         }
 
         private async void RefreshThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            await LoadingPage.NavigateTo();
+            LoadingPage.OpenLoading(Frame);
+
             await playlist.LoadSongsFromStorage();
+
             LoadingPage.GoBack();
 
-            if (playlist.IsEmptyOrLoading) Frame.GoBack();
+            if (playlist.IsEmptyOrLoading) GoBack();
         }
 
         private async void SearchForNewSongs_Click(object sender, RoutedEventArgs e)
         {
-            await LoadingPage.NavigateTo();
-            await playlist.SearchForNewSongs();
-            LoadingPage.GoBack();
-        }
+            LoadingPage.OpenLoading(Frame);
 
-        private async void UpdateThisPlaylist_Click(object sender, RoutedEventArgs e)
-        {
-            await LoadingPage.NavigateTo();
-            await playlist.UpdateSongsFromStorage();
+            await playlist.SearchForNewSongs();
+
             LoadingPage.GoBack();
         }
 
         private void DeleteThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
             Library.Current.Delete(playlist);
-
-            Frame.GoBack();
+            GoBack();
         }
     }
 }

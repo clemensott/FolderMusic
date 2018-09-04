@@ -1,10 +1,11 @@
 ﻿using FolderMusicLib;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using TagLib;
 using Windows.Storage;
-using Windows.Storage.FileProperties;
 using Windows.UI.Core;
 using Windows.UI.Xaml.Media;
 
@@ -13,7 +14,7 @@ namespace LibraryLib
     public sealed class Song : INotifyPropertyChanged
     {
         private bool isLoading, failed = false;
-        private double naturalDurationMilliseconds = 1;
+        private double naturalDurationMilliseconds;
         private string title, artist, path;
 
         [XmlIgnore]
@@ -25,23 +26,18 @@ namespace LibraryLib
         public double NaturalDurationMilliseconds
         {
             get { return naturalDurationMilliseconds; }
-            set
-            {
-                if (value < 1) return;
-
-                naturalDurationMilliseconds = value;
-            }
+            set { naturalDurationMilliseconds = value; }
         }
 
         public string Title
         {
-            get { return title == "" ? GetTitleFromPath() : title; }
+            get { return title; }
             set { title = value; }
         }
 
         public string Artist
         {
-            get { return artist == "" ? "Unkown" : artist; }
+            get { return artist; }
             set { artist = value; }
         }
 
@@ -52,13 +48,7 @@ namespace LibraryLib
         }
 
         [XmlIgnore]
-        public string RelativePath { get { return Playlist.GetRelativePath(path); } }
-
-        [XmlIgnore]
-        public Brush TextFirstBrush { get { return Playlist.TextFirstBrush; } }
-
-        [XmlIgnore]
-        public Brush TextSecondBrush { get { return Playlist.TextSecondBrush; } }
+        public Brush TextBrush { get { return Playlist.TextBrush; } }
 
         public Song()
         {
@@ -70,8 +60,6 @@ namespace LibraryLib
         {
             isLoading = true;
             path = absolutePath;
-
-            SetTitleAndArtistByPath();
         }
 
         private void SetEmptyOrLoading()
@@ -80,7 +68,7 @@ namespace LibraryLib
             artist = path = "";
         }
 
-        public async void Refresh()
+        public async Task Refresh()
         {
             naturalDurationMilliseconds = 1;
 
@@ -102,28 +90,41 @@ namespace LibraryLib
 
         private async Task SetTitleAndArtist(StorageFile file)
         {
+            File tagFile;
+            Tag tags;
+            Stream fileStream;
+
             try
             {
-                MusicProperties properties = await file.Properties.GetMusicPropertiesAsync();
+                fileStream = await file.OpenStreamForReadAsync();
 
-                if (properties == null) return;
+                tagFile = File.Create(new StreamFileAbstraction(file.Name, fileStream, fileStream));
+                tags = tagFile.GetTag(TagTypes.Id3v2);
 
-                title = properties.Title;
-                artist = properties.Artist;
-                naturalDurationMilliseconds = properties.Duration.TotalMilliseconds;
+                if (tags == null || tags.IsEmpty)
+                {
+                    SetTitleAndArtistByPath();
+                    return;
+                }
+
+                title = tags != null && tags.Title != null && tags.Title != "" ? tags.Title : GetTitleFromPath();
+                artist = tags != null && tags.FirstPerformer != null ? tags.FirstPerformer : "";
             }
-            catch { }
+            catch
+            {
+                SetTitleAndArtistByPath();
+            }
         }
 
         private void SetTitleAndArtistByPath()
         {
             title = GetTitleFromPath();
-            artist = "";
+            artist = "Unkown";
         }
 
         private string GetTitleFromPath()
         {
-            return System.IO.Path.GetFileName(Path);
+            return System.IO.Path.GetFileNameWithoutExtension(Path);
         }
 
         public StorageFile GetStorageFile()
@@ -150,15 +151,6 @@ namespace LibraryLib
         public void SetFailed()
         {
             failed = true;
-            SaveFailed();
-        }
-
-        private void SaveFailed()
-        {
-            string filename = "SongFailed.txt";
-            string text = DateTime.Now.Ticks.ToString() + ";" + RelativePath + "\n";
-
-            LibraryIO.AppendText(text, filename);
         }
 
         public void UpdateTitleAndArtist()
@@ -184,7 +176,7 @@ namespace LibraryLib
 
         public override string ToString()
         {
-            return Artist != null && Artist != "" ? Artist + " - " + Title : Title;
+            return Artist != "" ? Artist + " - " + Title : Title;
         }
     }
 }

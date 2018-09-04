@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -42,15 +41,10 @@ namespace MusicPlayerApp
         {
         }
 
-        public async static Task NavigateTo()
+        public static void OpenLoading(Frame frame)
         {
             if (Open) return;
-
-            await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.
-                RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                {
-                    (Window.Current.Content as Frame).Navigate(typeof(LoadingPage));
-                });
+            frame.Navigate(typeof(LoadingPage));
         }
 
         public static void GoBack()
