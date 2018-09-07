@@ -1,8 +1,0 @@
-D:\Projects\FolderMusicConsoleTest\bin\Debug\FolderMusicConsoleTest.exe.config
-D:\Projects\FolderMusic\FolderMusicConsoleTest\bin\Debug\FolderMusicConsoleTest.exe.config
-D:\Projects\FolderMusic\FolderMusicConsoleTest\bin\Debug\FolderMusicConsoleTest.exe
-D:\Projects\FolderMusic\FolderMusicConsoleTest\bin\Debug\FolderMusicConsoleTest.pdb
-D:\Projects\FolderMusic\FolderMusicConsoleTest\obj\Debug\FolderMusicConsoleTest.csprojResolveAssemblyReference.cache
-D:\Projects\FolderMusic\FolderMusicConsoleTest\obj\Debug\FolderMusicConsoleTest.csproj.CoreCompileInputs.cache
-D:\Projects\FolderMusic\FolderMusicConsoleTest\obj\Debug\FolderMusicConsoleTest.exe
-D:\Projects\FolderMusic\FolderMusicConsoleTest\obj\Debug\FolderMusicConsoleTest.pdb

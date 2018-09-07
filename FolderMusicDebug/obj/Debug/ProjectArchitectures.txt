@@ -1,2 +1,0 @@
-D:\Projects\FolderMusic\FolderMusicDebug\FolderMusicDebug.csproj;neutral
-D:\Projects\FolderMusic\MusicPlayerApp\FolderMusicDebug\MobileDebug.csproj;neutral

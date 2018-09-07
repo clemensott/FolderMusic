@@ -1,5 +1,0 @@
-C:\Users\Christine & Bernhard\documents\visual studio 2015\Projects\ShuffleIcon\ShuffleIcon\bin\Release\ShuffleIcon.exe.config
-C:\Users\Christine & Bernhard\documents\visual studio 2015\Projects\ShuffleIcon\ShuffleIcon\bin\Release\ShuffleIcon.exe
-C:\Users\Christine & Bernhard\documents\visual studio 2015\Projects\ShuffleIcon\ShuffleIcon\bin\Release\ShuffleIcon.pdb
-C:\Users\Christine & Bernhard\documents\visual studio 2015\Projects\ShuffleIcon\ShuffleIcon\obj\Release\ShuffleIcon.exe
-C:\Users\Christine & Bernhard\documents\visual studio 2015\Projects\ShuffleIcon\ShuffleIcon\obj\Release\ShuffleIcon.pdb

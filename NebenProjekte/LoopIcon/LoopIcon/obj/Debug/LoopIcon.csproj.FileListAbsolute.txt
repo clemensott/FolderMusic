@@ -1,9 +1,0 @@
-c:\users\christine & bernhard\documents\visual studio 2015\Projects\LoopIcon\LoopIcon\bin\Debug\LoopIcon.exe.config
-c:\users\christine & bernhard\documents\visual studio 2015\Projects\LoopIcon\LoopIcon\bin\Debug\LoopIcon.exe
-c:\users\christine & bernhard\documents\visual studio 2015\Projects\LoopIcon\LoopIcon\bin\Debug\LoopIcon.pdb
-c:\users\christine & bernhard\documents\visual studio 2015\Projects\LoopIcon\LoopIcon\obj\Debug\LoopIcon.exe
-c:\users\christine & bernhard\documents\visual studio 2015\Projects\LoopIcon\LoopIcon\obj\Debug\LoopIcon.pdb
-c:\users\christine & bernhard\documents\visual studio 2015\Projects\LoopIcon\LoopIcon\obj\Debug\LoopIcon.csprojResolveAssemblyReference.cache
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\LoopIcon\LoopIcon\bin\Debug\LoopIcon.exe.config
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\LoopIcon\LoopIcon\obj\Debug\LoopIcon.exe
-C:\Users\Christine & Bernhard\Documents\Visual Studio 2015\Projects\FolderMusic\NebenProjekte\LoopIcon\LoopIcon\obj\Debug\LoopIcon.pdb

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayIcon", "PlayIcon\PlayIcon.csproj", "{04B8815D-46C0-4661-A78D-3CA1815F6315}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayIcon", "PlayIcon.csproj", "{04B8815D-46C0-4661-A78D-3CA1815F6315}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
