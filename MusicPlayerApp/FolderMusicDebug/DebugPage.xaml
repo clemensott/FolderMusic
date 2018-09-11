@@ -47,7 +47,7 @@
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
-                <AppBarButton Label="Refresh" Icon="Refresh" Click="Ref_Click"/>
+                <AppBarButton Label="Reset" Icon="Refresh" Click="Ref_Click"/>
                 <AppBarToggleButton Label="Background" Icon="Back" IsChecked="{Binding ShowBackground,Mode=TwoWay}"
                                     Click="ShowBackground_Click"/>
                 <AppBarToggleButton Label="Foreground" Icon="Forward" IsChecked="{Binding ShowForeground,Mode=TwoWay}"

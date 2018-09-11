@@ -47,7 +47,7 @@ namespace FolderMusic
             if (args.NewPlaylists.Count > 0) return;
 
             Frame.Navigate(typeof(LoadingPage), library);
-            await library.Refresh();
+            await library.Reset();
             Frame.GoBack();
         }
 
@@ -58,7 +58,7 @@ namespace FolderMusic
 
         private void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
         {
-            if (Frame.BackStackDepth == 0) Application.Current.Exit();
+            if (!Frame.CanGoBack) Application.Current.Exit();
             else
             {
                 Frame.GoBack();
@@ -129,7 +129,7 @@ namespace FolderMusic
         private async void ResetLibraryFromStorage_Click(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(LoadingPage), library);
-            await library.Refresh();
+            await library.Reset();
             Frame.GoBack();
         }
 
@@ -137,6 +137,13 @@ namespace FolderMusic
         {
             Frame.Navigate(typeof(LoadingPage), library);
             await library.Update();
+            Frame.GoBack();
+        }
+
+        private void ResetAllSongs_Click(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(LoadingPage), library);
+            await library.ResetSongs();
             Frame.GoBack();
         }
 

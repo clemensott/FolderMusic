@@ -256,13 +256,13 @@ namespace MusicPlayer.Data
             }
         }
 
-        public virtual async Task Refresh()
+        public virtual async Task Reset()
         {
             StorageFile[] files = (await GetStorageFolderFiles()).ToArray();
             IEnumerable<Song> foundSongs = GetSongsFromStorageFiles(files).ToArray();
 
             if (Parent.Parent.CanceledLoading) return;
-       
+
             Songs.Reset(foundSongs);
 
             IShuffleCollection newShuffleSongs = new ShuffleOffCollection(this, Songs);
@@ -278,6 +278,11 @@ namespace MusicPlayer.Data
         private IEnumerable<Song> GetSongsFromStorageFiles(IEnumerable<StorageFile> files)
         {
             return files.AsParallel().Select(f => GetLoadedSong(f)).Where(s => !s.IsEmpty);
+        }
+
+        public virtual async Task ResetSongs()
+        {
+            foreach (Song song in Songs) await song.Reset();
         }
 
         public virtual async Task Update()

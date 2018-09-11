@@ -47,10 +47,10 @@ namespace FolderMusic
             Playlist.SetNextLoop();
         }
 
-        private async void RefreshThisPlaylist_Click(object sender, RoutedEventArgs e)
+        private async void ResetThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(LoadingPage), Playlist.Parent.Parent);
-            await Playlist.Refresh();
+            await Playlist.Reset();
             Frame.GoBack();
 
             if (Playlist.SongsCount == 0) Frame.GoBack();

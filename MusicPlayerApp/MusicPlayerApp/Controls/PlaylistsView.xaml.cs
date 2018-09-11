@@ -117,14 +117,14 @@ namespace FolderMusic
             FlyoutBase.ShowAttachedFlyout(sender as FrameworkElement);
         }
 
-        private async void RefreshPlaylist_Click(object sender, RoutedEventArgs e)
+        private async void ResetPlaylist_Click(object sender, RoutedEventArgs e)
         {
             if (Source == null) return;
 
             GetFrame().Navigate(typeof(LoadingPage), Source);
 
             IPlaylist playlist = (sender as MenuFlyoutItem).DataContext as IPlaylist;
-            await playlist.Refresh();
+            await playlist.Reset();
 
             GetFrame().GoBack();
         }
@@ -138,7 +138,19 @@ namespace FolderMusic
             IPlaylist playlist = (sender as MenuFlyoutItem).DataContext as IPlaylist;
             await playlist.Update();
 
-            (Window.Current.Content as Frame).GoBack();
+            GetFrame().GoBack();
+        }
+
+        private async void ResetSongsPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            if (Source == null) return;
+
+            GetFrame().Navigate(typeof(LoadingPage), Source);
+
+            IPlaylist playlist = (sender as MenuFlyoutItem).DataContext as IPlaylist;
+            await playlist.ResetSongs();
+
+            GetFrame().GoBack();
         }
 
         private async void SearchForNewSongsPlaylist_Click(object sender, RoutedEventArgs e)

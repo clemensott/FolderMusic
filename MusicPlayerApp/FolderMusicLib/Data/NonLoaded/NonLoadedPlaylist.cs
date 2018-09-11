@@ -107,7 +107,7 @@ namespace MusicPlayer.Data.NonLoaded
             ReadXml(XmlConverter.GetReader(xmlText));
         }
 
-        public async Task Refresh()
+        public async Task Reset()
         {
         }
 

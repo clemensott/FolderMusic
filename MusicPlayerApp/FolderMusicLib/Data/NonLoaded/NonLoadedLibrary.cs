@@ -71,7 +71,19 @@ namespace MusicPlayer.Data.NonLoaded
         {
         }
 
-        public async Task Refresh()
+        public async Task Reset()
+        {
+        }
+
+        public async Task ResetSongs()
+        {
+        }
+
+        public async Task Update()
+        {
+        }
+
+        public void Set(ILibrary library)
         {
         }
 
@@ -90,14 +102,6 @@ namespace MusicPlayer.Data.NonLoaded
         public async Task SaveAsync()
         {
             await new Task(new Action(Save));
-        }
-
-        public async Task Update()
-        {
-        }
-
-        public void Set(ILibrary library)
-        {
         }
 
         public XmlSchema GetSchema()

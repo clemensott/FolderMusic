@@ -134,7 +134,7 @@ namespace MusicPlayer.Data
             return new Song(parent, durationMilliseconds, file.Path, title, artist);
         }
 
-        public async void Refresh()
+        public async Task Reset()
         {
             durationMilliseconds = DefaultDuration;
 
@@ -145,7 +145,7 @@ namespace MusicPlayer.Data
             }
             catch (Exception e)
             {
-                MobileDebug.Service.WriteEvent("SongRefreshFail", e, Path);
+                MobileDebug.Service.WriteEvent("SongResetFail", e, Path);
             }
         }
 

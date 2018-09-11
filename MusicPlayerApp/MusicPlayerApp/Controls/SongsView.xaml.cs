@@ -192,11 +192,11 @@ namespace FolderMusic
             FlyoutBase.ShowAttachedFlyout(sender as FrameworkElement);
         }
 
-        private void RefreshSong_Click(object sender, RoutedEventArgs e)
+        private async void ResetSong_Click(object sender, RoutedEventArgs e)
         {
             Song song = (sender as MenuFlyoutItem).DataContext as Song;
 
-            song.Refresh();
+            await song.Reset();
         }
 
         private void RemoveSong_Click(object sender, RoutedEventArgs e)

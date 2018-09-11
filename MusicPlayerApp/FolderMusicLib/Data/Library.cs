@@ -140,7 +140,7 @@ namespace MusicPlayer.Data
             LibraryChanged?.Invoke(this, args);
         }
 
-        public async Task Refresh()
+        public async Task Reset()
         {
             CanceledLoading = false;
             IsPlaying = false;
@@ -152,7 +152,7 @@ namespace MusicPlayer.Data
             {
                 IPlaylist playlist = new Playlist(refreshedPlaylists, folder.Path);
 
-                await playlist.Refresh();
+                await playlist.Reset();
 
                 if (CanceledLoading) return;
                 if (playlist.SongsCount > 0) refreshedPlaylists.Add(playlist);
@@ -174,6 +174,16 @@ namespace MusicPlayer.Data
                 if (CanceledLoading) return;
 
                 await playlist.Update();
+            }
+        }
+
+        public async Task ResetSongs()
+        {
+            foreach (IPlaylist playlist in Playlists.ToArray())
+            {
+                if (CanceledLoading) return;
+
+                await playlist.ResetSongs();
             }
         }
 
@@ -202,7 +212,7 @@ namespace MusicPlayer.Data
             if (playlist == null)
             {
                 playlist = new Playlist(playlists, folderPath);
-                await playlist.Refresh();
+                await playlist.Reset();
 
                 if (playlist.Songs.Count == 0) return;
             }

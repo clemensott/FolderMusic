@@ -29,7 +29,8 @@ namespace MusicPlayer.Data
         Task AddNew();
         void CancelLoading();
         void LoadComplete();
-        Task Refresh();
+        Task Reset();
+        Task ResetSongs();
         void Save();
         Task SaveAsync();
         void Set(ILibrary library);

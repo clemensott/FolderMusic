@@ -31,7 +31,8 @@ namespace MusicPlayer.Data
         ISongCollection Songs { get; }
 
         void ChangeCurrentSong(int offset);
-        Task Refresh();
+        Task Reset();
+        Task ResetSongs();
         Task AddNew();
         void SetNextLoop();
         void SetNextShuffle();
