@@ -181,16 +181,16 @@ namespace FolderMusic
             }
         }
 
-        private void AbbMusicProperties_Click(object sender, RoutedEventArgs e)
+        private void AbbComPing_Click(object sender, RoutedEventArgs e)
         {
             MusicPlayer.Communication.BackForegroundCommunicator.instance?.Ping();
         }
 
-        private void AbbTest0_Click(object sender, RoutedEventArgs e)
+        private async void AbbComReset_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                MusicPlayer.Communication.BackForegroundCommunicator.Reset();
+                await MusicPlayer.Communication.BackForegroundCommunicator.Reset();
             }
             catch { }
         }

@@ -121,8 +121,8 @@
                 <AppBarButton Label="Add new playlists" Click="AddNotExistingPlaylists_Click"/>
                 <AppBarButton Label="Settings" Click="Settings_Click"/>
                 <AppBarButton Label="Debug Site" Click="AbbDebugSite_Click"/>
-                <AppBarButton Label="Music Properties" Click="AbbMusicProperties_Click"/>
-                <AppBarButton Label="Test0" Click="AbbTest0_Click"/>
+                <AppBarButton Label="Ping" Click="AbbComPing_Click"/>
+                <AppBarButton Label="Reset Com" Click="AbbComReset_Click"/>
                 <AppBarButton Label="Test1" Click="AbbTest1_Click"/>
             </CommandBar.SecondaryCommands>
         </CommandBar>
