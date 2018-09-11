@@ -470,6 +470,7 @@ namespace MusicPlayer.Communication
 
         public void OnCurrentPlaylistChanged(ILibrary sender, CurrentPlaylistChangedEventArgs args)
         {
+            MobileDebug.Service.WriteEventPair("Com.OnCurrentPlaylistChanged", "LibraryHash: ", sender.GetHashCode());
             string value = sender.CurrentPlaylist.AbsolutePath;
             ValueSet valueSet = receivers[currentPlaylistPrimaryKey].GetValueSet(value.ToString());
 

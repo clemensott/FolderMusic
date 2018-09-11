@@ -8,7 +8,7 @@ namespace MusicPlayer.Data.Shuffle
     public interface IShuffleCollection : IEnumerable<Song>, IXmlSerializable
     {
         int Count { get; }
-        IPlaylist Parent { get; }
+        IPlaylist Parent { get; set; }
         ISongCollection Songs { get; }
         ShuffleType Type { get; }
 

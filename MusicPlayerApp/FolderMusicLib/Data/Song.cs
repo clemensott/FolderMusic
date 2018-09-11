@@ -33,7 +33,7 @@ namespace MusicPlayer.Data
 
         public bool Failed { get { return failed; } }
 
-        public ISongCollection Parent { get; private set; }
+        public ISongCollection Parent { get; set; }
 
         public double DurationMilliseconds
         {

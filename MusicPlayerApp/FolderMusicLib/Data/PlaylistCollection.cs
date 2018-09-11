@@ -19,14 +19,14 @@ namespace MusicPlayer.Data
 
         public int Count { get { return collection.Count; } }
 
-        public ILibrary Parent { get; private set; }
+        public ILibrary Parent { get; set; }
 
         public PlaylistCollection(ILibrary parent)
         {
             Parent = parent;
 
             collection = new ObservableCollection<IPlaylist>();
-            collection.CollectionChanged += This_CollectionChanged;
+            collection.CollectionChanged += OnCollectionChanged;
         }
 
         public PlaylistCollection(ILibrary parent, IEnumerable<IPlaylist> playlists)
@@ -34,7 +34,7 @@ namespace MusicPlayer.Data
             Parent = parent;
 
             collection = new ObservableCollection<IPlaylist>(playlists);
-            collection.CollectionChanged += This_CollectionChanged;
+            collection.CollectionChanged += OnCollectionChanged;
         }
 
         public PlaylistCollection(ILibrary parent, string xmlText)
@@ -43,8 +43,13 @@ namespace MusicPlayer.Data
             ReadXml(XmlConverter.GetReader(xmlText));
         }
 
-        private void This_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            foreach (IPlaylist playlist in (IEnumerable)e.NewItems ?? Enumerable.Empty<IPlaylist>())
+            {
+                playlist.Parent = this;
+            }
+
             CollectionChanged?.Invoke(this, e);
         }
 
@@ -155,7 +160,7 @@ namespace MusicPlayer.Data
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Service.WriteEventPair("XmlReadPlaylistCollectionFail", 
+                    MobileDebug.Service.WriteEventPair("XmlReadPlaylistCollectionFail",
                         e, "Count: ", collection.Count, "Node: ", reader.NodeType);
                 }
             }

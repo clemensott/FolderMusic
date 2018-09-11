@@ -84,7 +84,8 @@ namespace FolderMusic
             try
             {
                 Playlist.Parent.Parent.CurrentPlaylist = Playlist;
-                MobileDebug.Service.WriteEventPair("OnSelectedSongChangedManually2", "CurrentPlaylist: ", Playlist?.Parent?.Parent?.CurrentPlaylist);
+                MobileDebug.Service.WriteEventPair("OnSelectedSongChangedManually2", "CurrentPlaylist: ", Playlist?.Parent?.Parent?.CurrentPlaylist,
+                    "LibraryHash: ", Playlist.Parent.Parent.GetHashCode());
             }
             catch (System.Exception exc)
             {

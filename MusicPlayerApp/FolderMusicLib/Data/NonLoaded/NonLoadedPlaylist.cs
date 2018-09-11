@@ -53,7 +53,7 @@ namespace MusicPlayer.Data.NonLoaded
 
         public string Name { get; private set; }
 
-        public IPlaylistCollection Parent { get; private set; }
+        public IPlaylistCollection Parent { get; set; }
 
         public ShuffleType Shuffle { get; set; }
 

@@ -24,7 +24,7 @@ namespace MusicPlayer.Data
         double CurrentSongPositionPercent { get; set; }
         LoopType Loop { get; set; }
         string Name { get; }
-        IPlaylistCollection Parent { get; }
+        IPlaylistCollection Parent { get; set; }
         ShuffleType Shuffle { get; set; }
         IShuffleCollection ShuffleSongs { get; }
         int SongsCount { get; }

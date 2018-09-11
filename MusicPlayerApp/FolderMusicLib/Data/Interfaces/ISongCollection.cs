@@ -8,7 +8,7 @@ namespace MusicPlayer.Data
     public interface ISongCollection : IEnumerable<Song>, IXmlSerializable
     {
         int Count { get; }
-        IPlaylist Parent { get; }
+        IPlaylist Parent { get; set; }
 
         event SongCollectionChangedEventHandler Changed;
 

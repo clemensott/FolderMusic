@@ -15,7 +15,7 @@ namespace MusicPlayer.Data.NonLoaded
 
         public int Count { get { return list.Count; } }
 
-        public IPlaylist Parent { get; private set; }
+        public IPlaylist Parent { get; set; }
 
         public event SongCollectionChangedEventHandler Changed;
 

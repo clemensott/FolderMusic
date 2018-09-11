@@ -1,9 +1,9 @@
 <XamlCompilerSaveState>
   <ReferenceAssemblyList>
-    <LocalAssembly PathName="c:\users\clemens.ott\source\repos\foldermusic\musicplayerapp\musicplayerapp\obj\arm\debug\intermediatexaml\musicplayerapp.exe" HashGuid="675e49a8-fe2c-44c4-e118-016370c56c42" />
-    <ReferenceAssembly PathName="c:\users\clemens.ott\source\repos\foldermusic\musicplayerapp\backgroundtask\bin\arm\debug\backgroundtask.winmd" HashGuid="2eec2653-cfa3-0d76-6792-6c262c9589e7" />
+    <LocalAssembly PathName="c:\users\clemens.ott\source\repos\foldermusic\musicplayerapp\musicplayerapp\obj\arm\debug\intermediatexaml\musicplayerapp.exe" HashGuid="44107f1c-f6d7-0cfb-85df-3a68ae74149d" />
+    <ReferenceAssembly PathName="c:\users\clemens.ott\source\repos\foldermusic\musicplayerapp\backgroundtask\bin\arm\debug\backgroundtask.winmd" HashGuid="58b64b1f-1864-72bf-b429-f44f7d6f87ed" />
     <ReferenceAssembly PathName="c:\users\clemens.ott\source\repos\foldermusic\musicplayerapp\foldermusicdebug\bin\arm\debug\mobiledebug.dll" HashGuid="b2f76cc9-030a-2d1f-bca9-b0c3d5d0c4d7" />
-    <ReferenceAssembly PathName="c:\users\clemens.ott\source\repos\foldermusic\musicplayerapp\foldermusiclib\bin\arm\debug\musicplayerlib.dll" HashGuid="da4a255c-aaf8-9a7b-837d-899f35e4f788" />
+    <ReferenceAssembly PathName="c:\users\clemens.ott\source\repos\foldermusic\musicplayerapp\foldermusiclib\bin\arm\debug\musicplayerlib.dll" HashGuid="cf29e7e7-f645-bfea-43f0-e9f606708715" />
     <ReferenceAssembly PathName="c:\users\clemens.ott\source\repos\foldermusic\musicplayerapp\playericonswp8.1\bin\arm\debug\playericonswp8.1.dll" HashGuid="3303c29d-bfd6-9c31-c37e-c703fdff2677" />
   </ReferenceAssemblyList>
 </XamlCompilerSaveState>

@@ -17,7 +17,7 @@ namespace MusicPlayer.Data.NonLoaded
 
         public int Count { get { return list.Count; } }
 
-        public ILibrary Parent { get; private set; }
+        public ILibrary Parent { get; set; }
 
         public NonLoadedPlaylistCollection(ILibrary parent,
             IPlaylistCollection actualPlaylists, IPlaylist actualCurrentPlaylist)

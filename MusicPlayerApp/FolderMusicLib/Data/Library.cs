@@ -133,8 +133,10 @@ namespace MusicPlayer.Data
             }
 
             playlists = library.Playlists;
+            playlists.Parent = this;
             currentPlaylist = library.CurrentPlaylist;
             IsLoadedComplete = true;
+            MobileDebug.Service.WriteEventPair("Com.OnCurrentPlaylistChanged", "thisHash: ", GetHashCode(), "newLHash: ", library.GetHashCode());
 
             LibraryChanged?.Invoke(this, args);
         }

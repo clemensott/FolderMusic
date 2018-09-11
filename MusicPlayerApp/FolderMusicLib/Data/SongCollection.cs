@@ -14,7 +14,7 @@ namespace MusicPlayer.Data
 
         public int Count { get { return list.Count; } }
 
-        public IPlaylist Parent { get; private set; }
+        public IPlaylist Parent { get; set; }
 
         public SongCollection(IPlaylist parent)
         {
@@ -81,6 +81,7 @@ namespace MusicPlayer.Data
                 if (list.Contains(addSong)) continue;
 
                 list.Add(addSong);
+                addSong.Parent = this;
                 yield return new ChangedSong(list.IndexOf(addSong), addSong);
             }
         }

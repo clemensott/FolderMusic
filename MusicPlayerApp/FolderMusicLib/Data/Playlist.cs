@@ -123,7 +123,7 @@ namespace MusicPlayer.Data
             }
         }
 
-        public IPlaylistCollection Parent { get; private set; }
+        public IPlaylistCollection Parent { get; set; }
 
         public Playlist(IPlaylistCollection parent)
         {
@@ -215,6 +215,7 @@ namespace MusicPlayer.Data
 
             var args = new ShuffleChangedEventArgs(ShuffleSongs, shuffleSongs, CurrentSong, CurrentSong);
             ShuffleSongs = shuffleSongs;
+            ShuffleSongs.Parent = this;
             ShuffleChanged?.Invoke(this, args);
         }
 
