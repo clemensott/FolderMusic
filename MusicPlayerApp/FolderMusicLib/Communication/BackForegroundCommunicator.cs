@@ -52,6 +52,8 @@ namespace MusicPlayer.Communication
             instance.Dispose();
             instance = new BackForegroundCommunicator(instance.library, instance.isForeground);
 
+            MobileDebug.Service.WriteEvent("Com.Reset");
+
             if (!instance.isForeground) return;
 
             try
