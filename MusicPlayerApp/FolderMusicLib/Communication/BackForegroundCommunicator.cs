@@ -46,9 +46,22 @@ namespace MusicPlayer.Communication
             instance = new BackForegroundCommunicator(library, isForeground);
         }
 
-        public static void Reset()
+        private System.Threading.Timer timer;
+        public static async System.Threading.Tasks.Task Reset()
         {
-            instance = new BackForegroundCommunicator(instance.library,instance.isForeground);
+            instance.Dispose();
+            instance = new BackForegroundCommunicator(instance.library, instance.isForeground);
+
+            if (!instance.isForeground) return;
+
+            try
+            {
+                await Windows.Storage.PathIO.WriteTextAsync("Reset.txt", "Do");
+            }
+            catch (Exception e)
+            {
+                await new Windows.UI.Popups.MessageDialog(e.Message, e.GetType().Name).ShowAsync();
+            }
         }
 
         private bool isForeground;
@@ -78,6 +91,8 @@ namespace MusicPlayer.Communication
                 senderMethod = BackgroundMediaPlayer.SendMessageToForeground;
 
                 library.SkippedSongs.SkippedSong += OnSkippedSong;
+
+                timer = new System.Threading.Timer(new System.Threading.TimerCallback(Timer_Tick), null, 0, 1000);
             }
 
             library.LibraryChanged += OnLibraryChanged;
@@ -272,9 +287,9 @@ namespace MusicPlayer.Communication
         private void ReceiveCurrentSongChanged(ValueSet valueSet, string value)
         {
             Song newCurrentSong;
-            MobileDebug.Service.WriteEvent("ReceiveCurrentSongChanged1");
+
             if (!HaveSong(value, out newCurrentSong)) return;
-            MobileDebug.Service.WriteEvent("ReceiveCurrentSongChanged2", newCurrentSong.Parent.Parent.CurrentSong, newCurrentSong);
+
             newCurrentSong.Parent.Parent.CurrentSong = newCurrentSong;
         }
 
@@ -621,7 +636,7 @@ namespace MusicPlayer.Communication
 
             try
             {
-                if (!UseDispatcher()) Handle(e.Data);
+                if (!NeedsDispatcher()) Handle(e.Data);
                 else
                 {
                     await CoreApplication.MainView.CoreWindow.Dispatcher.
@@ -638,11 +653,12 @@ namespace MusicPlayer.Communication
 
         private void Handle(ValueSet valueSet)
         {
-            if(valueSet.ContainsKey("Ping")){
+            if (valueSet.ContainsKey("Ping"))
+            {
                 AnswerPing();
                 return;
             }
-            else if(valueSet.ContainsKey("AnswerPing"))
+            else if (valueSet.ContainsKey("AnswerPing"))
             {
                 MobileDebug.Service.WriteEvent("GotPingAnswer");
                 return;
@@ -662,10 +678,12 @@ namespace MusicPlayer.Communication
             return valueSet.Keys.FirstOrDefault(k => k.EndsWith(primaryKey));
         }
 
-        private bool UseDispatcher()
+        private bool NeedsDispatcher()
         {
             try
             {
+                if (!isForeground) return false;
+
                 return !CoreApplication.MainView.CoreWindow.Dispatcher.HasThreadAccess;
             }
             catch
@@ -726,6 +744,44 @@ namespace MusicPlayer.Communication
             }
 
             return null;
+        }
+
+        private async void Timer_Tick(object state)
+        {
+            try
+            {
+                string resetText = await Windows.Storage.PathIO.ReadTextAsync("Reset.txt");
+                await Windows.Storage.PathIO.WriteTextAsync("Reset.txt", "");
+
+                if (resetText.Length == 0) return;
+
+                await Reset();
+            }
+            catch { }
+        }
+
+        private void Dispose()
+        {
+            if (isForeground)
+            {
+                BackgroundMediaPlayer.MessageReceivedFromBackground -= BackgroundMediaPlayer_MessageReceived;
+            }
+            else
+            {
+                BackgroundMediaPlayer.MessageReceivedFromForeground -= BackgroundMediaPlayer_MessageReceived;
+
+                library.SkippedSongs.SkippedSong -= OnSkippedSong;
+
+                timer.Dispose();
+            }
+
+            library.LibraryChanged -= OnLibraryChanged;
+            library.PlayStateChanged -= OnPlayStateChanged;
+            library.CurrentPlaylistChanged -= OnCurrentPlaylistChanged;
+            library.PlaylistsChanged -= OnPlaylistsChanged;
+            library.SettingsChanged -= OnSettingsChanged;
+
+            Unsubscribe(library.Playlists);
         }
     }
 }

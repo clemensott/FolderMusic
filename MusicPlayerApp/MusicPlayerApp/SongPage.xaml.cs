@@ -17,6 +17,8 @@ namespace FolderMusic
     /// </summary>
     public sealed partial class SongPage : Page
     {
+        private Song song;
+
         public SongPage()
         {
             this.InitializeComponent();
@@ -29,7 +31,7 @@ namespace FolderMusic
         /// Dieser Parameter wird normalerweise zum Konfigurieren der Seite verwendet.</param>
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            Song song = e.Parameter as Song;
+            song = e.Parameter as Song;
 
             if (song == null) return;
 
@@ -66,18 +68,18 @@ namespace FolderMusic
             }
         }
 
-        private async void Abb_Click(object sender, RoutedEventArgs e)
+        private async void AbbSave_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 MusicProperties props = (MusicProperties)DataContext;
 
                 await props.SavePropertiesAsync();
+                await song?.Reset();
             }
             catch (Exception exc)
             {
-                string message = exc.GetType().Name + "\n" + exc.Message;
-                await new MessageDialog(message).ShowAsync();
+                await new MessageDialog(exc.Message, exc.GetType().Name).ShowAsync();
             }
         }
     }

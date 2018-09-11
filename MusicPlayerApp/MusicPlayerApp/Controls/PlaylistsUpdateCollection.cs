@@ -49,7 +49,7 @@ namespace FolderMusic
         {
             if (playlist == null) return;
 
-            playlist.Songs.Changed += OnPlaylistChanged;
+            playlist.Songs.Changed += OnPlaylistSongsChanged;
             Add(playlist);
         }
 
@@ -57,11 +57,11 @@ namespace FolderMusic
         {
             if (playlist == null) return;
 
-            playlist.Songs.Changed -= OnPlaylistChanged;
+            playlist.Songs.Changed -= OnPlaylistSongsChanged;
             Remove(playlist);
         }
 
-        private void OnPlaylistChanged(ISongCollection sender, EventArgs args)
+        private void OnPlaylistSongsChanged(ISongCollection sender, EventArgs args)
         {
             int index = source.IndexOf(sender.Parent);
 
