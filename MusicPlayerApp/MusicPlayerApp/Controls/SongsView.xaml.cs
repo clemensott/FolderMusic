@@ -1,7 +1,10 @@
 ﻿using MusicPlayer.Data;
 using MusicPlayer.Data.Shuffle;
 using System;
+using System.IO;
 using System.Linq;
+using Windows.Storage;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -201,6 +204,27 @@ namespace FolderMusic
             Song song = (sender as MenuFlyoutItem).DataContext as Song;
 
             Source.Songs.Remove(song);
+        }
+
+        private async void DeleteSong_Click(object sender, RoutedEventArgs e)
+        {
+            Song song = (sender as MenuFlyoutItem).DataContext as Song;
+
+            try
+            {
+                StorageFile file = await song.GetStorageFileAsync();
+
+                await file.DeleteAsync();
+                Source.Songs.Remove(song);
+            }
+            catch (FileNotFoundException)
+            {
+                Source.Songs.Remove(song);
+            }
+            catch (Exception exc)
+            {
+                await new MessageDialog(exc.Message, exc.GetType().Name).ShowAsync();
+            }
         }
 
         private void EditSong_Click(object sender, RoutedEventArgs e)

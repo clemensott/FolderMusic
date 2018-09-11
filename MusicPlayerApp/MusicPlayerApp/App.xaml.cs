@@ -24,7 +24,7 @@ namespace FolderMusic
 
         private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            MobileDebug.Service.WriteEvent("UnhandledException", e.Exception);
+            MobileDebug.Service.WriteEvent("UnhandledException", e.Exception, e.Exception.StackTrace);
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs e)

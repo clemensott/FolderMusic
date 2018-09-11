@@ -55,7 +55,7 @@ namespace BackgroundTask
             ringer = new Ringer(this, library);
 
             Subscribe(task);
-            
+
             library.LoadComplete();
 
             BackgroundPlayer.SetCurrent();
@@ -306,15 +306,19 @@ namespace BackgroundTask
 
         private void TaskCompleted(BackgroundTaskRegistration sender, BackgroundTaskCompletedEventArgs args)
         {
-            Dispose();
+            library.IsPlaying = false;
+            //MobileDebug.Service.WriteEvent("TaskCompleted");
+            Cancel();
         }
 
         private void OnCanceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason)
         {
-            Dispose();
+            library.IsPlaying = false;
+            //MobileDebug.Service.WriteEvent("OnCanceled", reason);
+            Cancel();
         }
 
-        private void Dispose()
+        private void Cancel()
         {
             ringer?.Dispose();
 

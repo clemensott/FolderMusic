@@ -30,7 +30,6 @@ namespace FolderMusic
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine((sender as Button).ActualWidth + " x " + (sender as Button).ActualHeight);
             if (list == null) return;
 
             list.Add(string.Empty);
@@ -74,7 +73,6 @@ namespace FolderMusic
             list = DataContext as IList<string>;
 
             UpdateUiList(-1, true);
-            System.Diagnostics.Debug.WriteLine(list != null);
         }
 
         private void UpdateUiList()
@@ -204,10 +202,6 @@ namespace FolderMusic
 
         private void Tbl_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            //System.Diagnostics.Debug.WriteLine(e.GetPosition(sender as UIElement));
-            //System.Diagnostics.Debug.WriteLine((sender as FrameworkElement).Width +
-            //    ": " + (sender as FrameworkElement).ActualWidth);
-
             Select(GetListUiElementIndex(sender as UIElement), true);
         }
 

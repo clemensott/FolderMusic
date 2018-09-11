@@ -79,17 +79,14 @@ namespace FolderMusic
 
         private void OnSelectedSongChangedManually(object sender, SelectedSongChangedManuallyEventArgs e)
         {
-            MobileDebug.Service.WriteEventPair("OnSelectedSongChangedManually1", "OldCurrentSong: ", e.OldCurrentSong,
-                "NewCurrentSong: ", e.NewCurrentSong, "CurrentPlaylist: ", Playlist?.Parent?.Parent?.CurrentPlaylist);
             try
             {
                 Playlist.Parent.Parent.CurrentPlaylist = Playlist;
-                MobileDebug.Service.WriteEventPair("OnSelectedSongChangedManually2", "CurrentPlaylist: ", Playlist?.Parent?.Parent?.CurrentPlaylist,
-                    "LibraryHash: ", Playlist.Parent.Parent.GetHashCode());
             }
             catch (System.Exception exc)
             {
-                MobileDebug.Service.WriteEventPair("OnSelectedSongChangedManuallyFail", exc, "CurrentPlaylist: ", Playlist?.Parent?.Parent?.CurrentPlaylist);
+                MobileDebug.Service.WriteEventPair("OnSelectedSongChangedManuallyFail", exc,
+                    "CurrentPlaylist: ", Playlist?.Parent?.Parent?.CurrentPlaylist);
             }
 
             Frame.GoBack();

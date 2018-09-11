@@ -99,7 +99,7 @@ namespace MusicPlayer.Data
         public Library(string xmlText)
         {
             IsLoadedComplete = true;
-            System.Diagnostics.Debug.WriteLine(xmlText.Length);
+            
             ReadXml(XmlConverter.GetReader(xmlText));
         }
 
@@ -136,7 +136,6 @@ namespace MusicPlayer.Data
             playlists.Parent = this;
             currentPlaylist = library.CurrentPlaylist;
             IsLoadedComplete = true;
-            MobileDebug.Service.WriteEventPair("Com.OnCurrentPlaylistChanged", "thisHash: ", GetHashCode(), "newLHash: ", library.GetHashCode());
 
             LibraryChanged?.Invoke(this, args);
         }

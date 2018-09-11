@@ -1,5 +1,6 @@
 ﻿using MusicPlayer.Data;
 using System.Collections.Generic;
+using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -72,17 +73,13 @@ namespace FolderMusic
 
         private void Toggle_Click(object sender, RoutedEventArgs e)
         {
-            if (lbxSongs.SelectedItems.Count == 0) lbxSongs.SelectAll();
-            else lbxSongs.SelectedItems.Clear();
-            //foreach (object item in lbxSongs.Items)
-            //{
-            //    try
-            //    {
-            //        if (lbxSongs.SelectedItems.Contains(item)) lbxSongs.SelectedItems.Remove(item);
-            //        else lbxSongs.SelectedItems.Add(item);
-            //    }
-            //    catch { }
-            //}
+            object[] unselectedItems = lbxSongs.Items.Except(lbxSongs.SelectedItems).ToArray();
+
+            lbxSongs.SelectedItems.Clear();
+
+            foreach (object item in unselectedItems) lbxSongs.SelectedItems.Add(item);
+            //if (lbxSongs.SelectedItems.Count == 0) lbxSongs.SelectAll();
+            //else lbxSongs.SelectedItems.Clear();
         }
     }
 }

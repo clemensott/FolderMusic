@@ -265,11 +265,13 @@ namespace FolderMusic
                 catch (Exception e)
                 {
                     MobileDebug.Service.WriteEvent("Slider.SetValues2", e, percent, duration);
+                    new Windows.UI.Popups.MessageDialog(e.Message, "Slider.SetValues2").ShowAsync().AsTask().Wait();
                 }
             }
             catch (Exception e)
             {
                 MobileDebug.Service.WriteEvent("Slider.SetValues1", e);
+                new Windows.UI.Popups.MessageDialog(e.Message, "Slider.SetValues1").ShowAsync().AsTask().Wait();
             }
         }
 

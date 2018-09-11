@@ -8,16 +8,13 @@ namespace MusicPlayer.Data.Shuffle
     {
         public ShuffleOffCollection(IPlaylist parent, ISongCollection songs) : base(parent, songs, GetStart(songs))
         {
-            foreach (Song song in this)
-            {
-                Subscribe(song);
-            }
+            foreach (Song song in this) Subscribe(song);
         }
 
         public ShuffleOffCollection(IPlaylist parent, ISongCollection songs, string xmlText)
             : base(parent, songs, xmlText)
         {
-
+            foreach (Song song in this) Subscribe(song);
         }
 
         private static IEnumerable<Song> GetStart(ISongCollection songs)
@@ -27,17 +24,19 @@ namespace MusicPlayer.Data.Shuffle
 
         private void Subscribe(Song song)
         {
-
+            song.TitleChanged += OnSongChanged;
+            song.ArtistChanged += OnSongChanged;
         }
 
         private void Unsubscribe(Song song)
         {
-
+            song.TitleChanged -= OnSongChanged;
+            song.ArtistChanged -= OnSongChanged;
         }
 
-        private void Song_Changed(Song sender, EventArgs args)
+        private void OnSongChanged(Song sender, EventArgs args)
         {
-            UpdateOrder();
+            if (UpdateOrder()) RaiseChange();
         }
 
         protected override ShuffleType GetShuffleType()
@@ -65,8 +64,7 @@ namespace MusicPlayer.Data.Shuffle
                 Unsubscribe(removeSong);
             }
 
-            if (UpdateOrder()) changed = true;
-            if (changed) RaiseChange();
+            if (UpdateOrder() || changed) RaiseChange();
         }
 
         private bool UpdateOrder()
