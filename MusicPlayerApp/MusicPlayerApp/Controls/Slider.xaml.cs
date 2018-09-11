@@ -251,12 +251,26 @@ namespace FolderMusic
 
         private void SetValues()
         {
-            double percent = Library?.CurrentPlaylist?.CurrentSongPositionPercent ?? 0;
-            double duration = Library?.CurrentPlaylist?.CurrentSong?.DurationMilliseconds ?? Song.DefaultDuration;
+            try
+            {
+                double percent = Library?.CurrentPlaylist?.CurrentSongPositionPercent ?? 0;
+                double duration = Library?.CurrentPlaylist?.CurrentSong?.DurationMilliseconds ?? Song.DefaultDuration;
 
-            sld.Value = percent;
-            tblPosition.Text = GetShowTime(percent * duration);
-            tblDuration.Text = GetShowTime(duration);
+                try
+                {
+                    sld.Value = percent;
+                    tblPosition.Text = GetShowTime(percent * duration);
+                    tblDuration.Text = GetShowTime(duration);
+                }
+                catch (Exception e)
+                {
+                    MobileDebug.Service.WriteEvent("Slider.SetValues2", e, percent, duration);
+                }
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Service.WriteEvent("Slider.SetValues1", e);
+            }
         }
 
         private string GetShowTime(double totalMilliseconds)

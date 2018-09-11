@@ -60,7 +60,7 @@ namespace BackgroundTask
 
             try
             {
-                MobileDebug.Manager.WriteEvent("RingFileGet");
+                MobileDebug.Service.WriteEvent("RingFileGet");
 
                 Uri uri = new Uri("ms-appx:///Assets/Glockenschlag.mp3");
                 StorageFile file = GetRingerFile(uri);
@@ -75,14 +75,14 @@ namespace BackgroundTask
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Manager.WriteEvent("RingFileFail1", e);
+                    MobileDebug.Service.WriteEvent("RingFileFail1", e);
                     task.PlayerType = BackgroundPlayerType.Music;
                     task.BackgroundPlayer.SetCurrent();
                 }
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("RingFileFaFileName", e);
+                MobileDebug.Service.WriteEvent("RingFileFaFileName", e);
             }
         }
 
@@ -120,7 +120,7 @@ namespace BackgroundTask
 
         public void MediaEnded(MediaPlayer sender, object args)
         {
-            MobileDebug.Manager.WriteEventPair("RingerEnded", "RingerState: ", State);
+            MobileDebug.Service.WriteEventPair("RingerEnded", "RingerState: ", State);
 
             if (State == RingerState.Waiting) SetCurrent();
             else if (State == RingerState.Ringing)
@@ -147,7 +147,7 @@ namespace BackgroundTask
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("ReloadTimesFail", e);
+                MobileDebug.Service.WriteEvent("ReloadTimesFail", e);
                 startMillis = periodSpanMillis = Timeout.Infinite;
             }
 
@@ -155,7 +155,7 @@ namespace BackgroundTask
 
             timer.Change(startMillis, periodSpanMillis);
 
-            MobileDebug.Manager.WriteEvent("RingerSet", "Start [ms]: " +
+            MobileDebug.Service.WriteEvent("RingerSet", "Start [ms]: " +
                startMillis, "Periode [ms]: " + periodSpanMillis);
         }
 
@@ -171,7 +171,7 @@ namespace BackgroundTask
 
         private async void Ring(object obj)
         {
-            MobileDebug.Manager.WriteEvent("Ring");
+            MobileDebug.Service.WriteEvent("Ring");
 
             if (!library.IsPlaying) return;
 

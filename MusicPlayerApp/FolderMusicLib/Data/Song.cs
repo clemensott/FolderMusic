@@ -145,7 +145,7 @@ namespace MusicPlayer.Data
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("SongRefreshFail", e, Path);
+                MobileDebug.Service.WriteEvent("SongRefreshFail", e, Path);
             }
         }
 
@@ -163,7 +163,7 @@ namespace MusicPlayer.Data
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("SongSetTitleAndArtistFail", e, Path);
+                MobileDebug.Service.WriteEvent("SongSetTitleAndArtistFail", e, Path);
             }
         }
 
@@ -179,7 +179,7 @@ namespace MusicPlayer.Data
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("SongLoadDurationFail", e, Path);
+                MobileDebug.Service.WriteEvent("SongLoadDurationFail", e, Path);
             }
         }
 
@@ -210,7 +210,7 @@ namespace MusicPlayer.Data
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("SongGetFileFail", e, Path);
+                MobileDebug.Service.WriteEvent("SongGetFileFail", e, Path);
                 failed = true;
                 throw e;
             }

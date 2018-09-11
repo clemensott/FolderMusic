@@ -16,13 +16,26 @@ namespace MusicPlayer.Data.NonLoaded
         public event CurrentPlaylistPropertyChangedEventHandler CurrentPlaylistChanged;
         public event SettingsPropertyChangedEventHandler SettingsChanged;
 
+        private bool isPlaying;
+
         public IPlaylist this[int index] { get { return Playlists.ElementAtOrDefault(index); } }
 
         public bool CanceledLoading { get; private set; }
 
         public IPlaylist CurrentPlaylist { get; set; }
 
-        public bool IsPlaying { get; set; }
+        public bool IsPlaying
+        {
+            get { return isPlaying; }
+            set
+            {
+                if (value == isPlaying) return;
+
+                isPlaying = value;
+                var args = new PlayStateChangedEventArgs(value);
+                PlayStateChanged?.Invoke(this, args);
+            }
+        }
 
         public IPlaylistCollection Playlists { get; private set; }
 
@@ -70,7 +83,7 @@ namespace MusicPlayer.Data.NonLoaded
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("NonLoadedLibrarySaveFail", e);
+                MobileDebug.Service.WriteEvent("NonLoadedLibrarySaveFail", e);
             }
         }
 

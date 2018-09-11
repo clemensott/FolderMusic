@@ -47,8 +47,8 @@ namespace MobileDebug
         {
             try
             {
-                await FileIO.WriteTextAsync(await Manager.GetBackDebugDataFile(), string.Empty);
-                await FileIO.WriteTextAsync(await Manager.GetForeDebugDataFile(), string.Empty);
+                await FileIO.WriteTextAsync(await Service.GetBackDebugDataFile(), string.Empty);
+                await FileIO.WriteTextAsync(await Service.GetForeDebugDataFile(), string.Empty);
             }
             catch { }
         }

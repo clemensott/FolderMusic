@@ -37,7 +37,7 @@ namespace MobileDebug
             private set
             {
                 if (value == isLoading) return;
-
+                
                 isLoading = value;
                 NotifyPropertyChanged("IsLoading");
                 NotifyPropertyChanged("ShowLog");
@@ -163,8 +163,8 @@ namespace MobileDebug
 
             IEnumerable<Event> filterer = IsFinding ? Join(Events, ShowEventNames) : Events;
 
-            if (ShowBackground && !ShowForeground) return filterer.Where(e => e.BackgroundTaskId != Manager.ForegroundId);
-            else if (ShowForeground && !ShowBackground) return filterer.Where(e => e.BackgroundTaskId == Manager.ForegroundId);
+            if (ShowBackground && !ShowForeground) return filterer.Where(e => e.BackgroundTaskId != Service.ForegroundId);
+            else if (ShowForeground && !ShowBackground) return filterer.Where(e => e.BackgroundTaskId == Service.ForegroundId);
 
             return filterer;
         }
@@ -186,7 +186,7 @@ namespace MobileDebug
             UpdateAllNamesIsChecked();
 
             IsLoading = false;
-            if (Events.Length > 0) ForceLog = true;
+            if (Events.Length == 0) ForceLog = true;
 
             AppandLoadingLog("Relaoding is done: " + GetFilterEvents().Count());
         }
@@ -196,11 +196,11 @@ namespace MobileDebug
             try
             {
                 AppandLoadingLog("\nGetBackFile: ");
-                StorageFile backFile = await Manager.GetBackDebugDataFile();
+                StorageFile backFile = await Service.GetBackDebugDataFile();
                 AppandLoadingLog(backFile.Path);
 
                 AppandLoadingLog("\nGetForeFile: ");
-                StorageFile foreFile = await Manager.GetForeDebugDataFile();
+                StorageFile foreFile = await Service.GetForeDebugDataFile();
                 AppandLoadingLog(foreFile.Path);
 
                 AppandLoadingLog("\nLoadBackFile: ");

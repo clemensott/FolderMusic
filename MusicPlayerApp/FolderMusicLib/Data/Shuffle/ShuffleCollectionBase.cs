@@ -100,7 +100,7 @@ namespace MusicPlayer.Data.Shuffle
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Manager.WriteEvent("ShuffleCollectionReadXmlFail1", e, reader.NodeType, reader.Name);
+                    MobileDebug.Service.WriteEvent("ShuffleCollectionReadXmlFail1", e, reader.NodeType, reader.Name);
                 }
             }
         }

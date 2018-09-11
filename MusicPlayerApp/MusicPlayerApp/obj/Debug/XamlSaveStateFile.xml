@@ -1,9 +1,6 @@
 <XamlCompilerSaveState>
   <ReferenceAssemblyList>
     <LocalAssembly PathName="e:\foldermusic\musicplayerapp\musicplayerapp\obj\debug\intermediatexaml\musicplayerapp.exe" HashGuid="da979a13-55ae-e440-ac17-81756bfd5f0d" />
-    <ReferenceAssembly PathName="e:\foldermusic\musicplayerapp\backgroundtask\bin\debug\backgroundtask.winmd" HashGuid="58b64b1f-1864-72bf-b429-f44f7d6f87ed" />
-    <ReferenceAssembly PathName="e:\foldermusic\musicplayerapp\foldermusicdebug\bin\debug\mobiledebug.dll" HashGuid="b227f3c8-a524-fc7b-51ae-3cf396c1c43a" />
-    <ReferenceAssembly PathName="e:\foldermusic\musicplayerapp\foldermusiclib\bin\debug\musicplayerlib.dll" HashGuid="01760bf3-f0b7-7423-328a-126126e5357d" />
-    <ReferenceAssembly PathName="e:\foldermusic\musicplayerapp\playericonswp8.1\bin\debug\playericonswp8.1.dll" HashGuid="3303c29d-bfd6-9c31-c37e-c703fdff2677" />
+    <ReferenceAssembly PathName="c:\users\clemens.ott\source\repos\foldermusic\musicplayerapp\playericonswp8.1\bin\debug\playericonswp8.1.dll" HashGuid="3303c29d-bfd6-9c31-c37e-c703fdff2677" />
   </ReferenceAssemblyList>
 </XamlCompilerSaveState>

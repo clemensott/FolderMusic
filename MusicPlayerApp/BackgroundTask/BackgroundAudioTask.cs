@@ -37,8 +37,8 @@ namespace BackgroundTask
         public void Run(IBackgroundTaskInstance taskInstance)
         {
             string taskId = taskInstance.InstanceId.ToString();
-            MobileDebug.Manager.SetIsBackground(taskId);
-            MobileDebug.Manager.WriteEventPair("Run", "task == null: ", task == null,
+            MobileDebug.Service.SetIsBackground(taskId);
+            MobileDebug.Service.WriteEventPair("Run", "task == null: ", task == null,
                 "this.Hash: ", GetHashCode(), "PlayerHash: ", BackgroundMediaPlayer.Current.GetHashCode());
 
             deferral = taskInstance.GetDeferral();
@@ -51,22 +51,23 @@ namespace BackgroundTask
             smtc = SystemMediaTransportControls.GetForCurrentView();
             task = this;
 
-            Subscribe(task);
-
-            library.LoadComplete();
             musicPlayer = new MusicPlayer(smtc, library);
             ringer = new Ringer(this, library);
 
+            Subscribe(task);
+            
+            library.LoadComplete();
+
             BackgroundPlayer.SetCurrent();
 
-            MobileDebug.Manager.WriteEvent("RunFinish");
+            MobileDebug.Service.WriteEvent("RunFinish");
         }
 
         private static void Subscribe(BackgroundAudioTask task)
         {
             var smtcType = task?.smtc.DisplayUpdater.Type.ToString() ?? "null";
             var smtcHash = task?.smtc.DisplayUpdater.GetHashCode().ToString() ?? "null";
-            MobileDebug.Manager.WriteEventPair("BackSubscribe", "SmtcType: ", smtcType, "SmtcHash: ", smtcHash);
+            MobileDebug.Service.WriteEventPair("BackSubscribe", "SmtcType: ", smtcType, "SmtcHash: ", smtcHash);
 
             if (task == null) return;
 
@@ -90,7 +91,7 @@ namespace BackgroundTask
         {
             var smtcType = task?.smtc.DisplayUpdater.Type.ToString() ?? "null";
             var smtcHash = task?.smtc.DisplayUpdater.GetHashCode().ToString() ?? "null";
-            MobileDebug.Manager.WriteEventPair("BackUnsubscribe", "SmtcType: ", smtcType, "SmtcHash: ", smtcHash);
+            MobileDebug.Service.WriteEventPair("BackUnsubscribe", "SmtcType: ", smtcType, "SmtcHash: ", smtcHash);
 
             if (task == null) return;
 
@@ -112,7 +113,7 @@ namespace BackgroundTask
         private void MediaTransportControlButtonPressed(SystemMediaTransportControls sender,
             SystemMediaTransportControlsButtonPressedEventArgs args)
         {
-            MobileDebug.Manager.WriteEventPair("MTCPressed", "Button: ", args.Button,
+            MobileDebug.Service.WriteEventPair("MTCPressed", "Button: ", args.Button,
                 "Song: ", library.CurrentPlaylist?.CurrentSong);
 
             MediaTransportControlButtonPressed(args.Button);
@@ -168,7 +169,7 @@ namespace BackgroundTask
 
             if (curMillis >= natMillis) pauseAllowed = false;
 
-            MobileDebug.Manager.WriteEventPair("StateChanged", "Playerstate: ", sender.CurrentState,
+            MobileDebug.Service.WriteEventPair("StateChanged", "Playerstate: ", sender.CurrentState,
                 "SMTC-State: ", smtc.PlaybackStatus, "PlayerPosition [s]: ", sender.Position.TotalMilliseconds,
                 "PlayerDuration [s]: ", sender.NaturalDuration.TotalMilliseconds, "PauseAllowed: ", pauseAllowed,
                 "LibraryIsPlaying: ", library.IsPlaying, "CurrentSong: ", library.CurrentPlaylist?.CurrentSong,
@@ -237,7 +238,7 @@ namespace BackgroundTask
 
         private void OnPlayStateChanged(ILibrary sender, PlayStateChangedEventArgs args)
         {
-            //MobileDebug.Manager.WriteEvent("BackgroundPlayStateChanged", args.NewValue);
+            MobileDebug.Service.WriteEvent("BackgroundPlayStateChanged", args.NewValue);
 
             if (args.NewValue) BackgroundPlayer.Play();
             else BackgroundPlayer.Pause();

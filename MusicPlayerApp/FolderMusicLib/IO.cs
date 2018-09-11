@@ -28,7 +28,7 @@ namespace MusicPlayer
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("IOLoadTextFail", e, filenameWithExtention);
+                MobileDebug.Service.WriteEvent("IOLoadTextFail", e, filenameWithExtention);
             }
 
             return string.Empty;
@@ -39,7 +39,7 @@ namespace MusicPlayer
             string xmlText = XmlConverter.Serialize(obj);
 
             if (xmlText != string.Empty) SaveText(filenameWithExtention, xmlText);
-            else MobileDebug.Manager.WriteEvent("SaveObject", obj.GetType());
+            else MobileDebug.Service.WriteEvent("SaveObject", obj.GetType());
         }
 
         public static void SaveText(string filenameWithExtention, string text)
@@ -60,7 +60,7 @@ namespace MusicPlayer
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Manager.WriteEvent("IOSaveTextDoubleFail", e, filenameWithExtention);
+                    MobileDebug.Service.WriteEvent("IOSaveTextDoubleFail", e, filenameWithExtention);
                 }
             }
         }
@@ -83,7 +83,7 @@ namespace MusicPlayer
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Manager.WriteEvent("IOAppendTextDoubleFail", e, filenameWithExtention);
+                    MobileDebug.Service.WriteEvent("IOAppendTextDoubleFail", e, filenameWithExtention);
                 }
             }
         }
@@ -98,7 +98,7 @@ namespace MusicPlayer
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("IODeleteFail", e, filenameWithExtention);
+                MobileDebug.Service.WriteEvent("IODeleteFail", e, filenameWithExtention);
             }
         }
 

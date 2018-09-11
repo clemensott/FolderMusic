@@ -94,7 +94,7 @@ namespace MusicPlayer.Data.NonLoaded
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Manager.WriteEventPair("XmlReadNonLoadedPlaylistCollectionFail",
+                    MobileDebug.Service.WriteEventPair("XmlReadNonLoadedPlaylistCollectionFail",
                         e, "Count: ", list.Count, "Node: ", reader.NodeType, "Name: ", reader.Name);
                 }
             }
@@ -112,7 +112,7 @@ namespace MusicPlayer.Data.NonLoaded
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Manager.WriteEvent("XmlWriteNonLoadedPlaylistCollectionFail", e);
+                    MobileDebug.Service.WriteEvent("XmlWriteNonLoadedPlaylistCollectionFail", e);
                 }
 
                 writer.WriteEndElement();

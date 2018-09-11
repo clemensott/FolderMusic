@@ -147,7 +147,7 @@ namespace FolderMusic
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("ScrollToCurrentTopFail", e);
+                MobileDebug.Service.WriteEvent("ScrollToCurrentTopFail", e);
             }
         }
 
@@ -159,7 +159,7 @@ namespace FolderMusic
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("ScrollToCurrentDirectFail", e);
+                MobileDebug.Service.WriteEvent("ScrollToCurrentDirectFail", e);
             }
         }
 
@@ -169,7 +169,7 @@ namespace FolderMusic
 
             IPlaylist playlist = Source;
 
-            if (playlist == null || lbxSongs.Items.Count < playlist.ShuffleSongs.Count) return;
+            if (playlist == null || lbxSongs.Items.Count < playlist.ShuffleSongs.Count || lbxSongs.Items.Count == 0) return;
             if (scrollTo == ScrollToType.Current)
             {
                 lbxSongs.ScrollIntoView(playlist.CurrentSong);

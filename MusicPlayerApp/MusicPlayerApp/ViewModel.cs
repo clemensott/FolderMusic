@@ -312,7 +312,7 @@ namespace FolderMusic
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("ViewModelNotifyFail", e);
+                MobileDebug.Service.WriteEvent("ViewModelNotifyFail", e);
             }
         }
     }

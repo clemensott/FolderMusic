@@ -11,7 +11,7 @@ using Windows.UI.Core;
 
 namespace MusicPlayer.Communication
 {
-    class BackForegroundCommunicator
+    public class BackForegroundCommunicator
     {
         private const string primaryKey = "Primary",
             currentPlaylistPathKey = "CurrentPlaylistPath", currentSongPathKey = "CurrentSongPath",
@@ -39,11 +39,16 @@ namespace MusicPlayer.Communication
             shuffleSongsKey = "ShuffleSongs",
             libraryEmptyValue = "LibraryIsEmpty";
 
-        private static BackForegroundCommunicator instance;
+        public static BackForegroundCommunicator instance;
 
         public static void StartCommunication(ILibrary library, bool isForeground)
         {
             instance = new BackForegroundCommunicator(library, isForeground);
+        }
+
+        public static void Reset()
+        {
+            instance = new BackForegroundCommunicator(instance.library,instance.isForeground);
         }
 
         private bool isForeground;
@@ -267,9 +272,9 @@ namespace MusicPlayer.Communication
         private void ReceiveCurrentSongChanged(ValueSet valueSet, string value)
         {
             Song newCurrentSong;
-            MobileDebug.Manager.WriteEvent("ReceiveCurrentSongChanged1");
+            MobileDebug.Service.WriteEvent("ReceiveCurrentSongChanged1");
             if (!HaveSong(value, out newCurrentSong)) return;
-            MobileDebug.Manager.WriteEvent("ReceiveCurrentSongChanged2", newCurrentSong.Parent.Parent.CurrentSong, newCurrentSong);
+            MobileDebug.Service.WriteEvent("ReceiveCurrentSongChanged2", newCurrentSong.Parent.Parent.CurrentSong, newCurrentSong);
             newCurrentSong.Parent.Parent.CurrentSong = newCurrentSong;
         }
 
@@ -528,7 +533,6 @@ namespace MusicPlayer.Communication
 
         private void SendLibrary()
         {
-
             string value = library.Playlists.Count > 0 ? XmlConverter.Serialize(library) : libraryEmptyValue;
             ValueSet valueSet = receivers[libraryPrimaryKey].GetValueSet(value);
 
@@ -564,10 +568,27 @@ namespace MusicPlayer.Communication
         }
 
 
+        public void Ping()
+        {
+            ValueSet valueSet = new ValueSet();
+            valueSet.Add("Ping", "");
+
+            Send(valueSet);
+        }
+
+        public void AnswerPing()
+        {
+            ValueSet valueSet = new ValueSet();
+            valueSet.Add("AnswerPing", "");
+
+            Send(valueSet);
+        }
+
+
         private void Send(ValueSet valueSet)
         {
             bool send = AllowedToSend(valueSet);
-            MobileDebug.Manager.WriteEvent("Send", GetPrimaryKey(valueSet), send);
+            MobileDebug.Service.WriteEvent("Send", GetPrimaryKey(valueSet), send);
             if (!send) return;
 
             senderMethod(valueSet);
@@ -611,12 +632,22 @@ namespace MusicPlayer.Communication
             {
                 string currentReceivedPrimaryKey = GetPrimaryKey(e.Data);
                 string primaryData = e.Data[currentReceivedPrimaryKey].ToString();
-                MobileDebug.Manager.WriteEvent("ReceiveFail1", exc1, currentReceivedPrimaryKey);
+                MobileDebug.Service.WriteEvent("ReceiveFail1", exc1, currentReceivedPrimaryKey);
             }
         }
 
         private void Handle(ValueSet valueSet)
         {
+            if(valueSet.ContainsKey("Ping")){
+                AnswerPing();
+                return;
+            }
+            else if(valueSet.ContainsKey("AnswerPing"))
+            {
+                MobileDebug.Service.WriteEvent("GotPingAnswer");
+                return;
+            }
+
             var receivingItem = new Tuple<int, ValueSet>(Environment.CurrentManagedThreadId, valueSet);
             receivingItems.Add(receivingItem);
 

@@ -155,7 +155,7 @@ namespace MusicPlayer.Data
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Manager.WriteEventPair("XmlReadPlaylistCollectionFail", 
+                    MobileDebug.Service.WriteEventPair("XmlReadPlaylistCollectionFail", 
                         e, "Count: ", collection.Count, "Node: ", reader.NodeType);
                 }
             }

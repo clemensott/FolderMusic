@@ -1,1 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?><Files><file>\BackgroundTask.winmd</file><file>\FolderMusicDebug.dll</file><file>\FolderMusicLib.dll</file><file>\MusicPlayerApp.exe</file><file>\PlayerIconsWP8.1.dll</file></Files>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Files>
+  <file>\BackgroundTask.winmd</file>
+  <file>\MusicPlayerApp.exe</file>
+  <file>\PlayerIconsWP8.1.dll</file>
+  <file>\MobileDebug.dll</file>
+  <file>\MusicPlayerLib.dll</file>
+</Files>

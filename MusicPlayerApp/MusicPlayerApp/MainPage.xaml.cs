@@ -174,42 +174,16 @@ namespace FolderMusic
             }
         }
 
-        private async void AbbMusicProperties_Click(object sender, RoutedEventArgs e)
+        private void AbbMusicProperties_Click(object sender, RoutedEventArgs e)
         {
-            StorageFile file = await library.CurrentPlaylist.CurrentSong.GetStorageFileAsync();
-            var v = await file.Properties.GetMusicPropertiesAsync();
-            string text = string.Empty;
-
-            text += "Album: " + v.Album + "\n";
-            text += "AlbumArtist: " + v.AlbumArtist + "\n";
-            text += "Artist: " + v.Artist + "\n";
-            text += "Bitrate: " + v.Bitrate.ToString() + "\n";
-            text += "Composers: " + string.Join("; ", v.Composers) + "\n";
-            text += "Conductors: " + string.Join("; ", v.Conductors) + "\n";
-            text += "Duration: " + v.Duration.TotalSeconds.ToString() + "\n";
-            text += "Genre: " + string.Join("; ", v.Genre) + "\n";
-            text += "Producers: " + string.Join("; ", v.Producers) + "\n";
-            text += "Publisher: " + v.Publisher + "\n";
-            text += "Rating: " + v.Rating.ToString() + "\n";
-            text += "Subtitle: " + v.Subtitle + "\n";
-            text += "Title: " + v.Title + "\n";
-            text += "Writers: " + string.Join("; ", v.Writers) + "\n";
-            text += "Year: " + v.Year.ToString();
-
-            await new Windows.UI.Popups.MessageDialog(text).ShowAsync();
+            MusicPlayer.Communication.BackForegroundCommunicator.instance?.Ping();
         }
 
         private void AbbTest0_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                string filenameWithExtention = "Data.xml";
-                var get = KnownFolders.VideosLibrary.GetFileAsync(filenameWithExtention);
-                get.AsTask().Wait();
-                StorageFile file = get.GetResults();
-                var read = FileIO.ReadTextAsync(file);
-                read.AsTask().Wait();
-                System.Diagnostics.Debug.WriteLine(filenameWithExtention + ": " + read.GetResults().Length);
+                MusicPlayer.Communication.BackForegroundCommunicator.Reset();
             }
             catch { }
         }
@@ -231,7 +205,7 @@ namespace FolderMusic
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("IOLoadTextFail", e, filenameWithExtention);
+                MobileDebug.Service.WriteEvent("IOLoadTextFail", e, filenameWithExtention);
             }
 
             return null;

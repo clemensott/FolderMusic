@@ -250,7 +250,7 @@ namespace MusicPlayer.Data
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("GetFilesFail", e, Name);
+                MobileDebug.Service.WriteEvent("GetFilesFail", e, Name);
                 return new List<StorageFile>();
             }
         }
@@ -322,7 +322,7 @@ namespace MusicPlayer.Data
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("LoadSongFail", e);
+                MobileDebug.Service.WriteEvent("LoadSongFail", e);
             }
 
             return Song.GetEmpty(Songs);
@@ -420,7 +420,7 @@ namespace MusicPlayer.Data
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("PlaylistShuffleSongsReadXmlFail", e, AbsolutePath);
+                MobileDebug.Service.WriteEvent("PlaylistShuffleSongsReadXmlFail", e, AbsolutePath);
             }
 
             return new ShuffleOffCollection(this, Songs);

@@ -43,7 +43,7 @@ namespace BackgroundTask
 
                     if (HasFinished) return;
 
-                    MobileDebug.Manager.WriteEvent("InstantPlayerSetNotHappend", song);
+                    MobileDebug.Service.WriteEvent("InstantPlayerSetNotHappend", song);
 
                     Unsubscribe();
                     Sucessfull = false;
@@ -54,12 +54,12 @@ namespace BackgroundTask
                 catch (Exception e)
                 {
                     Unsubscribe();
-                    MobileDebug.Manager.WriteEvent("InstantSetFileFail", e, song);
+                    MobileDebug.Service.WriteEvent("InstantSetFileFail", e, song);
                 }
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("InstantSetGetFileFail", e, song);
+                MobileDebug.Service.WriteEvent("InstantSetGetFileFail", e, song);
                 Finished?.Invoke(this, false);
             }
         }
@@ -84,7 +84,7 @@ namespace BackgroundTask
 
         private void OnPlayStateChanged(ILibrary sender, PlayStateChangedEventArgs args)
         {
-            MobileDebug.Manager.WriteEvent("InstantPlayerPlaystateChanged", args.NewValue);
+            MobileDebug.Service.WriteEvent("InstantPlayerPlaystateChanged", args.NewValue);
 
             if (HasFinished) return;
 
@@ -94,7 +94,7 @@ namespace BackgroundTask
 
         private void OnMediaOpened(MediaPlayer sender, object args)
         {
-            MobileDebug.Manager.WriteEvent("InstantOpen", Library.IsPlaying, sender.CurrentState);
+            MobileDebug.Service.WriteEvent("InstantOpen", Library.IsPlaying, sender.CurrentState);
 
             double position = Library.CurrentPlaylist.CurrentSongPositionPercent;
 
@@ -115,7 +115,7 @@ namespace BackgroundTask
 
         private void OnCurrentStateChanged(MediaPlayer sender, object args)
         {
-            MobileDebug.Manager.WriteEvent("InstantPlayerCurrentState", sender.CurrentState, Library.IsPlaying);
+            MobileDebug.Service.WriteEvent("InstantPlayerCurrentState", sender.CurrentState, Library.IsPlaying);
             if (sender.CurrentState != MediaPlayerState.Playing) return;
 
             if (!Library.IsPlaying) sender.Pause();

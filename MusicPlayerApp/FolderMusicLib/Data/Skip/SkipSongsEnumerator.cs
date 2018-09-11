@@ -23,14 +23,14 @@ namespace MusicPlayer.Data
             List<string> songsPaths = SkipSongs.GetSkipSongsPaths();
 
             if (songsPaths.Count == 0) return false;
-            MobileDebug.Manager.WriteEvent("MoveNext1", songsPaths.Count);
+            MobileDebug.Service.WriteEvent("MoveNext1", songsPaths.Count);
 
             int index = HandleCurrent(songsPaths);
             Song song = GetNextSong(songsPaths, index);
 
             SkipSongs.SaveSkipSongsPaths(songsPaths);
 
-            MobileDebug.Manager.WriteEvent("MoveNext2", song);
+            MobileDebug.Service.WriteEvent("MoveNext2", song);
             if (song == null) return false;
 
             currentSkip = new SkipSong(song);

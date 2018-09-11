@@ -10,7 +10,7 @@ using Windows.Storage;
 
 namespace MobileDebug
 {
-    public static class Manager
+    public static class Service
     {
         private const char addChar = '&';
         public const string ForegroundId = "Foreground";
@@ -213,11 +213,11 @@ namespace MobileDebug
 
         internal static void AddToDataString(ref string dataString, object add, char dataSplitter, params char[] splitters)
         {
-            string addText = add.ToString();
+            string addText = add.ToString().Replace(dataSplitter.ToString(), dataSplitter.ToString() + addChar.ToString());
 
             foreach (char splitter in splitters)
             {
-                addText = addText.Replace(splitter.ToString(), splitter.ToString() + addText.ToString());
+                addText = addText.Replace(splitter.ToString(), splitter.ToString() + addChar.ToString());
             }
 
             dataString += addText + dataSplitter;

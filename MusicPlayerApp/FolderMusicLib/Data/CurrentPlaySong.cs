@@ -43,7 +43,7 @@ namespace MusicPlayer.Data
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("CurrentPlaySongLoadFail", e);
+                MobileDebug.Service.WriteEvent("CurrentPlaySongLoadFail", e);
             }
 
             return new Library(false);

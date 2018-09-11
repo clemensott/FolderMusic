@@ -1,9 +1,9 @@
 <XamlCompilerSaveState>
   <ReferenceAssemblyList>
-    <LocalAssembly PathName="c:\users\clemens\documents\visual studio 2015\projects\foldermusic\musicplayerapp\musicplayerapp\obj\arm\debug\intermediatexaml\musicplayerapp.exe" HashGuid="9bf93e28-7bba-d9a6-6918-805b0ad420ce" />
-    <ReferenceAssembly PathName="d:\projects\foldermusic\musicplayerapp\backgroundtask\bin\arm\debug\backgroundtask.winmd" HashGuid="16f40ad5-24eb-f953-f171-868a887c5ae7" />
-    <ReferenceAssembly PathName="d:\projects\foldermusic\musicplayerapp\foldermusicdebug\bin\arm\debug\foldermusicdebug.dll" HashGuid="545e9031-6cfd-0ce6-4e49-e5cf5eff6f12" />
-    <ReferenceAssembly PathName="d:\projects\foldermusic\musicplayerapp\foldermusiclib\bin\arm\debug\musicplayerlib.dll" HashGuid="33e9f463-b22b-6549-c900-c920bf9c7efd" />
-    <ReferenceAssembly PathName="d:\projects\foldermusic\musicplayerapp\playericonswp8.1\bin\arm\debug\playericonswp8.1.dll" HashGuid="3303c29d-bfd6-9c31-c37e-c703fdff2677" />
+    <LocalAssembly PathName="c:\users\clemens.ott\source\repos\foldermusic\musicplayerapp\musicplayerapp\obj\arm\debug\intermediatexaml\musicplayerapp.exe" HashGuid="675e49a8-fe2c-44c4-e118-016370c56c42" />
+    <ReferenceAssembly PathName="c:\users\clemens.ott\source\repos\foldermusic\musicplayerapp\backgroundtask\bin\arm\debug\backgroundtask.winmd" HashGuid="2eec2653-cfa3-0d76-6792-6c262c9589e7" />
+    <ReferenceAssembly PathName="c:\users\clemens.ott\source\repos\foldermusic\musicplayerapp\foldermusicdebug\bin\arm\debug\mobiledebug.dll" HashGuid="b2f76cc9-030a-2d1f-bca9-b0c3d5d0c4d7" />
+    <ReferenceAssembly PathName="c:\users\clemens.ott\source\repos\foldermusic\musicplayerapp\foldermusiclib\bin\arm\debug\musicplayerlib.dll" HashGuid="da4a255c-aaf8-9a7b-837d-899f35e4f788" />
+    <ReferenceAssembly PathName="c:\users\clemens.ott\source\repos\foldermusic\musicplayerapp\playericonswp8.1\bin\arm\debug\playericonswp8.1.dll" HashGuid="3303c29d-bfd6-9c31-c37e-c703fdff2677" />
   </ReferenceAssemblyList>
 </XamlCompilerSaveState>

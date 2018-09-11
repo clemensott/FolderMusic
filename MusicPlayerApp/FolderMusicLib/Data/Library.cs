@@ -125,7 +125,11 @@ namespace MusicPlayer.Data
             }
             else if (isForeground == true)
             {
-                isPlaying = BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing;
+                if (IsPlaying)
+                {
+                    PlayStateChanged?.Invoke(this, new PlayStateChangedEventArgs(IsPlaying));
+                }
+                else IsPlaying = BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing;
             }
 
             playlists = library.Playlists;
@@ -237,7 +241,7 @@ namespace MusicPlayer.Data
 
         public void Save()
         {
-            MobileDebug.Manager.WriteEventPair("SaveLibrary", "IsForeground: ", isForeground);
+            MobileDebug.Service.WriteEventPair("SaveLibrary", "IsForeground: ", isForeground);
             SaveSimple();
 
             if (isForeground != false) return;
@@ -248,7 +252,7 @@ namespace MusicPlayer.Data
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("SaveFail", e);
+                MobileDebug.Service.WriteEvent("SaveFail", e);
                 CheckLibrary(this);
             }
         }
@@ -263,7 +267,7 @@ namespace MusicPlayer.Data
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("SaveSimpleSongFail", e);
+                MobileDebug.Service.WriteEvent("SaveSimpleSongFail", e);
             }
 
             try
@@ -273,7 +277,7 @@ namespace MusicPlayer.Data
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("SaveSimpleLibrayFail", e);
+                MobileDebug.Service.WriteEvent("SaveSimpleLibrayFail", e);
             }
         }
 
@@ -297,7 +301,7 @@ namespace MusicPlayer.Data
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("LibraryXmlLoadFail", e, reader.Name, reader.NodeType);
+                MobileDebug.Service.WriteEvent("LibraryXmlLoadFail", e, reader.Name, reader.NodeType);
                 throw;
             }
 
@@ -315,7 +319,7 @@ namespace MusicPlayer.Data
 
         public static string CheckLibrary(ILibrary lib)
         {
-            MobileDebug.Manager.WriteEvent("CheckLibraryStart", lib?.Playlists?.Count.ToString() ?? "null");
+            MobileDebug.Service.WriteEvent("CheckLibraryStart", lib?.Playlists?.Count.ToString() ?? "null");
             bool contains = lib.Playlists.Contains(lib.CurrentPlaylist);
 
             List<string> list = new List<string>()
@@ -349,7 +353,7 @@ namespace MusicPlayer.Data
                 list.Add(text);
             }
 
-            MobileDebug.Manager.WriteEvent("CheckLibraryEnd", list.AsEnumerable());
+            MobileDebug.Service.WriteEvent("CheckLibraryEnd", list.AsEnumerable());
 
             return string.Join("\r\n", list);
         }
@@ -369,7 +373,7 @@ namespace MusicPlayer.Data
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Manager.WriteEvent("LibraryLoadForegroundFail", e);
+                    MobileDebug.Service.WriteEvent("LibraryLoadForegroundFail", e);
                 }
 
                 BackForegroundCommunicator.StartCommunication(library, isForeground);
@@ -395,7 +399,7 @@ namespace MusicPlayer.Data
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Manager.WriteEvent("Coundn't load Data", e);
+                    MobileDebug.Service.WriteEvent("Coundn't load Data", e);
                 }
             }
 
@@ -409,11 +413,11 @@ namespace MusicPlayer.Data
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Manager.WriteEvent("Coundn't load Backup", e);
+                    MobileDebug.Service.WriteEvent("Coundn't load Backup", e);
                 }
             }
 
-            MobileDebug.Manager.WriteEvent("Coundn't load any data");
+            MobileDebug.Service.WriteEvent("Coundn't load any data");
             IO.Copy(fileName, KnownFolders.VideosLibrary, fileName);
             IO.Copy(backupFileName, KnownFolders.VideosLibrary, backupFileName);
 

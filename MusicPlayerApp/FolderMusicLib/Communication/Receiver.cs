@@ -27,13 +27,13 @@ namespace MusicPlayer.Communication
         {
             try
             {
-                MobileDebug.Manager.WriteEvent("Handle1", Key, valueSet.ContainsKey(Key));
+                MobileDebug.Service.WriteEvent("Handle1", Key, valueSet.ContainsKey(Key));
                 if (valueSet.ContainsKey(Key)) messageReceived(valueSet, valueSet[Key].ToString());
-                MobileDebug.Manager.WriteEvent("Handle2", Key, valueSet.ContainsKey(Key));
+                MobileDebug.Service.WriteEvent("Handle2", Key, valueSet.ContainsKey(Key));
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("HandleFail", e, Key, valueSet[Key].ToString());
+                MobileDebug.Service.WriteEvent("HandleFail", e, Key, valueSet[Key].ToString());
             }
         }
     }

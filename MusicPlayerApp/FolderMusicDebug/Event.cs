@@ -33,7 +33,7 @@ namespace MobileDebug
             Count = count++;
 
             Name = name;
-            BackgroundTaskId = Manager.Id;
+            BackgroundTaskId = Service.Id;
             ThreadId = Environment.CurrentManagedThreadId;
         }
 
@@ -65,19 +65,19 @@ namespace MobileDebug
 
         internal Event(StringBuilder dataString)
         {
-            Time = long.Parse(Manager.GetUntil(ref dataString, partSplitter));
-            Count = int.Parse(Manager.GetUntil(ref dataString, partSplitter));
-            BackgroundTaskId = Manager.GetUntil(ref dataString, partSplitter);
-            ThreadId = int.Parse(Manager.GetUntil(ref dataString, partSplitter));
-            Name = Manager.GetUntil(ref dataString, partSplitter);
+            Time = long.Parse(Service.GetUntil(ref dataString, partSplitter));
+            Count = int.Parse(Service.GetUntil(ref dataString, partSplitter));
+            BackgroundTaskId = Service.GetUntil(ref dataString, partSplitter);
+            ThreadId = int.Parse(Service.GetUntil(ref dataString, partSplitter));
+            Name = Service.GetUntil(ref dataString, partSplitter);
 
-            Data = Manager.Split(dataString, partSplitter).ToArray();
+            Data = Service.Split(dataString, partSplitter).ToArray();
         }
 
         internal static IEnumerable<Event> GetEvents(string eventsDataString)
         {
             StringBuilder dataString = new StringBuilder(eventsDataString);
-            var dataStrings = Manager.Split(dataString, eventSplitter);
+            var dataStrings = Service.Split(dataString, eventSplitter);
 
             foreach (string eventDataString in dataStrings)
             {
@@ -101,15 +101,15 @@ namespace MobileDebug
         {
             string dataString = string.Empty;
 
-            Manager.AddToDataString(ref dataString, Time, partSplitter, eventSplitter);
-            Manager.AddToDataString(ref dataString, Count, partSplitter, eventSplitter);
-            Manager.AddToDataString(ref dataString, BackgroundTaskId, partSplitter, eventSplitter);
-            Manager.AddToDataString(ref dataString, ThreadId, partSplitter, eventSplitter);
-            Manager.AddToDataString(ref dataString, Name, partSplitter, eventSplitter);
+            Service.AddToDataString(ref dataString, Time, partSplitter, eventSplitter);
+            Service.AddToDataString(ref dataString, Count, partSplitter, eventSplitter);
+            Service.AddToDataString(ref dataString, BackgroundTaskId, partSplitter, eventSplitter);
+            Service.AddToDataString(ref dataString, ThreadId, partSplitter, eventSplitter);
+            Service.AddToDataString(ref dataString, Name, partSplitter, eventSplitter);
 
             foreach (string data in Data)
             {
-                Manager.AddToDataString(ref dataString, data, partSplitter, eventSplitter);
+                Service.AddToDataString(ref dataString, data, partSplitter, eventSplitter);
             }
 
             return dataString + eventSplitter;

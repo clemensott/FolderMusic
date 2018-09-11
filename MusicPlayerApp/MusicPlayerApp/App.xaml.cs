@@ -18,13 +18,13 @@ namespace FolderMusic
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
 
-            MobileDebug.Manager.SetIsForeground();
+            MobileDebug.Service.SetIsForeground();
             UnhandledException += App_UnhandledException;
         }
 
         private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            MobileDebug.Manager.WriteEvent("UnhandledException", e.Exception);
+            MobileDebug.Service.WriteEvent("UnhandledException", e.Exception);
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs e)

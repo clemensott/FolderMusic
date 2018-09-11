@@ -87,10 +87,10 @@
     <Compile Include="Data\EventArgs\CurrentSongChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\CurrentSongPositionChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\LoopChangedEventArgs.cs" />
-    <Compile Include="Data\ILibrary.cs" />
-    <Compile Include="Data\IPlaylist.cs" />
-    <Compile Include="Data\IPlaylistCollection.cs" />
-    <Compile Include="Data\ISongCollection.cs" />
+    <Compile Include="Data\Interfaces\ILibrary.cs" />
+    <Compile Include="Data\Interfaces\IPlaylist.cs" />
+    <Compile Include="Data\Interfaces\IPlaylistCollection.cs" />
+    <Compile Include="Data\Interfaces\ISongCollection.cs" />
     <Compile Include="Data\Loop\LoopAll.cs" />
     <Compile Include="Data\Loop\LoopCurrent.cs" />
     <Compile Include="Data\Loop\LoopOff.cs" />

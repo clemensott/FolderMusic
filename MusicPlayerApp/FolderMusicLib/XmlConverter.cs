@@ -53,7 +53,7 @@ namespace MusicPlayer
             }
             catch (Exception e)
             {
-                MobileDebug.Manager.WriteEvent("XmlSerializeFail", e);
+                MobileDebug.Service.WriteEvent("XmlSerializeFail", e);
             }
 
             return tw.ToString();
