@@ -140,7 +140,7 @@ namespace FolderMusic
             Frame.GoBack();
         }
 
-        private void ResetAllSongs_Click(object sender, RoutedEventArgs e)
+        private async void ResetAllSongs_Click(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(LoadingPage), library);
             await library.ResetSongs();

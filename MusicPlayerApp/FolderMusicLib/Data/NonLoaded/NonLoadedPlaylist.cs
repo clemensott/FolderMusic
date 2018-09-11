@@ -111,6 +111,10 @@ namespace MusicPlayer.Data.NonLoaded
         {
         }
 
+        public async Task ResetSongs()
+        {
+        }
+
         public async Task AddNew()
         {
         }
