@@ -58,6 +58,7 @@ namespace FolderMusic
 
         private void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
         {
+            MobileDebug.Service.WriteEvent("HardwareButtons_BackPressed");
             if (!Frame.CanGoBack) Application.Current.Exit();
             else
             {
@@ -195,9 +196,9 @@ namespace FolderMusic
             catch { }
         }
 
-        private async void hub_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        private void hub_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
-            await new Windows.UI.Popups.MessageDialog("Lock").ShowAsync();
+            Frame.Navigate(typeof(LockPage));
         }
 
         private void AbbTest1_Click(object sender, RoutedEventArgs e)
