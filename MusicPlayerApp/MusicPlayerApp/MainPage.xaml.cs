@@ -178,7 +178,7 @@ namespace FolderMusic
             }
             catch (Exception exc)
             {
-                await new Windows.UI.Popups.MessageDialog(exc.Message).ShowAsync();
+                await new Windows.UI.Popups.MessageDialog(exc.Message, e.GetType().Name).ShowAsync();
             }
         }
 
