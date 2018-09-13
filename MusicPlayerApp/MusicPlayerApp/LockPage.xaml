@@ -9,6 +9,8 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <TextBlock Text="Unlock!" FontSize="50" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <TextBlock Text="Unlock!" FontSize="50" FontWeight="Bold" 
+                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   DoubleTapped="TextBlock_DoubleTapped"/>
     </Grid>
 </Page>
