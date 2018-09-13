@@ -195,6 +195,11 @@ namespace FolderMusic
             catch { }
         }
 
+        private async void hub_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            await new Windows.UI.Popups.MessageDialog("Lock").ShowAsync();
+        }
+
         private void AbbTest1_Click(object sender, RoutedEventArgs e)
         {
             Library.CheckLibrary(library);
