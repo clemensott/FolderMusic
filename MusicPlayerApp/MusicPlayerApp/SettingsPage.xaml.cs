@@ -69,8 +69,8 @@ namespace FolderMusic
             }
             catch (Exception exc)
             {
-                string message = "Didn't save.\nType: " + exc.GetType().Name + "\n" + exc.Message;
-                await new MessageDialog(message).ShowAsync();
+                string message = "Didn't save.\n" + exc.Message;
+                await new MessageDialog(message,exc.GetType().Name).ShowAsync();
             }
 
             Frame.GoBack();

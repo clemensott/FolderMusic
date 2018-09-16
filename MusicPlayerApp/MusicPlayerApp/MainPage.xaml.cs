@@ -58,6 +58,7 @@ namespace FolderMusic
 
         private void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
         {
+            MobileDebug.Service.WriteEvent("HardwareButtons_BackPressed");
             if (!Frame.CanGoBack) Application.Current.Exit();
             else
             {
@@ -177,7 +178,7 @@ namespace FolderMusic
             }
             catch (Exception exc)
             {
-                await new Windows.UI.Popups.MessageDialog(exc.Message).ShowAsync();
+                await new Windows.UI.Popups.MessageDialog(exc.Message, e.GetType().Name).ShowAsync();
             }
         }
 
@@ -193,6 +194,11 @@ namespace FolderMusic
                 await MusicPlayer.Communication.BackForegroundCommunicator.Reset();
             }
             catch { }
+        }
+
+        private void hub_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(LockPage));
         }
 
         private void AbbTest1_Click(object sender, RoutedEventArgs e)
