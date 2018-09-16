@@ -26,14 +26,6 @@ namespace FolderMusic
         public LockPage()
         {
             this.InitializeComponent();
-
-            HardwareButtons.BackPressed += HardwareButtons_BackPressed;
-        }
-
-        private void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
-        {
-            e.Handled = true;
-            MobileDebug.Service.WriteEvent("LockPage_BackPressed");
         }
 
         /// <summary>

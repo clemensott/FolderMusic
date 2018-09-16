@@ -58,7 +58,9 @@ namespace FolderMusic
 
         private void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
         {
-            MobileDebug.Service.WriteEvent("HardwareButtons_BackPressed");
+            MobileDebug.Service.WriteEvent("HardwareButtons_BackPressed", Frame.CurrentSourcePageType);
+
+            if (Frame.CurrentSourcePageType == typeof(LockPage)) return;
             if (!Frame.CanGoBack) Application.Current.Exit();
             else
             {
