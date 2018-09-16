@@ -256,6 +256,15 @@ namespace FolderMusic
                 double percent = Library?.CurrentPlaylist?.CurrentSongPositionPercent ?? 0;
                 double duration = Library?.CurrentPlaylist?.CurrentSong?.DurationMilliseconds ?? Song.DefaultDuration;
 
+                if (duration == 0)
+                {
+                    duration = Song.DefaultDuration;
+                    MobileDebug.Service.WriteEvent("Slider.SetValues2", "Lib != null", Library != null,
+                        "Playlist != null", Library?.CurrentPlaylist != null, 
+                        "Song != null", Library?.CurrentPlaylist?.CurrentSong != null,
+                        "Duration != null", Library?.CurrentPlaylist?.CurrentSong?.DurationMilliseconds != null);
+                }
+
                 try
                 {
                     sld.Value = percent;
@@ -264,14 +273,12 @@ namespace FolderMusic
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Service.WriteEvent("Slider.SetValues2", e, percent, duration);
-                    new Windows.UI.Popups.MessageDialog(e.Message, "Slider.SetValues2").ShowAsync().AsTask().Wait();
+                    MobileDebug.Service.WriteEvent("Slider.SetValues3", e, percent, duration);
                 }
             }
             catch (Exception e)
             {
                 MobileDebug.Service.WriteEvent("Slider.SetValues1", e);
-                new Windows.UI.Popups.MessageDialog(e.Message, "Slider.SetValues1").ShowAsync().AsTask().Wait();
             }
         }
 

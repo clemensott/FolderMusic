@@ -40,7 +40,7 @@ namespace MusicPlayer.Data
             get { return !double.IsNaN(durationMilliseconds) ? durationMilliseconds : DefaultDuration; }
             set
             {
-                if (value < 1 || value == durationMilliseconds) return;
+                if (value < DefaultDuration || value == durationMilliseconds) return;
 
                 var args = new SongDurationChangedEventArgs(durationMilliseconds, value);
                 durationMilliseconds = value;

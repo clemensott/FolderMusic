@@ -43,8 +43,6 @@ namespace BackgroundTask
             if (setSongCount >= maxFailOrSetCount)
             {
                 setSongCount = 0;
-                BackgroundMediaPlayer.Current.Volume = 0;
-                BackgroundMediaPlayer.Current.Play();
 
                 Volume0To1();
 
@@ -70,19 +68,21 @@ namespace BackgroundTask
                 MobileDebug.Service.WriteEvent("PlayNormal", BackgroundMediaPlayer.Current.CurrentState, CurrentSong, percent);
                 if (percent >= 0) BackgroundMediaPlayer.Current.Position = TimeSpan.FromMilliseconds(percent * duration);
 
-                BackgroundMediaPlayer.Current.Volume = 0;
-                BackgroundMediaPlayer.Current.Play();
-
                 Volume0To1();
 
                 setSongCount = 0;
             }
 
             smtc.PlaybackStatus = MediaPlaybackStatus.Playing;
+
+            BackgroundMediaPlayer.Current.Play();
         }
 
         private void Volume0To1()
         {
+            BackgroundMediaPlayer.Current.Volume = 0;
+            BackgroundMediaPlayer.Current.Play();
+
             double step = 0.1;
 
             for (double i = step; i < 1; i += step)
@@ -191,8 +191,8 @@ namespace BackgroundTask
 
             if (library.IsPlaying)
             {
-                if (CurrentPlaylist.CurrentSongPositionPercent > 0) Play();
-                else setSongCount = 0;
+                if (CurrentPlaylist.CurrentSongPositionPercent > 0) Volume0To1();
+                else BackgroundMediaPlayer.Current.Play();
             }
             else smtc.PlaybackStatus = MediaPlaybackStatus.Paused;
 
