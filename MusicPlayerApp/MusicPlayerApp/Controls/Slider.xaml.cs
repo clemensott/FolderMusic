@@ -246,7 +246,7 @@ namespace FolderMusic
 
         private void SetValuesSafe()
         {
-            MainPage.DoSafe(SetValues);
+            Utils.DoSafe(SetValues);
         }
 
         private void SetValues()
@@ -303,8 +303,8 @@ namespace FolderMusic
 
         private void MediaPlayer_CurrentStateChanged(MediaPlayer sender, object args)
         {
-            MainPage.DoSafe(SetTimer);
-            MainPage.DoSafe(SetIsIndeterminate);
+            Utils.DoSafe(SetTimer);
+            Utils.DoSafe(SetIsIndeterminate);
         }
 
         private void SetTimer()

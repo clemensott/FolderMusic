@@ -109,7 +109,7 @@ namespace FolderMusic
 
         private void SetSelectedItemSafe()
         {
-            MainPage.DoSafe(SetSelectedItem);
+            Utils.DoSafe(SetSelectedItem);
         }
 
         private void SetSelectedItem()
@@ -187,6 +187,7 @@ namespace FolderMusic
 
         private void Song_Holding(object sender, HoldingRoutedEventArgs e)
         {
+            MobileDebug.Service.WriteEvent("Song_Holding", ActualWidth);
             if (((sender as Grid).DataContext as Song).IsEmpty) return;
 
             FlyoutBase.ShowAttachedFlyout(sender as FrameworkElement);

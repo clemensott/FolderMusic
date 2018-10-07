@@ -1,10 +1,8 @@
 ﻿using MusicPlayer.Data;
 using System;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.Core;
 using Windows.Phone.UI.Input;
 using Windows.Storage;
-using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -20,26 +18,26 @@ namespace FolderMusic
 
         private SongsView currentPlaylistSongListView;
 
-        public async static void DoSafe(DispatchedHandler handler)
-        {
-            if (CoreApplication.MainView.CoreWindow.Dispatcher.HasThreadAccess) handler();
-            else await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, handler);
-        }
-
         public MainPage()
         {
             this.InitializeComponent();
             this.NavigationCacheMode = NavigationCacheMode.Enabled;
 
             checkedSkippedSongs = false;
-            library = Library.LoadSimple(true);
-            viewModel = new ViewModel(library);
+        }
 
-            DataContext = viewModel;
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            if ((ILibrary)e.Parameter != library)
+            {
+                library = (ILibrary)e.Parameter;
+                viewModel = new ViewModel(library);
 
-            library.LibraryChanged += Library_LibraryChanged;
-            library.SkippedSongs.SkippedSong += SkippedSongs_SkippedSong;
-            HardwareButtons.BackPressed += HardwareButtons_BackPressed;
+                DataContext = viewModel;
+
+                library.LibraryChanged += Library_LibraryChanged;
+                library.SkippedSongs.SkippedSong += SkippedSongs_SkippedSong;
+            }
         }
 
         private async void Library_LibraryChanged(ILibrary sender, LibraryChangedEventsArgs args)
@@ -54,19 +52,6 @@ namespace FolderMusic
         private void SkippedSongs_SkippedSong(SkipSongs sender)
         {
             if (!SkipSongsPage.Open && sender.HasSongs()) Frame.Navigate(typeof(SkipSongsPage), sender);
-        }
-
-        private void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
-        {
-            MobileDebug.Service.WriteEvent("HardwareButtons_BackPressed", Frame.CurrentSourcePageType);
-
-            if (Frame.CurrentSourcePageType == typeof(LockPage)) return;
-            if (!Frame.CanGoBack) Application.Current.Exit();
-            else
-            {
-                Frame.GoBack();
-                e.Handled = true;
-            }
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)

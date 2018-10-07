@@ -51,7 +51,7 @@ namespace FolderMusic
             {
                 MusicProperties props = asyncInfo.GetResults();
 
-                MainPage.DoSafe(() => { DataContext = props; });
+                Utils.DoSafe(() => { DataContext = props; });
             }
             else if (asyncStatus == AsyncStatus.Error)
             {
@@ -62,7 +62,8 @@ namespace FolderMusic
             }
             else if (asyncStatus == AsyncStatus.Canceled)
             {
-                MessageDialog dialog = new MessageDialog("Loading Properties has been canceled.");
+                string message = "Loading Properties has been canceled.";
+                MessageDialog dialog = new MessageDialog(message);
 
                 await dialog.ShowAsync();
             }

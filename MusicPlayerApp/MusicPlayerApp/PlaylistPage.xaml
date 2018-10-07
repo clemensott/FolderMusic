@@ -10,7 +10,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     Loaded="Page_Loaded">
 
-    <Grid>
+    <Grid HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -19,18 +19,22 @@
 
         <TextBlock Text="{Binding Name}" FontSize="50" Margin="15,0,0,5"/>
 
-        <Hub Grid.Row="1" Style="{StaticResource HHeaderRelativePath}"
-             Header="{Binding AbsolutePath,Converter={StaticResource relativePathConverter}}" >
-            <HubSection Header="Default" Style="{StaticResource HSHeader}" Margin="0,-10,0,0">
+        <Hub Grid.Row="1" Style="{StaticResource HHeaderRelativePath}" HorizontalAlignment="Stretch"
+             Header="{Binding AbsolutePath,Converter={StaticResource relativePathConverter}}">
+            <HubSection Header="Default" Style="{StaticResource HSHeader}" 
+                        Margin="0,-10,0,0" HorizontalAlignment="Stretch">
                 <DataTemplate>
-                    <local:ShuffleOffSongsView Margin="0,-30,0,0" Source="{Binding Source}"
+                    <local:ShuffleOffSongsView Margin="0,-30,0,0" HorizontalAlignment="Stretch"
+                                               Source="{Binding Source}"
                                                SelectedSongChangedManually="OnSelectedSongChangedManually"/>
                 </DataTemplate>
             </HubSection>
 
-            <HubSection Header="Shuffle" Style="{StaticResource HSHeader}" Margin="0,-10,0,0">
+            <HubSection Header="Shuffle" Style="{StaticResource HSHeader}" 
+                        Margin="0,-10,0,0" HorizontalAlignment="Stretch">
                 <DataTemplate>
-                    <local:ShuffleSongsView Margin="0,-30,0,0" Source="{Binding Source}"
+                    <local:ShuffleSongsView Margin="0,-30,0,0" HorizontalAlignment="Stretch"
+                                            Source="{Binding Source}"
                                             SelectedSongChangedManually="OnSelectedSongChangedManually"/>
                 </DataTemplate>
             </HubSection>

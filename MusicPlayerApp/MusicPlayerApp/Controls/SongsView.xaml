@@ -12,10 +12,13 @@
     x:Name="control"
     Loaded="control_Loaded">
 
-    <ListBox x:Name="lbxSongs" Background="Transparent" SelectionMode="Single"
-             DataContext="{Binding ElementName=control,Path=Source}"
-             SelectionChanged="lbxSongs_SelectionChanged"
-             LayoutUpdated="lbxSongs_LayoutUpdated">
+    <ListBox x:Name="lbxSongs" Background="Transparent" HorizontalAlignment="Stretch" SelectionMode="Single"
+             SelectionChanged="lbxSongs_SelectionChanged" LayoutUpdated="lbxSongs_LayoutUpdated">
+        <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            </Style>
+        </ListBox.ItemContainerStyle>
         <ListBox.ItemTemplate>
             <DataTemplate>
                 <Grid x:Name="grid" Holding="Song_Holding">
@@ -27,8 +30,6 @@
                             <MenuFlyoutItem Text="Edit" Click="EditSong_Click"/>
                         </MenuFlyout>
                     </FlyoutBase.AttachedFlyout>
-
-                    <Rectangle Fill="Transparent" Width="{Binding ElementName=control,Path=ActualWidth}"/>
 
                     <StackPanel Orientation="Vertical">
                         <TextBlock FontSize="20" Margin="0,-5,0,-2" Text="{Binding Title}"

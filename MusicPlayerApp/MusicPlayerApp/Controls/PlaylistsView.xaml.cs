@@ -65,7 +65,7 @@ namespace FolderMusic
 
         private void SetSelectedPlaylistSafe()
         {
-            MainPage.DoSafe(SetSelectedPlaylist);
+            Utils.DoSafe(SetSelectedPlaylist);
         }
 
         private void SetSelectedPlaylist()
@@ -80,7 +80,7 @@ namespace FolderMusic
 
         private void SetItemsSourceSafe()
         {
-            MainPage.DoSafe(SetItemsSource);
+            Utils.DoSafe(SetItemsSource);
         }
 
         private void SetItemsSource()

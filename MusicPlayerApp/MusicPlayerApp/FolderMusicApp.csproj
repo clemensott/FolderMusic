@@ -108,6 +108,16 @@
     <Compile Include="Controls\IListStringControl.xaml.cs">
       <DependentUpon>IListStringControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FrameHistory\FrameHistoryService.cs" />
+    <Compile Include="FrameHistory\Handlers\PlaylistPageHandler.cs" />
+    <Compile Include="FrameHistory\Handlers\SongPageHandler.cs" />
+    <Compile Include="FrameHistory\Handlers\SkippedSongsPageHandler.cs" />
+    <Compile Include="FrameHistory\Handlers\SettingsPageHandler.cs" />
+    <Compile Include="FrameHistory\HistoricFrame.cs" />
+    <Compile Include="FrameHistory\Handlers\HistoricFrameHandler.cs" />
+    <Compile Include="FrameHistory\HistoricParameter.cs" />
+    <Compile Include="FrameHistory\RestoreMusicProperties.cs" />
+    <Compile Include="FrameHistory\Parameter.cs" />
     <Compile Include="IUpdateSellectedItemCollection.cs" />
     <Compile Include="LoadingPage.xaml.cs">
       <DependentUpon>LoadingPage.xaml</DependentUpon>
@@ -140,6 +150,7 @@
     <Compile Include="SongPage.xaml.cs">
       <DependentUpon>SongPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utils.cs" />
     <Compile Include="ViewModel.cs" />
   </ItemGroup>
   <ItemGroup>

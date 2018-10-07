@@ -308,7 +308,7 @@ namespace FolderMusic
             {
                 if (null == PropertyChanged) return;
 
-                MainPage.DoSafe(() => { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); });
+                Utils.DoSafe(() => { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); });
             }
             catch (Exception e)
             {
