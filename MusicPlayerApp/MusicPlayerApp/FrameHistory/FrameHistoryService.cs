@@ -19,6 +19,7 @@ namespace FolderMusic.FrameHistory
         public FrameHistoryService(IEnumerable<HistoricFrame> history, Frame rootFrame, ILibrary library)
         {
             restoreHistory = new Queue<HistoricFrame>(history);
+            MobileDebug.Service.WriteEventPair("FrameHistoricSerivce Constructer", "RestoreFrames: ", restoreHistory.Count);
 
             this.history = new Stack<HistoricFrame>();
             this.rootFrame = rootFrame;
@@ -97,7 +98,7 @@ namespace FolderMusic.FrameHistory
                 HistoricFrame frame = restoreHistory.Dequeue();
                 HistoricFrameHandler handler = HistoricFrameHandler.GetHandler(frame.Page);
                 parameter = handler.FromHistoricParameter(frame.Parameter, library);
-              
+
                 rootFrame.Navigate(frame.Page, parameter);
             }
         }
@@ -118,6 +119,11 @@ namespace FolderMusic.FrameHistory
         private Page GetCurrentPage()
         {
             return rootFrame.Content as Page;
+        }
+
+        public IEnumerable<HistoricFrame> GetFrames()
+        {
+            return history;
         }
     }
 }

@@ -117,11 +117,11 @@ namespace FolderMusic
             rootFrame.Navigated -= this.RootFrame_FirstNavigated;
         }
 
-        private void Window_Activated(object sender, WindowActivatedEventArgs e)
+        private async void Window_Activated(object sender, WindowActivatedEventArgs e)
         {
             if (e.WindowActivationState != CoreWindowActivationState.Deactivated) return;
 
-
+            await WriteHistoricFrame(frameHistoryService.GetFrames());
         }
 
         private async Task<IEnumerable<HistoricFrame>> ReadHistoricFrames()
@@ -142,11 +142,18 @@ namespace FolderMusic
 
         private async Task WriteHistoricFrame(IEnumerable<HistoricFrame> frames)
         {
-            StringWriter writer = new StringWriter();
-            frameHistorySerializer.Serialize(writer, frames);
-            string frameHistoryXml = writer.ToString();
+            try
+            {
+                StringWriter writer = new StringWriter();
+                frameHistorySerializer.Serialize(writer, frames);
+                string frameHistoryXml = writer.ToString();
 
-            await PathIO.WriteTextAsync(GetFrameHistoryPath(), frameHistoryXml);
+                await PathIO.WriteTextAsync(GetFrameHistoryPath(), frameHistoryXml);
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Service.WriteEvent("WriteHistoricFarmes", e, frames.Count());
+            }
         }
 
         private string GetFrameHistoryPath()
