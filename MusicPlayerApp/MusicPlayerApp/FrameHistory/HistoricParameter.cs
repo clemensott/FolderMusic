@@ -1,6 +1,6 @@
 ﻿namespace FolderMusic.FrameHistory
 {
-    class HistoricParameter
+    public class HistoricParameter
     {
         public object Value { get; set; }
 

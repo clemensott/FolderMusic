@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace FolderMusic.FrameHistory
 {
-    class HistoricFrame
+    public class HistoricFrame
     {
         private string pageTypeName;
 
