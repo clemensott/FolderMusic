@@ -110,6 +110,7 @@
     </Compile>
     <Compile Include="FrameHistory\FrameHistoryService.cs" />
     <Compile Include="FrameHistory\Handlers\PlaylistPageHandler.cs" />
+    <Compile Include="FrameHistory\Handlers\MainPageHandler.cs" />
     <Compile Include="FrameHistory\Handlers\SongPageHandler.cs" />
     <Compile Include="FrameHistory\Handlers\SkippedSongsPageHandler.cs" />
     <Compile Include="FrameHistory\Handlers\SettingsPageHandler.cs" />

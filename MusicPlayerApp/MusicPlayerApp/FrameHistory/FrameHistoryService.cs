@@ -1,5 +1,6 @@
 ﻿using FolderMusic.FrameHistory.Handlers;
 using MusicPlayer.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Windows.UI.Xaml;
@@ -91,15 +92,28 @@ namespace FolderMusic.FrameHistory
             Restore();
         }
 
-        public void Restore()
+        public bool Restore()
         {
-            if (restoreHistory.Count > 0)
-            {
-                HistoricFrame frame = restoreHistory.Dequeue();
-                HistoricFrameHandler handler = HistoricFrameHandler.GetHandler(frame.Page);
-                parameter = handler.FromHistoricParameter(frame.Parameter, library);
+            MobileDebug.Service.WriteEvent("Restore1", restoreHistory.Select(f => f.PageTypeName));
+            //return false;
 
-                rootFrame.Navigate(frame.Page, parameter);
+            if (restoreHistory.Count == 0) return false;
+
+            HistoricFrame frame = restoreHistory.Dequeue();
+            HistoricFrameHandler handler = HistoricFrameHandler.GetHandler(frame.Page);
+            parameter = handler.FromHistoricParameter(frame.Parameter, library);
+
+            try
+            {
+                MobileDebug.Service.WriteEventPair("Restore2", "Page: ", frame.PageTypeName, "Parameter: ", parameter?.Value);
+                //rootFrame.Navigate(typeof(MobileDebug.DebugPage), null);
+                return rootFrame.Navigate(frame.Page, parameter.Value);
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Service.WriteEvent("RestoreFail", e, frame.PageTypeName, parameter.Value);
+                restoreHistory.Clear();
+                return false;
             }
         }
 

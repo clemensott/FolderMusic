@@ -74,6 +74,8 @@ namespace MobileDebug
 
         private static IEnumerable<string> GetMessages(Exception e)
         {
+            string stackTrace = e.StackTrace;
+
             while (e != null)
             {
                 yield return "Typ: " + e.GetType().Name;
@@ -81,10 +83,14 @@ namespace MobileDebug
 
                 e = e.InnerException;
             }
+
+            yield return "Stack: " + stackTrace;
         }
 
         private static IEnumerable<string> GetMessagesPair(Exception e)
         {
+            string stackTrace = e.StackTrace;
+
             while (e != null)
             {
                 yield return "Typ: ";
@@ -94,6 +100,9 @@ namespace MobileDebug
 
                 e = e.InnerException;
             }
+
+            yield return "Stack: ";
+            yield return stackTrace;
         }
 
         private static async void Append(object parameter)

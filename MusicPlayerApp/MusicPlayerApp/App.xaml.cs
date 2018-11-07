@@ -21,7 +21,7 @@ namespace FolderMusic
     public sealed partial class App : Application
     {
         private const string frameHistoryFileName = "FrameHistory.xml";
-        private static readonly XmlSerializer frameHistorySerializer = new XmlSerializer(typeof(IEnumerable<HistoricFrame>));
+        private static readonly XmlSerializer frameHistorySerializer = new XmlSerializer(typeof(HistoricFrame[]));
 
         private Frame rootFrame;
         private TransitionCollection transitions;
@@ -73,15 +73,14 @@ namespace FolderMusic
                 rootFrame.Language = Windows.Globalization.ApplicationLanguages.Languages[0];
 
                 MobileDebug.Service.WriteEventPair("OnLaunched", "PreviousExecutionState", e.PreviousExecutionState);
-                if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
+                //if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
                     // TODO: Zustand von zuvor angehaltener Anwendung laden
                     IEnumerable<HistoricFrame> frameHistory = await ReadHistoricFrames();
 
                     frameHistoryService = new FrameHistoryService(frameHistory, rootFrame, library);
-                    frameHistoryService.Restore();
                 }
-                else frameHistoryService = new FrameHistoryService(Enumerable.Empty<HistoricFrame>(), rootFrame, library);
+                //else frameHistoryService = new FrameHistoryService(Enumerable.Empty<HistoricFrame>(), rootFrame, library);
 
                 Window.Current.Content = rootFrame;
             }
@@ -100,7 +99,7 @@ namespace FolderMusic
                 rootFrame.ContentTransitions = null;
                 rootFrame.Navigated += this.RootFrame_FirstNavigated;
 
-                if (!rootFrame.Navigate(typeof(MainPage), library))
+                if (!frameHistoryService.Restore() && !rootFrame.Navigate(typeof(MainPage), library))
                 {
                     throw new Exception("Failed to create initial page");
                 }
@@ -121,14 +120,15 @@ namespace FolderMusic
         {
             if (e.WindowActivationState != CoreWindowActivationState.Deactivated) return;
 
-            await WriteHistoricFrame(frameHistoryService.GetFrames());
+            await WriteHistoricFrames(frameHistoryService.GetFrames().Reverse().ToArray());
         }
 
         private async Task<IEnumerable<HistoricFrame>> ReadHistoricFrames()
         {
             try
             {
-                string frameHistoryXml = await PathIO.ReadTextAsync(GetFrameHistoryPath());
+                StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(frameHistoryFileName);
+                string frameHistoryXml = await FileIO.ReadTextAsync(file);
 
                 return (IEnumerable<HistoricFrame>)frameHistorySerializer.Deserialize(new StringReader(frameHistoryXml));
             }
@@ -140,25 +140,45 @@ namespace FolderMusic
             }
         }
 
-        private async Task WriteHistoricFrame(IEnumerable<HistoricFrame> frames)
+        private async Task WriteHistoricFrames(HistoricFrame[] frames)
         {
+            string frameHistoryXml;
+
+            MobileDebug.Service.WriteEvent("WriteHistoricFrames", frames?.Select(f => f?.PageTypeName));
+
             try
             {
                 StringWriter writer = new StringWriter();
                 frameHistorySerializer.Serialize(writer, frames);
-                string frameHistoryXml = writer.ToString();
+                frameHistoryXml = writer.ToString();
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Service.WriteEvent("SerializeHistoricFarmes", e, frames.Count());
+                return;
+            }
 
-                await PathIO.WriteTextAsync(GetFrameHistoryPath(), frameHistoryXml);
+            try
+            {
+                StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(frameHistoryFileName);
+                await FileIO.WriteTextAsync(file, frameHistoryXml);
+            }
+            catch (FileNotFoundException e1)
+            {
+                try
+                {
+                    StorageFile file = await ApplicationData.Current.LocalFolder.CreateFileAsync(frameHistoryFileName);
+                    await FileIO.WriteTextAsync(file, frameHistoryXml);
+                }
+                catch (Exception e2)
+                {
+                    MobileDebug.Service.WriteEvent("CreateHistoricFramesFile", e2, frames.Count());
+                }
             }
             catch (Exception e)
             {
                 MobileDebug.Service.WriteEvent("WriteHistoricFarmes", e, frames.Count());
             }
-        }
-
-        private string GetFrameHistoryPath()
-        {
-            return Path.Combine(ApplicationData.Current.LocalFolder.Path, frameHistoryFileName);
         }
 
         private void OnSuspending(object sender, SuspendingEventArgs e)
