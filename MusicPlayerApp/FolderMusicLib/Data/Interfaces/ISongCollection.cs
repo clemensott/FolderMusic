@@ -1,21 +1,24 @@
-﻿using System.Collections.Generic;
+﻿using MusicPlayer.Data.Shuffle;
+using System;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace MusicPlayer.Data
 {
-    public delegate void SongCollectionChangedEventHandler(ISongCollection sender, SongCollectionChangedEventArgs args);
-
     public interface ISongCollection : IEnumerable<Song>, IXmlSerializable
     {
         int Count { get; }
         IPlaylist Parent { get; set; }
+        IShuffleCollection Shuffle { get; set; }
 
-        event SongCollectionChangedEventHandler Changed;
+        event EventHandler<SongCollectionChangedEventArgs> Changed;
+        event EventHandler<ShuffleChangedEventArgs> ShuffleChanged;
 
         void Add(Song song);
         void Remove(Song song);
-        void Change(IEnumerable<Song> adds, IEnumerable<Song> removes);
+        void Change(IEnumerable<Song> removes, IEnumerable<Song> adds);
         int IndexOf(Song song);
-        void Reset(IEnumerable<Song> newSongs);
+        void SetShuffleType(ShuffleType type);
+        ISongCollection ToSimple();
     }
 }

@@ -1,5 +1,4 @@
 ﻿using MusicPlayer.Data;
-using MusicPlayer.Data.Loop;
 using MusicPlayer.Data.Shuffle;
 using PlayerIcons;
 using System;
@@ -24,8 +23,6 @@ namespace FolderMusic
 
         public IPlaylist CurrentPlaylist { get { return Library.CurrentPlaylist; } }
 
-        public IEnumerable<IPlaylist> Playlists { get { return Library.Playlists; } }
-
         public string CurrentPlaylistName { get { return CurrentPlaylist?.Name ?? "Empty"; } }
 
         public BitmapImage CurrentPlaylistShuffleIcon { get { return GetCurrentPlaylistShuffleIcon(); } }
@@ -42,33 +39,16 @@ namespace FolderMusic
         {
             Library = library;
 
-            library.LibraryChanged += OnLibraryChanged;
             library.PlayStateChanged += OnPlayStateChanged;
-            library.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
-            library.PlaylistsChanged += OnPlaylistsChanged;
 
-            Subscribe(library.Playlists);
+            if (!library.IsLoaded) library.Loaded += OnLibraryLoaded;
+            else
+            {
+                library.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
+                library.PlaylistsChanged += OnPlaylistsChanged;
+            }
+
             Subscribe(library.CurrentPlaylist);
-        }
-
-        private void Subscribe(IPlaylistCollection playlists)
-        {
-            playlists.Changed += OnPlaylistCollectionChanged;
-
-            foreach (IPlaylist playlist in playlists ?? Enumerable.Empty<IPlaylist>())
-            {
-                //playlist.Songs.CollectionChanged += Songs_CollectionChanged;
-            }
-        }
-
-        private void Unsubscribe(IPlaylistCollection playlists)
-        {
-            playlists.Changed -= OnPlaylistCollectionChanged;
-
-            foreach (IPlaylist playlist in playlists ?? Enumerable.Empty<IPlaylist>())
-            {
-                //playlist.Songs.CollectionChanged -= Songs_CollectionChanged;
-            }
         }
 
         private void Subscribe(IPlaylist playlist)
@@ -77,9 +57,10 @@ namespace FolderMusic
 
             playlist.CurrentSongChanged += OnCurrentSongChanged;
             playlist.LoopChanged += OnLoopChanged;
-            playlist.ShuffleChanged += OnShuffleChanged;
+            playlist.SongsChanged += OnSongsChanged;
+            playlist.Songs.ShuffleChanged += OnShuffleChanged;
 
-            Subscribe(playlist.ShuffleSongs);
+            Subscribe(playlist.CurrentSong);
         }
 
         private void Unsubscribe(IPlaylist playlist)
@@ -88,19 +69,10 @@ namespace FolderMusic
 
             playlist.CurrentSongChanged -= OnCurrentSongChanged;
             playlist.LoopChanged -= OnLoopChanged;
-            playlist.ShuffleChanged -= OnShuffleChanged;
+            playlist.SongsChanged += OnSongsChanged;
+            playlist.Songs.ShuffleChanged += OnShuffleChanged;
 
-            Unsubscribe(playlist.ShuffleSongs);
-        }
-
-        private void Subscribe(IEnumerable<Song> songs)
-        {
-            foreach (Song song in songs ?? Enumerable.Empty<Song>()) Subscribe(song);
-        }
-
-        private void Unsubscribe(IEnumerable<Song> songs)
-        {
-            foreach (Song song in songs ?? Enumerable.Empty<Song>()) Unsubscribe(song);
+            Unsubscribe(playlist.CurrentSong);
         }
 
         private void Subscribe(Song song)
@@ -121,8 +93,9 @@ namespace FolderMusic
             {
                 if (playIcon == null) playIcon = new SymbolIcon(Symbol.Play);
             }
-            catch
+            catch (Exception e)
             {
+                MobileDebug.Service.WriteEvent("GetPlayIconFail", e);
                 return new SymbolIcon(Symbol.Play);
             }
 
@@ -135,8 +108,9 @@ namespace FolderMusic
             {
                 if (pauseIcon == null) pauseIcon = new SymbolIcon(Symbol.Pause);
             }
-            catch
+            catch (Exception e)
             {
+                MobileDebug.Service.WriteEvent("GetPauseIconFail", e);
                 return new SymbolIcon(Symbol.Pause);
             }
 
@@ -164,7 +138,7 @@ namespace FolderMusic
 
         private BitmapImage GetCurrentPlaylistShuffleIcon()
         {
-            switch (CurrentPlaylist?.Shuffle ?? ShuffleType.Off)
+            switch (CurrentPlaylist?.Songs?.Shuffle.Type ?? ShuffleType.Off)
             {
                 case ShuffleType.Complete:
                     return Icons.Current.ShuffleComplete;
@@ -221,13 +195,13 @@ namespace FolderMusic
             NotifyPropertyChanged("CurrentSongArtist");
         }
 
-        private void OnLibraryChanged(ILibrary sender, LibraryChangedEventsArgs args)
+        private void OnLibraryLoaded(object sender, EventArgs args)
         {
-            Unsubscribe(args.OldPlaylists);
-            Subscribe(args.NewPlaylists);
+            Library.Loaded -= OnLibraryLoaded;
+            Library.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
+            Library.PlaylistsChanged += OnPlaylistsChanged;
 
-            Unsubscribe(args.OldCurrentPlaylist);
-            Subscribe(args.NewCurrentPlaylist);
+            Subscribe(Library.CurrentPlaylist);
 
             UpdatePlayPauseIconAndText();
             UpdatePlaylists();
@@ -235,28 +209,13 @@ namespace FolderMusic
             UpdateCurrentSongTitleAndArtist();
         }
 
-        private void OnPlaylistsChanged(ILibrary sender, PlaylistsChangedEventArgs args)
+        private void OnPlaylistsChanged(object sender, PlaylistsChangedEventArgs args)
         {
-            Unsubscribe(args.OldPlaylists);
-            Subscribe(args.NewPlaylists);
-
-            Unsubscribe(args.OldCurrentPlaylist);
-            Subscribe(args.NewCurrentPlaylist);
-
             UpdatePlaylists();
             UpdateCurrentPlaylistAndRest();
         }
 
-        private void OnPlaylistCollectionChanged(IPlaylistCollection sender, PlaylistCollectionChangedEventArgs args)
-        {
-            Unsubscribe(args.OldCurrentPlaylist);
-            Subscribe(args.NewCurrentPlaylist);
-
-            UpdatePlaylists();
-            UpdateCurrentPlaylistAndRest();
-        }
-
-        private void OnCurrentPlaylistChanged(ILibrary sender, CurrentPlaylistChangedEventArgs args)
+        private void OnCurrentPlaylistChanged(object sender, CurrentPlaylistChangedEventArgs args)
         {
             Unsubscribe(args.OldCurrentPlaylist);
             Subscribe(args.NewCurrentPlaylist);
@@ -270,32 +229,39 @@ namespace FolderMusic
             //if (sender.MoveNext()) (Window.Current.Content as Frame).Navigate(typeof(SkipSongsPage));
         }
 
-        private void OnCurrentSongChanged(IPlaylist sender, CurrentSongChangedEventArgs args)
+        private void OnCurrentSongChanged(object sender, CurrentSongChangedEventArgs args)
         {
             UpdateCurrentSongTitleAndArtist();
         }
 
-        private void OnShuffleChanged(IPlaylist sender, ShuffleChangedEventArgs args)
+        private void OnShuffleChanged(object sender, ShuffleChangedEventArgs args)
         {
             NotifyPropertyChanged("CurrentPlaylistShuffleIcon");
         }
 
-        private void OnLoopChanged(IPlaylist sender, LoopChangedEventArgs args)
+        private void OnLoopChanged(object sender, LoopChangedEventArgs args)
         {
             NotifyPropertyChanged("CurrentPlaylistLoopIcon");
         }
 
-        private void OnTitleChanged(Song sender, SongTitleChangedEventArgs args)
+        private void OnSongsChanged(object sender, SongsChangedEventArgs e)
         {
-            if (sender == CurrentPlaylist.CurrentSong) NotifyPropertyChanged("CurrentSongTitle");
+            e.OldSongs.ShuffleChanged -= OnShuffleChanged;
+
+            NotifyPropertyChanged("CurrentPlaylistShuffleIcon");
         }
 
-        private void OnArtistChanged(Song sender, SongArtistChangedEventArgs args)
+        private void OnTitleChanged(object sender, SongTitleChangedEventArgs args)
         {
-            if (sender == CurrentPlaylist.CurrentSong) NotifyPropertyChanged("CurrentSongArtist");
+            NotifyPropertyChanged("CurrentSongTitle");
         }
 
-        private void OnPlayStateChanged(ILibrary sender, PlayStateChangedEventArgs args)
+        private void OnArtistChanged(object sender, SongArtistChangedEventArgs args)
+        {
+            NotifyPropertyChanged("CurrentSongArtist");
+        }
+
+        private void OnPlayStateChanged(object sender, PlayStateChangedEventArgs args)
         {
             UpdatePlayPauseIconAndText();
         }

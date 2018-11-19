@@ -1,9 +1,6 @@
-﻿using MusicPlayer.Data.NonLoaded;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
@@ -12,133 +9,104 @@ namespace MusicPlayer.Data
 {
     class PlaylistCollection : IPlaylistCollection
     {
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
-        public event PlaylistCollectionChangedEventHandler Changed;
+        private List<IPlaylist> list;
 
-        private ObservableCollection<IPlaylist> collection;
+        public event EventHandler<PlaylistCollectionChangedEventArgs> Changed;
 
-        public int Count { get { return collection.Count; } }
+        public int Count { get { return list.Count; } }
 
         public ILibrary Parent { get; set; }
 
-        public PlaylistCollection(ILibrary parent)
+        public PlaylistCollection()
         {
-            Parent = parent;
-
-            collection = new ObservableCollection<IPlaylist>();
-            collection.CollectionChanged += OnCollectionChanged;
+            list = new List<IPlaylist>();
         }
 
-        public PlaylistCollection(ILibrary parent, IEnumerable<IPlaylist> playlists)
+        public PlaylistCollection(CurrentPlaySong currentPlaySong)
         {
-            Parent = parent;
-
-            collection = new ObservableCollection<IPlaylist>(playlists);
-            collection.CollectionChanged += OnCollectionChanged;
-        }
-
-        public PlaylistCollection(ILibrary parent, string xmlText)
-        {
-            Parent = parent;
-            ReadXml(XmlConverter.GetReader(xmlText));
-        }
-
-        private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            foreach (IPlaylist playlist in (IEnumerable)e.NewItems ?? Enumerable.Empty<IPlaylist>())
-            {
-                playlist.Parent = this;
-            }
-
-            CollectionChanged?.Invoke(this, e);
+            list = new List<IPlaylist>(Utils.RepeatOnce(new Playlist(currentPlaySong)));
         }
 
         public int IndexOf(IPlaylist playlist)
         {
-            return collection.IndexOf(playlist);
+            return list.IndexOf(playlist);
         }
 
         public void Add(IPlaylist playlist)
         {
-            Change(Enumerable.Range(0, 1).Select(i => playlist), Enumerable.Empty<IPlaylist>());
+            Change(null, Utils.RepeatOnce(playlist));
         }
 
         public void Remove(IPlaylist playlist)
         {
-            Change(Enumerable.Empty<IPlaylist>(), Enumerable.Range(0, 1).Select(i => playlist));
+            Change(Utils.RepeatOnce(playlist), null);
         }
 
-        public void Change(IEnumerable<IPlaylist> adds, IEnumerable<IPlaylist> removes)
+        public void Change(IEnumerable<IPlaylist> removes, IEnumerable<IPlaylist> adds)
         {
             IPlaylist oldCurrentPlaylist, newCurrentPlaylist;
-            newCurrentPlaylist = oldCurrentPlaylist = Parent.CurrentPlaylist;
-            int currentPlaylistIndex = collection.IndexOf(oldCurrentPlaylist);
+            newCurrentPlaylist = oldCurrentPlaylist = Parent?.CurrentPlaylist;
+            int currentPlaylistIndex = list.IndexOf(oldCurrentPlaylist);
 
-            IPlaylist[] addArray = adds.ToArray();
-            IPlaylist[] removeArray = removes.ToArray();
+            IPlaylist[] removeArray = removes?.ToArray() ?? new IPlaylist[0];
+            IPlaylist[] addArray = adds?.ToArray() ?? new IPlaylist[0];
 
-            ChangedPlaylist[] removed = GetRemovedChangedPlaylists(removeArray).ToArray();
-            ChangedPlaylist[] added = GetAddedChangedPlaylists(addArray).ToArray();
+            List<ChangeCollectionItem<IPlaylist>> removed = ChangeCollectionItem<IPlaylist>.GetRemovedChanged(removeArray, this);
+            List<ChangeCollectionItem<IPlaylist>> added = new List<ChangeCollectionItem<IPlaylist>>();
+            IEnumerable<IPlaylist> newList = list.Except(removed.Select(c => c.Item)).Concat(added.Select(c => c.Item)).ToArray();
 
-            if (removed.Length == 0 && added.Length == 0) return;
-
-            if (oldCurrentPlaylist == null) newCurrentPlaylist = collection.FirstOrDefault();
-            else if (Parent.Playlists == this && !collection.Contains(oldCurrentPlaylist))
+            foreach (IPlaylist playlist in addArray.OrderBy(p => p.AbsolutePath))
             {
-                if (currentPlaylistIndex < 0) currentPlaylistIndex = 0;
-                if (currentPlaylistIndex >= collection.Count) currentPlaylistIndex = collection.Count;
-                newCurrentPlaylist = collection.ElementAtOrDefault(currentPlaylistIndex);
+                int index = WouldIndexOf(newList.Select(p => p.AbsolutePath).OrderBy(p => p), playlist.AbsolutePath);
+                ChangeCollectionItem<IPlaylist> addChange = new ChangeCollectionItem<IPlaylist>(index, playlist);
+
+                added.Add(addChange);
             }
 
-            var args = new PlaylistCollectionChangedEventArgs(added, removed, oldCurrentPlaylist, newCurrentPlaylist);
+            if (removed.Count == 0 && added.Count == 0) return;
+
+            if (oldCurrentPlaylist == null) newCurrentPlaylist = newList.FirstOrDefault();
+            else if (Parent.Playlists == this && !newList.Contains(oldCurrentPlaylist))
+            {
+                if (currentPlaylistIndex < 0) currentPlaylistIndex = 0;
+                if (currentPlaylistIndex >= newList.Count()) currentPlaylistIndex = newList.Count() - 1;
+
+                newCurrentPlaylist = newList.ElementAtOrDefault(currentPlaylistIndex);
+            }
+
+            foreach (ChangeCollectionItem<IPlaylist> change in removed) list.Remove(change.Item);
+            foreach (ChangeCollectionItem<IPlaylist> change in added) list.Insert(change.Index, change.Item);
+
+            var args = new PlaylistCollectionChangedEventArgs(added.ToArray(), removed.ToArray());
             Changed?.Invoke(this, args);
 
             Parent.CurrentPlaylist = newCurrentPlaylist;
         }
 
-        private IEnumerable<ChangedPlaylist> GetAddedChangedPlaylists(IEnumerable<IPlaylist> adds)
+        private static int WouldIndexOf(IEnumerable<string> paths, string path)
         {
-            foreach (IPlaylist addPlaylist in adds?.ToArray() ?? Enumerable.Empty<IPlaylist>())
-            {
-                if (collection.Contains(addPlaylist)) continue;
+            List<string> list = paths.ToList();
+            if (!list.Contains(path)) list.Add(path);
 
-                collection.Add(addPlaylist);
-                yield return new ChangedPlaylist(collection.IndexOf(addPlaylist), addPlaylist);
-            }
+            return list.OrderBy(p => p).IndexOf(path);
         }
 
-        private IEnumerable<ChangedPlaylist> GetRemovedChangedPlaylists(IEnumerable<IPlaylist> removes)
+        public IPlaylistCollection ToSimple()
         {
-            foreach (IPlaylist removePlaylist in removes?.ToArray() ?? Enumerable.Empty<IPlaylist>())
-            {
-                int index = collection.IndexOf(removePlaylist);
+            IPlaylistCollection collection = new PlaylistCollection();
+            collection.Change(null, this.Select(p => p.ToSimple()));
 
-                if (index == -1) continue;
-
-                collection.Remove(removePlaylist);
-                yield return new ChangedPlaylist(index, removePlaylist);
-            }
-        }
-
-        public void Reset(IEnumerable<IPlaylist> newPlaylists)
-        {
-            collection.Clear();
-
-
-            foreach (IPlaylist playlist in newPlaylists)
-            {
-                collection.Add(playlist);
-            }
+            return collection;
         }
 
         public IEnumerator<IPlaylist> GetEnumerator()
         {
-            return collection.GetEnumerator();
+            return list.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return collection.GetEnumerator();
+            return list.GetEnumerator();
         }
 
         public XmlSchema GetSchema()
@@ -148,22 +116,9 @@ namespace MusicPlayer.Data
 
         public void ReadXml(XmlReader reader)
         {
-            collection = new ObservableCollection<IPlaylist>();
-
             reader.ReadStartElement();
 
-            while (reader.NodeType == XmlNodeType.Element)
-            {
-                try
-                {
-                    collection.Add(new Playlist(reader.ReadOuterXml(), this));
-                }
-                catch (Exception e)
-                {
-                    MobileDebug.Service.WriteEventPair("XmlReadPlaylistCollectionFail",
-                        e, "Count: ", collection.Count, "Node: ", reader.NodeType);
-                }
-            }
+            list = XmlConverter.DeserializeList<Playlist>(reader).Cast<IPlaylist>().ToList();
         }
 
         public void WriteXml(XmlWriter writer)

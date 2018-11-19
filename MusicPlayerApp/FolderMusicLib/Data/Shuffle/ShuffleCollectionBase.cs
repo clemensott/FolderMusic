@@ -11,34 +11,22 @@ namespace MusicPlayer.Data.Shuffle
 
     abstract class ShuffleCollectionBase : IShuffleCollection
     {
-        public event ShuffleCollectionChangedEventHandler Changed;
+        public event EventHandler<ShuffleCollectionChangedEventArgs> Changed;
 
-        protected List<Song> list;
+        private ISongCollection songs;
+        private List<Song> list;
 
-        public IPlaylist Parent { get; set; }
-
-        public ISongCollection Songs { get; private set; }
+        public ISongCollection Parent { get; private set; }
 
         public ShuffleType Type { get { return GetShuffleType(); } }
 
         public int Count { get { return list.Count; } }
 
-        public ShuffleCollectionBase(IPlaylist parent, ISongCollection songs, IEnumerable<Song> shuffleSongs)
+        public ShuffleCollectionBase(ISongCollection parent)
         {
+            list = new List<Song>();
+
             Parent = parent;
-            Songs = songs;
-            songs.Changed += Songs_CollectionChanged;
-
-            list = new List<Song>(shuffleSongs);
-        }
-
-        public ShuffleCollectionBase(IPlaylist parent, ISongCollection songs, string xmlText)
-        {
-            Parent = parent;
-            Songs = songs;
-            songs.Changed += Songs_CollectionChanged;
-
-            ReadXml(XmlConverter.GetReader(xmlText));
         }
 
         protected abstract ShuffleType GetShuffleType();
@@ -48,25 +36,42 @@ namespace MusicPlayer.Data.Shuffle
             return list.IndexOf(song);
         }
 
-        public void Reset(IEnumerable<Song> newShuffleSongs)
+        protected void Change(IEnumerable<Song> removes, IEnumerable<Song> adds)
         {
-            list.Clear();
-            list.AddRange(newShuffleSongs);
+            ChangeCollectionItem<Song>[] removeChanges = ChangeCollectionItem<Song>.GetRemovedChanged(removes, list).ToArray();
+            ChangeCollectionItem<Song>[] addChanges = ChangeCollectionItem<Song>.GetAddedChanged(adds, list.Except(removes)).ToArray();
 
-            RaiseChange();
+            Change(removeChanges, addChanges);
         }
 
-        private void Songs_CollectionChanged(ISongCollection sender, SongCollectionChangedEventArgs args)
+        public void Change(IEnumerable<Song> removes, IEnumerable<ChangeCollectionItem<Song>> adds)
         {
-            UpdateCollection(args);
+            ChangeCollectionItem<Song>[] removeChanges = ChangeCollectionItem<Song>.GetRemovedChanged(removes, list).ToArray();
+            ChangeCollectionItem<Song>[] addChanges = (adds ?? Enumerable.Empty<ChangeCollectionItem<Song>>()).ToArray();
+
+            Change(removeChanges, addChanges);
         }
 
-        protected abstract void UpdateCollection(SongCollectionChangedEventArgs args);
-
-        protected void RaiseChange()
+        private void Change(ChangeCollectionItem<Song>[] removeChanges, ChangeCollectionItem<Song>[] addChanges)
         {
-            Changed?.Invoke(this);
+            if (removeChanges.Length == 0 && addChanges.Length == 0) return;
+
+            foreach (ChangeCollectionItem<Song> change in removeChanges) list.Remove(change.Item);
+            foreach (ChangeCollectionItem<Song> change in addChanges) list.Insert(change.Index, change.Item);
+
+            var args = new ShuffleCollectionChangedEventArgs(addChanges, removeChanges);
+            Changed?.Invoke(this, args);
         }
+
+        public IShuffleCollection Repalce(IEnumerable<Song> songsToRepalce)
+        {
+            Song[] array = songs.ToArray();
+            IEnumerable<Song> newSongs = this.Select(s1 => array.FirstOrDefault(s2 => s2.Path == s1.Path) ?? s1);
+
+            return GetNewThis(newSongs);
+        }
+
+        protected abstract IShuffleCollection GetNewThis(IEnumerable<Song> songs);
 
         public IEnumerator<Song> GetEnumerator()
         {
@@ -94,7 +99,7 @@ namespace MusicPlayer.Data.Shuffle
                 try
                 {
                     string path = reader.ReadElementContentAsString();
-                    Song song = Songs.FirstOrDefault(s => s.Path == path);
+                    Song song = Parent.FirstOrDefault(s => s.Path == path);
 
                     if (!(song?.IsEmpty ?? true)) list.Add(song);
                 }

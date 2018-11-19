@@ -1,93 +1,127 @@
 ﻿using MusicPlayer.Data;
 using MusicPlayer.Data.Shuffle;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace FolderMusic.Converters
 {
-    class ShuffleSongsCollection : ObservableCollection<Song>, IUpdateSellectedItemCollection<Song>
+    class ShuffleSongsCollection : ObservableCollection<Song>, IUpdateSelectedItemCollection<Song>
     {
         private IPlaylist source;
 
-        public event UpdateFinishedEventHandler<Song> UpdateFinished;
+        public event EventHandler UpdateFinished;
 
         public ShuffleSongsCollection(IPlaylist source) : base()
         {
             this.source = source;
-            if (source == null) return;
 
-            source.ShuffleChanged += Source_ShuffleChanged;
-            source.ShuffleSongs.Changed += ShuffleCollection_Changed;
-
-            Subscribe(source.ShuffleSongs);
+            source.SongsChanged += Source_SongsChanged;
+            Subscribe(source.Songs);
         }
 
-        private void Source_ShuffleChanged(IPlaylist sender, ShuffleChangedEventArgs args)
+        private void Subscribe(ISongCollection songs)
         {
-            Unsubscribe(this.ToList());
-            Subscribe(source.ShuffleSongs);
-
-            UpdateFinished?.Invoke(this);
+            if (songs != null) songs.ShuffleChanged += Songs_ShuffleChanged;
         }
 
-        private void ShuffleCollection_Changed(IShuffleCollection sender)
+        private void Unsubscribe(ISongCollection songs)
         {
-            Unsubscribe(this.ToList());
-            Subscribe(source.ShuffleSongs);
-
-            UpdateFinished?.Invoke(this);
+            if (songs != null) songs.ShuffleChanged += Songs_ShuffleChanged;
         }
 
-        private void Subscribe(IEnumerable<Song> songs)
+        private void Subscribe(IShuffleCollection shuffle)
         {
-            if (songs == null) return;
-
-            foreach (Song song in songs ?? Enumerable.Empty<Song>())
-            {
-                Subscribe(song);
-            }
+            if (shuffle != null) shuffle.Changed += Shuffle_Changed;
         }
 
-        private void Unsubscribe(IEnumerable<Song> songs)
+        private void Unsubscribe(IShuffleCollection shuffle)
         {
-            if (songs == null) return;
-
-            foreach (Song song in songs ?? Enumerable.Empty<Song>())
-            {
-                Unsubscribe(song);
-            }
+            if (shuffle != null) shuffle.Changed += Shuffle_Changed;
         }
 
         private void Subscribe(Song song)
         {
-            if (song?.IsEmpty ?? true) return;
+            if (song == null) return;
 
-            song.ArtistChanged += OnSongChanged;
-            song.TitleChanged += OnSongChanged;
-
-            Add(song);
+            song.ArtistChanged += Song_Changed;
+            song.TitleChanged += Song_Changed;
         }
 
         private void Unsubscribe(Song song)
         {
-            if (song?.IsEmpty ?? true) return;
+            if (song == null) return;
 
-            song.ArtistChanged -= OnSongChanged;
-            song.TitleChanged -= OnSongChanged;
-
-            Remove(song);
+            song.ArtistChanged += Song_Changed;
+            song.TitleChanged += Song_Changed;
         }
 
-        private void OnSongChanged(Song sender, EventArgs args)
+        private void Source_SongsChanged(object sender, SongsChangedEventArgs e)
         {
-            int index = source.ShuffleSongs.IndexOf(sender);
+            Unsubscribe(e.OldSongs);
+            Subscribe(e.NewSongs);
+
+            Clear();
+
+            foreach (Song song in source.Songs.Shuffle) Add(song);
+
+            UpdateFinished?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Songs_ShuffleChanged(object sender, ShuffleChangedEventArgs e)
+        {
+            Unsubscribe(e.OldShuffleSongs);
+            Subscribe(e.NewShuffleSongs);
+
+            Clear();
+
+            foreach (Song song in source.Songs.Shuffle) Add(song);
+
+            UpdateFinished?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Shuffle_Changed(object sender, ShuffleCollectionChangedEventArgs e)
+        {
+            foreach (Song song in e.GetRemoved()) Remove(song);
+            foreach (ChangeCollectionItem<Song> change in e.AddedSongs) Insert(change.Index, change.Item);
+
+            UpdateFinished?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Song_Changed(object sender, EventArgs e)
+        {
+            int index = IndexOf((Song)sender);
 
             RemoveAt(index);
-            Insert(index, sender);
+            Insert(index, (Song)sender);
+        }
 
-            UpdateFinished?.Invoke(this);
+        protected override void ClearItems()
+        {
+            foreach (Song song in this) Unsubscribe(song);
+
+            base.ClearItems();
+        }
+
+        protected override void InsertItem(int index, Song item)
+        {
+            Subscribe(item);
+
+            base.InsertItem(index, item);
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            Unsubscribe(this[index]);
+
+            base.RemoveItem(index);
+        }
+
+        protected override void SetItem(int index, Song item)
+        {
+            Unsubscribe(this[index]);
+            Subscribe(item);
+
+            base.SetItem(index, item);
         }
     }
 }

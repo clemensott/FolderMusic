@@ -62,7 +62,7 @@ namespace BackgroundTask
             }
             else if (BackgroundMediaPlayer.Current.CurrentState != MediaPlayerState.Playing)
             {
-                double percent = library?.CurrentPlaylist?.CurrentSongPositionPercent ?? -1;
+                double percent = library?.CurrentPlaylist?.CurrentSongPosition ?? -1;
                 double duration = library?.CurrentPlaylist?.CurrentSong?.DurationMilliseconds ?? Song.DefaultDuration;
 
                 MobileDebug.Service.WriteEvent("PlayNormal", BackgroundMediaPlayer.Current.CurrentState, CurrentSong, percent);
@@ -98,7 +98,7 @@ namespace BackgroundTask
             {
                 TimeSpan position = BackgroundMediaPlayer.Current.Position;
                 TimeSpan duration = BackgroundMediaPlayer.Current.NaturalDuration;
-                library.CurrentPlaylist.CurrentSongPositionPercent = position.TotalMilliseconds / duration.TotalMilliseconds;
+                library.CurrentPlaylist.CurrentSongPosition = position.TotalMilliseconds / duration.TotalMilliseconds;
             }
             catch (Exception e)
             {
@@ -125,7 +125,7 @@ namespace BackgroundTask
 
         public void Next(bool fromEnded)
         {
-            CurrentPlaylist.SetNextSong();
+            CurrentPlaylist.ChangeCurrentSong(1);
             playNext = true;
             bool isLast = CurrentPlaylist.CurrentSong == CurrentPlaylist.Songs.Last();
 
@@ -135,7 +135,7 @@ namespace BackgroundTask
         public void Previous()
         {
             playNext = false;
-            CurrentPlaylist.SetPreviousSong();
+            CurrentPlaylist.ChangeCurrentSong(-1);
         }
 
         public void SetCurrent()
@@ -146,7 +146,7 @@ namespace BackgroundTask
 
             if ((CurrentSong?.IsEmpty ?? true) || (CurrentSong?.Failed ?? true)) return;
 
-            BackgroundMediaPlayer.Current.AutoPlay = library.IsPlaying && CurrentPlaylist.CurrentSongPositionPercent == 0;
+            BackgroundMediaPlayer.Current.AutoPlay = library.IsPlaying && CurrentPlaylist.CurrentSongPosition == 0;
 
             try
             {
@@ -182,7 +182,7 @@ namespace BackgroundTask
                 Subscribe(CurrentSong);
             }
 
-            if (library.IsLoadedComplete && sender.NaturalDuration.TotalMilliseconds > Song.DefaultDuration)
+            if (library.IsLoaded && sender.NaturalDuration.TotalMilliseconds > Song.DefaultDuration)
             {
                 CurrentSong.DurationMilliseconds = sender.NaturalDuration.TotalMilliseconds;
             }
@@ -191,7 +191,7 @@ namespace BackgroundTask
 
             if (library.IsPlaying)
             {
-                if (CurrentPlaylist.CurrentSongPositionPercent > 0) Volume0To1();
+                if (CurrentPlaylist.CurrentSongPosition > 0) Volume0To1();
                 else BackgroundMediaPlayer.Current.Play();
             }
             else smtc.PlaybackStatus = MediaPlaybackStatus.Paused;
@@ -215,7 +215,7 @@ namespace BackgroundTask
             song.TitleChanged -= OnCurrentSongArtistOrTitleChanged;
         }
 
-        private void OnCurrentSongArtistOrTitleChanged(Song sender, EventArgs args)
+        private void OnCurrentSongArtistOrTitleChanged(object sender, EventArgs args)
         {
             UpdateSystemMediaTransportControl();
         }

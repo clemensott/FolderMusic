@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -13,18 +14,28 @@ namespace MusicPlayer
             return XmlConverter.Deserialize<T>(xmlText);
         }
 
+        public async static Task<T> LoadObjectAsync<T>(string filenameWithExtention)
+        {
+            string xmlText = await LoadTextAsync(filenameWithExtention);
+
+            return XmlConverter.Deserialize<T>(xmlText);
+        }
+
         public static string LoadText(string filenameWithExtention)
+        {
+            Task<string> task = LoadTextAsync(filenameWithExtention);
+            task.Wait();
+
+            return task.Result;
+        }
+
+        public async static Task<string> LoadTextAsync(string filenameWithExtention)
         {
             try
             {
-                //string path = ApplicationData.Current.LocalFolder.Path + "\\" + filenameWithExtention;
-                //Task<string> load = PathIO.ReadTextAsync(path).AsTask();
-                //load.Wait();
-                StorageFile file = GetStorageFile(filenameWithExtention);
-                var read = FileIO.ReadTextAsync(file);
-                read.AsTask().Wait();
+                StorageFile file = await GetStorageFileAsync(filenameWithExtention);
 
-                return read.GetResults();
+                return await FileIO.ReadTextAsync(file);
             }
             catch (Exception e)
             {
@@ -36,59 +47,57 @@ namespace MusicPlayer
 
         public static void SaveObject(string filenameWithExtention, object obj)
         {
+            SaveObjectAsync(filenameWithExtention, obj).Wait();
+        }
+
+        public async static Task SaveObjectAsync(string filenameWithExtention, object obj)
+        {
             string xmlText = XmlConverter.Serialize(obj);
 
-            if (xmlText != string.Empty) SaveText(filenameWithExtention, xmlText);
+            if (xmlText != string.Empty) await SaveTextAsync(filenameWithExtention, xmlText);
             else MobileDebug.Service.WriteEvent("SaveObject", obj.GetType());
         }
 
         public static void SaveText(string filenameWithExtention, string text)
         {
-            string path = ApplicationData.Current.LocalFolder.Path + "\\" + filenameWithExtention;
-
-            try
-            {
-                PathIO.WriteTextAsync(path, text).AsTask().Wait();
-            }
-            catch
-            {
-                try
-                {
-                    ApplicationData.Current.LocalFolder.CreateFileAsync(filenameWithExtention).AsTask().Wait();
-
-                    PathIO.WriteTextAsync(path, text).AsTask().Wait();
-                }
-                catch (Exception e)
-                {
-                    MobileDebug.Service.WriteEvent("IOSaveTextDoubleFail", e, filenameWithExtention);
-                }
-            }
+            SaveTextAsync(filenameWithExtention, text).Wait();
         }
 
-        public static void AppendText(string text, string filenameWithExtention)
+        public async static Task SaveTextAsync(string filenameWithExtention, string text)
         {
             string path = ApplicationData.Current.LocalFolder.Path + "\\" + filenameWithExtention;
 
             try
             {
-                PathIO.AppendTextAsync(path, text).AsTask().Wait();
+                StorageFile file = GetOrCreateStorageFile(filenameWithExtention);
+                await FileIO.WriteTextAsync(file, text);
+                return;
             }
-            catch
+            catch (Exception e)
             {
-                try
-                {
-                    ApplicationData.Current.LocalFolder.CreateFileAsync(filenameWithExtention).AsTask().Wait();
-
-                    PathIO.WriteTextAsync(path, text).AsTask().Wait();
-                }
-                catch (Exception e)
-                {
-                    MobileDebug.Service.WriteEvent("IOAppendTextDoubleFail", e, filenameWithExtention);
-                }
+                MobileDebug.Service.WriteEvent("IOSaveTextFail", e, filenameWithExtention);
             }
         }
 
-        public async static void Delete(string filenameWithExtention)
+        public static void AppendText(string filenameWithExtention, string text)
+        {
+            AppendTextAsync(filenameWithExtention, text).Wait();
+        }
+
+        public async static Task AppendTextAsync(string filenameWithExtention, string text)
+        {
+            try
+            {
+                StorageFile file = await GetOrCreateStorageFileAsync(filenameWithExtention);
+                await FileIO.AppendTextAsync(file, text);
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Service.WriteEvent("IOAppendTextDoubleFail", e, filenameWithExtention);
+            }
+        }
+
+        public async static Task Delete(string filenameWithExtention)
         {
             try
             {
@@ -102,42 +111,70 @@ namespace MusicPlayer
             }
         }
 
-        public static void Copy(string srcFileName, string destFileName)
+        public async static Task CopyAsync(string srcFileName, string destFileName)
         {
-            Copy(srcFileName, ApplicationData.Current.LocalFolder, destFileName);
+            await CopyAsync(srcFileName, ApplicationData.Current.LocalFolder, destFileName);
         }
 
-        public static void Copy(string srcFileName, StorageFolder destFolder, string destFileName)
+        public async static Task CopyAsync(string srcFileName, StorageFolder destFolder, string destFileName)
         {
+            StorageFile srcFile;
+
             try
             {
-                StorageFile srcFile = GetStorageFile(srcFileName);
-
-                try
-                {
-                    StorageFile destFile = GetStorageFile(destFileName);
-
-                    srcFile.CopyAndReplaceAsync(destFile);
-                }
-                catch
-                {
-                    srcFile.CopyAsync(destFolder, destFileName);
-                }
+                srcFile = await GetStorageFileAsync(srcFileName);
             }
-            catch { }
+            catch (Exception e)
+            {
+                MobileDebug.Service.WriteEventPair("IOCopyGetSrcFail", e, "Src: ", srcFileName,
+                    "DestFolder: ", destFolder.Path, "DestFile: ", destFileName);
+                return;
+            }
+
+            try
+            {
+                StorageFile destFile = await GetStorageFileAsync(destFileName);
+
+                await srcFile.CopyAndReplaceAsync(destFile);
+            }
+            catch (FileNotFoundException e)
+            {
+                MobileDebug.Service.WriteEventPair("IOCopyFileNotFound", e, "Src: ", srcFileName,
+                    "DestFolder: ", destFolder.Path, "DestFile: ", destFileName);
+
+                await srcFile.CopyAsync(destFolder, destFileName);
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Service.WriteEventPair("IOCopyFail", e, "Src: ", srcFileName,
+                    "DestFolder: ", destFolder.Path, "DestFile: ", destFileName);
+            }
         }
 
         private static StorageFile GetStorageFile(string fileName)
         {
-            return GetStorageFile(ApplicationData.Current.LocalFolder, fileName);
+            Task<StorageFile> task = GetStorageFileAsync(ApplicationData.Current.LocalFolder, fileName);
+            task.Wait();
+
+            return task.Result;
+        }
+
+        private async static Task<StorageFile> GetStorageFileAsync(string fileName)
+        {
+            return await GetStorageFileAsync(ApplicationData.Current.LocalFolder, fileName);
         }
 
         private static StorageFile GetStorageFile(StorageFolder folder, string fileName)
         {
-            var fileOp = folder.GetFileAsync(fileName);
-            fileOp.AsTask().Wait();
+            Task<StorageFile> task = GetStorageFileAsync(folder, fileName);
+            task.Wait();
 
-            return fileOp.GetResults();
+            return task.Result;
+        }
+
+        private async static Task<StorageFile> GetStorageFileAsync(StorageFolder folder, string fileName)
+        {
+            return await folder.GetFileAsync(fileName);
         }
 
         private static StorageFile GetOrCreateStorageFile(string fileName)
@@ -145,21 +182,31 @@ namespace MusicPlayer
             return GetOrCreateStorageFile(ApplicationData.Current.LocalFolder, fileName);
         }
 
+        private async static Task<StorageFile> GetOrCreateStorageFileAsync(string fileName)
+        {
+            return await GetOrCreateStorageFileAsync(ApplicationData.Current.LocalFolder, fileName);
+        }
+
         private static StorageFile GetOrCreateStorageFile(StorageFolder folder, string fileName)
+        {
+            Task<StorageFile> task = GetOrCreateStorageFileAsync(folder, fileName);
+            task.Wait();
+
+            return task.Result;
+        }
+
+        private async static Task<StorageFile> GetOrCreateStorageFileAsync(StorageFolder folder, string fileName)
         {
             try
             {
-                var fileOp = folder.GetFileAsync(fileName);
-                fileOp.AsTask().Wait();
-
-                return fileOp.GetResults();
+                return await folder.GetFileAsync(fileName);
             }
-            catch { }
+            catch(Exception e)
+            {
+                MobileDebug.Service.WriteEvent("GetOrCreateStorageFileAsyncFail", e, folder.Path, fileName);
+            }
 
-            var createFileOp = folder.CreateFileAsync(fileName);
-            createFileOp.AsTask().Wait();
-
-            return createFileOp.GetResults();
+            return await folder.CreateFileAsync(fileName);
         }
     }
 }

@@ -13,19 +13,12 @@ namespace MusicPlayer.Data
 
         public IShuffleCollection NewShuffleSongs { get; private set; }
 
-        public Song OldCurrentSong { get; private set; }
-
-        public Song NewCurrentSong { get; private set; }
-
-        internal ShuffleChangedEventArgs(IShuffleCollection oldShuffleSongs, IShuffleCollection newShuffleSongs,
-            Song oldCurrentSong, Song newCurrentSong)
+        internal ShuffleChangedEventArgs(IShuffleCollection oldShuffleSongs, IShuffleCollection newShuffleSongs)
         {
             OldShuffleType = oldShuffleSongs?.Type ?? ShuffleType.Off;
             NewShuffleType = newShuffleSongs?.Type ?? ShuffleType.Off;
             OldShuffleSongs = oldShuffleSongs;
             NewShuffleSongs = newShuffleSongs;
-            OldCurrentSong = oldCurrentSong;
-            NewCurrentSong = newCurrentSong;
         }
     }
 }

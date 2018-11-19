@@ -8,18 +8,10 @@ namespace MusicPlayer.Data
 
         public IPlaylistCollection NewPlaylists { get; private set; }
 
-        public IPlaylist OldCurrentPlaylist { get; private set; }
-
-        public IPlaylist NewCurrentPlaylist { get; private set; }
-
-        public PlaylistsChangedEventArgs(IPlaylistCollection oldPlaylists,
-            IPlaylistCollection newPlaylists, IPlaylist oldCurrentPlaylist, IPlaylist newCurrentPlaylist)
+        public PlaylistsChangedEventArgs(IPlaylistCollection oldPlaylists, IPlaylistCollection newPlaylists)
         {
             OldPlaylists = oldPlaylists;
             NewPlaylists = newPlaylists;
-
-            OldCurrentPlaylist = oldCurrentPlaylist;
-            NewCurrentPlaylist = newCurrentPlaylist;
         }
     }
 }

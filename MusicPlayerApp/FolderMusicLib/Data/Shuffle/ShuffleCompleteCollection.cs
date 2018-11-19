@@ -10,16 +10,20 @@ namespace MusicPlayer.Data.Shuffle
 
         private static Random random = new Random();
 
-        public ShuffleCompleteCollection(IPlaylist parent, ISongCollection songs, Song currentSong)
-            : base(parent, songs, GetStart(songs, currentSong))
+        public ShuffleCompleteCollection(ISongCollection songs, Song currentSong) : base(songs)
         {
-            parent.CurrentSongChanged += Parent_CurrentSongChanged;
+            Change(null, GetStart(songs, currentSong));
         }
 
-        public ShuffleCompleteCollection(IPlaylist parent, ISongCollection songs, string xmlText)
-            : base(parent, songs, xmlText)
+        public ShuffleCompleteCollection(ISongCollection songs) : base(songs)
         {
-            parent.CurrentSongChanged += Parent_CurrentSongChanged;
+            Parent.Changed += Parent_CollectionChanged;
+            Parent.Parent.CurrentSongChanged += Playlist_CurrentSongChanged;
+        }
+
+        public ShuffleCompleteCollection(ISongCollection songs, IEnumerable<Song> shuffleSongs) : this(songs)
+        {
+            Change(null, shuffleSongs.Select((s, i) => new ChangeCollectionItem<Song>(i, s)));
         }
 
         protected override ShuffleType GetShuffleType()
@@ -27,7 +31,7 @@ namespace MusicPlayer.Data.Shuffle
             return ShuffleType.Complete;
         }
 
-        protected static IEnumerable<Song> GetStart(ISongCollection songs, Song currentSong)
+        protected static IEnumerable<ChangeCollectionItem<Song>> GetStart(ISongCollection songs, Song currentSong)
         {
             List<Song> remaining = new List<Song>(songs);
             int shuffleCount = GetCount(songs.Count);
@@ -38,71 +42,129 @@ namespace MusicPlayer.Data.Shuffle
                 Song addSong = i == currentSongIndex && currentSong != null ?
                     currentSong : remaining[random.Next(remaining.Count)];
 
-                yield return addSong;
+                yield return new ChangeCollectionItem<Song>(i, addSong);
 
                 remaining.Remove(addSong);
             }
         }
 
-        private void Parent_CurrentSongChanged(IPlaylist sender, CurrentSongChangedEventArgs args)
+        private void Parent_CollectionChanged(object sender, SongCollectionChangedEventArgs e)
         {
-            Song currentSong = sender.CurrentSong;
-            int shuffleCount = GetCount(Songs.Count);
-            int shuffleIndex = GetCurrentSongIndex(Songs.Count);
+            Song currentSong = Parent.Parent.CurrentSong;
+            int shuffleIndex = GetCurrentSongIndex(Parent.Count);
+            int shuffleCount = GetCount(Parent.Count);
+            int currentSongIndex = IndexOf(currentSong);
 
-            if (!list.Contains(currentSong)) list.Add(currentSong);
+            List<Song> removes = new List<Song>();
+            List<ChangeCollectionItem<Song>> adds = new List<ChangeCollectionItem<Song>>();
 
-            while (list.IndexOf(currentSong) > shuffleIndex)
+            foreach (Song remove in e.GetRemoved())
             {
-                list.RemoveAt(0);
-                list.Add(Songs.Except(list).ElementAt(random.Next(Songs.Count - list.Count)));
+                int index = IndexOf(remove);
+
+                if (index == -1) continue;
+
+                Song add = GetRandomSong(Parent, null, adds.Select(c => c.Item));
+                ChangeCollectionItem<Song> addChange = new ChangeCollectionItem<Song>(index, add);
+
+                removes.Add(remove);
+                adds.Add(addChange);
             }
 
-            while (list.IndexOf(currentSong) < shuffleIndex)
+            for (int i = currentSongIndex - 1; i >= shuffleIndex; i++)
             {
-                list.RemoveAt(list.Count - 1);
-                list.Insert(0, Songs.Except(list).ElementAt(random.Next(Songs.Count - list.Count)));
+                Song remove = this.ElementAt(i);
+
+                if (!removes.Contains(remove)) removes.Add(remove);
+                else adds.Remove(adds.FirstOrDefault(c => c.Index == i));
+            }
+
+            for (int i = currentSongIndex; i < shuffleIndex; i++)
+            {
+                Song add = GetRandomSong(Parent, removes, adds.Select(c => c.Item));
+                ChangeCollectionItem<Song> addChange = new ChangeCollectionItem<Song>(i, add);
+            }
+
+            while (Parent.Count - removes.Count + adds.Count > shuffleCount)
+            {
+                if (!adds.Remove(adds.FirstOrDefault(c => c.Index > shuffleIndex)))
+                {
+                    removes.Add(this.Except(removes).LastOrDefault());
+                }
+            }
+
+            while (Parent.Count - removes.Count + adds.Count < shuffleCount)
+            {
+                int index = Parent.Count - removes.Count + adds.Count;
+                Song add = GetRandomSong(Parent, removes, adds.Select(c => c.Item));
+                ChangeCollectionItem<Song> addChange = new ChangeCollectionItem<Song>(index, add);
+
+                adds.Add(addChange);
             }
         }
 
-        protected override void UpdateCollection(SongCollectionChangedEventArgs args)
+        private void Playlist_CurrentSongChanged(object sender, CurrentSongChangedEventArgs args)
         {
-            bool changed = false;
-            Song currentSong = Parent.CurrentSong;
-            int shuffleCount = GetCount(Songs.Count);
-            int shuffleIndex = GetCurrentSongIndex(Songs.Count);
+            Song currentSong = args.NewCurrentSong;
+            int shuffleIndex = GetCurrentSongIndex(Parent.Count);
+            int currentSongIndex = IndexOf(currentSong);
 
-            foreach (Song removeSong in args.GetRemoved())
+            if (currentSongIndex == -1)
             {
-                if (list.Remove(removeSong)) changed = true;
+                Song[] removes = this.Take(Count - shuffleIndex).ToArray();
+                List<Song> adds = GetRandomSongs(Parent, removes, Count - shuffleIndex);
+
+                if (!adds.Remove(currentSong)) adds.RemoveAt(0);
+                adds.Insert(0, currentSong);
+
+                Change(removes, adds);
+            }
+            else if (currentSongIndex > shuffleIndex)
+            {
+                Song[] removes = this.Take(currentSongIndex - shuffleIndex).ToArray();
+                List<Song> adds = GetRandomSongs(Parent, removes, currentSongIndex - shuffleIndex);
+
+                Change(removes, adds);
+            }
+            else
+            {
+                Song[] removes = this.Skip(Count - shuffleIndex + currentSongIndex).ToArray();
+                List<ChangeCollectionItem<Song>> adds = GetRandomSongs(Parent, removes, shuffleIndex - currentSongIndex).
+                    Select((c, i) => new ChangeCollectionItem<Song>(i, c)).ToList();
+
+                Change(removes, adds);
+            }
+        }
+
+        private List<Song> GetRandomSongs(IEnumerable<Song> songs, IEnumerable<Song> removes, int count)
+        {
+            List<Song> adds = new List<Song>();
+
+            for (int i = 0; i < Count; i++)
+            {
+                adds.Add(GetRandomSong(songs, removes, adds));
             }
 
-            while (list.IndexOf(currentSong) > shuffleIndex)
-            {
-                changed = true;
+            return adds;
+        }
 
-                list.RemoveAt(0);
-                list.Add(Songs.Except(list).ElementAt(random.Next(Songs.Count - list.Count)));
-            }
+        private Song GetRandomSong(IEnumerable<Song> songs, IEnumerable<Song> removes, IEnumerable<Song> adds)
+        {
+            if (songs == null) songs = Enumerable.Empty<Song>();
+            if (removes == null) removes = Enumerable.Empty<Song>();
+            if (adds == null) adds = Enumerable.Empty<Song>();
 
-            while (list.IndexOf(currentSong) < shuffleIndex)
-            {
-                changed = true;
+            IEnumerable<Song> remainingSongs = songs.Except(this.Except(removes)).Except(adds);
 
-                list.RemoveAt(list.Count - 1);
-                list.Insert(0, Songs.Except(list).ElementAt(random.Next(Songs.Count - list.Count)));
-            }
-
-            if (changed) RaiseChange();
+            return remainingSongs.ElementAt(random.Next(remainingSongs.Count()));
         }
 
         private static int GetCurrentSongIndex(int songsCount)
         {
-            double indexDouble = (GetCount(songsCount) - 1) /
-                Convert.ToDouble(shuffleCompleteListNextCount + shuffleCompleteListPreviousCount) *
+            double divisor = (shuffleCompleteListNextCount + shuffleCompleteListPreviousCount) *
                 shuffleCompleteListPreviousCount;
 
-            return Convert.ToInt32(indexDouble);
+            return (int)((GetCount(songsCount) - 1) / divisor);
         }
 
         private static int GetCount(int songsCount)
@@ -110,6 +172,11 @@ namespace MusicPlayer.Data.Shuffle
             int count = shuffleCompleteListNextCount + shuffleCompleteListPreviousCount + 1;
 
             return songsCount > count ? count : songsCount;
+        }
+
+        protected override IShuffleCollection GetNewThis(IEnumerable<Song> songs)
+        {
+            return new ShuffleCompleteCollection(Parent, songs);
         }
     }
 }

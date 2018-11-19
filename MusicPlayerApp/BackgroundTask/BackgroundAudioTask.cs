@@ -1,5 +1,4 @@
 ﻿using MusicPlayer.Data;
-using MusicPlayer.Data.Loop;
 using MusicPlayer.Data.Shuffle;
 using Windows.ApplicationModel.Background;
 using Windows.Media;
@@ -11,8 +10,12 @@ namespace BackgroundTask
 
     public sealed class BackgroundAudioTask : IBackgroundTask
     {
+        private const string completeFileName = "Data.xml", backupFileName = "Data.bak",
+              simpleFileName = "SimpleData.xml", currentSongFileName = "CurrentPlaySong.xml";
+
         private static BackgroundAudioTask task;
 
+        private AutoSaveLoad saveLoad;
         private ILibrary library;
         private SystemMediaTransportControls smtc;
         private BackgroundTaskDeferral deferral;
@@ -47,7 +50,8 @@ namespace BackgroundTask
 
             Unsubscribe(task);
 
-            library = Library.LoadSimple(false);
+            saveLoad = new AutoSaveLoad(completeFileName, backupFileName, simpleFileName, currentSongFileName);
+            library = saveLoad.LoadSimple(false);
             smtc = SystemMediaTransportControls.GetForCurrentView();
             task = this;
 
@@ -56,7 +60,7 @@ namespace BackgroundTask
 
             Subscribe(task);
 
-            library.LoadComplete();
+            saveLoad.LoadComplete();
 
             BackgroundPlayer.SetCurrent();
 
@@ -78,10 +82,7 @@ namespace BackgroundTask
             BackgroundMediaPlayer.Current.MediaOpened += task.BackgroundMediaPlayer_MediaOpened;
             BackgroundMediaPlayer.Current.MediaFailed += task.BackgroundMediaPlayer_MediaFailed;
 
-            task.library.LibraryChanged += task.OnLibraryChanged;
             task.library.PlayStateChanged += task.OnPlayStateChanged;
-            task.library.PlaylistsChanged += task.OnPlaylistsChanged;
-            task.library.Playlists.Changed += task.OnPlaylistCollectionChanged;
             task.library.CurrentPlaylistChanged += task.OnCurrentPlaylistChanged;
 
             task.Subscribe(task.library.CurrentPlaylist);
@@ -102,9 +103,7 @@ namespace BackgroundTask
             BackgroundMediaPlayer.Current.MediaOpened -= task.BackgroundMediaPlayer_MediaOpened;
             BackgroundMediaPlayer.Current.MediaFailed -= task.BackgroundMediaPlayer_MediaFailed;
 
-            task.library.LibraryChanged -= task.OnLibraryChanged;
             task.library.PlayStateChanged -= task.OnPlayStateChanged;
-            task.library.PlaylistsChanged -= task.OnPlaylistsChanged;
             task.library.CurrentPlaylistChanged -= task.OnCurrentPlaylistChanged;
 
             task.Unsubscribe(task.library.CurrentPlaylist);
@@ -173,7 +172,7 @@ namespace BackgroundTask
                 "SMTC-State: ", smtc.PlaybackStatus, "PlayerPosition [s]: ", sender.Position.TotalMilliseconds,
                 "PlayerDuration [s]: ", sender.NaturalDuration.TotalMilliseconds, "PauseAllowed: ", pauseAllowed,
                 "LibraryIsPlaying: ", library.IsPlaying, "CurrentSong: ", library.CurrentPlaylist?.CurrentSong,
-                "LibIsCompleteLoaded: ", library.IsLoadedComplete);
+                "LibIsCompleteLoaded: ", library.IsLoaded);
 
             if (playling)
             {
@@ -187,56 +186,7 @@ namespace BackgroundTask
             ringer.ReloadTimes();
         }
 
-        private void OnSongsChanged(ISongCollection sender, SongCollectionChangedEventArgs args)
-        {
-            //MobileDebug.Manager.WriteEvent("SetOnSongs", library.CurrentPlaylist?.CurrentSong);
-            if (args.OldCurrentSong != args.NewCurrentSong) BackgroundPlayer.SetCurrent();
-        }
-
-        private void OnShuffleSongsChanged(IShuffleCollection sender)
-        {
-            //MobileDebug.Manager.WriteEvent("SetOnShuffleSongs", library.CurrentPlaylist?.CurrentSong);
-            //BackgroundPlayer.SetCurrent();
-        }
-
-        private void OnShuffleChanged(IPlaylist sender, ShuffleChangedEventArgs args)
-        {
-            //MobileDebug.Manager.WriteEvent("SetOnShuffle", library.CurrentPlaylist?.CurrentSong,
-            //args.NewCurrentSong == args.OldCurrentSong);
-
-            if (args.NewCurrentSong == args.OldCurrentSong) return;
-
-            BackgroundPlayer.SetCurrent();
-        }
-
-        private void OnPlaylistsChanged(ILibrary sender, PlaylistsChangedEventArgs args)
-        {
-            //MobileDebug.Manager.WriteEvent("BackgroundOnPlaylistChanged");
-
-            args.OldPlaylists.Changed -= OnPlaylistCollectionChanged;
-            args.NewPlaylists.Changed += OnPlaylistCollectionChanged;
-
-            if (args.NewCurrentPlaylist == args.OldCurrentPlaylist) return;
-
-            Unsubscribe(args.OldCurrentPlaylist);
-            Subscribe(args.NewCurrentPlaylist);
-
-            //MobileDebug.Manager.WriteEvent("SetOnPlaylists", library.CurrentPlaylist?.CurrentSong);
-            BackgroundPlayer.SetCurrent();
-        }
-
-        private void OnPlaylistCollectionChanged(IPlaylistCollection sender, PlaylistCollectionChangedEventArgs args)
-        {
-            if (args.NewCurrentPlaylist == args.OldCurrentPlaylist) return;
-
-            Unsubscribe(args.OldCurrentPlaylist);
-            Subscribe(args.NewCurrentPlaylist);
-
-            //MobileDebug.Manager.WriteEvent("SetOnPlaylists", library.CurrentPlaylist?.CurrentSong);
-            BackgroundPlayer.SetCurrent();
-        }
-
-        private void OnPlayStateChanged(ILibrary sender, PlayStateChangedEventArgs args)
+        private void OnPlayStateChanged(object sender, PlayStateChangedEventArgs args)
         {
             MobileDebug.Service.WriteEvent("BackgroundPlayStateChanged", args.NewValue);
 
@@ -244,32 +194,18 @@ namespace BackgroundTask
             else BackgroundPlayer.Pause();
         }
 
-        private void OnLoopChanged(IPlaylist sender, LoopChangedEventArgs args)
+        private void OnLoopChanged(object sender, LoopChangedEventArgs args)
         {
             SetLoopToBackgroundPlayer();
         }
 
-        private void OnLibraryChanged(ILibrary sender, LibraryChangedEventsArgs args)
-        {
-            Unsubscribe(args.OldCurrentPlaylist);
-            Subscribe(args.NewCurrentPlaylist);
-
-            SetLoopToBackgroundPlayer();
-
-            //MobileDebug.Manager.WriteEvent("SetOnLibrary", library.CurrentPlaylist?.CurrentSong);
-            if (args.OldCurrentPlaylist?.CurrentSong.Path != args.NewCurrentPlaylist?.CurrentSong?.Path)
-            {
-                BackgroundPlayer.SetCurrent();
-            }
-        }
-
-        private void OnCurrentSongChanged(IPlaylist sender, CurrentSongChangedEventArgs args)
+        private void OnCurrentSongChanged(object sender, CurrentSongChangedEventArgs args)
         {
             //MobileDebug.Manager.WriteEvent("SetOnCurrentSong", library.CurrentPlaylist?.CurrentSong);
             BackgroundPlayer.SetCurrent();
         }
 
-        private void OnCurrentPlaylistChanged(ILibrary sender, CurrentPlaylistChangedEventArgs args)
+        private void OnCurrentPlaylistChanged(object sender, CurrentPlaylistChangedEventArgs args)
         {
             //MobileDebug.Manager.WriteEvent("SetOnCurrentPlaylist", library.CurrentPlaylist?.CurrentSong);
             Unsubscribe(args.OldCurrentPlaylist);
@@ -285,10 +221,6 @@ namespace BackgroundTask
 
             playlist.CurrentSongChanged += OnCurrentSongChanged;
             playlist.LoopChanged += OnLoopChanged;
-            playlist.ShuffleChanged += OnShuffleChanged;
-
-            playlist.Songs.Changed += OnSongsChanged;
-            playlist.ShuffleSongs.Changed += OnShuffleSongsChanged;
         }
 
         private void Unsubscribe(IPlaylist playlist)
@@ -298,10 +230,6 @@ namespace BackgroundTask
 
             playlist.CurrentSongChanged -= OnCurrentSongChanged;
             playlist.LoopChanged -= OnLoopChanged;
-            playlist.ShuffleChanged -= OnShuffleChanged;
-
-            playlist.Songs.Changed -= OnSongsChanged;
-            playlist.ShuffleSongs.Changed -= OnShuffleSongsChanged;
         }
 
         private void TaskCompleted(BackgroundTaskRegistration sender, BackgroundTaskCompletedEventArgs args)

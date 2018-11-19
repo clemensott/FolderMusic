@@ -11,13 +11,13 @@ namespace MusicPlayer.Data
     {
         private const string skipSongsFileName = "SkipSongs.xml";
 
-        private ILibrary library;
+        public ILibrary Parent { get; private set; }
 
         public event SkippedSongEventHandler SkippedSong;
 
         internal SkipSongs(ILibrary library)
         {
-            this.library = library;
+            Parent = library;
         }
 
         public bool HasSongs()
@@ -50,18 +50,18 @@ namespace MusicPlayer.Data
 
         public IEnumerator<SkipSong> GetEnumerator()
         {
-            return new SkipSongsEnumerator(library);
+            return new SkipSongsEnumerator(Parent);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new SkipSongsEnumerator(library);
+            return new SkipSongsEnumerator(Parent);
         }
 
         public IEnumerable<Song> GetSongs()
         {
             List<string> ssps = GetSkipSongsPaths();
-            var selected = ssps.Select(ssp => library.Playlists.SelectMany(p => p.Songs).FirstOrDefault(s => s.Path == ssp));
+            var selected = ssps.Select(ssp => Parent.Playlists.SelectMany(p => p.Songs).FirstOrDefault(s => s.Path == ssp));
             return selected.Where(s => s != null);
         }
 

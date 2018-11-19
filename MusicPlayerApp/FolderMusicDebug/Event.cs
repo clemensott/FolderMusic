@@ -150,21 +150,20 @@ namespace MobileDebug
 
         public bool Equals(Event other)
         {
-            return this == other;
+            if (ReferenceEquals(other, null)) return false;
+            if (BackgroundTaskId != other.BackgroundTaskId) return false;
+            if (Count != other.Count) return false;
+            if (!Data.SequenceEqual(other.Data)) return false;
+            if (Name != other.Name) return false;
+            if (ThreadId != other.ThreadId) return false;
+            if (Time != other.Time) return false;
+
+            return true;
         }
 
         public static bool operator ==(Event e1, Event e2)
         {
-            if (ReferenceEquals(e1, null) && ReferenceEquals(e2, null)) return true;
-            if (ReferenceEquals(e1, null) || ReferenceEquals(e2, null)) return false;
-            if (e1.BackgroundTaskId != e2.BackgroundTaskId) return false;
-            if (e1.Count != e2.Count) return false;
-            if (!e1.Data.SequenceEqual(e2.Data)) return false;
-            if (e1.Name != e2.Name) return false;
-            if (e1.ThreadId != e2.ThreadId) return false;
-            if (e1.Time != e2.Time) return false;
-
-            return true;
+            return (e1?.Equals(e2) ?? e2?.Equals(e1)) ?? true;
         }
 
         public static bool operator !=(Event e1, Event e2)

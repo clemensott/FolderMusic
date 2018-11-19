@@ -28,8 +28,8 @@ namespace FolderMusic
             var oldPlaylist = e.OldValue as IPlaylist;
             var newPlaylist = e.NewValue as IPlaylist;
 
-            if (oldPlaylist != null) s.Unsubscibe(oldPlaylist);
-            if (newPlaylist != null) s.Subscibe(newPlaylist);
+            if (oldPlaylist != null) s.Unsubscribe(oldPlaylist);
+            if (newPlaylist != null) s.Subscribe(newPlaylist);
 
             s.SetItemsSource();
             s.scrollTo = ScrollToType.Last;
@@ -57,52 +57,90 @@ namespace FolderMusic
 
         private void SetItemsSource()
         {
-            IUpdateSellectedItemCollection<Song> collection = GetItemsSource(Source);
+            IUpdateSelectedItemCollection<Song> collection = GetItemsSource(Source);
             collection.UpdateFinished += ItemsSource_UpdateFinished;
 
             lbxSongs.ItemsSource = collection;
             SetSelectedItem();
         }
 
-        protected abstract IUpdateSellectedItemCollection<Song> GetItemsSource(IPlaylist playlist);
+        protected abstract IUpdateSelectedItemCollection<Song> GetItemsSource(IPlaylist playlist);
 
-        private void ItemsSource_UpdateFinished(IUpdateSellectedItemCollection<Song> sender)
+        private void ItemsSource_UpdateFinished(object sender, EventArgs e)
         {
             SetSelectedItemSafe();
         }
 
-        private void Subscibe(IPlaylist playlist)
+        private void Subscribe(IPlaylist playlist)
         {
             if (playlist == null) return;
 
             playlist.CurrentSongChanged += OnCurrentSongPropertyChanged;
-            playlist.ShuffleChanged += OnShuffleChanged;
-            playlist.ShuffleSongs.Changed += OnShuffleSongsChanged;
-            playlist.Songs.Changed += OnSongsCollectionChanged;
+            playlist.SongsChanged += Playlist_SongsChanged;
+
+            Subscribe(playlist.Songs);
         }
 
-        private void Unsubscibe(IPlaylist playlist)
+        private void Unsubscribe(IPlaylist playlist)
         {
             if (playlist == null) return;
 
             playlist.CurrentSongChanged -= OnCurrentSongPropertyChanged;
-            playlist.ShuffleChanged -= OnShuffleChanged;
-            playlist.ShuffleSongs.Changed -= OnShuffleSongsChanged;
-            playlist.Songs.Changed -= OnSongsCollectionChanged;
+            playlist.SongsChanged -= Playlist_SongsChanged;
+
+            Unsubscribe(playlist.Songs);
         }
 
-        private void OnCurrentSongPropertyChanged(IPlaylist sender, CurrentSongChangedEventArgs args)
+        private void Subscribe(ISongCollection songs)
         {
-            SetSelectedItemSafe();
+            if (songs == null) return;
+
+            songs.ShuffleChanged += Songs_ShuffleChanged;
+
+            Subscribe(songs.Shuffle);
         }
 
-        private void OnShuffleChanged(IPlaylist sender, ShuffleChangedEventArgs args)
+        private void Unsubscribe(ISongCollection songs)
         {
-            SetSelectedItemSafe();
-            ScrollToCurrentSongDirect();
+            if (songs == null) return;
+
+            songs.ShuffleChanged -= Songs_ShuffleChanged;
+
+            Unsubscribe(songs.Shuffle);
         }
 
-        private void OnSongsCollectionChanged(ISongCollection sender, SongCollectionChangedEventArgs args)
+        private void Subscribe(IShuffleCollection shuffle)
+        {
+            if (shuffle != null) shuffle.Changed += Shuffle_Changed;
+        }
+
+        private void Unsubscribe(IShuffleCollection shuffle)
+        {
+            if (shuffle != null) shuffle.Changed -= Shuffle_Changed;
+        }
+
+        private void Playlist_SongsChanged(object sender, SongsChangedEventArgs e)
+        {
+            Unsubscribe(e.OldSongs);
+            Subscribe(e.NewSongs);
+
+            ScrollToCurrentSongTop();
+        }
+
+        private void Songs_ShuffleChanged(object sender, ShuffleChangedEventArgs e)
+        {
+            Unsubscribe(e.OldShuffleSongs);
+            Subscribe(e.NewShuffleSongs);
+
+            ScrollToCurrentSongTop();
+        }
+
+        private void Shuffle_Changed(object sender, ShuffleCollectionChangedEventArgs e)
+        {
+            ScrollToCurrentSongTop();
+        }
+
+        private void OnCurrentSongPropertyChanged(object sender, CurrentSongChangedEventArgs args)
         {
             SetSelectedItemSafe();
         }
@@ -115,11 +153,6 @@ namespace FolderMusic
         private void SetSelectedItem()
         {
             lbxSongs.SelectedItem = Source?.CurrentSong;
-        }
-
-        private void OnShuffleSongsChanged(IShuffleCollection sender)
-        {
-            ScrollToCurrentSongTop();
         }
 
         private void lbxSongs_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -172,7 +205,7 @@ namespace FolderMusic
 
             IPlaylist playlist = Source;
 
-            if (playlist == null || lbxSongs.Items.Count < playlist.ShuffleSongs.Count || lbxSongs.Items.Count == 0) return;
+            if (playlist == null || lbxSongs.Items.Count < playlist.Songs.Shuffle.Count || lbxSongs.Items.Count == 0) return;
             if (scrollTo == ScrollToType.Current)
             {
                 lbxSongs.ScrollIntoView(playlist.CurrentSong);

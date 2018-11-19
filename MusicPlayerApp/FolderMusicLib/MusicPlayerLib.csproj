@@ -81,8 +81,8 @@
   <ItemGroup>
     <Compile Include="Communication\BackForegroundCommunicator.cs" />
     <Compile Include="Communication\Receiver.cs" />
-    <Compile Include="Data\EventArgs\ChangedPlaylist.cs" />
-    <Compile Include="Data\EventArgs\ChangedSong.cs" />
+    <Compile Include="Data\AutoSaveLoad.cs" />
+    <Compile Include="Data\EventArgs\ChangeCollectionItem.cs" />
     <Compile Include="Data\EventArgs\CurrentPlaylistChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\CurrentSongChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\CurrentSongPositionChangedEventArgs.cs" />
@@ -91,14 +91,9 @@
     <Compile Include="Data\Interfaces\IPlaylist.cs" />
     <Compile Include="Data\Interfaces\IPlaylistCollection.cs" />
     <Compile Include="Data\Interfaces\ISongCollection.cs" />
-    <Compile Include="Data\Loop\LoopAll.cs" />
-    <Compile Include="Data\Loop\LoopCurrent.cs" />
-    <Compile Include="Data\Loop\LoopOff.cs" />
-    <Compile Include="Data\NonLoaded\NonLoadedLibrary.cs" />
-    <Compile Include="Data\NonLoaded\NonLoadedPlaylist.cs" />
-    <Compile Include="Data\NonLoaded\NonLoadedPlaylistCollection.cs" />
-    <Compile Include="Data\NonLoaded\NonLoadedShuffleCollection.cs" />
-    <Compile Include="Data\NonLoaded\NonLoadedSongCollection.cs" />
+    <Compile Include="Data\Interfaces\SongsChangedEventArgs.cs" />
+    <Compile Include="Data\Simple\SimpleShuffleCollection.cs" />
+    <Compile Include="Data\Simple\SimpleSongCollection.cs" />
     <Compile Include="Data\PlaylistCollection.cs" />
     <Compile Include="Data\EventArgs\PlaylistCollectionChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\PlayStateChangedEventArgs.cs" />
@@ -106,10 +101,10 @@
     <Compile Include="Data\EventArgs\PlaylistsChangedEventArgs.cs" />
     <Compile Include="Data\Shuffle\IShuffleCollection.cs" />
     <Compile Include="Data\Shuffle\ShuffleCollectionBase.cs" />
-    <Compile Include="Data\Loop\ILoop.cs" />
     <Compile Include="Data\CurrentPlaySong.cs" />
     <Compile Include="Data\Library.cs" />
     <Compile Include="Data\Playlist.cs" />
+    <Compile Include="Data\EventArgs\ShuffleCollectionChangedEventArgs.cs" />
     <Compile Include="Data\Shuffle\ShuffleCompleteCollection.cs" />
     <Compile Include="Data\Shuffle\ShuffleOffCollection.cs" />
     <Compile Include="Data\Shuffle\ShuffleOneTimeCollection.cs" />
@@ -117,14 +112,13 @@
     <Compile Include="Data\Skip\SkipSongs.cs" />
     <Compile Include="Data\Skip\SkipSongsEnumerator.cs" />
     <Compile Include="Data\Song.cs" />
-    <Compile Include="Extention.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="IO.cs" />
     <Compile Include="Data\EventArgs\SongArtistChangedEventArgs.cs" />
     <Compile Include="Data\SongCollection.cs" />
-    <Compile Include="Data\EventArgs\SongCollectionChangingEventArgs.cs" />
+    <Compile Include="Data\EventArgs\SongCollectionChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\SongNaturalDurationChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\SongTitleChangedEventArgs.cs" />
-    <Compile Include="Data\EventArgs\LibraryChangedEventsArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="XmlConverter.cs" />
   </ItemGroup>

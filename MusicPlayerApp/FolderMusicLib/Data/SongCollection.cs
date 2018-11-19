@@ -1,37 +1,50 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
+using MusicPlayer.Data.Shuffle;
+using MusicPlayer.Data.Simple;
 
 namespace MusicPlayer.Data
 {
     public class SongCollection : ISongCollection
     {
-        public event SongCollectionChangedEventHandler Changed;
-
         private List<Song> list;
+
+        public event EventHandler<SongCollectionChangedEventArgs> Changed;
+        public event EventHandler<ShuffleChangedEventArgs> ShuffleChanged;
 
         public int Count { get { return list.Count; } }
 
         public IPlaylist Parent { get; set; }
 
-        public SongCollection(IPlaylist parent)
+        private IShuffleCollection shuffle;
+
+        public IShuffleCollection Shuffle
         {
-            Parent = parent;
+            get { return shuffle; }
+            set
+            {
+                if (value == shuffle) return;
+
+                var args = new ShuffleChangedEventArgs(shuffle, value);
+                shuffle = value;
+                ShuffleChanged?.Invoke(this, args);
+            }
+        }
+
+        public SongCollection()
+        {
             list = new List<Song>();
+            Shuffle = new ShuffleOffCollection(this);
         }
 
-        public SongCollection(IPlaylist parent, string xmlText)
+        public SongCollection(IEnumerable<Song> songs, ShuffleType type, Song currentSong)
         {
-            Parent = parent;
-            ReadXml(XmlConverter.GetReader(xmlText));
-        }
-
-        public void Reset(IEnumerable<Song> newSongs)
-        {
-            Change(newSongs, this);
-            //list = new List<Song>(newSongs);
+            list = new List<Song>(songs);
+            Shuffle = GetShuffleType(type, currentSong);
         }
 
         public int IndexOf(Song song)
@@ -41,15 +54,15 @@ namespace MusicPlayer.Data
 
         public void Add(Song song)
         {
-            Change(Enumerable.Range(0, 1).Select(i => song), Enumerable.Empty<Song>());
+            Change(null, Utils.RepeatOnce(song));
         }
 
         public void Remove(Song song)
         {
-            Change(Enumerable.Empty<Song>(), Enumerable.Range(0, 1).Select(i => song));
+            Change(Utils.RepeatOnce(song), null);
         }
 
-        public void Change(IEnumerable<Song> adds, IEnumerable<Song> removes)
+        public void Change(IEnumerable<Song> removes, IEnumerable<Song> adds)
         {
             Song oldCurrentSong, newCurrentSong;
             newCurrentSong = oldCurrentSong = Parent.CurrentSong;
@@ -57,46 +70,30 @@ namespace MusicPlayer.Data
 
             Song[] addArray = adds.ToArray();
             Song[] removeArray = removes.ToArray();
+            Song[] newList = list.Except(removeArray).Concat(addArray).ToArray();
 
-            ChangedSong[] removed = GetRemovedChangedSongs(removeArray).ToArray();
-            ChangedSong[] added = GetAddedChangedSongs(addArray).ToArray();
+            ChangeCollectionItem<Song>[] removed = ChangeCollectionItem<Song>.GetRemovedChanged(removeArray, list).ToArray();
+            ChangeCollectionItem<Song>[] added = ChangeCollectionItem<Song>.GetAddedChanged(addArray, list).ToArray();
 
             if (removed.Length == 0 && added.Length == 0) return;
 
-            if (!list.Contains(oldCurrentSong))
+            if (!newList.Contains(oldCurrentSong))
             {
                 if (currentSongIndex < 0) currentSongIndex = 0;
-                if (currentSongIndex >= list.Count) currentSongIndex = list.Count;
-                Parent.CurrentSong = newCurrentSong = list.ElementAtOrDefault(currentSongIndex);
+                if (currentSongIndex >= newList.Length) currentSongIndex = newList.Length - 1;
+
+                newCurrentSong = list.ElementAtOrDefault(currentSongIndex);
             }
 
-            var args = new SongCollectionChangedEventArgs(added, removed, oldCurrentSong, newCurrentSong);
+            var args = new SongCollectionChangedEventArgs(added, removed);
             Changed?.Invoke(this, args);
+
+            Parent.CurrentSong = newCurrentSong;
         }
 
-        private IEnumerable<ChangedSong> GetAddedChangedSongs(IEnumerable<Song> adds)
+        public ISongCollection ToSimple()
         {
-            foreach (Song addSong in adds?.ToArray() ?? Enumerable.Empty<Song>())
-            {
-                if (list.Contains(addSong)) continue;
-
-                list.Add(addSong);
-                addSong.Parent = this;
-                yield return new ChangedSong(list.IndexOf(addSong), addSong);
-            }
-        }
-
-        private IEnumerable<ChangedSong> GetRemovedChangedSongs(IEnumerable<Song> removes)
-        {
-            foreach (Song removeSong in removes?.ToArray() ?? Enumerable.Empty<Song>())
-            {
-                int index = list.IndexOf(removeSong);
-
-                if (index == -1) continue;
-
-                list.Remove(removeSong);
-                yield return new ChangedSong(index, removeSong);
-            }
+            return new SimpleSongCollection(Shuffle, Parent.CurrentSong);
         }
 
         public IEnumerator<Song> GetEnumerator()
@@ -116,23 +113,70 @@ namespace MusicPlayer.Data
 
         public void ReadXml(XmlReader reader)
         {
-            list = new List<Song>();
-            reader.ReadStartElement();
+            ShuffleType shuffleType = (ShuffleType)Enum.Parse(typeof(ShuffleType),
+                reader.GetAttribute("Shuffle") ?? Enum.GetName(typeof(ShuffleType), ShuffleType.Off));
+            IShuffleCollection shuffle = GetShuffleType(shuffleType);
 
-            while (reader.NodeType == XmlNodeType.Element)
-            {
-                list.Add(new Song(this, reader.ReadOuterXml()));
-            }
+            reader.ReadStartElement();
+            List<Song> list = XmlConverter.DeserializeList<Song>(reader, "Song").ToList();
+
+            shuffle.ReadXml(XmlConverter.GetReader(reader.ReadOuterXml()));
+
+            this.list = list;
+            Shuffle = shuffle;
         }
 
         public void WriteXml(XmlWriter writer)
         {
+            writer.WriteAttributeString("Shuffle", Enum.GetName(typeof(ShuffleType), Shuffle.Type));
+
             foreach (Song song in this)
             {
                 writer.WriteStartElement("Song");
                 song.WriteXml(writer);
                 writer.WriteEndElement();
             }
+        }
+
+        public void SetShuffleType(ShuffleType type)
+        {
+            if (type == Shuffle.Type) return;
+
+            Shuffle = GetShuffleType(type, Parent?.CurrentSong);
+        }
+
+        private IShuffleCollection GetShuffleType(ShuffleType type)
+        {
+            switch (type)
+            {
+                case ShuffleType.Complete:
+                    return new ShuffleCompleteCollection(this);
+
+                case ShuffleType.Off:
+                    return new ShuffleOffCollection(this);
+
+                case ShuffleType.OneTime:
+                    return new ShuffleOneTimeCollection(this);
+            }
+
+            throw new NotImplementedException("Value \"" + type + "\"of LoopType is not implemented in GetShuffleType");
+        }
+
+        private IShuffleCollection GetShuffleType(ShuffleType type, Song currentSong)
+        {
+            switch (type)
+            {
+                case ShuffleType.Complete:
+                    return new ShuffleCompleteCollection(this, currentSong);
+
+                case ShuffleType.Off:
+                    return new ShuffleOffCollection(this);
+
+                case ShuffleType.OneTime:
+                    return new ShuffleOneTimeCollection(this, currentSong);
+            }
+
+            throw new NotImplementedException("Value \"" + type + "\"of LoopType is not implemented in GetShuffleType");
         }
     }
 }

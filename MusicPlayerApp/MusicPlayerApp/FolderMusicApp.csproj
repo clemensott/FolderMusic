@@ -119,7 +119,7 @@
     <Compile Include="FrameHistory\HistoricParameter.cs" />
     <Compile Include="FrameHistory\RestoreMusicProperties.cs" />
     <Compile Include="FrameHistory\Parameter.cs" />
-    <Compile Include="IUpdateSellectedItemCollection.cs" />
+    <Compile Include="IUpdateSelectedItemCollection.cs" />
     <Compile Include="LoadingPage.xaml.cs">
       <DependentUpon>LoadingPage.xaml</DependentUpon>
     </Compile>

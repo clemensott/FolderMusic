@@ -1,5 +1,4 @@
 ﻿using MusicPlayer.Data;
-using MusicPlayer.Data.Loop;
 using MusicPlayer.Data.Shuffle;
 using System.ComponentModel;
 
@@ -9,20 +8,20 @@ namespace FolderMusic
     {
         private IPlaylist source;
 
-        public double CurrentSongPositionPercent
-        {
-            get { return Source?.CurrentSongPositionPercent ?? 0; }
-            set { if (Source != null) Source.CurrentSongPositionPercent = value; }
-        }
-
         public double CurrentSongPosition
         {
-            get { return CurrentSongPositionPercent * CurrentSongDuration; }
+            get { return Source?.CurrentSongPosition ?? 0; }
+            set { if (Source != null) Source.CurrentSongPosition = value; }
+        }
+
+        public double CurrentSongPositionMillis
+        {
+            get { return CurrentSongPosition * CurrentSongDuration; }
             set
             {
                 if (Source == null || CurrentSongDuration == 0) return;
 
-                Source.CurrentSongPositionPercent = value / CurrentSongDuration;
+                Source.CurrentSongPosition = value / CurrentSongDuration;
             }
         }
 
@@ -46,12 +45,6 @@ namespace FolderMusic
             set { if (Source == null) Source.CurrentSong = value; }
         }
 
-        public ShuffleType Shuffle
-        {
-            get { return Source?.Shuffle ?? ShuffleType.Off; }
-            set { if (Source != null) Source.Shuffle = value; }
-        }
-
         public LoopType Loop
         {
             get { return Source?.Loop ?? LoopType.Off; }
@@ -59,8 +52,6 @@ namespace FolderMusic
         }
 
         public ISongCollection Songs { get { return Source?.Songs; } }
-
-        public IShuffleCollection ShuffleSongs { get { return Source?.ShuffleSongs; } }
 
         public IPlaylist Source
         {
@@ -93,7 +84,6 @@ namespace FolderMusic
             playlist.CurrentSongChanged += OnCurrentSongChanged;
             playlist.CurrentSongPositionChanged += OnCurrentSongPositionChanged;
             playlist.LoopChanged += OnLoopChanged;
-            playlist.ShuffleChanged += OnShuffleChanged;
 
             Subscribe(playlist.CurrentSong);
         }
@@ -105,7 +95,6 @@ namespace FolderMusic
             playlist.CurrentSongChanged -= OnCurrentSongChanged;
             playlist.CurrentSongPositionChanged -= OnCurrentSongPositionChanged;
             playlist.LoopChanged -= OnLoopChanged;
-            playlist.ShuffleChanged -= OnShuffleChanged;
 
             Unsubscribe(playlist.CurrentSong);
         }
@@ -128,23 +117,23 @@ namespace FolderMusic
             song.DurationChanged -= OnDurationChanged;
         }
 
-        private void OnTitleChanged(Song sender, SongTitleChangedEventArgs args)
+        private void OnTitleChanged(object sender, SongTitleChangedEventArgs args)
         {
             OnPropertyChanged("CurrentSongTitle");
         }
 
-        private void OnArtistChanged(Song sender, SongArtistChangedEventArgs args)
+        private void OnArtistChanged(object sender, SongArtistChangedEventArgs args)
         {
             OnPropertyChanged("CurrentSongArtist");
         }
 
-        private void OnDurationChanged(Song sender, SongDurationChangedEventArgs args)
+        private void OnDurationChanged(object sender, SongDurationChangedEventArgs args)
         {
             OnPropertyChanged("CurrentSongDuration");
             OnPropertyChanged("CurrentSongPosition");
         }
 
-        private void OnCurrentSongChanged(IPlaylist sender, CurrentSongChangedEventArgs args)
+        private void OnCurrentSongChanged(object sender, CurrentSongChangedEventArgs args)
         {
             Unsubscribe(args.OldCurrentSong);
             Subscribe(args.NewCurrentSong);
@@ -152,17 +141,17 @@ namespace FolderMusic
             UpdateCurrentSong();
         }
 
-        private void OnCurrentSongPositionChanged(IPlaylist sender, CurrentSongPositionChangedEventArgs args)
+        private void OnCurrentSongPositionChanged(object sender, CurrentSongPositionChangedEventArgs args)
         {
             OnPropertyChanged("CurrentSongPosition");
         }
 
-        private void OnLoopChanged(IPlaylist sender, LoopChangedEventArgs args)
+        private void OnLoopChanged(object sender, LoopChangedEventArgs args)
         {
             OnPropertyChanged("Loop");
         }
 
-        private void OnShuffleChanged(IPlaylist sender, ShuffleChangedEventArgs args)
+        private void OnShuffleChanged(object sender, ShuffleChangedEventArgs args)
         {
             OnPropertyChanged("Shuffle");
             OnPropertyChanged("ShuffleSongs");

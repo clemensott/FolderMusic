@@ -8,22 +8,13 @@ using Windows.Storage.FileProperties;
 
 namespace MusicPlayer.Data
 {
-    public delegate void TitlePropertyChangedEventHandler(Song sender, SongTitleChangedEventArgs args);
-    public delegate void ArtistPropertyChangedEventHandler(Song sender, SongArtistChangedEventArgs args);
-    public delegate void DurationPropertyChangedEventHandler(Song sender, SongDurationChangedEventArgs args);
-
     public class Song : IXmlSerializable
     {
         public const double DefaultDuration = 400;
 
-        public static Song GetEmpty(ISongCollection parent)
-        {
-            return new Song(parent);
-        }
-
-        public event TitlePropertyChangedEventHandler TitleChanged;
-        public event ArtistPropertyChangedEventHandler ArtistChanged;
-        public event DurationPropertyChangedEventHandler DurationChanged;
+        public event EventHandler<SongTitleChangedEventArgs> TitleChanged;
+        public event EventHandler<SongArtistChangedEventArgs> ArtistChanged;
+        public event EventHandler<SongDurationChangedEventArgs> DurationChanged;
 
         private bool failed;
         private double durationMilliseconds;
@@ -80,7 +71,7 @@ namespace MusicPlayer.Data
             set { path = value; }
         }
 
-        private Song(ISongCollection parent)
+        public Song()
         {
             failed = true;
 
@@ -88,13 +79,10 @@ namespace MusicPlayer.Data
 
             title = "Empty";
             artist = path = string.Empty;
-
-            Parent = parent;
         }
 
-        internal Song(ISongCollection parent, CurrentPlaySong currentPlaySong)
+        internal Song(CurrentPlaySong currentPlaySong)
         {
-            Parent = parent;
             failed = false;
 
             durationMilliseconds = DefaultDuration;
@@ -103,13 +91,7 @@ namespace MusicPlayer.Data
             artist = currentPlaySong.Artist;
         }
 
-        internal Song(ISongCollection parent, string xmlText)
-        {
-            Parent = parent;
-            ReadXml(XmlConverter.GetReader(xmlText));
-        }
-
-        private Song(ISongCollection parent, double durationMilliseconds, string path, string title, string artist)
+        private Song(double durationMilliseconds, string path, string title, string artist)
         {
             failed = false;
 
@@ -117,8 +99,6 @@ namespace MusicPlayer.Data
             this.path = path;
             this.title = title;
             this.artist = artist;
-
-            Parent = parent;
         }
 
         public static Song GetLoaded(ISongCollection parent, StorageFile file)
@@ -131,7 +111,7 @@ namespace MusicPlayer.Data
             string artist = properties.Artist;
             double durationMilliseconds = properties.Duration.TotalMilliseconds;
 
-            return new Song(parent, durationMilliseconds, file.Path, title, artist);
+            return new Song(durationMilliseconds, file.Path, title, artist);
         }
 
         public async Task Reset()
@@ -223,7 +203,19 @@ namespace MusicPlayer.Data
 
         public override bool Equals(object obj)
         {
-            return this == (Song)obj;
+            if (ReferenceEquals(this, obj)) return true;
+            if (ReferenceEquals(obj, null)) return false;
+
+            if (!(obj is Song)) return false;
+
+            Song other = (Song)obj;
+
+            if (Artist != other.Artist) return false;
+            if (Title != other.Title) return false;
+            if (DurationMilliseconds != other.DurationMilliseconds) return false;
+            if (Path != other.Path) return false;
+
+            return true;
         }
 
         public override int GetHashCode()
@@ -252,21 +244,14 @@ namespace MusicPlayer.Data
         public void WriteXml(XmlWriter writer)
         {
             writer.WriteAttributeString("DurationMilliseconds", DurationMilliseconds.ToString());
-            writer.WriteAttributeString("Title", Title.ToString());
-            writer.WriteAttributeString("Artist", Artist.ToString());
+            writer.WriteAttributeString("Title", Title);
+            writer.WriteAttributeString("Artist", Artist);
             writer.WriteAttributeString("Path", Path);
         }
 
         public static bool operator ==(Song song1, Song song2)
         {
-            if (ReferenceEquals(song1, song2)) return true;
-            if (ReferenceEquals(song1, null) || ReferenceEquals(song2, null)) return false;
-            if (song1.Artist != song2.Artist) return false;
-            if (song1.Title != song2.Title) return false;
-            if (song1.DurationMilliseconds != song2.DurationMilliseconds) return false;
-            if (song1.Path != song2.Path) return false;
-
-            return true;
+            return (song1?.Equals(song2) ?? song2?.Equals(song1)) ?? true;
         }
 
         public static bool operator !=(Song song1, Song song2)

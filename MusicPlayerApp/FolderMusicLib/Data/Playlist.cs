@@ -1,5 +1,5 @@
-﻿using MusicPlayer.Data.Loop;
-using MusicPlayer.Data.Shuffle;
+﻿using MusicPlayer.Data.Shuffle;
+using MusicPlayer.Data.Simple;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,71 +11,70 @@ using Windows.Storage;
 
 namespace MusicPlayer.Data
 {
+
     class Playlist : IPlaylist
     {
         private const string emptyName = "None", emptyOrLoadingPath = "None";
 
-        public event CurrentSongPropertyChangedEventHandler CurrentSongChanged;
-        public event CurrentSongPositionPropertyChangedEventHandler CurrentSongPositionChanged;
-        public event ShufflePropertyChangedEventHandler ShuffleChanged;
-        public event LoopPropertyChangedEventHandler LoopChanged;
-
-        private double currentSongPositionPercent = double.NaN;
-        private string name = emptyName, absolutePath = emptyOrLoadingPath;
+        private double currentSongPosition = double.NaN;
         private Song currentSong;
+        private ISongCollection songs;
         private LoopType loop = LoopType.Off;
 
-        public Song this[int index] { get { return Songs.ElementAt(index); } }
+        public event EventHandler<CurrentSongChangedEventArgs> CurrentSongChanged;
+        public event EventHandler<CurrentSongPositionChangedEventArgs> CurrentSongPositionChanged;
+        public event EventHandler<LoopChangedEventArgs> LoopChanged;
+        public event EventHandler<SongsChangedEventArgs> SongsChanged;
 
         public bool IsEmpty { get { return Songs.Count == 0; } }
 
-        public int SongsCount { get { return Songs.Count; } }
-
-        public double CurrentSongPositionPercent
+        public double CurrentSongPosition
         {
             get
             {
-                return !double.IsNaN(currentSongPositionPercent) ? currentSongPositionPercent : Library.DefaultSongsPositionPercent;
+                return !double.IsNaN(currentSongPosition) ? currentSongPosition : Library.DefaultSongsPosition;
             }
             set
             {
-                if (value == currentSongPositionPercent) return;
+                if (value == currentSongPosition) return;
 
-                double oldCurrentSongPositionPercent = currentSongPositionPercent;
-                currentSongPositionPercent = value;
-
-                var args = new CurrentSongPositionChangedEventArgs(oldCurrentSongPositionPercent, currentSongPositionPercent);
+                var args = new CurrentSongPositionChangedEventArgs(currentSongPosition, value);
+                currentSongPosition = value;
                 CurrentSongPositionChanged?.Invoke(this, args);
             }
         }
 
-        public string Name
-        {
-            get { return name; }
-        }
+        public string Name { get; private set; }
 
-        public string AbsolutePath
-        {
-            get { return absolutePath; }
-        }
+        public string AbsolutePath { get; private set; }
 
         public Song CurrentSong
         {
             get { return currentSong; }
             set
             {
-                if (value == currentSong || !Songs.Contains(value)) return;
+                if (value == currentSong) return;
 
                 var args = new CurrentSongChangedEventArgs(currentSong, value);
                 currentSong = value;
-                currentSongPositionPercent = 0;
+                currentSongPosition = 0;
                 CurrentSongChanged?.Invoke(this, args);
             }
         }
 
-        public ISongCollection Songs { get; private set; }
+        public ISongCollection Songs
+        {
+            get { return songs; }
+            set
+            {
+                if (value == songs) return;
 
-        public IShuffleCollection ShuffleSongs { get; private set; }
+                var args = new SongsChangedEventArgs(songs, value);
+                songs = value;
+                songs.Parent = this;
+                SongsChanged?.Invoke(this, args);
+            }
+        }
 
         public LoopType Loop
         {
@@ -84,144 +83,35 @@ namespace MusicPlayer.Data
             {
                 if (value == loop) return;
 
-                LoopType oldType = loop;
+                var args = new LoopChangedEventArgs(loop, value);
                 loop = value;
-
-                var args = new LoopChangedEventArgs(oldType, loop);
                 LoopChanged?.Invoke(this, args);
-            }
-        }
-
-        internal ILoop Looper { get { return GetLooper(Loop); } }
-
-        public ShuffleType Shuffle
-        {
-            get { return ShuffleSongs?.Type ?? ShuffleType.Off; }
-            set
-            {
-                if (ShuffleSongs != null && value == Shuffle) return;
-
-                IShuffleCollection oldShuffleSongs = ShuffleSongs;
-
-                switch (value)
-                {
-                    case ShuffleType.Off:
-                        ShuffleSongs = new ShuffleOffCollection(this, Songs);
-                        break;
-
-                    case ShuffleType.OneTime:
-                        ShuffleSongs = new ShuffleOneTimeCollection(this, Songs, CurrentSong);
-                        break;
-
-                    case ShuffleType.Complete:
-                        ShuffleSongs = new ShuffleCompleteCollection(this, Songs, CurrentSong);
-                        break;
-                }
-
-                var args = new ShuffleChangedEventArgs(oldShuffleSongs, ShuffleSongs, CurrentSong, CurrentSong);
-                ShuffleChanged?.Invoke(this, args);
             }
         }
 
         public IPlaylistCollection Parent { get; set; }
 
-        public Playlist(IPlaylistCollection parent)
+        public Playlist()
         {
-            Parent = parent;
+            Songs = new SongCollection();
 
-            Songs = new SongCollection(this);
-
-            name = emptyName;
-            absolutePath = emptyOrLoadingPath;
+            Name = emptyName;
+            AbsolutePath = emptyOrLoadingPath;
 
             Loop = LoopType.Off;
-            Shuffle = ShuffleType.Off;
         }
 
-        public Playlist(string xmlText, IPlaylistCollection parent)
+        public Playlist(string path) : this()
         {
-            Parent = parent;
-            ReadXml(XmlConverter.GetReader(xmlText));
+            Name = path != string.Empty ? Path.GetFileName(path) : KnownFolders.MusicLibrary.Name;
+            AbsolutePath = path;
         }
 
-        public Playlist(IPlaylistCollection parent, string path) : this(parent)
+        public Playlist(CurrentPlaySong currentPlaySong) : this()
         {
-            name = path != string.Empty ? Path.GetFileName(path) : KnownFolders.MusicLibrary.Name;
-            absolutePath = path;
-        }
-
-        private ILoop GetLooper(LoopType type)
-        {
-            switch (type)
-            {
-                case LoopType.All:
-                    return LoopAll.Instance;
-
-                case LoopType.Current:
-                    return LoopCurrent.Instance;
-
-                default:
-                    return LoopOff.Instance;
-            }
-        }
-
-        public void SetNextSong()
-        {
-            ChangeCurrentSong(1);
-        }
-
-        public void SetPreviousSong()
-        {
-            ChangeCurrentSong(-1);
-        }
-
-        public void ChangeCurrentSong(int offset)
-        {
-            if (ShuffleSongs.Count == 0) return;
-
-            int shuffleSongsIndex = ShuffleSongs.IndexOf(CurrentSong);
-            shuffleSongsIndex = (shuffleSongsIndex + offset + ShuffleSongs.Count) % ShuffleSongs.Count;
-            CurrentSong = ShuffleSongs.ElementAt(shuffleSongsIndex);
-
-            if (CurrentSong.Failed)
-            {
-                if (Songs.All(x => x.Failed)) return;
-
-                ChangeCurrentSong(offset);
-            }
-        }
-
-        public void SetNextShuffle()
-        {
-            switch (ShuffleSongs.Type)
-            {
-                case ShuffleType.Off:
-                    Shuffle = ShuffleType.OneTime;
-                    break;
-
-                case ShuffleType.OneTime:
-                    Shuffle = ShuffleType.Complete;
-                    break;
-
-                case ShuffleType.Complete:
-                    Shuffle = ShuffleType.Off;
-                    break;
-            }
-        }
-
-        public void SetShuffle(IShuffleCollection shuffleSongs)
-        {
-            if (shuffleSongs.Parent != this) return;
-
-            var args = new ShuffleChangedEventArgs(ShuffleSongs, shuffleSongs, CurrentSong, CurrentSong);
-            ShuffleSongs = shuffleSongs;
-            ShuffleSongs.Parent = this;
-            ShuffleChanged?.Invoke(this, args);
-        }
-
-        public void SetNextLoop()
-        {
-            Loop = Looper.GetNext().GetLoopType();
+            Songs.Add(new Song(currentPlaySong));
+            CurrentSong = Songs.FirstOrDefault();
+            CurrentSongPosition = currentPlaySong.Position;
         }
 
         private IEnumerable<Song> SetCurrentSongsOrderedWithAddedSongs(IEnumerable<Song> currentSongs, IEnumerable<Song> addSongs)
@@ -236,9 +126,9 @@ namespace MusicPlayer.Data
 
         private async Task<StorageFolder> GetStorageFolder()
         {
-            if (absolutePath == string.Empty) return KnownFolders.MusicLibrary;
+            if (AbsolutePath == string.Empty) return KnownFolders.MusicLibrary;
 
-            return await StorageFolder.GetFolderFromPathAsync(absolutePath);
+            return await StorageFolder.GetFolderFromPathAsync(AbsolutePath);
         }
 
         private async Task<IReadOnlyList<StorageFile>> GetStorageFolderFiles()
@@ -263,16 +153,8 @@ namespace MusicPlayer.Data
 
             if (Parent.Parent.CanceledLoading) return;
 
-            Songs.Reset(foundSongs);
-
-            IShuffleCollection newShuffleSongs = new ShuffleOffCollection(this, Songs);
-            var args = new ShuffleChangedEventArgs(ShuffleSongs, newShuffleSongs,
-                CurrentSong, newShuffleSongs.FirstOrDefault());
-
-            ShuffleSongs = new ShuffleOffCollection(this, Songs);
-            CurrentSong = ShuffleSongs.FirstOrDefault();
-
-            ShuffleChanged?.Invoke(this, args);
+            CurrentSong = foundSongs.FirstOrDefault();
+            Songs = new SongCollection(foundSongs, ShuffleType.Off, CurrentSong);
         }
 
         private IEnumerable<Song> GetSongsFromStorageFiles(IEnumerable<StorageFile> files)
@@ -301,7 +183,7 @@ namespace MusicPlayer.Data
                 return;
             }
 
-            Songs.Change(addSongs, removeSongs);
+            Songs.Change(removeSongs, addSongs);
         }
 
         public virtual async Task AddNew()
@@ -310,17 +192,17 @@ namespace MusicPlayer.Data
             Song[] songs = Songs.ToArray();
 
             IEnumerable<StorageFile> addFiles = files.Where(f => !songs.Any(s => s.Path == f.Path));
-            Song[] addSongs = addFiles.Select(f => GetLoadedSong(f)).Where(s => !s.IsEmpty).ToArray();
+            Song[] addSongs = addFiles.Select(f => GetLoadedSong(f)).Where(s => s != null && !s.IsEmpty).ToArray();
 
             if (Parent.Parent.CanceledLoading) return;
             if (addSongs.Length == 0) return;
 
-            Songs.Change(addSongs, null);
+            Songs.Change(null, addSongs);
         }
 
         private Song GetLoadedSong(StorageFile file)
         {
-            if (Parent.Parent.CanceledLoading) return Song.GetEmpty(Songs);
+            if (Parent.Parent.CanceledLoading) return null;
 
             try
             {
@@ -331,12 +213,39 @@ namespace MusicPlayer.Data
                 MobileDebug.Service.WriteEvent("LoadSongFail", e);
             }
 
-            return Song.GetEmpty(Songs);
+            return null;
+        }
+
+        public IPlaylist ToSimple()
+        {
+            Playlist playlist = new Playlist();
+            playlist.AbsolutePath = AbsolutePath;
+            playlist.currentSong = CurrentSong;
+            playlist.Loop = Loop;
+            playlist.Name = Name;
+            playlist.Songs = Songs.ToSimple();
+
+            return playlist;
         }
 
         public override bool Equals(object obj)
         {
-            return this == obj as IPlaylist;
+            if (ReferenceEquals(this, obj)) return true;
+            if (ReferenceEquals(obj, null)) return false;
+
+            if (!(obj is IPlaylist)) return false;
+
+            IPlaylist other = (IPlaylist)obj;
+
+            if (AbsolutePath != other.AbsolutePath) return false;
+            if (CurrentSong != other.CurrentSong) return false;
+            if (Loop != other.Loop) return false;
+            if (Name != other.Name) return false;
+            if (Songs.Shuffle?.Type != other.Songs.Shuffle?.Type) return false;
+            if (!Songs.SequenceEqual(other.Songs)) return false;
+            if (!Songs.Shuffle.SequenceEqual(other.Songs.Shuffle)) return false;
+
+            return true;
         }
 
         public override int GetHashCode()
@@ -346,35 +255,22 @@ namespace MusicPlayer.Data
 
         public static bool operator ==(Playlist playlist1, IPlaylist playlist2)
         {
-            bool playlist1IsNull = ReferenceEquals(playlist1, null);
-            bool playlist2IsNull = ReferenceEquals(playlist2, null);
-
-            if (ReferenceEquals(playlist1, playlist2)) return true;
-            if (ReferenceEquals(playlist1, null) || ReferenceEquals(playlist2, null)) return false;
-            if (playlist1.AbsolutePath != playlist2.AbsolutePath) return false;
-            if (playlist1.CurrentSong != playlist2.CurrentSong) return false;
-            if (playlist1.Loop != playlist2.Loop) return false;
-            if (playlist1.Name != playlist2.Name) return false;
-            if (playlist1.Shuffle != playlist2.Shuffle) return false;
-            if (!playlist1.ShuffleSongs.SequenceEqual(playlist2.ShuffleSongs)) return false;
-            if (!playlist1.Songs.SequenceEqual(playlist2.Songs)) return false;
-
-            return true;
+            return (playlist1?.Equals(playlist2) ?? playlist2?.Equals(playlist1)) ?? true;
         }
 
         public static bool operator !=(Playlist playlist1, IPlaylist playlist2)
         {
-            return !playlist1.Equals(playlist2);
+            return !(playlist1 == playlist2);
         }
 
         public static bool operator ==(IPlaylist playlist1, Playlist playlist2)
         {
-            return playlist2.Equals(playlist1);
+            return playlist2 == playlist1;
         }
 
         public static bool operator !=(IPlaylist playlist1, Playlist playlist2)
         {
-            return !playlist2.Equals(playlist1);
+            return !(playlist1 == playlist2);
         }
 
         public override string ToString()
@@ -389,9 +285,9 @@ namespace MusicPlayer.Data
 
         public void ReadXml(XmlReader reader)
         {
-            absolutePath = reader.GetAttribute("AbsolutePath") ?? emptyOrLoadingPath;
-            currentSongPositionPercent = double.Parse(reader.GetAttribute("CurrentSongPositionPercent") ?? "0");
-            name = reader.GetAttribute("Name") ?? emptyName;
+            AbsolutePath = reader.GetAttribute("AbsolutePath") ?? emptyOrLoadingPath;
+            CurrentSongPosition = double.Parse(reader.GetAttribute("CurrentSongPosition") ?? "0");
+            Name = reader.GetAttribute("Name") ?? emptyName;
             Loop = (LoopType)Enum.Parse(typeof(LoopType), reader.GetAttribute("Loop") ?? LoopType.Off.ToString());
 
             string currentSongPath = reader.GetAttribute("CurrentSongPath") ?? string.Empty; ;
@@ -399,54 +295,25 @@ namespace MusicPlayer.Data
                 reader.GetAttribute("Shuffle") ?? ShuffleType.Off.ToString());
 
             reader.ReadStartElement();
+            ISongCollection songs = reader.Name == typeof(SongCollection).Name ?
+                (ISongCollection)new SongCollection() : new SimpleSongCollection();
 
-            Songs = new SongCollection(this, reader.ReadOuterXml());
-            ShuffleSongs = ReadShuffleSongs(shuffle, reader);
+            XmlConverter.Deserialize(songs, reader.ReadOuterXml());
 
-            currentSong = Songs.FirstOrDefault(s => s.Path == currentSongPath) ?? Songs.FirstOrDefault();
-        }
-
-        private IShuffleCollection ReadShuffleSongs(ShuffleType type, XmlReader reader)
-        {
-            try
-            {
-                string outerXml = reader.ReadOuterXml();
-
-                switch (type)
-                {
-                    case ShuffleType.Off:
-                        return new ShuffleOffCollection(this, Songs, outerXml);
-
-                    case ShuffleType.OneTime:
-                        return new ShuffleOneTimeCollection(this, Songs, outerXml);
-
-                    case ShuffleType.Complete:
-                        return new ShuffleCompleteCollection(this, Songs, outerXml);
-                }
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Service.WriteEvent("PlaylistShuffleSongsReadXmlFail", e, AbsolutePath);
-            }
-
-            return new ShuffleOffCollection(this, Songs);
+            CurrentSong = songs.FirstOrDefault(s => s.Path == currentSongPath) ?? songs.FirstOrDefault();
+            Songs = songs;
         }
 
         public void WriteXml(XmlWriter writer)
         {
             writer.WriteAttributeString("AbsolutePath", AbsolutePath);
             writer.WriteAttributeString("CurrentSongPath", CurrentSong.Path);
-            writer.WriteAttributeString("CurrentSongPositionPercent", currentSongPositionPercent.ToString());
+            writer.WriteAttributeString("CurrentSongPosition", currentSongPosition.ToString());
             writer.WriteAttributeString("Loop", Loop.ToString());
             writer.WriteAttributeString("Name", Name);
-            writer.WriteAttributeString("Shuffle", Shuffle.ToString());
 
-            writer.WriteStartElement("Songs");
+            writer.WriteStartElement(Songs.GetType().Name);
             Songs.WriteXml(writer);
-            writer.WriteEndElement();
-
-            writer.WriteStartElement("ShuffleSongs");
-            ShuffleSongs.WriteXml(writer);
             writer.WriteEndElement();
         }
     }

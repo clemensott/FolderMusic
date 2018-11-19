@@ -6,11 +6,9 @@ using System.Linq;
 
 namespace FolderMusic
 {
-    class PlaylistsUpdateCollection : ObservableCollection<IPlaylist>, IUpdateSellectedItemCollection<IPlaylist>
+    class PlaylistsUpdateCollection : ObservableCollection<IPlaylist>
     {
         private IPlaylistCollection source;
-
-        public event UpdateFinishedEventHandler<IPlaylist> UpdateFinished;
 
         public PlaylistsUpdateCollection(IPlaylistCollection source)
         {
@@ -18,15 +16,12 @@ namespace FolderMusic
             source.Changed += Source_Changed;
 
             Subscribe(source);
-            //MobileDebug.Manager.WriteEvent("PlaylistsUpdateCollectionConst", source.Count, Count);
         }
 
-        private void Source_Changed(IPlaylistCollection sender, PlaylistCollectionChangedEventArgs args)
+        private void Source_Changed(object sender, PlaylistCollectionChangedEventArgs args)
         {
             Unsubscribe(args.GetRemoved());
             Subscribe(args.GetAdded());
-
-            UpdateFinished?.Invoke(this);
         }
 
         private void Subscribe(IEnumerable<IPlaylist> playlists)
@@ -61,14 +56,13 @@ namespace FolderMusic
             Remove(playlist);
         }
 
-        private void OnPlaylistSongsChanged(ISongCollection sender, EventArgs args)
+        private void OnPlaylistSongsChanged(object sender, EventArgs args)
         {
-            int index = source.IndexOf(sender.Parent);
+            ISongCollection songs = (ISongCollection)sender;
+            int index = source.IndexOf(songs.Parent);
 
             RemoveAt(index);
-            Insert(index, sender.Parent);
-
-            UpdateFinished?.Invoke(this);
+            Insert(index, songs.Parent);
         }
     }
 }

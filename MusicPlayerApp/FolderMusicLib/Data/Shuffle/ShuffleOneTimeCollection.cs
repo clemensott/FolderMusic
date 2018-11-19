@@ -1,20 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MusicPlayer.Data.Shuffle
 {
     class ShuffleOneTimeCollection : ShuffleCollectionBase
     {
-        private static Random random = new Random();
+        private static Random ran = new Random();
 
-        public ShuffleOneTimeCollection(IPlaylist parent, ISongCollection songs, Song currentSong)
-            : base(parent, songs, GetStart(songs, currentSong))
+        public ShuffleOneTimeCollection(ISongCollection parent) : this(parent, Enumerable.Empty<Song>())
         {
         }
 
-        public ShuffleOneTimeCollection(IPlaylist parent, ISongCollection songs, string xmlText)
-            : base(parent, songs, xmlText)
+        public ShuffleOneTimeCollection(ISongCollection parent, Song currentSong) : this(parent, GetStart(parent, currentSong))
         {
+        }
+
+        public ShuffleOneTimeCollection(ISongCollection parent, IEnumerable<Song> songs) : base(parent)
+        {
+            parent.Changed += Parent_CollectionChanged;
+
+            Change(null, songs);
+        }
+
+        private void Parent_CollectionChanged(object sender, SongCollectionChangedEventArgs e)
+        {
+            List<ChangeCollectionItem<Song>> adds = new List<ChangeCollectionItem<Song>>();
+
+            foreach (Song addSong in e.GetAdded())
+            {
+                int index = ran.Next(Count - e.RemovedSongs.Length + adds.Count + 1);
+
+                adds.Add(new ChangeCollectionItem<Song>(index, addSong));
+            }
+
+            Change(e.GetRemoved(), adds);
         }
 
         protected override ShuffleType GetShuffleType()
@@ -30,32 +50,16 @@ namespace MusicPlayer.Data.Shuffle
 
             while (remaining.Count > 0)
             {
-                int index = random.Next(remaining.Count);
+                int index = ran.Next(remaining.Count);
                 yield return remaining[index];
 
                 remaining.RemoveAt(index);
             }
         }
 
-        protected override void UpdateCollection(SongCollectionChangedEventArgs args)
+        protected override IShuffleCollection GetNewThis(IEnumerable<Song> songs)
         {
-            bool changed = false;
-
-            foreach (Song addSong in args.GetAdded())
-            {
-                changed = true;
-
-                list.Insert(random.Next(list.Count + 1), addSong);
-            }
-
-            foreach (Song removeSong in args.GetRemoved())
-            {
-                changed = true;
-
-                list.Remove(removeSong);
-            }
-
-            if (changed) RaiseChange();
+            return new ShuffleOneTimeCollection(Parent, songs);
         }
     }
 }

@@ -4,33 +4,47 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
+using System;
 
-namespace MusicPlayer.Data.NonLoaded
+namespace MusicPlayer.Data.Simple
 {
-    class NonLoadedSongCollection : ISongCollection
+    class SimpleSongCollection : ISongCollection
     {
         private const int saveSongsCount = 10;
 
         private List<Song> list;
+        private IShuffleCollection shuffle;
+
+        public event EventHandler<SongCollectionChangedEventArgs> Changed;
+        public event EventHandler<ShuffleChangedEventArgs> ShuffleChanged;
 
         public int Count { get { return list.Count; } }
 
         public IPlaylist Parent { get; set; }
 
-        public event SongCollectionChangedEventHandler Changed;
-
-        public NonLoadedSongCollection(IPlaylist parent)
+        public IShuffleCollection Shuffle
         {
-            Parent = parent;
+            get { return shuffle; }
+            set
+            {
+                if (value == shuffle) return;
+
+                var args = new ShuffleChangedEventArgs(shuffle, value);
+                shuffle = value;
+                ShuffleChanged?.Invoke(this, args);
+            }
+        }
+
+        public SimpleSongCollection()
+        {
             list = new List<Song>();
         }
 
-        public NonLoadedSongCollection(IPlaylist parent, IShuffleCollection actualShuffleSongs)
+        public SimpleSongCollection(IShuffleCollection actualShuffleSongs, Song currentSong)
         {
-            Parent = parent;
             list = new List<Song>();
 
-            int currentSongIndex = actualShuffleSongs.IndexOf(parent.CurrentSong);
+            int currentSongIndex = actualShuffleSongs.IndexOf(currentSong);
             int startIndex, count;
 
             if (actualShuffleSongs.Count < saveSongsCount)
@@ -55,18 +69,10 @@ namespace MusicPlayer.Data.NonLoaded
             }
         }
 
-        public NonLoadedSongCollection(IPlaylist parent, CurrentPlaySong currentPlaySong)
+        public SimpleSongCollection(CurrentPlaySong currentPlaySong)
         {
-            Parent = parent;
-
             list = new List<Song>();
-            list.Add(new Song(this, currentPlaySong));
-        }
-
-        public NonLoadedSongCollection(IPlaylist parent, string xmlText)
-        {
-            Parent = parent;
-            ReadXml(XmlConverter.GetReader(xmlText));
+            list.Add(new Song(currentPlaySong));
         }
 
         public int IndexOf(Song song)
@@ -76,20 +82,21 @@ namespace MusicPlayer.Data.NonLoaded
 
         public void Add(Song song)
         {
-            Change(Enumerable.Range(0, 1).Select(i => song), Enumerable.Empty<Song>());
+            Change(null, Utils.RepeatOnce(song));
         }
 
         public void Remove(Song song)
         {
-            Change(Enumerable.Empty<Song>(), Enumerable.Range(0, 1).Select(i => song));
+            Change(Utils.RepeatOnce(song), null);
         }
 
-        public void Change(IEnumerable<Song> adds, IEnumerable<Song> removes)
+        public void Change(IEnumerable<Song> removes, IEnumerable<Song> adds)
         {
         }
 
-        public void Reset(IEnumerable<Song> newSongs)
+        public void SetShuffleType(ShuffleType type)
         {
+            Shuffle = new SimpleShuffleCollection(this, type);
         }
 
         public IEnumerator<Song> GetEnumerator()
@@ -109,23 +116,29 @@ namespace MusicPlayer.Data.NonLoaded
 
         public void ReadXml(XmlReader reader)
         {
-            list = new List<Song>();
-            reader.ReadStartElement();
+            ShuffleType shuffleType = (ShuffleType)Enum.Parse(typeof(ShuffleType), reader.GetAttribute("Shuffle"));
 
-            while (reader.NodeType == XmlNodeType.Element)
-            {
-                list.Add(new Song(this, reader.ReadOuterXml()));
-            }
+            reader.ReadStartElement();
+            list = new List<Song>(XmlConverter.DeserializeList<Song>(reader, "Song"));
+
+            Shuffle = new SimpleShuffleCollection(this, shuffleType);
         }
 
         public void WriteXml(XmlWriter writer)
         {
+            writer.WriteAttributeString("Shuffle", Shuffle.Type.ToString());
+
             foreach (Song song in this)
             {
                 writer.WriteStartElement("Song");
                 song.WriteXml(writer);
                 writer.WriteEndElement();
             }
+        }
+
+        public ISongCollection ToSimple()
+        {
+            return new SimpleSongCollection(Shuffle, this.FirstOrDefault());
         }
     }
 }

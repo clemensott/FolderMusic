@@ -1,4 +1,5 @@
-﻿using MusicPlayer.Data;
+﻿using MusicPlayer;
+using MusicPlayer.Data;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -39,7 +40,7 @@ namespace FolderMusic
 
         private void Shuffle_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            Playlist.SetNextShuffle();
+            Playlist.Songs.SetNextShuffle();
         }
 
         private void Loop_Tapped(object sender, TappedRoutedEventArgs e)
@@ -53,7 +54,7 @@ namespace FolderMusic
             await Playlist.Reset();
             Frame.GoBack();
 
-            if (Playlist.SongsCount == 0) Frame.GoBack();
+            if (Playlist.Songs.Count == 0) Frame.GoBack();
         }
 
         private async void SearchForNewSongs_Click(object sender, RoutedEventArgs e)

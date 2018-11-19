@@ -1,39 +1,33 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace MusicPlayer.Data
 {
-    public delegate void PlayStateChangedEventHandler(ILibrary sender, PlayStateChangedEventArgs args);
-    public delegate void LibraryChangedEventHandler(ILibrary sender, LibraryChangedEventsArgs args);
-    public delegate void PlaylistsPropertyChangedEventHandler(ILibrary sender, PlaylistsChangedEventArgs args);
-    public delegate void CurrentPlaylistPropertyChangedEventHandler(ILibrary sender, CurrentPlaylistChangedEventArgs args);
-    public delegate void SettingsPropertyChangedEventHandler();
-
     public interface ILibrary : IXmlSerializable
     {
-        event PlayStateChangedEventHandler PlayStateChanged;
-        event LibraryChangedEventHandler LibraryChanged;
-        event PlaylistsPropertyChangedEventHandler PlaylistsChanged;
-        event CurrentPlaylistPropertyChangedEventHandler CurrentPlaylistChanged;
-        event SettingsPropertyChangedEventHandler SettingsChanged;
+        event EventHandler<PlayStateChangedEventArgs> PlayStateChanged;
+        event EventHandler<PlaylistsChangedEventArgs> PlaylistsChanged;
+        event EventHandler<CurrentPlaylistChangedEventArgs> CurrentPlaylistChanged;
+        event EventHandler SettingsChanged;
+        event EventHandler Loaded;
 
         IPlaylist this[int index] { get; }
 
         bool CanceledLoading { get; }
         IPlaylist CurrentPlaylist { get; set; }
-        bool IsLoadedComplete { get; }
+        bool IsForeground { get; }
+        bool IsLoaded { get; }
         bool IsPlaying { get; set; }
-        IPlaylistCollection Playlists { get; }
+        IPlaylistCollection Playlists { get; set; }
         SkipSongs SkippedSongs { get; }
-
         Task AddNew();
         void CancelLoading();
-        void LoadComplete();
         Task Reset();
         Task ResetSongs();
-        void Save();
-        Task SaveAsync();
-        void Set(ILibrary library);
+        void Load(IEnumerable<IPlaylist> playlists);
+        ILibrary ToSimple();
         Task Update();
     }
 }

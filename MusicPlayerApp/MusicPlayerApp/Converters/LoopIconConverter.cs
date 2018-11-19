@@ -1,4 +1,4 @@
-﻿using MusicPlayer.Data.Loop;
+﻿using MusicPlayer.Data;
 using PlayerIcons;
 using System;
 using Windows.UI.Xaml.Data;

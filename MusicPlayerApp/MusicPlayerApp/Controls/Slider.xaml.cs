@@ -134,9 +134,6 @@ namespace FolderMusic
 
             library.PlayStateChanged += OnPlayStateChanged;
             library.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
-            library.PlaylistsChanged += OnPlaylistsChanged;
-            library.Playlists.Changed += OnPlaylistCollectionChanged;
-            library.LibraryChanged += OnLibraryChanged;
 
             Subscribe(library.CurrentPlaylist);
         }
@@ -147,33 +144,8 @@ namespace FolderMusic
 
             library.PlayStateChanged -= OnPlayStateChanged;
             library.CurrentPlaylistChanged -= OnCurrentPlaylistChanged;
-            library.PlaylistsChanged -= OnPlaylistsChanged;
-            library.Playlists.Changed -= OnPlaylistCollectionChanged;
-            library.LibraryChanged -= OnLibraryChanged;
 
             Unsubscribe(library.CurrentPlaylist);
-        }
-
-        private void OnPlaylistsChanged(ILibrary sender, PlaylistsChangedEventArgs args)
-        {
-            args.OldPlaylists.Changed -= OnPlaylistCollectionChanged;
-            Unsubscribe(args.OldCurrentPlaylist);
-            args.NewPlaylists.Changed += OnPlaylistCollectionChanged;
-            Subscribe(args.NewCurrentPlaylist);
-        }
-
-        private void OnPlaylistCollectionChanged(IPlaylistCollection sender, PlaylistCollectionChangedEventArgs args)
-        {
-            Unsubscribe(args.OldCurrentPlaylist);
-            Subscribe(args.NewCurrentPlaylist);
-        }
-
-        private void OnLibraryChanged(ILibrary sender, LibraryChangedEventsArgs args)
-        {
-            Unsubscribe(args.OldCurrentPlaylist);
-            Subscribe(args.NewCurrentPlaylist);
-
-            SetValuesSafe();
         }
 
         private void Subscribe(IPlaylist playlist)
@@ -200,23 +172,23 @@ namespace FolderMusic
         {
             if (song == null) return;
 
-            song.DurationChanged += Song_DurationChanged;
+            song.DurationChanged += OnSongDurationChanged;
         }
 
         private void Unsubscribe(Song song)
         {
             if (song == null) return;
 
-            song.DurationChanged -= Song_DurationChanged;
+            song.DurationChanged -= OnSongDurationChanged;
         }
 
-        private void OnPlayStateChanged(ILibrary sender, PlayStateChangedEventArgs args)
+        private void OnPlayStateChanged(object sender, PlayStateChangedEventArgs args)
         {
             if (args.NewValue) StartTimer();
             else StopTimer();
         }
 
-        private void OnCurrentPlaylistChanged(ILibrary sender, CurrentPlaylistChangedEventArgs args)
+        private void OnCurrentPlaylistChanged(object sender, CurrentPlaylistChangedEventArgs args)
         {
             Unsubscribe(args.OldCurrentPlaylist);
             Subscribe(args.NewCurrentPlaylist);
@@ -224,7 +196,7 @@ namespace FolderMusic
             SetValuesSafe();
         }
 
-        private void OnCurrentSongChanged(IPlaylist sender, CurrentSongChangedEventArgs args)
+        private void OnCurrentSongChanged(object sender, CurrentSongChangedEventArgs args)
         {
             Unsubscribe(args.OldCurrentSong);
             Subscribe(args.NewCurrentSong);
@@ -233,13 +205,13 @@ namespace FolderMusic
             previousUpdatedTime = DateTime.Now;
         }
 
-        private void OnCurrentSongPositionChanged(IPlaylist sender, CurrentSongPositionChangedEventArgs args)
+        private void OnCurrentSongPositionChanged(object sender, CurrentSongPositionChangedEventArgs args)
         {
             SetValuesSafe();
             previousUpdatedTime = DateTime.Now;
         }
 
-        private void Song_DurationChanged(Song sender, SongDurationChangedEventArgs args)
+        private void OnSongDurationChanged(object sender, SongDurationChangedEventArgs args)
         {
             SetValuesSafe();
         }
@@ -253,7 +225,7 @@ namespace FolderMusic
         {
             try
             {
-                double percent = Library?.CurrentPlaylist?.CurrentSongPositionPercent ?? 0;
+                double percent = Library?.CurrentPlaylist?.CurrentSongPosition ?? 0;
                 double duration = Library?.CurrentPlaylist?.CurrentSong?.DurationMilliseconds ?? Song.DefaultDuration;
 
                 if (duration == 0)
@@ -345,12 +317,12 @@ namespace FolderMusic
 
             playlist.CurrentSong.DurationMilliseconds = duration;
 
-            if (position > 500 && duration > 500) playlist.CurrentSongPositionPercent = position / duration;
+            if (position > 500 && duration > 500) playlist.CurrentSongPosition = position / duration;
             else if (Player?.CurrentState == MediaPlayerState.Playing)
             {
-                position = playlist.CurrentSongPositionPercent * playlist.CurrentSong.DurationMilliseconds;
+                position = playlist.CurrentSongPosition * playlist.CurrentSong.DurationMilliseconds;
                 position += (currentDateTime - previousUpdatedTime).TotalMilliseconds;
-                playlist.CurrentSongPositionPercent = position / duration;
+                playlist.CurrentSongPosition = position / duration;
 
                 previousUpdatedTime = currentDateTime;
             }
@@ -367,7 +339,7 @@ namespace FolderMusic
 
             playerPositionEnabled = true;
 
-            double percent = Library?.CurrentPlaylist?.CurrentSongPositionPercent ?? 0;
+            double percent = Library?.CurrentPlaylist?.CurrentSongPosition ?? 0;
             double duration = Library?.CurrentPlaylist?.CurrentSong?.DurationMilliseconds ?? Song.DefaultDuration;
 
             Player.Position = TimeSpan.FromMilliseconds(percent * duration);
@@ -381,7 +353,7 @@ namespace FolderMusic
         {
             if (Library?.CurrentPlaylist == null) return;
 
-            Library.CurrentPlaylist.CurrentSongPositionPercent = e.NewValue;
+            Library.CurrentPlaylist.CurrentSongPosition = e.NewValue;
 
             //if (!playerPositionEnabled) return;
 

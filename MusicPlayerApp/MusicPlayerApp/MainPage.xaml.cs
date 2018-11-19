@@ -1,4 +1,5 @@
-﻿using MusicPlayer.Data;
+﻿using MusicPlayer;
+using MusicPlayer.Data;
 using System;
 using System.Threading.Tasks;
 using Windows.Phone.UI.Input;
@@ -35,14 +36,14 @@ namespace FolderMusic
 
                 DataContext = viewModel;
 
-                library.LibraryChanged += Library_LibraryChanged;
+                library.Loaded += Library_Loaded;
                 library.SkippedSongs.SkippedSong += SkippedSongs_SkippedSong;
             }
         }
 
-        private async void Library_LibraryChanged(ILibrary sender, LibraryChangedEventsArgs args)
+        private async void Library_Loaded(object sender, EventArgs args)
         {
-            if (args.NewPlaylists.Count > 0) return;
+            if (library.Playlists.Count > 0) return;
 
             Frame.Navigate(typeof(LoadingPage), library);
             await library.Reset();
@@ -65,7 +66,7 @@ namespace FolderMusic
 
         private void Shuffle_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            library.CurrentPlaylist.SetNextShuffle();
+            library.CurrentPlaylist.Songs.SetNextShuffle();
         }
 
         private void ShuffleImage_PointerEntered(object sender, PointerRoutedEventArgs e)
@@ -83,7 +84,7 @@ namespace FolderMusic
 
         private void Previous_Click(object sender, RoutedEventArgs e)
         {
-            library.CurrentPlaylist.SetPreviousSong();
+            library.CurrentPlaylist.ChangeCurrentSong(-1);
         }
 
         private void PlayPause_Click(object sender, RoutedEventArgs e)
@@ -93,7 +94,7 @@ namespace FolderMusic
 
         private void Next_Click(object sender, RoutedEventArgs e)
         {
-            library.CurrentPlaylist.SetNextSong();
+            library.CurrentPlaylist.ChangeCurrentSong(1);
         }
 
         private void Loop_Tapped(object sender, TappedRoutedEventArgs e)
@@ -171,16 +172,10 @@ namespace FolderMusic
 
         private void AbbComPing_Click(object sender, RoutedEventArgs e)
         {
-            MusicPlayer.Communication.BackForegroundCommunicator.instance?.Ping();
         }
 
         private async void AbbComReset_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                await MusicPlayer.Communication.BackForegroundCommunicator.Reset();
-            }
-            catch { }
         }
 
         private void hub_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
@@ -190,7 +185,7 @@ namespace FolderMusic
 
         private void AbbTest1_Click(object sender, RoutedEventArgs e)
         {
-            Library.CheckLibrary(library);
+            AutoSaveLoad.CheckLibrary(library);
         }
 
         public static string LoadText(string filenameWithExtention)

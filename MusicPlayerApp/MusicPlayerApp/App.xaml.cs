@@ -20,7 +20,7 @@ namespace FolderMusic
 {
     public sealed partial class App : Application
     {
-        private const string frameHistoryFileName = "FrameHistory.xml";
+        private const string simpleFileName = "SimpleData.xml", frameHistoryFileName = "FrameHistory.xml";
         private static readonly XmlSerializer frameHistorySerializer = new XmlSerializer(typeof(HistoricFrame[]));
 
         private Frame rootFrame;
@@ -62,7 +62,8 @@ namespace FolderMusic
                 this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
-            ILibrary library = Library.LoadSimple(true);
+            AutoSaveLoad asl = new AutoSaveLoad(null, null, simpleFileName, null);
+            ILibrary library = asl.LoadSimple(true);
 
             rootFrame = Window.Current.Content as Frame;
 

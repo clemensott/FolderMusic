@@ -21,20 +21,8 @@ namespace FolderMusic
             var oldLibrary = (ILibrary)e.OldValue;
             var newLibrary = (ILibrary)e.NewValue;
 
-            if (oldLibrary != null)
-            {
-
-                oldLibrary.CurrentPlaylistChanged -= s.Source_CurrentPlaylistChanged;
-                oldLibrary.PlaylistsChanged -= s.Source_PlaylistsChanged;
-            }
-
-            if (newLibrary != null)
-            {
-                newLibrary.LibraryChanged += s.Source_LibraryChanged;
-                newLibrary.CurrentPlaylistChanged += s.Source_CurrentPlaylistChanged;
-                newLibrary.PlaylistsChanged += s.Source_PlaylistsChanged;
-            }
-
+            s.Unsubscribe(oldLibrary);
+            s.Subscribe(newLibrary);
             s.SetItemsSourceSafe();
         }
 
@@ -53,14 +41,42 @@ namespace FolderMusic
             isPointerOnDetailIcon = false;
         }
 
-        private void Source_LibraryChanged(ILibrary sender, LibraryChangedEventsArgs args)
+        private void Subscribe(ILibrary library)
         {
+            if (library == null) return;
+
+            if (!library.IsLoaded) library.Loaded += OnSourceLoaded;
+            else
+            {
+                library.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
+                library.PlaylistsChanged += OnPlaylistsChanged;
+            }
+        }
+
+        private void Unsubscribe(ILibrary library)
+        {
+            if (library == null) return;
+
+            library.Loaded -= OnSourceLoaded;
+            library.CurrentPlaylistChanged -= OnCurrentPlaylistChanged;
+        }
+
+        private void OnSourceLoaded(object sender, EventArgs args)
+        {
+            Unsubscribe(Source);
+            Subscribe(Source);
+
             SetItemsSourceSafe();
         }
 
-        private void Source_CurrentPlaylistChanged(ILibrary sender, CurrentPlaylistChangedEventArgs args)
+        private void OnCurrentPlaylistChanged(object sender, CurrentPlaylistChangedEventArgs e)
         {
             SetSelectedPlaylistSafe();
+        }
+
+        private void OnPlaylistsChanged(object sender, PlaylistsChangedEventArgs e)
+        {
+            SetItemsSourceSafe();
         }
 
         private void SetSelectedPlaylistSafe()
@@ -73,11 +89,6 @@ namespace FolderMusic
             lbxPlaylists.SelectedItem = Source?.CurrentPlaylist;
         }
 
-        private void Source_PlaylistsChanged(ILibrary sender, PlaylistsChangedEventArgs args)
-        {
-            SetItemsSourceSafe();
-        }
-
         private void SetItemsSourceSafe()
         {
             Utils.DoSafe(SetItemsSource);
@@ -87,14 +98,11 @@ namespace FolderMusic
         {
             if (Source == null) return;
 
-            PlaylistsUpdateCollection collection = new PlaylistsUpdateCollection(Source.Playlists);
-            collection.UpdateFinished += ItemsSource_UpdateFinished;
-
-            lbxPlaylists.ItemsSource = collection;
+            lbxPlaylists.ItemsSource = new PlaylistsUpdateCollection(Source.Playlists);
             SetSelectedPlaylist();
         }
 
-        private void ItemsSource_UpdateFinished(IUpdateSellectedItemCollection<IPlaylist> sender)
+        private void ItemsSource_UpdateFinished(IUpdateSelectedItemCollection<IPlaylist> sender)
         {
             SetSelectedPlaylistSafe();
         }
