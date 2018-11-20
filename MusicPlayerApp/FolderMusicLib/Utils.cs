@@ -3,6 +3,9 @@ using MusicPlayer.Data.Shuffle;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MusicPlayer
 {
@@ -41,7 +44,8 @@ namespace MusicPlayer
 
         public static void SetNextLoop(this IPlaylist playlist)
         {
-            switch (playlist.Loop) {
+            switch (playlist.Loop)
+            {
                 case LoopType.All:
                     playlist.Loop = LoopType.Current;
                     break;
@@ -79,11 +83,11 @@ namespace MusicPlayer
             yield return item;
         }
 
-        public static int IndexOf<T>(this IEnumerable<T>items, T searchItem)
+        public static int IndexOf<T>(this IEnumerable<T> items, T searchItem)
         {
             int i = 0;
 
-            foreach(T item in items)
+            foreach (T item in items)
             {
                 if (item.Equals(searchItem)) return i;
             }

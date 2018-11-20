@@ -50,14 +50,14 @@ namespace FolderMusic
             Frame.GoBack();
         }
 
-        private void SkippedSongs_SkippedSong(SkipSongs sender)
+        private async void SkippedSongs_SkippedSong(SkipSongs sender)
         {
-            if (!SkipSongsPage.Open && sender.HasSongs()) Frame.Navigate(typeof(SkipSongsPage), sender);
+            if (!SkipSongsPage.Open && await sender.HasSongs()) Frame.Navigate(typeof(SkipSongsPage), sender);
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
+        private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            if (!checkedSkippedSongs && library.SkippedSongs.HasSongs())
+            if (!checkedSkippedSongs && await library.SkippedSongs.HasSongs())
             {
                 checkedSkippedSongs = true;
                 Frame.Navigate(typeof(SkipSongsPage), library.SkippedSongs);

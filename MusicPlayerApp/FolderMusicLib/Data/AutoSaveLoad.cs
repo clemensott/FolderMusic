@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Windows.Storage;
 
 namespace MusicPlayer.Data
@@ -183,22 +184,22 @@ namespace MusicPlayer.Data
             song.TitleChanged -= OnSongPropertyChanged;
         }
 
-        private void OnPlayStateChanged(object sender, PlayStateChangedEventArgs e)
+        private async void OnPlayStateChanged(object sender, PlayStateChangedEventArgs e)
         {
-            if (!e.NewValue) SaveSimple((ILibrary)sender);
+            if (!e.NewValue) await SaveSimple((ILibrary)sender);
         }
 
-        private void OnCurrentPlaylistChanged(object sender, CurrentPlaylistChangedEventArgs e)
+        private async void OnCurrentPlaylistChanged(object sender, CurrentPlaylistChangedEventArgs e)
         {
-            SaveAll((ILibrary)sender);
+            await SaveAll((ILibrary)sender);
 
             RemoveCurrentPlaylist(e.OldCurrentPlaylist);
             AddCurrentPlaylist(e.NewCurrentPlaylist);
         }
 
-        private void OnPlaylistsPropertyChanged(object sender, PlaylistsChangedEventArgs e)
+        private async void OnPlaylistsPropertyChanged(object sender, PlaylistsChangedEventArgs e)
         {
-            SaveAll((ILibrary)sender);
+            await SaveAll((ILibrary)sender);
 
             Remove(e.OldPlaylists);
             Add(e.NewPlaylists);
@@ -210,77 +211,79 @@ namespace MusicPlayer.Data
             Add((ILibrary)sender);
         }
 
-        private void OnCurrentSongPositionChanged(object sender, CurrentSongPositionChangedEventArgs e)
+        private async void OnCurrentSongPositionChanged(object sender, CurrentSongPositionChangedEventArgs e)
         {
-            SaveSimple(((IPlaylist)sender).Parent.Parent);
+            await SaveSimple(((IPlaylist)sender).Parent.Parent);
         }
 
-        private void OnPlaylistsCollectionChanged(object sender, PlaylistCollectionChangedEventArgs e)
+        private async void OnPlaylistsCollectionChanged(object sender, PlaylistCollectionChangedEventArgs e)
         {
             Remove(e.GetRemoved());
             Add(e.GetAdded());
 
-            SaveAll(((IPlaylistCollection)sender).Parent);
+            await SaveAll(((IPlaylistCollection)sender).Parent);
         }
 
-        private void OnCurrentSongChanged(object sender, CurrentSongChangedEventArgs e)
+        private async void OnCurrentSongChanged(object sender, CurrentSongChangedEventArgs e)
         {
-            SaveAll(((IPlaylist)sender).Parent.Parent);
+            await SaveAll(((IPlaylist)sender).Parent.Parent);
         }
 
-        private void OnLoopChanged(object sender, LoopChangedEventArgs e)
+        private async void OnLoopChanged(object sender, LoopChangedEventArgs e)
         {
-            SaveAll(((IPlaylist)sender).Parent.Parent);
+            await SaveAll(((IPlaylist)sender).Parent.Parent);
         }
 
-        private void OnSongsPropertyChanged(object sender, SongsChangedEventArgs e)
+        private async void OnSongsPropertyChanged(object sender, SongsChangedEventArgs e)
         {
             Remove(e.OldSongs);
             Add(e.NewSongs);
 
-            SaveAll(((IPlaylist)sender).Parent.Parent);
+            await SaveAll(((IPlaylist)sender).Parent.Parent);
         }
 
-        private void OnSongsCollectionChanged(object sender, SongCollectionChangedEventArgs e)
+        private async void OnSongsCollectionChanged(object sender, SongCollectionChangedEventArgs e)
         {
             Remove(e.GetRemoved());
             Add(e.GetAdded());
 
-            SaveAll(((ISongCollection)sender).Parent.Parent.Parent);
+            await SaveAll(((ISongCollection)sender).Parent.Parent.Parent);
         }
 
-        private void OnShufflePropertyChanged(object sender, ShuffleChangedEventArgs e)
+        private async void OnShufflePropertyChanged(object sender, ShuffleChangedEventArgs e)
         {
             Remove(e.OldShuffleSongs);
             Add(e.NewShuffleSongs);
 
-            SaveAll(((ISongCollection)sender).Parent.Parent.Parent);
+            await SaveAll(((ISongCollection)sender).Parent.Parent.Parent);
         }
 
-        private void OnShuffleCollectionChanged(object sender, ShuffleCollectionChangedEventArgs e)
+        private async void OnShuffleCollectionChanged(object sender, ShuffleCollectionChangedEventArgs e)
         {
-            SaveAll(((IShuffleCollection)sender).Parent.Parent.Parent.Parent);
+            await SaveAll(((IShuffleCollection)sender).Parent.Parent.Parent.Parent);
         }
 
-        private void OnSongPropertyChanged(object sender, EventArgs e)
+        private async void OnSongPropertyChanged(object sender, EventArgs e)
         {
-
-            SaveAll(((Song)sender).Parent.Parent.Parent.Parent);
+            await SaveAll(((Song)sender).Parent.Parent.Parent.Parent);
         }
 
-        private void SaveAll(ILibrary lib)
+        private async Task SaveAll(ILibrary lib)
         {
-            IO.SaveObject(Complete, lib);
-            SaveSimple(lib);
+            Task task = IO.SaveObjectAsync(Complete, lib);
+
+            await SaveSimple(lib);
+            await task;
         }
 
-        private void SaveSimple(ILibrary lib)
+        private async Task SaveSimple(ILibrary lib)
         {
-            IO.SaveObject(Simple, lib.ToSimple());
-            IO.SaveObject(CurrentSong, new CurrentPlaySong(lib));
+            Task task1 = IO.SaveObjectAsync(Simple, lib.ToSimple());
+            await IO.SaveObjectAsync(CurrentSong, new CurrentPlaySong(lib));
+            await task1;
         }
 
-        public ILibrary LoadSimple(bool isForeground)
+        public async Task<ILibrary> LoadSimple(bool isForeground)
         {
             ILibrary library;
 
@@ -289,9 +292,9 @@ namespace MusicPlayer.Data
                 if (isForeground)
                 {
                     library = new Library(true);
-                    library.ReadXml(XmlConverter.GetReader(IO.LoadText(Simple)));
+                    library.ReadXml(XmlConverter.GetReader(await IO.LoadTextAsync(Simple)));
                 }
-                else library = new Library(IO.LoadObject<CurrentPlaySong>(CurrentSong));
+                else library = new Library(await IO.LoadObjectAsync<CurrentPlaySong>(CurrentSong));
             }
             catch (Exception e)
             {
@@ -302,13 +305,13 @@ namespace MusicPlayer.Data
             return Library = library;
         }
 
-        public void LoadComplete()
+        public async Task LoadComplete()
         {
-            ILibrary completeLibrary = GetLibrary();
+            ILibrary completeLibrary = await GetLibrary();
             Library.Load(completeLibrary.Playlists);
         }
 
-        private ILibrary GetLibrary()
+        private async Task<ILibrary> GetLibrary()
         {
             ILibrary lib = new Library(Library.IsForeground);
 
@@ -316,7 +319,7 @@ namespace MusicPlayer.Data
             {
                 try
                 {
-                    lib.ReadXml(XmlConverter.GetReader(IO.LoadText(Complete)));
+                    lib.ReadXml(XmlConverter.GetReader(await IO.LoadTextAsync(Complete)));
                     IO.CopyAsync(Complete, Backup);
                     return lib;
                 }
@@ -324,14 +327,13 @@ namespace MusicPlayer.Data
                 {
                     MobileDebug.Service.WriteEvent("Coundn't load data", e);
                 }
-
             }
 
             for (int i = 0; i < 2; i++)
             {
                 try
                 {
-                    lib.ReadXml(XmlConverter.GetReader(IO.LoadText(Backup)));
+                    lib.ReadXml(XmlConverter.GetReader(await IO.LoadTextAsync(Backup)));
                     IO.CopyAsync(Backup, Complete);
                     return lib;
                 }

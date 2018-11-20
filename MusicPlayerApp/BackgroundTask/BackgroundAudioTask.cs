@@ -37,7 +37,7 @@ namespace BackgroundTask
             }
         }
 
-        public void Run(IBackgroundTaskInstance taskInstance)
+        public async void Run(IBackgroundTaskInstance taskInstance)
         {
             string taskId = taskInstance.InstanceId.ToString();
             MobileDebug.Service.SetIsBackground(taskId);
@@ -51,7 +51,7 @@ namespace BackgroundTask
             Unsubscribe(task);
 
             saveLoad = new AutoSaveLoad(completeFileName, backupFileName, simpleFileName, currentSongFileName);
-            library = saveLoad.LoadSimple(false);
+            library = await saveLoad.LoadSimple(false);
             smtc = SystemMediaTransportControls.GetForCurrentView();
             task = this;
 
@@ -60,7 +60,7 @@ namespace BackgroundTask
 
             Subscribe(task);
 
-            saveLoad.LoadComplete();
+            await saveLoad.LoadComplete();
 
             BackgroundPlayer.SetCurrent();
 

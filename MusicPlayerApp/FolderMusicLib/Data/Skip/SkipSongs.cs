@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MusicPlayer.Data
 {
@@ -20,32 +20,33 @@ namespace MusicPlayer.Data
             Parent = library;
         }
 
-        public bool HasSongs()
+        public async Task<bool> HasSongs()
         {
-            return GetSongs().Count() > 0;
+            return (await GetSongs()).Count() > 0;
         }
 
-        public void Add(Song song)
+        public async Task Add(Song song)
         {
-            List<string> songsPaths = GetSkipSongsPaths();
+            List<string> songsPaths = await GetSkipSongsPaths();
             if (songsPaths.Contains(song.Path)) return;
 
             songsPaths.Add(song.Path);
-            SaveSkipSongsPaths(songsPaths);
+            await SaveSkipSongsPaths(songsPaths);
 
             SkippedSong?.Invoke(this);
         }
 
-        internal static List<string> GetSkipSongsPaths()
+        internal async static Task<List<string>> GetSkipSongsPaths()
         {
-            return IO.LoadText(skipSongsFileName).Split(';').Where(s => s.Length > 0).Distinct().ToList();
+            string text = await IO.LoadTextAsync(skipSongsFileName);
+            return text.Split(';').Where(s => s.Length > 0).Distinct().ToList();
         }
 
-        internal static void SaveSkipSongsPaths(IEnumerable<string> songsPaths)
+        internal async static Task SaveSkipSongsPaths(IEnumerable<string> songsPaths)
         {
             string text = string.Join(";", songsPaths);
 
-            IO.SaveText(skipSongsFileName, text);
+            await IO.SaveTextAsync(skipSongsFileName, text);
         }
 
         public IEnumerator<SkipSong> GetEnumerator()
@@ -58,9 +59,9 @@ namespace MusicPlayer.Data
             return new SkipSongsEnumerator(Parent);
         }
 
-        public IEnumerable<Song> GetSongs()
+        public async Task<IEnumerable<Song>> GetSongs()
         {
-            List<string> ssps = GetSkipSongsPaths();
+            List<string> ssps = await GetSkipSongsPaths();
             var selected = ssps.Select(ssp => Parent.Playlists.SelectMany(p => p.Songs).FirstOrDefault(s => s.Path == ssp));
             return selected.Where(s => s != null);
         }

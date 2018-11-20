@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace MusicPlayer.Data
 {
@@ -23,9 +24,9 @@ namespace MusicPlayer.Data
             Path = library.CurrentPlaylist.CurrentSong.Path;
         }
 
-        public static void Delete()
+        public async static Task Delete()
         {
-            IO.Delete(fileName);
+            await IO.DeleteAsync(fileName);
         }
     }
 }

@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MusicPlayer.Data
 {
@@ -20,7 +22,7 @@ namespace MusicPlayer.Data
 
         public bool MoveNext()
         {
-            List<string> songsPaths = SkipSongs.GetSkipSongsPaths();
+            List<string> songsPaths = Await(SkipSongs.GetSkipSongsPaths);
 
             if (songsPaths.Count == 0) return false;
             MobileDebug.Service.WriteEvent("MoveNext1", songsPaths.Count);
@@ -28,13 +30,31 @@ namespace MusicPlayer.Data
             int index = HandleCurrent(songsPaths);
             Song song = GetNextSong(songsPaths, index);
 
-            SkipSongs.SaveSkipSongsPaths(songsPaths);
+            Await(SkipSongs.SaveSkipSongsPaths, songsPaths);
 
             MobileDebug.Service.WriteEvent("MoveNext2", song);
             if (song == null) return false;
 
             currentSkip = new SkipSong(song);
             return true;
+        }
+
+        private TResult Await<TResult>(Func<Task<TResult>> func)
+        {
+            var task = Task.Factory.StartNew(async () => await func());
+
+            task.Wait();
+            task.Result.Wait();
+
+            return task.Result.Result;
+        }
+
+        private void Await<T1>(Func<T1, Task> func, T1 param1)
+        {
+            var task = Task.Factory.StartNew(async () => await func(param1));
+
+            task.Wait();
+            task.Result.Wait();
         }
 
         private int HandleCurrent(List<string> songsPaths)

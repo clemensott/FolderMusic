@@ -42,11 +42,11 @@ namespace FolderMusic
         {
             MobileDebug.Service.WriteEvent("HardwareButtons_BackPressed", rootFrame.CurrentSourcePageType);
 
+            e.Handled = true;
+
             if (rootFrame.CurrentSourcePageType == typeof(LockPage)) return;
             if (!rootFrame.CanGoBack) Application.Current.Exit();
             else rootFrame.GoBack();
-
-            e.Handled = true;
         }
 
         private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -63,7 +63,7 @@ namespace FolderMusic
             }
 #endif
             AutoSaveLoad asl = new AutoSaveLoad(null, null, simpleFileName, null);
-            ILibrary library = asl.LoadSimple(true);
+            ILibrary library = await asl.LoadSimple(true);
 
             rootFrame = Window.Current.Content as Frame;
 
