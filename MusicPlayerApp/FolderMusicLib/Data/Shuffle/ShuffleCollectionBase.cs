@@ -38,6 +38,9 @@ namespace MusicPlayer.Data.Shuffle
 
         protected void Change(IEnumerable<Song> removes, IEnumerable<Song> adds)
         {
+            if (removes == null) removes = Enumerable.Empty<Song>();
+            if (adds == null) adds = Enumerable.Empty<Song>();
+
             ChangeCollectionItem<Song>[] removeChanges = ChangeCollectionItem<Song>.GetRemovedChanged(removes, list).ToArray();
             ChangeCollectionItem<Song>[] addChanges = ChangeCollectionItem<Song>.GetAddedChanged(adds, list.Except(removes)).ToArray();
 

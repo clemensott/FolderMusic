@@ -1,5 +1,4 @@
 ﻿using MusicPlayer.Communication;
-using MusicPlayer.Data.Shuffle;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,11 +53,18 @@ namespace MusicPlayer.Data
             {
                 if (value == currentPlaylist) return;
 
-                if (!IsForeground && currentPlaylist != null)
+                try
                 {
-                    TimeSpan position = BackgroundMediaPlayer.Current.Position;
-                    TimeSpan duration = BackgroundMediaPlayer.Current.NaturalDuration;
-                    currentPlaylist.CurrentSongPosition = position.TotalMilliseconds / duration.TotalMilliseconds;
+                    if (!IsForeground && currentPlaylist != null)
+                    {
+                        TimeSpan position = BackgroundMediaPlayer.Current.Position;
+                        TimeSpan duration = BackgroundMediaPlayer.Current.NaturalDuration;
+                        currentPlaylist.CurrentSongPosition = position.TotalMilliseconds / duration.TotalMilliseconds;
+                    }
+                }
+                catch (Exception e)
+                {
+                    MobileDebug.Service.WriteEvent("SetCurrentPlaylistSaveOldPositionFail", e, currentPlaylist?.AbsolutePath);
                 }
 
                 var args = new CurrentPlaylistChangedEventArgs(currentPlaylist, value);
@@ -91,8 +97,6 @@ namespace MusicPlayer.Data
             SkippedSongs = new SkipSongs(this);
             Playlists = new PlaylistCollection();
             CurrentPlaylist = null;
-
-            communicator = new BackForegroundCommunicator(this);
         }
 
         internal Library(CurrentPlaySong currentPlaySong)
@@ -103,7 +107,10 @@ namespace MusicPlayer.Data
             SkippedSongs = new SkipSongs(this);
             Playlists = new PlaylistCollection(currentPlaySong);
             CurrentPlaylist = Playlists.First();
+        }
 
+        public void BeginCommunication()
+        {
             communicator = new BackForegroundCommunicator(this);
         }
 
@@ -111,20 +118,50 @@ namespace MusicPlayer.Data
         {
             if (playlists == null) return;
 
+            string currentSongPath = CurrentPlaylist?.CurrentSong?.Path;
+            double currentSongPosition = CurrentPlaylist?.CurrentSongPosition ?? 0;
+            List<IPlaylist> remainingPlaylists = Playlists.ToList();
             List<IPlaylist> addPlaylists = new List<IPlaylist>();
 
             foreach (IPlaylist setPlaylist in playlists)
             {
-                IPlaylist existingPlaylist = Playlists.FirstOrDefault(p => p.AbsolutePath == setPlaylist.AbsolutePath);
+                IPlaylist existingPlaylist = remainingPlaylists.FirstOrDefault(p => p.AbsolutePath == setPlaylist.AbsolutePath);
 
                 if (existingPlaylist == null) addPlaylists.Add(setPlaylist);
-                else existingPlaylist.Songs = setPlaylist.Songs;
+                else
+                {
+                    existingPlaylist.Songs = setPlaylist.Songs;
+                    remainingPlaylists.Remove(existingPlaylist);
+                }
             }
 
-            Playlists.Change(null, addPlaylists);
+            Playlists.Change(remainingPlaylists, addPlaylists);
 
+            SetCurrentPlaylistAndCurrentSong(currentSongPath, currentSongPosition);
+            MobileDebug.Service.WriteEvent("LibraryLoad2", CurrentPlaylist?.AbsolutePath, CurrentPlaylist?.CurrentSongPosition, CurrentPlaylist?.CurrentSong?.Path);
+
+            AutoSaveLoad.CheckLibrary(this, "LoadedComplete");
             IsLoaded = true;
             Loaded?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void SetCurrentPlaylistAndCurrentSong(string currentSongPath, double currentSongPosition)
+        {
+            foreach (IPlaylist playlist in Playlists)
+            {
+                Song currentSong = playlist.Songs.FirstOrDefault(s => s.Path == currentSongPath);
+
+                if (currentSong != null)
+                {
+                    CurrentPlaylist = playlist;
+                    CurrentPlaylist.CurrentSong = currentSong;
+                    CurrentPlaylist.CurrentSongPosition = currentSongPosition;
+                    return;
+                }
+            }
+
+            CurrentPlaylist = Playlists.FirstOrDefault();
+            if (CurrentPlaylist != null) CurrentPlaylist.CurrentSong = CurrentPlaylist.Songs.FirstOrDefault();
         }
 
         public async Task Reset()
@@ -132,12 +169,13 @@ namespace MusicPlayer.Data
             CanceledLoading = false;
             IsPlaying = false;
 
-            IPlaylistCollection refreshedPlaylists = new PlaylistCollection();
+            List<IPlaylist> refreshedPlaylists = new List<IPlaylist>();
             var folders = await GetStorageFolders();
 
             foreach (StorageFolder folder in await GetStorageFolders())
             {
                 IPlaylist playlist = new Playlist(folder.Path);
+                playlist.Parent = Playlists;
 
                 await playlist.Reset();
 
@@ -145,8 +183,13 @@ namespace MusicPlayer.Data
                 if (playlist.Songs.Count > 0) refreshedPlaylists.Add(playlist);
             }
 
-            Playlists = refreshedPlaylists;
-            currentPlaylist = playlists.FirstOrDefault();
+            IPlaylistCollection playlists = new PlaylistCollection();
+            playlists.Change(null, refreshedPlaylists);
+
+            MobileDebug.Service.WriteEvent("Library.Reset1", playlists?.Count);
+            Playlists = playlists;
+            MobileDebug.Service.WriteEvent("Library.Reset2", Playlists?.Count);
+            CurrentPlaylist = playlists.FirstOrDefault();
         }
 
         public async Task Update()
@@ -255,7 +298,7 @@ namespace MusicPlayer.Data
                 throw;
             }
 
-            CurrentPlaylist = playlists.FirstOrDefault(p => p.AbsolutePath == currentPlaylistPath) ?? playlists.FirstOrDefault();
+            CurrentPlaylist = Playlists.FirstOrDefault(p => p.AbsolutePath == currentPlaylistPath) ?? Playlists.FirstOrDefault();
 
             Loaded?.Invoke(this, EventArgs.Empty);
         }
@@ -273,6 +316,9 @@ namespace MusicPlayer.Data
         {
             ILibrary lib = new Library(IsForeground);
             lib.Playlists = Playlists.ToSimple();
+            lib.CurrentPlaylist = lib.Playlists.FirstOrDefault(p => p.AbsolutePath == CurrentPlaylist?.AbsolutePath);
+
+            AutoSaveLoad.CheckLibrary(lib, "ToSimple");
 
             return lib;
         }

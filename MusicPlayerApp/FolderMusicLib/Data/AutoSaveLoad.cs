@@ -17,8 +17,6 @@ namespace MusicPlayer.Data
 
         public string CurrentSong { get; private set; }
 
-        public ILibrary Library { get; private set; }
-
         public AutoSaveLoad(string complete, string backup, string simple, string currentSong)
         {
             Complete = complete;
@@ -27,13 +25,14 @@ namespace MusicPlayer.Data
             CurrentSong = currentSong;
         }
 
-        private void Add(ILibrary lib)
+        public void Add(ILibrary lib)
         {
             if (lib == null) return;
 
+            MobileDebug.Service.WriteEvent("SubscribeToLibrary", lib.GetHashCode(),lib.IsLoaded,lib.CurrentPlaylist?.Name);
+
             if (lib.IsLoaded)
             {
-                lib.PlayStateChanged += OnPlayStateChanged;
                 lib.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
                 lib.PlaylistsChanged += OnPlaylistsPropertyChanged;
 
@@ -43,12 +42,11 @@ namespace MusicPlayer.Data
             else lib.Loaded += OnLoaded;
         }
 
-        private void Remove(ILibrary lib)
+        public void Remove(ILibrary lib)
         {
             if (lib == null) return;
 
             lib.Loaded -= OnLoaded;
-            lib.PlayStateChanged -= OnPlayStateChanged;
             lib.CurrentPlaylistChanged -= OnCurrentPlaylistChanged;
             lib.PlaylistsChanged -= OnPlaylistsPropertyChanged;
 
@@ -60,6 +58,7 @@ namespace MusicPlayer.Data
         {
             if (playlist == null) return;
 
+            MobileDebug.Service.WriteEvent("SubscribeCurrentPlaylist", playlist.Name, playlist.GetHashCode());
             playlist.CurrentSongPositionChanged += OnCurrentSongPositionChanged;
         }
 
@@ -184,17 +183,12 @@ namespace MusicPlayer.Data
             song.TitleChanged -= OnSongPropertyChanged;
         }
 
-        private async void OnPlayStateChanged(object sender, PlayStateChangedEventArgs e)
-        {
-            if (!e.NewValue) await SaveSimple((ILibrary)sender);
-        }
-
         private async void OnCurrentPlaylistChanged(object sender, CurrentPlaylistChangedEventArgs e)
         {
-            await SaveAll((ILibrary)sender);
-
             RemoveCurrentPlaylist(e.OldCurrentPlaylist);
             AddCurrentPlaylist(e.NewCurrentPlaylist);
+
+            await SaveAll((ILibrary)sender);
         }
 
         private async void OnPlaylistsPropertyChanged(object sender, PlaylistsChangedEventArgs e)
@@ -213,6 +207,9 @@ namespace MusicPlayer.Data
 
         private async void OnCurrentSongPositionChanged(object sender, CurrentSongPositionChangedEventArgs e)
         {
+            IPlaylist playlist = (IPlaylist)sender;
+            MobileDebug.Service.WriteEvent("AutoSaveOnCurrentSongPos", playlist, playlist.GetHashCode(),
+                playlist.Parent?.Parent?.GetHashCode(), e.OldCurrentSongPosition, e.NewCurrentSongPosition);
             await SaveSimple(((IPlaylist)sender).Parent.Parent);
         }
 
@@ -270,17 +267,28 @@ namespace MusicPlayer.Data
 
         private async Task SaveAll(ILibrary lib)
         {
-            Task task = IO.SaveObjectAsync(Complete, lib);
+            MobileDebug.Service.WriteEvent("SaveAll");
 
-            await SaveSimple(lib);
-            await task;
+            try
+            {
+                await IO.SaveObjectAsync(Complete, lib);
+                await SaveSimple(lib);
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Service.WriteEvent("SaveAllFail", e);
+                CheckLibrary(lib, "SaveFail");
+            }
         }
 
         private async Task SaveSimple(ILibrary lib)
         {
-            Task task1 = IO.SaveObjectAsync(Simple, lib.ToSimple());
-            await IO.SaveObjectAsync(CurrentSong, new CurrentPlaySong(lib));
-            await task1;
+            MobileDebug.Service.WriteEvent("SaveSimple", lib?.GetHashCode(), lib?.CurrentPlaylist?.Name,
+                lib?.CurrentPlaylist?.GetHashCode(), lib?.CurrentPlaylist?.CurrentSongPosition);
+
+            await IO.SaveObjectAsync(Simple, lib.ToSimple());
+
+            if (lib?.CurrentPlaylist != null) await IO.SaveObjectAsync(CurrentSong, new CurrentPlaySong(lib));
         }
 
         public async Task<ILibrary> LoadSimple(bool isForeground)
@@ -292,36 +300,44 @@ namespace MusicPlayer.Data
                 if (isForeground)
                 {
                     library = new Library(true);
-                    library.ReadXml(XmlConverter.GetReader(await IO.LoadTextAsync(Simple)));
+                    string xmlText = await IO.LoadTextAsync(Simple);
+                    MobileDebug.Service.WriteEvent("LoadSimpleForeground", xmlText);
+                    library.ReadXml(XmlConverter.GetReader(xmlText));
                 }
-                else library = new Library(await IO.LoadObjectAsync<CurrentPlaySong>(CurrentSong));
+                else
+                {
+                    library = new Library(await IO.LoadObjectAsync<CurrentPlaySong>(CurrentSong));
+                    MobileDebug.Service.WriteEvent("LoadSimpleBack", library?.CurrentPlaylist?.CurrentSong?.Path);
+                }
             }
             catch (Exception e)
             {
-                MobileDebug.Service.WriteEvent("LibraryLoadForegroundFail", e);
+                MobileDebug.Service.WriteEvent("SimpleLibraryLoadFail", e);
                 library = new Library(isForeground);
             }
 
-            return Library = library;
+            library.BeginCommunication();
+
+            return library;
         }
 
-        public async Task LoadComplete()
+        public async Task LoadComplete(ILibrary lib)
         {
-            ILibrary completeLibrary = await GetLibrary();
-            Library.Load(completeLibrary.Playlists);
+            ILibrary completeLib = await GetLibrary(lib);
+            lib.Load(completeLib.Playlists);
         }
 
-        private async Task<ILibrary> GetLibrary()
+        private async Task<ILibrary> GetLibrary(ILibrary lib)
         {
-            ILibrary lib = new Library(Library.IsForeground);
+            ILibrary completeLib = new Library(lib.IsForeground);
 
             for (int i = 0; i < 2; i++)
             {
                 try
                 {
-                    lib.ReadXml(XmlConverter.GetReader(await IO.LoadTextAsync(Complete)));
+                    completeLib.ReadXml(XmlConverter.GetReader(await IO.LoadTextAsync(Complete)));
                     IO.CopyAsync(Complete, Backup);
-                    return lib;
+                    return completeLib;
                 }
                 catch (Exception e)
                 {
@@ -333,9 +349,9 @@ namespace MusicPlayer.Data
             {
                 try
                 {
-                    lib.ReadXml(XmlConverter.GetReader(await IO.LoadTextAsync(Backup)));
+                    completeLib.ReadXml(XmlConverter.GetReader(await IO.LoadTextAsync(Backup)));
                     IO.CopyAsync(Backup, Complete);
-                    return lib;
+                    return completeLib;
                 }
                 catch (Exception e)
                 {
@@ -347,17 +363,20 @@ namespace MusicPlayer.Data
             IO.CopyAsync(Complete, KnownFolders.VideosLibrary, Complete);
             IO.CopyAsync(Backup, KnownFolders.VideosLibrary, Backup);
 
-            return lib;
+            return completeLib;
         }
-        public static string CheckLibrary(ILibrary lib)
+
+        public static string CheckLibrary(ILibrary lib, string id = "None")
         {
-            MobileDebug.Service.WriteEvent("CheckLibraryStart", lib?.Playlists?.Count.ToString() ?? "null");
+            MobileDebug.Service.WriteEvent("CheckLibraryStart", lib?.Playlists?.Count.ToString() ?? "null", id);
             bool contains = lib.Playlists.Contains(lib.CurrentPlaylist);
 
             List<string> list = new List<string>()
             {
+                "ID: " + id,
+                "CurrentPlaylist == null: " + (lib.CurrentPlaylist == null),
+                "CurrentPlaylistPath: " + lib?.CurrentPlaylist?.AbsolutePath,
                 "ContainsCurrentPlaylist: " + contains,
-                "CurrentPlaylist==null: " + (lib.CurrentPlaylist == null),
                 "LibraryType: " + lib.GetType().Name,
                 "LibraryHash: " + lib.GetHashCode()
             };
@@ -377,7 +396,7 @@ namespace MusicPlayer.Data
                     text += "\nSongs: " + (p?.Songs?.Count.ToString() ?? "null");
                     text += "\nDif: " + (p?.Songs?.GroupBy(s => s?.Path ?? "null")?.Count().ToString() ?? "null");
                     text += "\nShuffle: " + (p?.Songs?.Shuffle?.Type.ToString() ?? "null");
-                    text += "\nShuffle: " + (p?.Songs.Shuffle?.Count.ToString() ?? "null");
+                    text += "\nShuffle: " + (p?.Songs?.Shuffle?.Count.ToString() ?? "null");
 
                     text += "\nHash: " + (p?.GetHashCode() ?? -1);
                 }

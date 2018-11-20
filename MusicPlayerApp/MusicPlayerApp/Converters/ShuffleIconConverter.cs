@@ -9,6 +9,7 @@ namespace FolderMusic.Converters
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
+            MobileDebug.Service.WriteEvent("ShuffleIconCon", value);
             switch ((ShuffleType)value)
             {
                 case ShuffleType.Complete:

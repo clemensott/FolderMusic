@@ -66,7 +66,7 @@ namespace MusicPlayer.Data
             if (removed.Count == 0 && added.Count == 0) return;
 
             if (oldCurrentPlaylist == null) newCurrentPlaylist = newList.FirstOrDefault();
-            else if (Parent.Playlists == this && !newList.Contains(oldCurrentPlaylist))
+            else if (Parent?.Playlists == this && !newList.Contains(oldCurrentPlaylist))
             {
                 if (currentPlaylistIndex < 0) currentPlaylistIndex = 0;
                 if (currentPlaylistIndex >= newList.Count()) currentPlaylistIndex = newList.Count() - 1;
@@ -75,12 +75,16 @@ namespace MusicPlayer.Data
             }
 
             foreach (ChangeCollectionItem<IPlaylist> change in removed) list.Remove(change.Item);
-            foreach (ChangeCollectionItem<IPlaylist> change in added) list.Insert(change.Index, change.Item);
+            foreach (ChangeCollectionItem<IPlaylist> change in added)
+            {
+                change.Item.Parent = this;
+                list.Insert(change.Index, change.Item);
+            }
 
             var args = new PlaylistCollectionChangedEventArgs(added.ToArray(), removed.ToArray());
             Changed?.Invoke(this, args);
 
-            Parent.CurrentPlaylist = newCurrentPlaylist;
+            if (Parent != null) Parent.CurrentPlaylist = newCurrentPlaylist;
         }
 
         private static int WouldIndexOf(IEnumerable<string> paths, string path)
@@ -119,6 +123,8 @@ namespace MusicPlayer.Data
             reader.ReadStartElement();
 
             list = XmlConverter.DeserializeList<Playlist>(reader).Cast<IPlaylist>().ToList();
+
+            foreach (IPlaylist playlist in list) playlist.Parent = this;
         }
 
         public void WriteXml(XmlWriter writer)

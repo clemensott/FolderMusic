@@ -22,6 +22,8 @@ namespace MusicPlayer.Data
         bool IsPlaying { get; set; }
         IPlaylistCollection Playlists { get; set; }
         SkipSongs SkippedSongs { get; }
+
+        void BeginCommunication();
         Task AddNew();
         void CancelLoading();
         Task Reset();

@@ -23,6 +23,8 @@ namespace MobileDebug
         private static bool isAppending = false;
         private static int debugDataStringLength = -1;
         private static StorageFile foreDebugDataFile, backDebugDataFile;
+        private static Queue<Event> eventsBuffer = new Queue<Event>();
+        private static Task writeTask = Task.Run((Action)Append);
 
         public static string Id { get; private set; } = "None";
 
@@ -36,17 +38,25 @@ namespace MobileDebug
             Id = id;
         }
 
+        public static void WriteEvent(string name, string data)
+        {
+            //System.Diagnostics.Debug.WriteLine(name);
+            Event debugEvent = new Event(name, Enumerable.Repeat(data, 1));
+
+            Append(debugEvent);
+        }
+
         public static void WriteEvent(string name, IEnumerable data)
         {
             //System.Diagnostics.Debug.WriteLine(name);
             Event debugEvent = new Event(name, data);
 
-            Task.Factory.StartNew(new Action<object>(Append), debugEvent.ToDataString());
+            Append(debugEvent);
         }
 
         public static void WriteEvent(string name, params object[] data)
         {
-            WriteEvent(name, (IEnumerable)data);
+            WriteEvent(name, data.AsEnumerable());
         }
 
         public static void WriteEvent(string name, Exception exc, params object[] data)
@@ -59,7 +69,7 @@ namespace MobileDebug
             //System.Diagnostics.Debug.WriteLine(name);
             Event debugEvent = Event.GetPair(name, data);
 
-            Task.Factory.StartNew(new Action<object>(Append), debugEvent.ToDataString());
+            Append(debugEvent);
         }
 
         public static void WriteEventPair(string name, params object[] data)
@@ -69,7 +79,7 @@ namespace MobileDebug
 
         public static void WriteEventPair(string name, Exception exc, params object[] data)
         {
-            WriteEvent(name, data.Concat(GetMessagesPair(exc)));
+            WriteEventPair(name, data.Concat(GetMessagesPair(exc)));
         }
 
         private static IEnumerable<string> GetMessages(Exception e)
@@ -105,53 +115,51 @@ namespace MobileDebug
             yield return stackTrace;
         }
 
-        private static async void Append(object parameter)
+        private static void Append(Event debugEvent)
         {
-            string text = parameter.ToString();
-
-            SetIsAppending();
-
-            try
+            lock (eventsBuffer)
             {
-                StorageFile file = Id == ForegroundId ? await GetForeDebugDataFile() : await GetBackDebugDataFile();
-                await FileIO.AppendTextAsync(file, text);
+                eventsBuffer.Enqueue(debugEvent);
 
-                if (debugDataStringLength == -1) debugDataStringLength = (await FileIO.ReadTextAsync(file)).Length;
-                if (debugDataStringLength > maxDebugDataStringLength)
+                if (eventsBuffer.Count == 1) Monitor.Pulse(eventsBuffer);
+            }
+        }
+
+        private async static void Append()
+        {
+            while (true)
+            {
+                string text;
+
+                lock (eventsBuffer)
                 {
-                    string completeText = await FileIO.ReadTextAsync(file);
-                    debugDataStringLength = completeText.Length;
+                    while (eventsBuffer.Count == 0) Monitor.Wait(eventsBuffer);
 
+                    text = eventsBuffer.Dequeue().ToDataString();
+                }
+
+                try
+                {
+                    StorageFile file = Id == ForegroundId ? await GetForeDebugDataFile() : await GetBackDebugDataFile();
+                    await FileIO.AppendTextAsync(file, text);
+
+                    if (eventsBuffer.Count > 0) continue;
+
+                    if (debugDataStringLength == -1) debugDataStringLength = (await FileIO.ReadTextAsync(file)).Length;
                     if (debugDataStringLength > maxDebugDataStringLength)
                     {
-                        int surplus = completeText.Length - minDebugDataStringLength;
-                        await FileIO.WriteTextAsync(file, completeText.Remove(0, surplus));
-                        debugDataStringLength = minDebugDataStringLength;
+                        string completeText = await FileIO.ReadTextAsync(file);
+                        debugDataStringLength = completeText.Length;
+
+                        if (debugDataStringLength > maxDebugDataStringLength)
+                        {
+                            int surplus = completeText.Length - minDebugDataStringLength;
+                            await FileIO.WriteTextAsync(file, completeText.Remove(0, surplus));
+                            debugDataStringLength = minDebugDataStringLength;
+                        }
                     }
                 }
-            }
-            catch { }
-
-            UnsetIsAppending();
-        }
-
-        private static void SetIsAppending()
-        {
-            lock (lockObj)
-            {
-                if (isAppending) Monitor.Wait(lockObj);
-
-                isAppending = true;
-            }
-        }
-
-        private static void UnsetIsAppending()
-        {
-            lock (lockObj)
-            {
-                isAppending = false;
-
-                Monitor.Pulse(lockObj);
+                catch { }
             }
         }
 

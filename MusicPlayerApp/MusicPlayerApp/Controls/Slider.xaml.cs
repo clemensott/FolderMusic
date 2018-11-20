@@ -232,7 +232,7 @@ namespace FolderMusic
                 {
                     duration = Song.DefaultDuration;
                     MobileDebug.Service.WriteEvent("Slider.SetValues2", "Lib != null", Library != null,
-                        "Playlist != null", Library?.CurrentPlaylist != null, 
+                        "Playlist != null", Library?.CurrentPlaylist != null,
                         "Song != null", Library?.CurrentPlaylist?.CurrentSong != null,
                         "Duration != null", Library?.CurrentPlaylist?.CurrentSong?.DurationMilliseconds != null);
                 }
@@ -308,7 +308,7 @@ namespace FolderMusic
             timer.Interval = TimeSpan.FromMilliseconds(intervall - (PlayerPositionMilliseconds % intervall));
             timer.Start();
 
-            if (!playerPositionEnabled) return;
+            if (!playerPositionEnabled || Library?.CurrentPlaylist == null) return;
 
             IPlaylist playlist = Library.CurrentPlaylist;
             DateTime currentDateTime = DateTime.Now;

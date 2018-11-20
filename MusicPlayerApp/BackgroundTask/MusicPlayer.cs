@@ -96,9 +96,15 @@ namespace BackgroundTask
         {
             try
             {
-                TimeSpan position = BackgroundMediaPlayer.Current.Position;
-                TimeSpan duration = BackgroundMediaPlayer.Current.NaturalDuration;
-                library.CurrentPlaylist.CurrentSongPosition = position.TotalMilliseconds / duration.TotalMilliseconds;
+                if (library.CurrentPlaylist != null)
+                {
+                    TimeSpan position = BackgroundMediaPlayer.Current.Position;
+                    TimeSpan duration = BackgroundMediaPlayer.Current.NaturalDuration;
+                    MobileDebug.Service.WriteEvent("MusicPlayerPause", library?.GetHashCode(), library?.CurrentPlaylist?.Name,
+                        library?.CurrentPlaylist?.GetHashCode(),library==library?.CurrentPlaylist?.Parent,
+                        position.TotalMilliseconds / duration.TotalMilliseconds);
+                    library.CurrentPlaylist.CurrentSongPosition = position.TotalMilliseconds / duration.TotalMilliseconds;
+                }
             }
             catch (Exception e)
             {
@@ -140,11 +146,11 @@ namespace BackgroundTask
 
         public void SetCurrent()
         {
-            MobileDebug.Service.WriteEventPair("TrySet", "OpenPath: ", openSong?.Path,
-                "CurSongEmpty: ", CurrentSong?.IsEmpty, "CurSongFailed: ", CurrentSong?.Failed,
-                "IsOpen: ", CurrentSong == openSong, "CurrentSong: ", CurrentSong);
+            MobileDebug.Service.WriteEvent("TrySet", "OpenPath: " + openSong?.Path,
+                "CurSongEmpty: " + CurrentSong?.IsEmpty + "CurSongFailed: " + CurrentSong?.Failed,
+                "IsOpen: " + (CurrentSong == openSong), "CurrentSong: " + CurrentSong);
 
-            if ((CurrentSong?.IsEmpty ?? true) || (CurrentSong?.Failed ?? true)) return;
+            if (CurrentSong == null || CurrentSong.IsEmpty || CurrentSong.Failed) return;
 
             BackgroundMediaPlayer.Current.AutoPlay = library.IsPlaying && CurrentPlaylist.CurrentSongPosition == 0;
 

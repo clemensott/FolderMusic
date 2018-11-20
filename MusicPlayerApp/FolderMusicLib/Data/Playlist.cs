@@ -38,6 +38,7 @@ namespace MusicPlayer.Data
             {
                 if (value == currentSongPosition) return;
 
+                //MobileDebug.Service.WriteEvent("SetCurrentSongPosition1", Name, currentSongPosition, value);
                 var args = new CurrentSongPositionChangedEventArgs(currentSongPosition, value);
                 currentSongPosition = value;
                 CurrentSongPositionChanged?.Invoke(this, args);
@@ -57,7 +58,7 @@ namespace MusicPlayer.Data
 
                 var args = new CurrentSongChangedEventArgs(currentSong, value);
                 currentSong = value;
-                currentSongPosition = 0;
+                CurrentSongPosition = 0;
                 CurrentSongChanged?.Invoke(this, args);
             }
         }
@@ -149,12 +150,13 @@ namespace MusicPlayer.Data
         public virtual async Task Reset()
         {
             StorageFile[] files = (await GetStorageFolderFiles()).ToArray();
-            IEnumerable<Song> foundSongs = GetSongsFromStorageFiles(files).ToArray();
+            Song[] foundSongs = GetSongsFromStorageFiles(files).ToArray();
 
             if (Parent.Parent.CanceledLoading) return;
 
-            CurrentSong = foundSongs.FirstOrDefault();
-            Songs = new SongCollection(foundSongs, ShuffleType.Off, CurrentSong);
+            Song currentSong = foundSongs?.FirstOrDefault();
+            Songs = new SongCollection(foundSongs, ShuffleType.Off, currentSong);
+            CurrentSong = currentSong;
         }
 
         private IEnumerable<Song> GetSongsFromStorageFiles(IEnumerable<StorageFile> files)
@@ -220,7 +222,8 @@ namespace MusicPlayer.Data
         {
             Playlist playlist = new Playlist();
             playlist.AbsolutePath = AbsolutePath;
-            playlist.currentSong = CurrentSong;
+            playlist.CurrentSong = CurrentSong;
+            playlist.CurrentSongPosition = CurrentSongPosition;
             playlist.Loop = Loop;
             playlist.Name = Name;
             playlist.Songs = Songs.ToSimple();
@@ -285,8 +288,9 @@ namespace MusicPlayer.Data
 
         public void ReadXml(XmlReader reader)
         {
+            double currentSongPosition = double.Parse(reader.GetAttribute("CurrentSongPosition") ?? "0");
+
             AbsolutePath = reader.GetAttribute("AbsolutePath") ?? emptyOrLoadingPath;
-            CurrentSongPosition = double.Parse(reader.GetAttribute("CurrentSongPosition") ?? "0");
             Name = reader.GetAttribute("Name") ?? emptyName;
             Loop = (LoopType)Enum.Parse(typeof(LoopType), reader.GetAttribute("Loop") ?? LoopType.Off.ToString());
 
@@ -295,13 +299,13 @@ namespace MusicPlayer.Data
                 reader.GetAttribute("Shuffle") ?? ShuffleType.Off.ToString());
 
             reader.ReadStartElement();
+
             ISongCollection songs = reader.Name == typeof(SongCollection).Name ?
                 (ISongCollection)new SongCollection() : new SimpleSongCollection();
 
-            XmlConverter.Deserialize(songs, reader.ReadOuterXml());
-
+            Songs = XmlConverter.Deserialize(songs, reader.ReadOuterXml());
             CurrentSong = songs.FirstOrDefault(s => s.Path == currentSongPath) ?? songs.FirstOrDefault();
-            Songs = songs;
+            CurrentSongPosition = currentSongPosition;
         }
 
         public void WriteXml(XmlWriter writer)

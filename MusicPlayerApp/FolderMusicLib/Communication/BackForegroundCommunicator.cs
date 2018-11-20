@@ -519,7 +519,7 @@ namespace MusicPlayer.Communication
 
             if (!library.IsForeground) SendLibrary();
 
-            OnPlayStateChanged(library, new PlayStateChangedEventArgs(library.IsPlaying));
+            if (library.IsPlaying) OnPlayStateChanged(library, new PlayStateChangedEventArgs(library.IsPlaying));
         }
 
 
@@ -556,7 +556,6 @@ namespace MusicPlayer.Communication
 
         private void ReceiveLibrary(ValueSet valueSet, string value)
         {
-
             ILibrary receivedLibrary = new Library(library.IsForeground);
 
             if (value != libraryEmptyValue) receivedLibrary.ReadXml(XmlConverter.GetReader(value));

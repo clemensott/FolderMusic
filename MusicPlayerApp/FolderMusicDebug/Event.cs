@@ -39,7 +39,7 @@ namespace MobileDebug
 
         internal Event(string name, IEnumerable data) : this(name)
         {
-            Data = data.OfType<object>().Select(x => ToString(x)).ToArray();
+            Data = data.Cast<object>().Select(x => ToString(x)).ToArray();
         }
 
         private Event(string name, IEnumerable<string> data) : this(name)
@@ -126,7 +126,7 @@ namespace MobileDebug
                 return GetDateTimeString(value);
             }
 
-            if (text.Length > maxLengthOfOneData) return text.Remove(maxLengthOfOneData);
+            if (text.Length > maxLengthOfOneData) return text.Remove(maxLengthOfOneData) + "[...]";
 
             return text;
         }

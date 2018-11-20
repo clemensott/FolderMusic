@@ -77,12 +77,16 @@ namespace FolderMusic
 
         private void Subscribe(Song song)
         {
+            if (song == null) return;
+
             song.ArtistChanged += OnArtistChanged;
             song.TitleChanged += OnTitleChanged;
         }
 
         private void Unsubscribe(Song song)
         {
+            if (song == null) return;
+
             song.ArtistChanged -= OnArtistChanged;
             song.TitleChanged -= OnTitleChanged;
         }

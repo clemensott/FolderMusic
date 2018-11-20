@@ -11,7 +11,7 @@ namespace BackgroundTask
     public sealed class BackgroundAudioTask : IBackgroundTask
     {
         private const string completeFileName = "Data.xml", backupFileName = "Data.bak",
-              simpleFileName = "SimpleData.xml", currentSongFileName = "CurrentPlaySong.xml";
+              simpleFileName = "SimpleData.xml", currentSongFileName = "CurrentSong.xml";
 
         private static BackgroundAudioTask task;
 
@@ -58,9 +58,10 @@ namespace BackgroundTask
             musicPlayer = new MusicPlayer(smtc, library);
             ringer = new Ringer(this, library);
 
-            Subscribe(task);
+            await saveLoad.LoadComplete(library);
+            saveLoad.Add(library);
 
-            await saveLoad.LoadComplete();
+            Subscribe(task);
 
             BackgroundPlayer.SetCurrent();
 

@@ -17,6 +17,8 @@ namespace FolderMusic.Converters
 
             source.SongsChanged += Source_SongsChanged;
             Subscribe(source.Songs);
+
+            foreach (Song song in source.Songs) Add(song);
         }
 
         private void Subscribe(ISongCollection songs)

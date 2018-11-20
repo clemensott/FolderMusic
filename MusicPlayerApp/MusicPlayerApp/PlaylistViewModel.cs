@@ -51,6 +51,18 @@ namespace FolderMusic
             set { if (Source != null) Source.Loop = value; }
         }
 
+        public ShuffleType Shuffle
+        {
+            get { return Songs?.Shuffle?.Type ?? ShuffleType.Off; }
+            set
+            {
+                if (Songs?.Shuffle != null && value == Songs.Shuffle.Type) return;
+
+                Songs.SetShuffleType(value);
+                OnPropertyChanged("Shuffle");
+            }
+        }
+
         public ISongCollection Songs { get { return Source?.Songs; } }
 
         public IPlaylist Source
@@ -154,7 +166,6 @@ namespace FolderMusic
         private void OnShuffleChanged(object sender, ShuffleChangedEventArgs args)
         {
             OnPropertyChanged("Shuffle");
-            OnPropertyChanged("ShuffleSongs");
         }
 
         private void UpdateCurrentSong()

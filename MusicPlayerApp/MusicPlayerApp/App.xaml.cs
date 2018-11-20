@@ -77,11 +77,14 @@ namespace FolderMusic
                 //if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
                     // TODO: Zustand von zuvor angehaltener Anwendung laden
-                    IEnumerable<HistoricFrame> frameHistory = await ReadHistoricFrames();
+                    //IEnumerable<HistoricFrame> frameHistory = await ReadHistoricFrames();
 
-                    frameHistoryService = new FrameHistoryService(frameHistory, rootFrame, library);
+                    //frameHistoryService = new FrameHistoryService(frameHistory, rootFrame, library);
                 }
-                //else frameHistoryService = new FrameHistoryService(Enumerable.Empty<HistoricFrame>(), rootFrame, library);
+                //else
+                {
+                    frameHistoryService = new FrameHistoryService(Enumerable.Empty<HistoricFrame>(), rootFrame, library);
+                }
 
                 Window.Current.Content = rootFrame;
             }

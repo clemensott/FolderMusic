@@ -67,6 +67,8 @@ namespace MusicPlayer.Data.Simple
             {
                 list.Add(song);
             }
+
+            SetShuffleType(actualShuffleSongs.Type);
         }
 
         public SimpleSongCollection(CurrentPlaySong currentPlaySong)
@@ -126,7 +128,7 @@ namespace MusicPlayer.Data.Simple
 
         public void WriteXml(XmlWriter writer)
         {
-            writer.WriteAttributeString("Shuffle", Shuffle.Type.ToString());
+            writer.WriteAttributeString("Shuffle", Enum.GetName(typeof(ShuffleType), Shuffle.Type));
 
             foreach (Song song in this)
             {

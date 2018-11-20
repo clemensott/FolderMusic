@@ -74,11 +74,24 @@ namespace ConsoleTesten
             Console.WriteLine("Diffrent: " + prePath);
         }
 
+        private static void Print(params object[] data)
+        {
+            Print(data.AsEnumerable());
+        }
+
+        private static void Print(IEnumerable data)
+        {
+            foreach (string line in data.Cast<object>().Select(x => x?.ToString() ?? "nullRef").ToArray()) Console.WriteLine(line);
+        }
+
         static void Main(string[] args)
         {
             //Folder(path1);
             //Console.WriteLine("Fertig...");
             //Console.ReadLine();
+
+            Print("hsadkjf", null, null, "kljasdhfsdl", 4, null, 4, 67, null, "kklsdhf", null, null, null);
+            return;
 
             var l = new List<string>
             {

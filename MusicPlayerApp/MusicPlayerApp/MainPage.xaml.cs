@@ -48,6 +48,7 @@ namespace FolderMusic
             Frame.Navigate(typeof(LoadingPage), library);
             await library.Reset();
             Frame.GoBack();
+            AutoSaveLoad.CheckLibrary(library, "ResetedOnLoaded");
         }
 
         private async void SkippedSongs_SkippedSong(SkipSongs sender)
@@ -170,8 +171,10 @@ namespace FolderMusic
             }
         }
 
-        private void AbbComPing_Click(object sender, RoutedEventArgs e)
+        private async void AbbComPing_Click(object sender, RoutedEventArgs e)
         {
+            StorageFile file = await KnownFolders.VideosLibrary.CreateFileAsync("Data.xml", CreationCollisionOption.ReplaceExisting);
+            await FileIO.WriteTextAsync(file, XmlConverter.Serialize(library));
         }
 
         private async void AbbComReset_Click(object sender, RoutedEventArgs e)
@@ -185,7 +188,7 @@ namespace FolderMusic
 
         private void AbbTest1_Click(object sender, RoutedEventArgs e)
         {
-            AutoSaveLoad.CheckLibrary(library);
+            AutoSaveLoad.CheckLibrary(library, "Abb");
         }
 
         public static string LoadText(string filenameWithExtention)

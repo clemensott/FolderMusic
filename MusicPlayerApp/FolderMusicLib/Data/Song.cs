@@ -239,6 +239,7 @@ namespace MusicPlayer.Data
             Title = reader.GetAttribute("Title");
             Artist = reader.GetAttribute("Artist");
             Path = reader.GetAttribute("Path");
+            failed = false;
         }
 
         public void WriteXml(XmlWriter writer)

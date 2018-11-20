@@ -68,8 +68,8 @@ namespace MusicPlayer.Data
             newCurrentSong = oldCurrentSong = Parent.CurrentSong;
             int currentSongIndex = list.IndexOf(oldCurrentSong);
 
-            Song[] addArray = adds.ToArray();
-            Song[] removeArray = removes.ToArray();
+            Song[] removeArray = removes?.ToArray() ?? new Song[0];
+            Song[] addArray = adds?.ToArray() ?? new Song[0];
             Song[] newList = list.Except(removeArray).Concat(addArray).ToArray();
 
             ChangeCollectionItem<Song>[] removed = ChangeCollectionItem<Song>.GetRemovedChanged(removeArray, list).ToArray();
@@ -83,6 +83,13 @@ namespace MusicPlayer.Data
                 if (currentSongIndex >= newList.Length) currentSongIndex = newList.Length - 1;
 
                 newCurrentSong = list.ElementAtOrDefault(currentSongIndex);
+            }
+
+            foreach (ChangeCollectionItem<Song> change in removed) list.Remove(change.Item);
+            foreach (ChangeCollectionItem<Song> change in added)
+            {
+                change.Item.Parent = this;
+                list.Insert(change.Index, change.Item);
             }
 
             var args = new SongCollectionChangedEventArgs(added, removed);
@@ -118,11 +125,11 @@ namespace MusicPlayer.Data
             IShuffleCollection shuffle = GetShuffleType(shuffleType);
 
             reader.ReadStartElement();
-            List<Song> list = XmlConverter.DeserializeList<Song>(reader, "Song").ToList();
+            list = XmlConverter.DeserializeList<Song>(reader, "Song").ToList();
+
+            foreach (Song song in list) song.Parent = this;
 
             shuffle.ReadXml(XmlConverter.GetReader(reader.ReadOuterXml()));
-
-            this.list = list;
             Shuffle = shuffle;
         }
 
@@ -136,6 +143,10 @@ namespace MusicPlayer.Data
                 song.WriteXml(writer);
                 writer.WriteEndElement();
             }
+
+            writer.WriteStartElement("Shuffle");
+            Shuffle.WriteXml(writer);
+            writer.WriteEndElement();
         }
 
         public void SetShuffleType(ShuffleType type)
