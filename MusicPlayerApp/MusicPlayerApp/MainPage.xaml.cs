@@ -1,4 +1,5 @@
-﻿using MusicPlayer;
+﻿using FolderMusic.ViewModels;
+using MusicPlayer;
 using MusicPlayer.Data;
 using System;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace FolderMusic
     {
         private bool checkedSkippedSongs, loopImageEntered = false, shuffleImageEntered = false;
         private ILibrary library;
-        private ViewModel viewModel;
+        private MainViewModel viewModel;
 
         private SongsView currentPlaylistSongListView;
 
@@ -32,7 +33,7 @@ namespace FolderMusic
             if ((ILibrary)e.Parameter != library)
             {
                 library = (ILibrary)e.Parameter;
-                viewModel = new ViewModel(library);
+                viewModel = new MainViewModel(library);
 
                 DataContext = viewModel;
 
@@ -51,9 +52,9 @@ namespace FolderMusic
             AutoSaveLoad.CheckLibrary(library, "ResetedOnLoaded");
         }
 
-        private async void SkippedSongs_SkippedSong(SkipSongs sender)
+        private async void SkippedSongs_SkippedSong(object sender, EventArgs e)
         {
-            if (!SkipSongsPage.Open && await sender.HasSongs()) Frame.Navigate(typeof(SkipSongsPage), sender);
+            //if (!SkipSongsPage.Open && await sender.HasSongs()) Frame.Navigate(typeof(SkipSongsPage), sender);
         }
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)

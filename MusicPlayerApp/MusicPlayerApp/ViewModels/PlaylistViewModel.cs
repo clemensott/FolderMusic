@@ -6,31 +6,34 @@ using System.ComponentModel;
 
 namespace FolderMusic.ViewModels
 {
-    class PlaylistViewModel : INotifyPropertyChanged
+    public class PlaylistViewModel : INotifyPropertyChanged
     {
-        private IPlaylist playlist;
         private PlaylistSubscriptionsHandler psh;
 
-        public string Name { get { return playlist?.Name ?? "Null"; } }
+        public IPlaylist Base { get; private set; }
 
-        public string AbsolutePath { get { return playlist?.AbsolutePath ?? "Null"; } }
+        public string Name { get { return Base?.Name ?? "Null"; } }
+
+        public string AbsolutePath { get { return Base?.AbsolutePath ?? "Null"; } }
 
         public Song CurrentSong
         {
-            get { return playlist?.CurrentSong; }
-            set { if (playlist != null) playlist.CurrentSong = value; }
+            get { return Base?.CurrentSong; }
+            set { if (Base != null) Base.CurrentSong = value; }
         }
 
         public ISongCollection Songs
         {
-            get { return playlist?.Songs; }
-            set { if (playlist != null) playlist.Songs = value; }
+            get { return Base?.Songs; }
+            set { if (Base != null) Base.Songs = value; }
         }
+
+        public int SongsCount { get { return Base?.Songs?.Count ?? 0; } }
 
         public LoopType Loop
         {
-            get { return playlist?.Loop ?? LoopType.Off; }
-            set { if (playlist != null) playlist.Loop = value; }
+            get { return Base?.Loop ?? LoopType.Off; }
+            set { if (Base != null) Base.Loop = value; }
         }
 
         public ShuffleType Shuffle
@@ -41,13 +44,14 @@ namespace FolderMusic.ViewModels
 
         public PlaylistViewModel(IPlaylist playlist)
         {
-            this.playlist = playlist;
+            this.Base = playlist;
             psh = new PlaylistSubscriptionsHandler();
 
             psh.CurrentSongChanged += OnCurrentSongChanged;
             psh.LoopChanged += OnLoopChanged;
             psh.ShuffleChanged += OnShuffleChanged;
             psh.SongsPropertyChanged += OnSongsPropertyChanged;
+            psh.SongCollectionChanged += OnSongCollectionChanged;
 
             psh.Subscribe(playlist);
         }
@@ -62,15 +66,21 @@ namespace FolderMusic.ViewModels
             OnPropertyChanged(nameof(Loop));
         }
 
-        private void OnSongsPropertyChanged(object sender, EventArgs e)
-        {
-            OnPropertyChanged(nameof(Songs));
-            OnPropertyChanged(nameof(Shuffle));
-        }
-
         private void OnShuffleChanged(object sender, EventArgs e)
         {
             OnPropertyChanged(nameof(Shuffle));
+        }
+
+        private void OnSongsPropertyChanged(object sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(Songs));
+            OnPropertyChanged(nameof(SongsCount));
+            OnPropertyChanged(nameof(Shuffle));
+        }
+
+        private void OnSongCollectionChanged(object sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(SongsCount));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

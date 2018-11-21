@@ -19,33 +19,32 @@
         <Hub Grid.Row="0" Name="hub" Header="FolderMusic" Style="{StaticResource HHeader}" 
              Margin="0,5,0,0" HorizontalAlignment="Stretch" DoubleTapped="hub_DoubleTapped">
             <HubSection Background="Transparent" Margin="0,-10,0,0" HorizontalAlignment="Stretch"
-                        DataContext="{Binding CurrentPlaylist,Converter={StaticResource playlistViewModelConverter}}"
-                        Header="{Binding Name}" Style="{StaticResource HSHeader}">
+                        DataContext="{Binding CurrentPlaylist}" Header="{Binding Name}" Style="{StaticResource HSHeader}">
                 <DataTemplate>
-                    <local:ShuffleSongsView Margin="0,-30,0,0" HorizontalAlignment="Stretch" Source="{Binding Source}"
+                    <local:ShuffleSongsView Margin="0,-30,0,0" HorizontalAlignment="Stretch" Source="{Binding Songs}"
                                             DataContextChanged="SongListView_DataContextChanged"/>
                 </DataTemplate>
             </HubSection>
 
             <HubSection Header="Playlists" Style="{StaticResource HSHeader}" Margin="0,-10,0,0">
                 <DataTemplate>
-                    <local:PlaylistsView Margin="0,-30,0,0" Source="{Binding Library}"/>
+                    <local:PlaylistsView Margin="0,-30,0,0" Playlists="{Binding Playlists}"
+                                         CurrentPlaylist="{Binding SelectedPlaylist,Mode=TwoWay}"/>
                 </DataTemplate>
             </HubSection>
         </Hub>
 
-        <Grid Grid.Row="1" Tapped="CurrentSong_Tapped" HorizontalAlignment="Stretch"
-              DataContext="{Binding CurrentPlaylist,Converter={StaticResource playlistViewModelConverter}}">
+        <Grid Grid.Row="1" Tapped="CurrentSong_Tapped" HorizontalAlignment="Stretch" DataContext="{Binding CurrentSong}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="{Binding CurrentSongTitle}" FontSize="25" Margin="10,0" 
+            <TextBlock Grid.Row="0" Text="{Binding Title}" FontSize="25" Margin="10,0" 
                        TextWrapping="Wrap" HorizontalAlignment="Stretch"
                        Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"/>
 
-            <TextBlock Grid.Row="1" Text="{Binding CurrentSongArtist}" FontSize="20" Margin="10,0"
+            <TextBlock Grid.Row="1" Text="{Binding Artist}" FontSize="20" Margin="10,0"
                        FontStyle="Italic" TextWrapping="Wrap" HorizontalAlignment="Stretch"
                        Foreground="{ThemeResource ApplicationPointerOverForegroundThemeBrush}"/>
         </Grid>
@@ -57,8 +56,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0"
-                  DataContext="{Binding CurrentPlaylist,Converter={StaticResource playlistViewModelConverter}}">
+            <Grid Grid.Column="0">
                 <Grid.Resources>
                     <Storyboard x:Name="ShuffleImageTap">
                         <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateY)"
@@ -81,8 +79,7 @@
 
             <local:Slider Grid.Column="1" Height="60" Library="{Binding Library}" Player="{Binding BackgroundPlayer}"/>
 
-            <Grid Grid.Column="2"
-                  DataContext="{Binding CurrentPlaylist,Converter={StaticResource playlistViewModelConverter}}">
+            <Grid Grid.Column="2">
                 <Grid.Resources>
                     <Storyboard x:Name="LoopImageTap">
                         <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateY)" 

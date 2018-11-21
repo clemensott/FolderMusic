@@ -120,7 +120,7 @@ namespace MusicPlayer.Data
 
             try
             {
-                StorageFile file = await GetStorageFileAsync();
+                StorageFile file = await StorageFile.GetFileFromPathAsync(Path);
                 await SetTitleAndArtist(file);
             }
             catch (Exception e)
@@ -151,7 +151,8 @@ namespace MusicPlayer.Data
         {
             try
             {
-                MusicProperties properties = await (await GetStorageFileAsync()).Properties.GetMusicPropertiesAsync();
+                StorageFile file = await StorageFile.GetFileFromPathAsync(Path);
+                MusicProperties properties = await file.Properties.GetMusicPropertiesAsync();
 
                 if (properties == null) return;
 

@@ -20,12 +20,12 @@ namespace FolderMusic
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            library = e.Parameter as ILibrary;
+            //library = e.Parameter as ILibrary;
         }
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            library.CancelLoading();
+            library?.CancelLoading();
 
             base.OnNavigatingFrom(e);
         }

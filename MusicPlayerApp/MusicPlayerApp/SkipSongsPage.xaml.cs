@@ -1,4 +1,5 @@
 ﻿using MusicPlayer.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Windows.UI.Xaml;
@@ -38,7 +39,7 @@ namespace FolderMusic
             base.OnNavigatedFrom(e);
         }
 
-        private void List_SkippedSong(SkipSongs sender)
+        private void List_SkippedSong(object sender, EventArgs e)
         {
             IList<object> selectedItems = lbxSongs.SelectedItems;
 

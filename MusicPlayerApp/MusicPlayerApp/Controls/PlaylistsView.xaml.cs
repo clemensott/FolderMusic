@@ -1,5 +1,6 @@
-﻿using MusicPlayer.Data;
+﻿using FolderMusic.ViewModels;
 using System;
+using System.Collections.Generic;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -11,27 +12,43 @@ namespace FolderMusic
 {
     public sealed partial class PlaylistsView : UserControl
     {
-        public static readonly DependencyProperty SourceProperty =
-            DependencyProperty.Register("Source", typeof(ILibrary), typeof(PlaylistsView),
-                new PropertyMetadata(null, new PropertyChangedCallback(OnSourcePropertyChanged)));
+        public static readonly DependencyProperty CurrentPlaylistProperty =
+            DependencyProperty.Register("CurrentPlaylist", typeof(PlaylistViewModel), typeof(PlaylistsView),
+                new PropertyMetadata(null, new PropertyChangedCallback(OnCurrentPlaylistPropertyChanged)));
 
-        private static void OnSourcePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        private static void OnCurrentPlaylistPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             var s = (PlaylistsView)sender;
-            var oldLibrary = (ILibrary)e.OldValue;
-            var newLibrary = (ILibrary)e.NewValue;
+            var value = (PlaylistViewModel)e.NewValue;
 
-            s.Unsubscribe(oldLibrary);
-            s.Subscribe(newLibrary);
-            s.SetItemsSourceSafe();
+            s.SetSelectedPlaylist();
+        }
+
+        public static readonly DependencyProperty PlaylistsProperty =
+            DependencyProperty.Register("Playlists", typeof(IEnumerable<PlaylistViewModel>), typeof(PlaylistsView),
+                new PropertyMetadata(null, new PropertyChangedCallback(OnPlaylistsPropertyChanged)));
+
+        private static void OnPlaylistsPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            var s = (PlaylistsView)sender;
+            var value = (IEnumerable<PlaylistViewModel>)e.NewValue;
+
+            s.lbxPlaylists.ItemsSource = value;
+            s.SetSelectedPlaylist();
         }
 
         private bool isPointerOnDetailIcon;
 
-        public ILibrary Source
+        public PlaylistViewModel CurrentPlaylist
         {
-            get { return (ILibrary)GetValue(SourceProperty); }
-            set { SetValue(SourceProperty, value); }
+            get { return (PlaylistViewModel)GetValue(CurrentPlaylistProperty); }
+            set { SetValue(CurrentPlaylistProperty, value); }
+        }
+
+        public IEnumerable<PlaylistViewModel> Playlists
+        {
+            get { return (IEnumerable<PlaylistViewModel>)GetValue(PlaylistsProperty); }
+            set { SetValue(PlaylistsProperty, value); }
         }
 
         public PlaylistsView()
@@ -41,44 +58,6 @@ namespace FolderMusic
             isPointerOnDetailIcon = false;
         }
 
-        private void Subscribe(ILibrary library)
-        {
-            if (library == null) return;
-
-            if (!library.IsLoaded) library.Loaded += OnSourceLoaded;
-            else
-            {
-                library.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
-                library.PlaylistsChanged += OnPlaylistsChanged;
-            }
-        }
-
-        private void Unsubscribe(ILibrary library)
-        {
-            if (library == null) return;
-
-            library.Loaded -= OnSourceLoaded;
-            library.CurrentPlaylistChanged -= OnCurrentPlaylistChanged;
-        }
-
-        private void OnSourceLoaded(object sender, EventArgs args)
-        {
-            Unsubscribe(Source);
-            Subscribe(Source);
-
-            SetItemsSourceSafe();
-        }
-
-        private void OnCurrentPlaylistChanged(object sender, CurrentPlaylistChangedEventArgs e)
-        {
-            SetSelectedPlaylistSafe();
-        }
-
-        private void OnPlaylistsChanged(object sender, PlaylistsChangedEventArgs e)
-        {
-            SetItemsSourceSafe();
-        }
-
         private void SetSelectedPlaylistSafe()
         {
             Utils.DoSafe(SetSelectedPlaylist);
@@ -86,37 +65,22 @@ namespace FolderMusic
 
         private void SetSelectedPlaylist()
         {
-            lbxPlaylists.SelectedItem = Source?.CurrentPlaylist;
+            lbxPlaylists.SelectedItem = CurrentPlaylist;
         }
 
-        private void SetItemsSourceSafe()
-        {
-            Utils.DoSafe(SetItemsSource);
-        }
-
-        private void SetItemsSource()
-        {
-            if (Source == null) return;
-
-            lbxPlaylists.ItemsSource = new PlaylistsUpdateCollection(Source.Playlists);
-            SetSelectedPlaylist();
-        }
-
-        private void ItemsSource_UpdateFinished(IUpdateSelectedItemCollection<IPlaylist> sender)
+        private void ItemsSource_UpdateFinished(IUpdateSelectedItemCollection<PlaylistViewModel> sender)
         {
             SetSelectedPlaylistSafe();
         }
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if ((Source?.Playlists?.Count ?? 0) == 0) return;
+            PlaylistViewModel selectedPlaylist = lbxPlaylists.SelectedItem as PlaylistViewModel;
 
-            IPlaylist selectedPlaylist = lbxPlaylists.SelectedItem as IPlaylist;
-
-            if (!isPointerOnDetailIcon && selectedPlaylist != null) Source.CurrentPlaylist = selectedPlaylist;
-            else if (lbxPlaylists.Items.Contains(Source.CurrentPlaylist))
+            if (!isPointerOnDetailIcon && selectedPlaylist != null) CurrentPlaylist = selectedPlaylist;
+            else if (lbxPlaylists.Items.Contains(CurrentPlaylist))
             {
-                lbxPlaylists.SelectedItem = Source.CurrentPlaylist;
+                lbxPlaylists.SelectedItem = CurrentPlaylist;
             }
         }
 
@@ -127,60 +91,46 @@ namespace FolderMusic
 
         private async void ResetPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            if (Source == null) return;
+            PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
 
-            GetFrame().Navigate(typeof(LoadingPage), Source);
-
-            IPlaylist playlist = (sender as MenuFlyoutItem).DataContext as IPlaylist;
-            await playlist.Reset();
-
+            GetFrame().Navigate(typeof(LoadingPage), playlist.Base.Parent.Parent);
+            await playlist.Base.Reset();
             GetFrame().GoBack();
         }
 
         private async void UpdatePlaylist_Click(object sender, RoutedEventArgs e)
         {
-            if (Source == null) return;
+            PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
 
-            GetFrame().Navigate(typeof(LoadingPage), Source);
-
-            IPlaylist playlist = (sender as MenuFlyoutItem).DataContext as IPlaylist;
-            await playlist.Update();
-
+            GetFrame().Navigate(typeof(LoadingPage), playlist.Base.Parent.Parent);
+            await playlist.Base.Update();
             GetFrame().GoBack();
         }
 
         private async void ResetSongsPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            if (Source == null) return;
+            PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
 
-            GetFrame().Navigate(typeof(LoadingPage), Source);
-
-            IPlaylist playlist = (sender as MenuFlyoutItem).DataContext as IPlaylist;
-            await playlist.ResetSongs();
-
+            GetFrame().Navigate(typeof(LoadingPage), playlist.Base.Parent.Parent);
+            await playlist.Base.ResetSongs();
             GetFrame().GoBack();
         }
 
         private async void SearchForNewSongsPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            if (Source == null) return;
+            PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
 
-            GetFrame().Navigate(typeof(LoadingPage), Source);
-
-            IPlaylist playlist = (sender as MenuFlyoutItem).DataContext as IPlaylist;
-            await playlist.AddNew();
-
+            GetFrame().Navigate(typeof(LoadingPage), playlist.Base.Parent.Parent);
+            await playlist.Base.AddNew();
             GetFrame().GoBack();
         }
 
         private void PlayPlaylist_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            if (Source == null) return;
+            PlaylistViewModel playlist = (sender as Image).DataContext as PlaylistViewModel;
 
-            IPlaylist playlist = (sender as Image).DataContext as IPlaylist;
-
-            Source.CurrentPlaylist = playlist;
-            Source.IsPlaying = true;
+            CurrentPlaylist = playlist;
+            CurrentPlaylist.Base.Parent.Parent.CurrentPlaylist = CurrentPlaylist.Base;
         }
 
         private void DetailPlaylist_Tapped(object sender, TappedRoutedEventArgs e)
@@ -205,14 +155,14 @@ namespace FolderMusic
 
         private void DeletePlaylist_Click(object sender, RoutedEventArgs e)
         {
-            IPlaylist playlist = (sender as MenuFlyoutItem).DataContext as IPlaylist;
+            PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
 
-            Source?.Playlists.Remove(playlist);
+            playlist.Base.Parent.Remove(playlist.Base);
         }
 
         private void Playlist_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            if (Source != null) Source.CurrentPlaylist = (sender as Grid).DataContext as IPlaylist;
+            CurrentPlaylist = (sender as Grid).DataContext as PlaylistViewModel;
         }
     }
 }

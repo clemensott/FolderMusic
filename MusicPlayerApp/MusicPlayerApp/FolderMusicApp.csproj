@@ -90,7 +90,6 @@
     <Compile Include="Converters\LoopIconConverter.cs" />
     <Compile Include="Converters\MusicPropertiesListConverter.cs" />
     <Compile Include="Converters\PlayIconConverter.cs" />
-    <Compile Include="Converters\PlaylistViewModelConverter.cs" />
     <Compile Include="Converters\PlayPauseIconConverter.cs" />
     <Compile Include="Converters\PlayPauseTextConverter.cs" />
     <Compile Include="Converters\RelativePathConverter.cs" />

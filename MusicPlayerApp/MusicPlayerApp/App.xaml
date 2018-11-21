@@ -35,7 +35,6 @@
             </Setter>
         </Style>
 
-        <con:PlaylistViewModelConverter x:Key="playlistViewModelConverter"/>
         <con:ShuffleIconConverter x:Key="shuffleConverter"/>
         <con:LoopIconConverter x:Key="loopConverter"/>
         <con:PlayPauseIconConverter x:Key="playPauseIconConverter"/>

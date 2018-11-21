@@ -246,7 +246,7 @@ namespace FolderMusic
 
             try
             {
-                StorageFile file = await song.GetStorageFileAsync();
+                StorageFile file = await StorageFile.GetFileFromPathAsync(song.Path);
 
                 await file.DeleteAsync();
                 Source.Songs.Remove(song);
