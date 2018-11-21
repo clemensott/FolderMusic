@@ -9,7 +9,7 @@ using Windows.Media.Playback;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
 
-namespace FolderMusic
+namespace FolderMusic.ViewModels
 {
     public class ViewModel : INotifyPropertyChanged
     {
@@ -21,19 +21,15 @@ namespace FolderMusic
 
         public ILibrary Library { get; private set; }
 
-        public IPlaylist CurrentPlaylist { get { return Library.CurrentPlaylist; } }
+        public CurrentPlaylistViewModel CurrentPlaylist { get; private set; }
 
-        public string CurrentPlaylistName { get { return CurrentPlaylist?.Name ?? "Empty"; } }
+        public CurrentSongViewModel CurrentSong { get; private set; }
 
         public BitmapImage CurrentPlaylistShuffleIcon { get { return GetCurrentPlaylistShuffleIcon(); } }
 
         public BitmapImage CurrentPlaylistLoopIcon { get { return GetCurrentPlaylistLoopIcon(); } }
 
         public MediaPlayer BackgroundPlayer { get { return BackgroundMediaPlayer.Current; } }
-
-        public string CurrentSongTitle { get { return CurrentPlaylist?.CurrentSong?.Title ?? string.Empty; } }
-
-        public string CurrentSongArtist { get { return CurrentPlaylist?.CurrentSong?.Artist ?? string.Empty; } }
 
         public ViewModel(ILibrary library)
         {

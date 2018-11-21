@@ -1,4 +1,5 @@
 ﻿using MusicPlayer.Data.Shuffle;
+using MusicPlayer.Data.SubscriptionsHandler;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,8 @@ namespace MusicPlayer.Data
 {
     public class AutoSaveLoad
     {
+        private LibrarySubscriptionsHandler sh;
+
         public string Complete { get; private set; }
 
         public string Backup { get; private set; }
@@ -23,272 +26,169 @@ namespace MusicPlayer.Data
             Backup = backup;
             Simple = simple;
             CurrentSong = currentSong;
+
+            sh = new LibrarySubscriptionsHandler();
+
+            sh.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
+            sh.PlaylistsPropertyChanged += OnPlaylistsPropertyChanged;
+            sh.PlaylistCollectionChanged += OnPlaylistCollectionChanged;
+            sh.AllPlaylists.LoopChanged += AllPlaylists_LoopChanged;
+            sh.AllPlaylists.ShuffleChanged += AllPlaylists_ShuffleChanged;
+            sh.AllPlaylists.ShuffleCollectionChanged += AllPlaylists_ShuffleCollectionChanged;
+            sh.AllPlaylists.SongsPropertyChanged += AllPlaylists_SongsPropertyChanged;
+            sh.AllPlaylists.SongCollectionChanged += AllPlaylists_SongCollectionChanged;
+            sh.AllPlaylists.AllSongs.SomethingChanged += AllPlaylists_AllSongs_SomethingChanged;
+            sh.CurrentPlaylist.CurrentSongChanged += CurrentPlaylist_CurrentSongChanged;
+            sh.CurrentPlaylist.CurrentSongPositionChanged += CurrentPlaylist_CurrentSongPositionChanged;
+            sh.CurrentPlaylist.AllSongs.SomethingChanged += CurrentPlaylist_AllSongs_SomethingChanged;
+            sh.CurrentPlaylist.CurrentSong.SomethingChanged += CurrentPlaylist_CurrentSong_SomethingChanged;
+        }
+
+        private async void OnCurrentPlaylistChanged(object sender, SubscriptionsEventArgs<ILibrary, CurrentPlaylistChangedEventArgs> e)
+        {
+            await SaveAll(e.Source);
+        }
+
+        private async void OnPlaylistsPropertyChanged(object sender, SubscriptionsEventArgs<ILibrary, PlaylistsChangedEventArgs> e)
+        {
+            await SaveSimple(e.Source);
+            await SaveComplete(e.Source);
+        }
+
+        private async void OnPlaylistCollectionChanged(object sender, SubscriptionsEventArgs<IPlaylistCollection, PlaylistCollectionChangedEventArgs> e)
+        {
+            await SaveSimple(e.Source.Parent);
+            await SaveComplete(e.Source.Parent);
+        }
+
+        private async void AllPlaylists_LoopChanged(object sender, SubscriptionsEventArgs<IPlaylist, LoopChangedEventArgs> e)
+        {
+            await SaveSimple(e.Source.Parent.Parent);
+            await SaveComplete(e.Source.Parent.Parent);
+        }
+
+        private async void AllPlaylists_ShuffleChanged(object sender, SubscriptionsEventArgs<ISongCollection, ShuffleChangedEventArgs> e)
+        {
+            await SaveSimple(e.Source.Parent.Parent.Parent);
+            await SaveComplete(e.Source.Parent.Parent.Parent);
+        }
+
+        private async void AllPlaylists_ShuffleCollectionChanged(object sender, SubscriptionsEventArgs<IShuffleCollection, ShuffleCollectionChangedEventArgs> e)
+        {
+            await SaveSimple(e.Source.Parent.Parent.Parent.Parent);
+            await SaveComplete(e.Source.Parent.Parent.Parent.Parent);
+        }
+
+        private async void AllPlaylists_SongsPropertyChanged(object sender, SubscriptionsEventArgs<IPlaylist, SongsChangedEventArgs> e)
+        {
+            await SaveComplete(e.Source.Parent.Parent);
+        }
+
+        private async void AllPlaylists_SongCollectionChanged(object sender, SubscriptionsEventArgs<ISongCollection, SongCollectionChangedEventArgs> e)
+        {
+            await SaveComplete(e.Source.Parent.Parent.Parent);
+        }
+
+        private async void AllPlaylists_AllSongs_SomethingChanged(object sender, SubscriptionsEventArgs<Song, EventArgs> e)
+        {
+            await SaveSimple(e.Source.Parent.Parent.Parent.Parent);
+            await SaveComplete(e.Source.Parent.Parent.Parent.Parent);
+        }
+
+        private async void CurrentPlaylist_CurrentSongChanged(object sender, SubscriptionsEventArgs<IPlaylist, CurrentSongChangedEventArgs> e)
+        {
+            await SaveSimple(e.Source.Parent.Parent);
+            await SaveCurrentSong(e.Source.Parent.Parent);
+        }
+
+        private async void CurrentPlaylist_CurrentSongPositionChanged(object sender, SubscriptionsEventArgs<IPlaylist, CurrentSongPositionChangedEventArgs> e)
+        {
+            await SaveSimple(e.Source.Parent.Parent);
+            await SaveCurrentSong(e.Source.Parent.Parent);
+        }
+
+        private async void CurrentPlaylist_AllSongs_SomethingChanged(object sender, SubscriptionsEventArgs<Song, EventArgs> e)
+        {
+            await SaveSimple(e.Source.Parent.Parent.Parent.Parent);
+            await SaveCurrentSong(e.Source.Parent.Parent.Parent.Parent);
+        }
+
+        private async void CurrentPlaylist_CurrentSong_SomethingChanged(object sender, SubscriptionsEventArgs<Song, EventArgs> e)
+        {
+            await SaveSimple(e.Source.Parent.Parent.Parent.Parent);
+            await SaveCurrentSong(e.Source.Parent.Parent.Parent.Parent);
         }
 
         public void Add(ILibrary lib)
         {
-            if (lib == null) return;
-
-            MobileDebug.Service.WriteEvent("SubscribeToLibrary", lib.GetHashCode(),lib.IsLoaded,lib.CurrentPlaylist?.Name);
-
-            if (lib.IsLoaded)
-            {
-                lib.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
-                lib.PlaylistsChanged += OnPlaylistsPropertyChanged;
-
-                AddCurrentPlaylist(lib.CurrentPlaylist);
-                Add(lib.Playlists);
-            }
-            else lib.Loaded += OnLoaded;
+            sh.Subscribe(lib);
         }
 
         public void Remove(ILibrary lib)
         {
-            if (lib == null) return;
-
-            lib.Loaded -= OnLoaded;
-            lib.CurrentPlaylistChanged -= OnCurrentPlaylistChanged;
-            lib.PlaylistsChanged -= OnPlaylistsPropertyChanged;
-
-            RemoveCurrentPlaylist(lib.CurrentPlaylist);
-            Remove(lib.Playlists);
-        }
-
-        private void AddCurrentPlaylist(IPlaylist playlist)
-        {
-            if (playlist == null) return;
-
-            MobileDebug.Service.WriteEvent("SubscribeCurrentPlaylist", playlist.Name, playlist.GetHashCode());
-            playlist.CurrentSongPositionChanged += OnCurrentSongPositionChanged;
-        }
-
-        private void RemoveCurrentPlaylist(IPlaylist playlist)
-        {
-            if (playlist == null) return;
-
-            playlist.CurrentSongPositionChanged -= OnCurrentSongPositionChanged;
-        }
-
-        private void Add(IPlaylistCollection playlists)
-        {
-            if (playlists == null) return;
-
-            playlists.Changed += OnPlaylistsCollectionChanged;
-
-            Add((IEnumerable<IPlaylist>)playlists);
-        }
-
-        private void Remove(IPlaylistCollection playlists)
-        {
-            if (playlists == null) return;
-
-            playlists.Changed -= OnPlaylistsCollectionChanged;
-
-            Remove((IEnumerable<IPlaylist>)playlists);
-        }
-
-        private void Add(IEnumerable<IPlaylist> playlists)
-        {
-            foreach (IPlaylist playlist in playlists) Add(playlist);
-        }
-
-        private void Remove(IEnumerable<IPlaylist> playlists)
-        {
-            foreach (IPlaylist playlist in playlists) Remove(playlist);
-        }
-
-        private void Add(IPlaylist playlist)
-        {
-            if (playlist == null) return;
-
-            playlist.CurrentSongChanged += OnCurrentSongChanged;
-            playlist.LoopChanged += OnLoopChanged;
-            playlist.SongsChanged += OnSongsPropertyChanged;
-
-            Add(playlist.Songs);
-        }
-
-        private void Remove(IPlaylist playlist)
-        {
-            if (playlist == null) return;
-
-            playlist.CurrentSongChanged -= OnCurrentSongChanged;
-            playlist.LoopChanged -= OnLoopChanged;
-            playlist.SongsChanged -= OnSongsPropertyChanged;
-
-            Remove(playlist.Songs);
-        }
-
-        private void Add(ISongCollection songs)
-        {
-            if (songs == null) return;
-
-            songs.Changed += OnSongsCollectionChanged;
-            songs.ShuffleChanged += OnShufflePropertyChanged;
-
-            Add(songs.Shuffle);
-            Add((IEnumerable<Song>)songs);
-        }
-
-        private void Remove(ISongCollection songs)
-        {
-            if (songs == null) return;
-
-            songs.Changed -= OnSongsCollectionChanged;
-            songs.ShuffleChanged -= OnShufflePropertyChanged;
-
-            Remove(songs.Shuffle);
-            Remove((IEnumerable<Song>)songs);
-        }
-
-        private void Add(IShuffleCollection shuffle)
-        {
-            if (shuffle == null) return;
-
-            shuffle.Changed += OnShuffleCollectionChanged;
-        }
-
-        private void Remove(IShuffleCollection shuffle)
-        {
-            if (shuffle == null) return;
-
-            shuffle.Changed -= OnShuffleCollectionChanged;
-        }
-
-        private void Add(IEnumerable<Song> songs)
-        {
-            foreach (Song song in songs) Add(song);
-        }
-
-        private void Remove(IEnumerable<Song> songs)
-        {
-            foreach (Song song in songs) Remove(song);
-        }
-
-        private void Add(Song song)
-        {
-            if (song == null) return;
-
-            song.ArtistChanged += OnSongPropertyChanged;
-            song.DurationChanged += OnSongPropertyChanged;
-            song.TitleChanged += OnSongPropertyChanged;
-        }
-
-        private void Remove(Song song)
-        {
-            if (song == null) return;
-
-            song.ArtistChanged -= OnSongPropertyChanged;
-            song.DurationChanged -= OnSongPropertyChanged;
-            song.TitleChanged -= OnSongPropertyChanged;
-        }
-
-        private async void OnCurrentPlaylistChanged(object sender, CurrentPlaylistChangedEventArgs e)
-        {
-            RemoveCurrentPlaylist(e.OldCurrentPlaylist);
-            AddCurrentPlaylist(e.NewCurrentPlaylist);
-
-            await SaveAll((ILibrary)sender);
-        }
-
-        private async void OnPlaylistsPropertyChanged(object sender, PlaylistsChangedEventArgs e)
-        {
-            await SaveAll((ILibrary)sender);
-
-            Remove(e.OldPlaylists);
-            Add(e.NewPlaylists);
-        }
-
-        private void OnLoaded(object sender, EventArgs e)
-        {
-            Remove((ILibrary)sender);
-            Add((ILibrary)sender);
-        }
-
-        private async void OnCurrentSongPositionChanged(object sender, CurrentSongPositionChangedEventArgs e)
-        {
-            IPlaylist playlist = (IPlaylist)sender;
-            MobileDebug.Service.WriteEvent("AutoSaveOnCurrentSongPos", playlist, playlist.GetHashCode(),
-                playlist.Parent?.Parent?.GetHashCode(), e.OldCurrentSongPosition, e.NewCurrentSongPosition);
-            await SaveSimple(((IPlaylist)sender).Parent.Parent);
-        }
-
-        private async void OnPlaylistsCollectionChanged(object sender, PlaylistCollectionChangedEventArgs e)
-        {
-            Remove(e.GetRemoved());
-            Add(e.GetAdded());
-
-            await SaveAll(((IPlaylistCollection)sender).Parent);
-        }
-
-        private async void OnCurrentSongChanged(object sender, CurrentSongChangedEventArgs e)
-        {
-            await SaveAll(((IPlaylist)sender).Parent.Parent);
-        }
-
-        private async void OnLoopChanged(object sender, LoopChangedEventArgs e)
-        {
-            await SaveAll(((IPlaylist)sender).Parent.Parent);
-        }
-
-        private async void OnSongsPropertyChanged(object sender, SongsChangedEventArgs e)
-        {
-            Remove(e.OldSongs);
-            Add(e.NewSongs);
-
-            await SaveAll(((IPlaylist)sender).Parent.Parent);
-        }
-
-        private async void OnSongsCollectionChanged(object sender, SongCollectionChangedEventArgs e)
-        {
-            Remove(e.GetRemoved());
-            Add(e.GetAdded());
-
-            await SaveAll(((ISongCollection)sender).Parent.Parent.Parent);
-        }
-
-        private async void OnShufflePropertyChanged(object sender, ShuffleChangedEventArgs e)
-        {
-            Remove(e.OldShuffleSongs);
-            Add(e.NewShuffleSongs);
-
-            await SaveAll(((ISongCollection)sender).Parent.Parent.Parent);
-        }
-
-        private async void OnShuffleCollectionChanged(object sender, ShuffleCollectionChangedEventArgs e)
-        {
-            await SaveAll(((IShuffleCollection)sender).Parent.Parent.Parent.Parent);
-        }
-
-        private async void OnSongPropertyChanged(object sender, EventArgs e)
-        {
-            await SaveAll(((Song)sender).Parent.Parent.Parent.Parent);
+            sh.Unsubscribe(lib);
         }
 
         private async Task SaveAll(ILibrary lib)
         {
             MobileDebug.Service.WriteEvent("SaveAll");
 
+            await SaveComplete(lib);
+            await SaveSimple(lib);
+            await SaveCurrentSong(lib);
+        }
+
+        private async Task SaveComplete(ILibrary lib)
+        {
+            MobileDebug.Service.WriteEvent("SaveComplete", lib?.Playlists != null && lib.Playlists.Count > 0);
+
             try
             {
-                await IO.SaveObjectAsync(Complete, lib);
-                await SaveSimple(lib);
+                if (lib?.Playlists != null && lib.Playlists.Count > 0) await IO.SaveObjectAsync(Complete, lib);
+                else
+                {
+                    await IO.DeleteAsync(Complete);
+                    await IO.DeleteAsync(Backup);
+                }
             }
             catch (Exception e)
             {
-                MobileDebug.Service.WriteEvent("SaveAllFail", e);
-                CheckLibrary(lib, "SaveFail");
+                MobileDebug.Service.WriteEvent("SaveCompleteFail", e);
             }
         }
 
         private async Task SaveSimple(ILibrary lib)
         {
-            MobileDebug.Service.WriteEvent("SaveSimple", lib?.GetHashCode(), lib?.CurrentPlaylist?.Name,
-                lib?.CurrentPlaylist?.GetHashCode(), lib?.CurrentPlaylist?.CurrentSongPosition);
+            MobileDebug.Service.WriteEvent("SaveSimple", lib?.Playlists != null && lib.Playlists.Count > 0);
 
-            await IO.SaveObjectAsync(Simple, lib.ToSimple());
+            try
+            {
+                if (lib?.Playlists != null && lib.Playlists.Count > 0) await IO.SaveObjectAsync(Simple, lib.ToSimple());
+                else await IO.DeleteAsync(Simple);
 
-            if (lib?.CurrentPlaylist != null) await IO.SaveObjectAsync(CurrentSong, new CurrentPlaySong(lib));
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Service.WriteEvent("SaveSimpleFail", e);
+            }
+        }
+
+        private async Task SaveCurrentSong(ILibrary lib)
+        {
+            MobileDebug.Service.WriteEvent("SaveCurrentSong", lib?.CurrentPlaylist?.CurrentSong != null);
+
+            try
+            {
+                if (lib?.CurrentPlaylist?.CurrentSong != null)
+                {
+                    await IO.SaveObjectAsync(CurrentSong, new CurrentPlaySong(lib));
+                }
+                else await IO.DeleteAsync(CurrentSong);
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Service.WriteEvent("SaveCurrentSongFail", e);
+            }
         }
 
         public async Task<ILibrary> LoadSimple(bool isForeground)

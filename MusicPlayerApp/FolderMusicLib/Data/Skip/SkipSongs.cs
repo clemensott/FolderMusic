@@ -1,19 +1,18 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace MusicPlayer.Data
 {
-    public delegate void SkippedSongEventHandler(SkipSongs sender);
-
     public class SkipSongs : IEnumerable<SkipSong>
     {
         private const string skipSongsFileName = "SkipSongs.xml";
 
         public ILibrary Parent { get; private set; }
 
-        public event SkippedSongEventHandler SkippedSong;
+        public event EventHandler SkippedSong;
 
         internal SkipSongs(ILibrary library)
         {
@@ -33,7 +32,7 @@ namespace MusicPlayer.Data
             songsPaths.Add(song.Path);
             await SaveSkipSongsPaths(songsPaths);
 
-            SkippedSong?.Invoke(this);
+            SkippedSong?.Invoke(this, EventArgs.Empty);
         }
 
         internal async static Task<List<string>> GetSkipSongsPaths()
@@ -68,7 +67,7 @@ namespace MusicPlayer.Data
 
         internal void Raise()
         {
-            SkippedSong?.Invoke(this);
+            SkippedSong?.Invoke(this, EventArgs.Empty);
         }
     }
 }

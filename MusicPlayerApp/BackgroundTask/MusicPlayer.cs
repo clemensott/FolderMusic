@@ -1,5 +1,6 @@
 ﻿using MusicPlayer;
 using MusicPlayer.Data;
+using MusicPlayer.Data.SubscriptionsHandler;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace BackgroundTask
         private int failedCount = 0, setSongCount = 0;
         private Song openSong;
         private ILibrary library;
+        private LibrarySubscriptionsHandler lsh;
         private SystemMediaTransportControls smtc;
 
         private Song CurrentSong { get { return library.CurrentPlaylist?.CurrentSong; } }
@@ -27,6 +29,10 @@ namespace BackgroundTask
         {
             smtc = smtControls;
             this.library = library;
+
+            lsh = LibrarySubscriptionsHandler.GetInstance(library);
+            lsh.CurrentPlaylist.CurrentSong.ArtistChanged += OnCurrentSongArtistOrTitleChanged;
+            lsh.CurrentPlaylist.CurrentSong.TitleChanged += OnCurrentSongArtistOrTitleChanged;
 
             ActivateSystemMediaTransportControl();
         }
@@ -78,7 +84,7 @@ namespace BackgroundTask
             BackgroundMediaPlayer.Current.Play();
         }
 
-        private void Volume0To1()
+        private async void Volume0To1()
         {
             BackgroundMediaPlayer.Current.Volume = 0;
             BackgroundMediaPlayer.Current.Play();
@@ -88,7 +94,7 @@ namespace BackgroundTask
             for (double i = step; i < 1; i += step)
             {
                 BackgroundMediaPlayer.Current.Volume = Math.Sqrt(i);
-                Task.Delay(10).Wait();
+                await Task.Delay(10);
             }
         }
 
@@ -100,9 +106,6 @@ namespace BackgroundTask
                 {
                     TimeSpan position = BackgroundMediaPlayer.Current.Position;
                     TimeSpan duration = BackgroundMediaPlayer.Current.NaturalDuration;
-                    MobileDebug.Service.WriteEvent("MusicPlayerPause", library?.GetHashCode(), library?.CurrentPlaylist?.Name,
-                        library?.CurrentPlaylist?.GetHashCode(),library==library?.CurrentPlaylist?.Parent,
-                        position.TotalMilliseconds / duration.TotalMilliseconds);
                     library.CurrentPlaylist.CurrentSongPosition = position.TotalMilliseconds / duration.TotalMilliseconds;
                 }
             }
@@ -116,14 +119,14 @@ namespace BackgroundTask
             if (BackgroundMediaPlayer.Current.CurrentState != MediaPlayerState.Paused) Volume1To0AndPause();
         }
 
-        private void Volume1To0AndPause()
+        private async void Volume1To0AndPause()
         {
             double step = 0.1;
 
             for (double i = 1; i > 0; i -= step)
             {
                 BackgroundMediaPlayer.Current.Volume = Math.Sqrt(i);
-                Task.Delay(1).Wait();
+                await Task.Delay(1);
             }
 
             BackgroundMediaPlayer.Current.Pause();
@@ -144,7 +147,7 @@ namespace BackgroundTask
             CurrentPlaylist.ChangeCurrentSong(-1);
         }
 
-        public void SetCurrent()
+        public async void SetCurrent()
         {
             MobileDebug.Service.WriteEvent("TrySet", "OpenPath: " + openSong?.Path,
                 "CurSongEmpty: " + CurrentSong?.IsEmpty + "CurSongFailed: " + CurrentSong?.Failed,
@@ -156,7 +159,7 @@ namespace BackgroundTask
 
             try
             {
-                StorageFile file = CurrentSong.GetStorageFile();
+                StorageFile file = await StorageFile.GetFileFromPathAsync(CurrentSong.Path);
                 BackgroundMediaPlayer.Current.SetFileSource(file);
                 setSongCount++;
                 MobileDebug.Service.WriteEvent("Set", setSongCount, CurrentSong);
@@ -164,8 +167,8 @@ namespace BackgroundTask
             catch (Exception e)
             {
                 MobileDebug.Service.WriteEvent("Catch", e, CurrentSong);
-                library.SkippedSongs.Add(CurrentSong);
-                Task.Delay(100).Wait();
+                await library.SkippedSongs.Add(CurrentSong);
+                await Task.Delay(100);
 
                 if (playNext) Next(false);
                 else Previous();
@@ -180,13 +183,7 @@ namespace BackgroundTask
 
             playNext = true;
             failedCount = 0;
-
-            if (CurrentSong != openSong)
-            {
-                Unsubscribe(openSong);
-                openSong = CurrentSong;
-                Subscribe(CurrentSong);
-            }
+            openSong = CurrentSong;
 
             if (library.IsLoaded && sender.NaturalDuration.TotalMilliseconds > Song.DefaultDuration)
             {
@@ -203,22 +200,6 @@ namespace BackgroundTask
             else smtc.PlaybackStatus = MediaPlaybackStatus.Paused;
 
             UpdateSystemMediaTransportControl();
-        }
-
-        private void Subscribe(Song song)
-        {
-            if (openSong == null) return;
-
-            song.ArtistChanged += OnCurrentSongArtistOrTitleChanged;
-            song.TitleChanged += OnCurrentSongArtistOrTitleChanged;
-        }
-
-        private void Unsubscribe(Song song)
-        {
-            if (openSong == null) return;
-
-            song.ArtistChanged -= OnCurrentSongArtistOrTitleChanged;
-            song.TitleChanged -= OnCurrentSongArtistOrTitleChanged;
         }
 
         private void OnCurrentSongArtistOrTitleChanged(object sender, EventArgs args)
@@ -239,17 +220,17 @@ namespace BackgroundTask
             }
         }
 
-        public void MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
+        public async void MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
         {
             MobileDebug.Service.WriteEvent("Fail", args.ExtendedErrorCode, args.Error, args.ErrorMessage, CurrentSong);
-            Task.Delay(100).Wait();
+           await Task.Delay(100);
 
             failedCount++;
 
             if (failedCount >= maxFailOrSetCount) failedCount = 0;
             else if (args.Error == MediaPlayerError.Unknown)
             {
-                Task.Delay(2000).Wait();
+                await Task.Delay(2000);
 
                 SetCurrent();
                 return;

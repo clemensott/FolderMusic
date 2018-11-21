@@ -174,28 +174,6 @@ namespace MusicPlayer.Data
             return System.IO.Path.GetFileName(Path);
         }
 
-        public StorageFile GetStorageFile()
-        {
-            Task<StorageFile> storageFileTask = GetStorageFileAsync();
-            storageFileTask.Wait();
-
-            return storageFileTask.Result;
-        }
-
-        public async Task<StorageFile> GetStorageFileAsync()
-        {
-            try
-            {
-                return await StorageFile.GetFileFromPathAsync(Path);
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Service.WriteEvent("SongGetFileFail", e, Path);
-                failed = true;
-                throw e;
-            }
-        }
-
         public void SetFailed()
         {
             failed = true;

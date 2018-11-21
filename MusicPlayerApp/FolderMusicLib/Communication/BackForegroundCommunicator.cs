@@ -1,5 +1,6 @@
 ﻿using MusicPlayer.Data;
 using MusicPlayer.Data.Shuffle;
+using MusicPlayer.Data.SubscriptionsHandler;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,15 +39,17 @@ namespace MusicPlayer.Communication
             shuffleKey = "Shuffle",
             libraryEmptyValue = "LibraryIsEmpty";
 
-        private ILibrary library;
         private List<Tuple<int, ValueSet>> receivingItems;
-        private Action<ValueSet> senderMethod;
         private Dictionary<string, Receiver> receivers;
+        private LibrarySubscriptionsHandler lsh;
+        private ILibrary library;
+        private Action<ValueSet> senderMethod;
 
         public BackForegroundCommunicator(ILibrary library)
         {
             receivingItems = new List<Tuple<int, ValueSet>>();
             receivers = GetAllReceiver().ToDictionary(r => r.Key);
+            lsh = LibrarySubscriptionsHandler.GetInstance(library);
 
             this.library = library;
 
@@ -62,17 +65,25 @@ namespace MusicPlayer.Communication
                 BackgroundMediaPlayer.MessageReceivedFromForeground += BackgroundMediaPlayer_MessageReceived;
                 senderMethod = BackgroundMediaPlayer.SendMessageToForeground;
 
-                library.SkippedSongs.SkippedSong += OnSkippedSong;
+                lsh.SkippedSong += OnSkippedSong;
             }
 
-            if (!library.IsLoaded) library.Loaded += OnLibraryLoaded;
-            else
-            {
-                library.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
-                library.PlaylistsChanged += OnPlaylistsPropertyChanged;
+            lsh.Loaded += OnLoaded;
+            lsh.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
+            lsh.PlaylistsPropertyChanged += OnPlaylistsPropertyChanged;
+            lsh.PlaylistCollectionChanged += OnPlaylistCollectionChanged;
+            lsh.PlayStateChanged += OnPlayStateChanged;
+            lsh.AllPlaylists.CurrentSongChanged += OnAllPlaylists_CurrentSongChanged;
+            lsh.AllPlaylists.LoopChanged += OnAllPlaylists_LoopChanged;
+            lsh.AllPlaylists.SongsPropertyChanged += OnAllPlaylists_SongsPropertyChanged;
+            lsh.AllPlaylists.SongCollectionChanged += OnAllPlaylists_SongCollectionChanged;
+            lsh.AllPlaylists.ShuffleChanged += OnAllPlaylists_ShuffleChanged;
+            lsh.AllPlaylists.ShuffleCollectionChanged += OnAllPlaylists_ShuffleCollectionChanged;
+            lsh.AllPlaylists.AllSongs.ArtistChanged += OnAllPlaylists_AllSongs_ArtistChanged;
+            lsh.AllPlaylists.AllSongs.TitleChanged += OnAllPlaylist_AllSongs_TitleChanged;
+            lsh.AllPlaylists.AllSongs.DurationChanged += OnAllPlaylists_AllSongs_DurationChanged;
 
-                Subscribe(library.Playlists);
-            }
+            lsh.Subscribe(library);
         }
 
         private IEnumerable<Receiver> GetAllReceiver()
@@ -96,122 +107,11 @@ namespace MusicPlayer.Communication
             yield return new Receiver(skipPrimaryKey, new Action<ValueSet, string>(ReceiveSkippedSong));
         }
 
-        private void Subscribe(IPlaylistCollection playlists)
+
+        private void OnAllPlaylists_AllSongs_ArtistChanged(object sender, SubscriptionsEventArgs<Song, SongArtistChangedEventArgs> e)
         {
-            if (playlists == null) return;
-
-            playlists.Changed += OnPlaylistsCollectionChanged;
-
-            Subscribe((IEnumerable<IPlaylist>)playlists);
-        }
-
-        private void Unsubscribe(IPlaylistCollection playlists)
-        {
-            if (playlists == null) return;
-
-            playlists.Changed -= OnPlaylistsCollectionChanged;
-
-            Unsubscribe((IEnumerable<IPlaylist>)playlists);
-        }
-
-        private void Subscribe(IEnumerable<IPlaylist> playlists)
-        {
-            foreach (IPlaylist playlist in playlists ?? Enumerable.Empty<IPlaylist>()) Subscribe(playlist);
-        }
-
-        private void Unsubscribe(IEnumerable<IPlaylist> playlists)
-        {
-            foreach (IPlaylist playlist in playlists ?? Enumerable.Empty<IPlaylist>()) Unsubscribe(playlist);
-        }
-
-        private void Subscribe(IPlaylist playlist)
-        {
-            if (playlist == null) return;
-
-            playlist.CurrentSongChanged += OnCurrentSongChanged;
-            playlist.LoopChanged += OnLoopChanged;
-            playlist.SongsChanged += OnSongsPropertyChanged;
-
-            Subscribe(playlist.Songs);
-        }
-
-        private void Unsubscribe(IPlaylist playlist)
-        {
-            if (playlist == null) return;
-
-            playlist.CurrentSongChanged -= OnCurrentSongChanged;
-            playlist.LoopChanged -= OnLoopChanged;
-            playlist.SongsChanged -= OnSongsPropertyChanged;
-
-            Unsubscribe(playlist.Songs);
-        }
-
-        private void Subscribe(ISongCollection songs)
-        {
-            if (songs == null) return;
-
-            songs.Changed += OnSongsCollectionChanged;
-            songs.ShuffleChanged += OnShuffleChanged;
-
-            Subscribe(songs.Shuffle);
-            Subscribe((IEnumerable<Song>)songs);
-        }
-
-        private void Unsubscribe(ISongCollection songs)
-        {
-            if (songs == null) return;
-
-            songs.Changed -= OnSongsCollectionChanged;
-            songs.ShuffleChanged -= OnShuffleChanged;
-
-            Unsubscribe(songs.Shuffle);
-            Unsubscribe((IEnumerable<Song>)songs);
-        }
-
-        private void Subscribe(IShuffleCollection shuffle)
-        {
-            if (shuffle != null) shuffle.Changed += OnShuffleCollectionChanged;
-        }
-
-        private void Unsubscribe(IShuffleCollection shuffle)
-        {
-            if (shuffle != null) shuffle.Changed -= OnShuffleCollectionChanged;
-        }
-
-        private void Subscribe(IEnumerable<Song> songs)
-        {
-            foreach (Song song in songs ?? Enumerable.Empty<Song>()) Subscribe(song);
-        }
-
-        private void Unsubscribe(IEnumerable<Song> songs)
-        {
-            foreach (Song song in songs ?? Enumerable.Empty<Song>()) Unsubscribe(song);
-        }
-
-        private void Subscribe(Song song)
-        {
-            if (song?.IsEmpty ?? true) return;
-
-            song.ArtistChanged += OnArtistChanged;
-            song.DurationChanged += OnDurationChanged;
-            song.TitleChanged += OnTitleChanged;
-        }
-
-        private void Unsubscribe(Song song)
-        {
-            if (song?.IsEmpty ?? true) return;
-
-            song.ArtistChanged -= OnArtistChanged;
-            song.DurationChanged -= OnDurationChanged;
-            song.TitleChanged -= OnTitleChanged;
-        }
-
-
-        private void OnArtistChanged(object sender, SongArtistChangedEventArgs args)
-        {
-            Song song = (Song)sender;
-            string value = song.Artist;
-            string songPath = song.Path;
+            string value = e.Source.Artist;
+            string songPath = e.Source.Path;
 
             ValueSet valueSet = receivers[artistPrimaryKey].GetValueSet(value);
             valueSet.Add(songPathKey, songPath);
@@ -230,11 +130,10 @@ namespace MusicPlayer.Communication
         }
 
 
-        private void OnTitleChanged(object sender, SongTitleChangedEventArgs args)
+        private void OnAllPlaylist_AllSongs_TitleChanged(object sender, SubscriptionsEventArgs<Song, SongTitleChangedEventArgs> e)
         {
-            Song song = (Song)sender;
-            string value = song.Title;
-            string songPath = song.Path;
+            string value = e.Source.Title;
+            string songPath = e.Source.Path;
 
             ValueSet valueSet = receivers[titlePrimaryKey].GetValueSet(value);
             valueSet.Add(songPathKey, songPath);
@@ -253,11 +152,10 @@ namespace MusicPlayer.Communication
         }
 
 
-        private void OnDurationChanged(object sender, SongDurationChangedEventArgs args)
+        private void OnAllPlaylists_AllSongs_DurationChanged(object sender, SubscriptionsEventArgs<Song, SongDurationChangedEventArgs> e)
         {
-            Song song = (Song)sender;
-            double value = song.DurationMilliseconds;
-            string songPath = song.Path;
+            double value = e.Source.DurationMilliseconds;
+            string songPath = e.Source.Path;
 
             ValueSet valueSet = receivers[durationPrimaryKey].GetValueSet(value.ToString());
             valueSet.Add(songPathKey, songPath);
@@ -276,9 +174,9 @@ namespace MusicPlayer.Communication
         }
 
 
-        public void OnCurrentSongChanged(object sender, CurrentSongChangedEventArgs args)
+        private void OnAllPlaylists_CurrentSongChanged(object sender, SubscriptionsEventArgs<IPlaylist, CurrentSongChangedEventArgs> e)
         {
-            string value = ((IPlaylist)sender).CurrentSong.Path;
+            string value = e.Source.CurrentSong.Path;
             ValueSet valueSet = receivers[currentSongPrimaryKey].GetValueSet(value);
 
             Send(valueSet);
@@ -294,11 +192,10 @@ namespace MusicPlayer.Communication
         }
 
 
-        private void OnSongsPropertyChanged(object sender, SongsChangedEventArgs e)
+        private void OnAllPlaylists_SongsPropertyChanged(object sender, SubscriptionsEventArgs<IPlaylist, SongsChangedEventArgs> e)
         {
-            IPlaylist playlist = (IPlaylist)sender;
-            string value = XmlConverter.Serialize(playlist.Songs);
-            string playlistPath = playlist.AbsolutePath;
+            string value = XmlConverter.Serialize(e.Source.Songs);
+            string playlistPath = e.Source.AbsolutePath;
 
             ValueSet valueSet = receivers[songsPropertPrimaryKey].GetValueSet(value);
             valueSet.Add(playlistPathKey, playlistPath);
@@ -317,15 +214,11 @@ namespace MusicPlayer.Communication
         }
 
 
-        public void OnSongsCollectionChanged(object sender, SongCollectionChangedEventArgs args)
+        private void OnAllPlaylists_SongCollectionChanged(object sender, SubscriptionsEventArgs<ISongCollection, SongCollectionChangedEventArgs> e)
         {
-            Unsubscribe(args.GetRemoved());
-            Subscribe(args.GetAdded());
-
-            ISongCollection songs = (ISongCollection)sender;
-            string removeXml = XmlConverter.Serialize(args.GetRemoved().ToArray());
-            string addXml = XmlConverter.Serialize(args.GetAdded().ToArray());
-            string playlistPath = songs.Parent.AbsolutePath;
+            string removeXml = XmlConverter.Serialize(e.Base.GetRemoved().ToArray());
+            string addXml = XmlConverter.Serialize(e.Base.GetAdded().ToArray());
+            string playlistPath = e.Source.Parent.AbsolutePath;
 
             ValueSet valueSet = receivers[songsCollectionPrimaryKey].GetValueSet(string.Empty);
             valueSet.Add(removeKey, removeXml);
@@ -351,12 +244,11 @@ namespace MusicPlayer.Communication
         }
 
 
-        public void OnShuffleChanged(object sender, ShuffleChangedEventArgs args)
+        private void OnAllPlaylists_ShuffleChanged(object sender, SubscriptionsEventArgs<ISongCollection, ShuffleChangedEventArgs> e)
         {
-            ISongCollection songs = (ISongCollection)sender;
-            string value = Enum.GetName(typeof(ShuffleType), args.NewShuffleType);
-            string shuffleXml = XmlConverter.Serialize(args.NewShuffleSongs);
-            string playlistPath = songs.Parent.AbsolutePath;
+            string value = Enum.GetName(typeof(ShuffleType), e.Base.NewShuffleType);
+            string shuffleXml = XmlConverter.Serialize(e.Base.NewShuffleSongs);
+            string playlistPath = e.Source.Parent.AbsolutePath;
 
             ValueSet valueSet = receivers[shufflePropertyPrimaryKey].GetValueSet(value);
             valueSet.Add(shuffleKey, shuffleXml);
@@ -378,12 +270,11 @@ namespace MusicPlayer.Communication
         }
 
 
-        private void OnShuffleCollectionChanged(object sender, ShuffleCollectionChangedEventArgs args)
+        private void OnAllPlaylists_ShuffleCollectionChanged(object sender, SubscriptionsEventArgs<IShuffleCollection, ShuffleCollectionChangedEventArgs> e)
         {
-            IShuffleCollection shuffle = (IShuffleCollection)sender;
-            string removeXml = XmlConverter.Serialize(args.GetRemoved().ToArray());
-            string addXml = XmlConverter.Serialize(args.AddedSongs);
-            string playlistPath = shuffle.Parent.Parent.AbsolutePath;
+            string removeXml = XmlConverter.Serialize(e.Base.GetRemoved().ToArray());
+            string addXml = XmlConverter.Serialize(e.Base.AddedSongs);
+            string playlistPath = e.Source.Parent.Parent.AbsolutePath;
 
             ValueSet valueSet = receivers[shuffleCollectionPrimaryKey].GetValueSet(string.Empty);
             valueSet.Add(removeKey, removeXml);
@@ -409,11 +300,10 @@ namespace MusicPlayer.Communication
         }
 
 
-        public void OnLoopChanged(object sender, LoopChangedEventArgs args)
+        private void OnAllPlaylists_LoopChanged(object sender, SubscriptionsEventArgs<IPlaylist, LoopChangedEventArgs> e)
         {
-            IPlaylist playlist = (IPlaylist)sender;
-            string value = Enum.GetName(typeof(LoopType), playlist.Loop);
-            string playlistPath = playlist.AbsolutePath;
+            string value = Enum.GetName(typeof(LoopType), e.Source.Loop);
+            string playlistPath = e.Source.AbsolutePath;
 
             ValueSet valueSet = receivers[loopPrimaryKey].GetValueSet(value.ToString());
             valueSet.Add(playlistPathKey, playlistPath);
@@ -432,11 +322,9 @@ namespace MusicPlayer.Communication
             changedPlaylist.Loop = loop;
         }
 
-        private void OnPlaylistsPropertyChanged(object sender, PlaylistsChangedEventArgs args)
-        {
-            Unsubscribe(args.OldPlaylists);
-            Subscribe(args.NewPlaylists);
 
+        private void OnPlaylistsPropertyChanged(object sender, SubscriptionsEventArgs<ILibrary, PlaylistsChangedEventArgs> e)
+        {
             string value = XmlConverter.Serialize(library.Playlists);
             ValueSet valueSet = receivers[playlistsPropertyPrimaryKey].GetValueSet(value);
 
@@ -449,13 +337,10 @@ namespace MusicPlayer.Communication
         }
 
 
-        private void OnPlaylistsCollectionChanged(object sender, PlaylistCollectionChangedEventArgs args)
+        private void OnPlaylistCollectionChanged(object sender, SubscriptionsEventArgs<IPlaylistCollection, PlaylistCollectionChangedEventArgs> e)
         {
-            Unsubscribe(args.GetRemoved());
-            Subscribe(args.GetAdded());
-
-            string removeXml = XmlConverter.Serialize(args.GetRemoved().ToArray());
-            string addXml = XmlConverter.Serialize(args.GetAdded().ToArray());
+            string removeXml = XmlConverter.Serialize(e.Base.GetRemoved().ToArray());
+            string addXml = XmlConverter.Serialize(e.Base.GetAdded().ToArray());
 
             ValueSet valueSet = receivers[playlistsPropertyPrimaryKey].GetValueSet(string.Empty);
             valueSet.Add(removeKey, removeXml);
@@ -476,9 +361,9 @@ namespace MusicPlayer.Communication
         }
 
 
-        public void OnCurrentPlaylistChanged(object sender, CurrentPlaylistChangedEventArgs args)
+        private void OnCurrentPlaylistChanged(object sender, SubscriptionsEventArgs<ILibrary, CurrentPlaylistChangedEventArgs> e)
         {
-            string value = args.NewCurrentPlaylist.AbsolutePath;
+            string value = e.Base.NewCurrentPlaylist.AbsolutePath;
             ValueSet valueSet = receivers[currentPlaylistPrimaryKey].GetValueSet(value);
 
             Send(valueSet);
@@ -493,9 +378,14 @@ namespace MusicPlayer.Communication
         }
 
 
-        public void OnPlayStateChanged(object sender, PlayStateChangedEventArgs args)
+        private void OnPlayStateChanged(object sender, SubscriptionsEventArgs<ILibrary, PlayStateChangedEventArgs> e)
         {
-            string value = args.NewValue.ToString();
+            SendPlayState(e.Base.NewValue);
+        }
+
+        private void SendPlayState(bool isPlayling)
+        {
+            string value = isPlayling.ToString();
             ValueSet valueSet = receivers[playStatePrimaryKey].GetValueSet(value);
 
             Send(valueSet);
@@ -507,19 +397,10 @@ namespace MusicPlayer.Communication
         }
 
 
-        private void OnLibraryLoaded(object sender, EventArgs args)
+        private void OnLoaded(object sender, SubscriptionsEventArgs<ILibrary, EventArgs> e)
         {
-            library.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
-            library.PlaylistsChanged += OnPlaylistsPropertyChanged;
-            library.PlayStateChanged += OnPlayStateChanged;
-            library.Loaded -= OnLibraryLoaded;
-
-            Unsubscribe(library.Playlists);
-            Subscribe(library.Playlists);
-
             if (!library.IsForeground) SendLibrary();
-
-            if (library.IsPlaying) OnPlayStateChanged(library, new PlayStateChangedEventArgs(library.IsPlaying));
+            if (library.IsPlaying) SendPlayState(true);
         }
 
 
@@ -573,7 +454,7 @@ namespace MusicPlayer.Communication
         }
 
 
-        private void OnSkippedSong(SkipSongs sender)
+        private void OnSkippedSong(object sender, SubscriptionsEventArgs<SkipSongs, EventArgs> e)
         {
             ValueSet valueSet = receivers[skipPrimaryKey].GetValueSet(string.Empty);
 

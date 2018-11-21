@@ -1,6 +1,8 @@
-﻿namespace MusicPlayer.Data
+﻿using System;
+
+namespace MusicPlayer.Data
 {
-    public class SongsChangedEventArgs
+    public class SongsChangedEventArgs : EventArgs
     {
         public ISongCollection OldSongs { get; private set; }
 

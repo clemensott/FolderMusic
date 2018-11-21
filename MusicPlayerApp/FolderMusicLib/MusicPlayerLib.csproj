@@ -92,6 +92,7 @@
     <Compile Include="Data\Interfaces\IPlaylistCollection.cs" />
     <Compile Include="Data\Interfaces\ISongCollection.cs" />
     <Compile Include="Data\Interfaces\SongsChangedEventArgs.cs" />
+    <Compile Include="Data\SubscriptionsHandler\LibrarySubscriptionsHandler.cs" />
     <Compile Include="Data\Simple\SimpleShuffleCollection.cs" />
     <Compile Include="Data\Simple\SimpleSongCollection.cs" />
     <Compile Include="Data\PlaylistCollection.cs" />
@@ -112,6 +113,9 @@
     <Compile Include="Data\Skip\SkipSongs.cs" />
     <Compile Include="Data\Skip\SkipSongsEnumerator.cs" />
     <Compile Include="Data\Song.cs" />
+    <Compile Include="Data\SubscriptionsHandler\PlaylistSubscriptionsHandler.cs" />
+    <Compile Include="Data\SubscriptionsHandler\SongSubscriptionsHandler.cs" />
+    <Compile Include="Data\SubscriptionsHandler\SubscriptionsEventArgs.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="IO.cs" />
     <Compile Include="Data\EventArgs\SongArtistChangedEventArgs.cs" />
