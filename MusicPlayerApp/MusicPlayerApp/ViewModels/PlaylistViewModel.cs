@@ -4,7 +4,7 @@ using MusicPlayer.Data.SubscriptionsHandler;
 using System;
 using System.ComponentModel;
 
-namespace FolderMusic
+namespace FolderMusic.ViewModels
 {
     class PlaylistViewModel : INotifyPropertyChanged
     {
