@@ -7,66 +7,19 @@ namespace FolderMusic.Converters
 {
     class ShuffleSongsCollection : ObservableCollection<Song>, IUpdateSelectedItemCollection<Song>
     {
-        private IPlaylist source;
+        private ISongCollection source;
 
         public event EventHandler UpdateFinished;
 
-        public ShuffleSongsCollection(IPlaylist source) : base()
+        public ShuffleSongsCollection(ISongCollection songs) : base()
         {
-            this.source = source;
+            source = songs;
 
-            source.SongsChanged += Source_SongsChanged;
-            Subscribe(source.Songs);
+            source.ShuffleChanged += Songs_ShuffleChanged;
 
-            foreach (Song song in source.Songs) Add(song);
-        }
+            Subscribe(source.Shuffle);
 
-        private void Subscribe(ISongCollection songs)
-        {
-            if (songs != null) songs.ShuffleChanged += Songs_ShuffleChanged;
-        }
-
-        private void Unsubscribe(ISongCollection songs)
-        {
-            if (songs != null) songs.ShuffleChanged += Songs_ShuffleChanged;
-        }
-
-        private void Subscribe(IShuffleCollection shuffle)
-        {
-            if (shuffle != null) shuffle.Changed += Shuffle_Changed;
-        }
-
-        private void Unsubscribe(IShuffleCollection shuffle)
-        {
-            if (shuffle != null) shuffle.Changed += Shuffle_Changed;
-        }
-
-        private void Subscribe(Song song)
-        {
-            if (song == null) return;
-
-            song.ArtistChanged += Song_Changed;
-            song.TitleChanged += Song_Changed;
-        }
-
-        private void Unsubscribe(Song song)
-        {
-            if (song == null) return;
-
-            song.ArtistChanged += Song_Changed;
-            song.TitleChanged += Song_Changed;
-        }
-
-        private void Source_SongsChanged(object sender, SongsChangedEventArgs e)
-        {
-            Unsubscribe(e.OldSongs);
-            Subscribe(e.NewSongs);
-
-            Clear();
-
-            foreach (Song song in source.Songs.Shuffle) Add(song);
-
-            UpdateFinished?.Invoke(this, EventArgs.Empty);
+            foreach (Song song in source.Shuffle) Add(song);
         }
 
         private void Songs_ShuffleChanged(object sender, ShuffleChangedEventArgs e)
@@ -76,12 +29,38 @@ namespace FolderMusic.Converters
 
             Clear();
 
-            foreach (Song song in source.Songs.Shuffle) Add(song);
+            foreach (Song song in source.Shuffle) Add(song);
 
             UpdateFinished?.Invoke(this, EventArgs.Empty);
         }
 
-        private void Shuffle_Changed(object sender, ShuffleCollectionChangedEventArgs e)
+        private void Subscribe(IShuffleCollection shuffle)
+        {
+            if (shuffle != null) shuffle.Changed += OnShuffleCollectionChanged;
+        }
+
+        private void Unsubscribe(IShuffleCollection shuffle)
+        {
+            if (shuffle != null) shuffle.Changed += OnShuffleCollectionChanged;
+        }
+
+        private void Subscribe(Song song)
+        {
+            if (song == null) return;
+
+            song.ArtistChanged += OnSongChanged;
+            song.TitleChanged += OnSongChanged;
+        }
+
+        private void Unsubscribe(Song song)
+        {
+            if (song == null) return;
+
+            song.ArtistChanged += OnSongChanged;
+            song.TitleChanged += OnSongChanged;
+        }
+
+        private void OnShuffleCollectionChanged(object sender, ShuffleCollectionChangedEventArgs e)
         {
             foreach (Song song in e.GetRemoved()) Remove(song);
             foreach (ChangeCollectionItem<Song> change in e.AddedSongs) Insert(change.Index, change.Item);
@@ -89,7 +68,7 @@ namespace FolderMusic.Converters
             UpdateFinished?.Invoke(this, EventArgs.Empty);
         }
 
-        private void Song_Changed(object sender, EventArgs e)
+        private void OnSongChanged(object sender, EventArgs e)
         {
             int index = IndexOf((Song)sender);
 

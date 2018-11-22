@@ -35,7 +35,7 @@
                         </MenuFlyout>
                     </FlyoutBase.AttachedFlyout>
 
-                    <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                         <Image Source="{Binding Converter={StaticResource playConverter}}"
                                Margin="0,0,0,5" Width="30" Height="30" Tapped="PlayPlaylist_Tapped"/>
                         <Image Source="{Binding Converter={StaticResource detailConverter}}"

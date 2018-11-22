@@ -21,8 +21,8 @@
             <HubSection Background="Transparent" Margin="0,-10,0,0" HorizontalAlignment="Stretch"
                         DataContext="{Binding CurrentPlaylist}" Header="{Binding Name}" Style="{StaticResource HSHeader}">
                 <DataTemplate>
-                    <local:ShuffleSongsView Margin="0,-30,0,0" HorizontalAlignment="Stretch" Source="{Binding Songs}"
-                                            DataContextChanged="SongListView_DataContextChanged"/>
+                    <local:ShuffleSongsView Margin="0,-30,0,0" HorizontalAlignment="Stretch" CurrentSong="{Binding CurrentSong,Mode=TwoWay}"
+                                            Source="{Binding Songs}" DataContextChanged="SongListView_DataContextChanged"/>
                 </DataTemplate>
             </HubSection>
 

@@ -7,9 +7,9 @@ namespace FolderMusic
 {
     class ShuffleOffSongsView : SongsView
     {
-        protected override IUpdateSelectedItemCollection<Song> GetItemsSource(IPlaylist playlist)
+        protected override IUpdateSelectedItemCollection<Song> GetItemsSource(ISongCollection songs)
         {
-            return new ShuffleOffSongsCollection(playlist);
+            return new ShuffleOffSongsCollection(songs);
         }
     }
 }

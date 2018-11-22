@@ -1,6 +1,5 @@
 ﻿using FolderMusic.ViewModels;
 using MusicPlayer;
-using MusicPlayer.Data;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -16,8 +15,6 @@ namespace FolderMusic
 
         private PlaylistViewModel viewModel;
 
-        public IPlaylist Playlist { get; private set; }
-
         public PlaylistPage()
         {
             this.InitializeComponent();
@@ -26,8 +23,7 @@ namespace FolderMusic
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            Playlist = e.Parameter as IPlaylist;
-            DataContext = viewModel = new PlaylistViewModel(Playlist);
+            DataContext = viewModel = e.Parameter as PlaylistViewModel;
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -41,40 +37,40 @@ namespace FolderMusic
 
         private void Shuffle_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            Playlist.Songs.SetNextShuffle();
+            viewModel.Base.Songs.SetNextShuffle();
         }
 
         private void Loop_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            Playlist.SetNextLoop();
+            viewModel.Base.SetNextLoop();
         }
 
         private async void ResetThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(LoadingPage), Playlist.Parent.Parent);
-            await Playlist.Reset();
+            Frame.Navigate(typeof(LoadingPage), viewModel.Base.Parent.Parent);
+            await viewModel.Base.Reset();
             Frame.GoBack();
 
-            if (Playlist.Songs.Count == 0) Frame.GoBack();
+            if (viewModel.Base.Songs.Count == 0) Frame.GoBack();
         }
 
         private async void SearchForNewSongs_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(LoadingPage), Playlist.Parent.Parent);
-            await Playlist.AddNew();
+            Frame.Navigate(typeof(LoadingPage), viewModel.Base.Parent.Parent);
+            await viewModel.Base.AddNew();
             Frame.GoBack();
         }
 
         private async void UpdateThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(LoadingPage), Playlist.Parent.Parent);
-            await Playlist.Update();
+            Frame.Navigate(typeof(LoadingPage), viewModel.Base.Parent.Parent);
+            await viewModel.Base.Update();
             Frame.GoBack();
         }
 
         private void DeleteThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            Playlist.Parent.Remove(Playlist);
+            viewModel.Base.Parent.Remove(viewModel.Base);
 
             Frame.GoBack();
         }
@@ -83,12 +79,12 @@ namespace FolderMusic
         {
             try
             {
-                Playlist.Parent.Parent.CurrentPlaylist = Playlist;
+                viewModel.Base.Parent.Parent.CurrentPlaylist = viewModel.Base;
             }
             catch (System.Exception exc)
             {
                 MobileDebug.Service.WriteEventPair("OnSelectedSongChangedManuallyFail", exc,
-                    "CurrentPlaylist: ", Playlist?.Parent?.Parent?.CurrentPlaylist);
+                    "CurrentPlaylist: ", viewModel.Base?.Parent?.Parent?.CurrentPlaylist);
             }
 
             Frame.GoBack();

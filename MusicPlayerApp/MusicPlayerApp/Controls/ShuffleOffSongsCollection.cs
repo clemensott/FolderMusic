@@ -7,32 +7,16 @@ namespace FolderMusic.Converters
 {
     class ShuffleOffSongsCollection : ObservableCollection<Song>, IUpdateSelectedItemCollection<Song>
     {
-        private IPlaylist source;
+        private ISongCollection source;
 
         public event EventHandler UpdateFinished;
 
-        public ShuffleOffSongsCollection(IPlaylist playlist)
+        public ShuffleOffSongsCollection(ISongCollection songs)
         {
-            source = playlist;
-            source.SongsChanged += Source_SongsChanged;
+            source = songs;
+            source.Changed += OnSourceChanged;
 
-            Subscribe(source.Songs);
-
-            foreach (Song song in source.Songs) Add(song);
-        }
-
-        private void Subscribe(ISongCollection songs)
-        {
-            if (songs != null) return;
-
-            songs.Changed += Songs_Changed;
-        }
-
-        private void Unsubscribe(ISongCollection songs)
-        {
-            if (songs == null) return;
-
-            songs.Changed -= Songs_Changed;
+            foreach (Song song in source) Add(song);
         }
 
         private void Subscribe(Song song)
@@ -51,22 +35,10 @@ namespace FolderMusic.Converters
             song.TitleChanged -= OnSongChanged;
         }
 
-        private void Source_SongsChanged(object sender, SongsChangedEventArgs e)
+        private void OnSourceChanged(object sender, SongCollectionChangedEventArgs e)
         {
-            Unsubscribe(e.OldSongs);
-            Subscribe(e.NewSongs);
-
-            Clear();
-
-            foreach (Song song in e.NewSongs) Add(song);
-
-            UpdateFinished?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void Songs_Changed(object sender, SongCollectionChangedEventArgs args)
-        {
-            foreach (Song song in args.GetRemoved()) Remove(song);
-            foreach (Song song in args.GetAdded()) Add(song);
+            foreach (Song song in e.GetRemoved()) Remove(song);
+            foreach (Song song in e.GetAdded()) Add(song);
 
             UpdateFinished?.Invoke(this, EventArgs.Empty);
         }
