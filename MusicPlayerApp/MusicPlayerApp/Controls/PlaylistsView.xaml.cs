@@ -1,4 +1,5 @@
 ﻿using FolderMusic.ViewModels;
+using MusicPlayer.Data;
 using System;
 using System.Collections.Generic;
 using Windows.UI.Xaml;
@@ -128,14 +129,19 @@ namespace FolderMusic
         private void PlayPlaylist_Tapped(object sender, TappedRoutedEventArgs e)
         {
             PlaylistViewModel playlist = (sender as Image).DataContext as PlaylistViewModel;
+            MobileDebug.Service.WriteEvent("ImgPlayTapped1", playlist?.Base?.AbsolutePath);
 
             CurrentPlaylist = playlist;
-            CurrentPlaylist.Base.Parent.Parent.CurrentPlaylist = CurrentPlaylist.Base;
+            playlist.Base.Parent.Parent.CurrentPlaylist = CurrentPlaylist.Base;
+            playlist.Base.Parent.Parent.IsPlaying = true;
         }
 
         private void DetailPlaylist_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            if (!PlaylistPage.Open) GetFrame().Navigate(typeof(PlaylistPage), (sender as Image).DataContext);
+            IPlaylist playlist = ((PlaylistViewModel)((FrameworkElement)sender).DataContext).Base;
+            MobileDebug.Service.WriteEvent("ImgDetailTapped1", playlist?.AbsolutePath);
+
+            GetFrame().Navigate(typeof(PlaylistPage), playlist);
         }
 
         private void DetailPlaylist_PointerEntered(object sender, PointerRoutedEventArgs e)

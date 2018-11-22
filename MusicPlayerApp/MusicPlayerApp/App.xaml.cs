@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.Media.Playback;
 using Windows.Phone.UI.Input;
 using Windows.Storage;
 using Windows.UI.Core;
@@ -62,6 +63,7 @@ namespace FolderMusic
                 this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
+
             AutoSaveLoad asl = new AutoSaveLoad(null, null, simpleFileName, null);
             ILibrary library = await asl.LoadSimple(true);
 

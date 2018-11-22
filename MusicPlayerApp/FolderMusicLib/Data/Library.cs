@@ -116,7 +116,7 @@ namespace MusicPlayer.Data
 
         public void Load(IEnumerable<IPlaylist> playlists)
         {
-            if (playlists == null) return;
+            if (IsLoaded || playlists == null) return;
 
             string currentSongPath = CurrentPlaylist?.CurrentSong?.Path;
             double currentSongPosition = CurrentPlaylist?.CurrentSongPosition ?? 0;
@@ -138,7 +138,6 @@ namespace MusicPlayer.Data
             Playlists.Change(remainingPlaylists, addPlaylists);
 
             SetCurrentPlaylistAndCurrentSong(currentSongPath, currentSongPosition);
-            MobileDebug.Service.WriteEvent("LibraryLoad2", CurrentPlaylist?.AbsolutePath, CurrentPlaylist?.CurrentSongPosition, CurrentPlaylist?.CurrentSong?.Path);
 
             AutoSaveLoad.CheckLibrary(this, "LoadedComplete");
             IsLoaded = true;
@@ -186,9 +185,9 @@ namespace MusicPlayer.Data
             IPlaylistCollection playlists = new PlaylistCollection();
             playlists.Change(null, refreshedPlaylists);
 
-            MobileDebug.Service.WriteEvent("Library.Reset1", playlists?.Count);
+            if (CanceledLoading) return;
+
             Playlists = playlists;
-            MobileDebug.Service.WriteEvent("Library.Reset2", Playlists?.Count);
             CurrentPlaylist = playlists.FirstOrDefault();
         }
 

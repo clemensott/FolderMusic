@@ -10,7 +10,7 @@ namespace MusicPlayer.Data.Shuffle
 
         private static Random random = new Random();
 
-        public ShuffleCompleteCollection(ISongCollection songs, Song currentSong) : base(songs)
+        public ShuffleCompleteCollection(ISongCollection songs, Song currentSong) : this(songs)
         {
             Change(null, GetStart(songs, currentSong));
         }
@@ -36,15 +36,15 @@ namespace MusicPlayer.Data.Shuffle
             List<Song> remaining = new List<Song>(songs);
             int shuffleCount = GetCount(songs.Count);
             int currentSongIndex = GetCurrentSongIndex(songs.Count);
-
+            MobileDebug.Service.WriteEvent("ShuffleCompleteGetStart1", shuffleCount, currentSongIndex, currentSong.Path);
             for (int i = 0; i < shuffleCount; i++)
             {
                 Song addSong = i == currentSongIndex && currentSong != null ?
                     currentSong : remaining[random.Next(remaining.Count)];
+                MobileDebug.Service.WriteEvent("ShuffleCompleteGetStart2", i, addSong);
+                remaining.Remove(addSong);
 
                 yield return new ChangeCollectionItem<Song>(i, addSong);
-
-                remaining.Remove(addSong);
             }
         }
 
@@ -161,17 +161,16 @@ namespace MusicPlayer.Data.Shuffle
 
         private static int GetCurrentSongIndex(int songsCount)
         {
-            double divisor = (shuffleCompleteListNextCount + shuffleCompleteListPreviousCount) *
-                shuffleCompleteListPreviousCount;
+            double divisor = (shuffleCompleteListNextCount + shuffleCompleteListPreviousCount);
 
-            return (int)((GetCount(songsCount) - 1) / divisor);
+            return (int)((GetCount(songsCount) - 1) / divisor * shuffleCompleteListPreviousCount);
         }
 
         private static int GetCount(int songsCount)
         {
-            int count = shuffleCompleteListNextCount + shuffleCompleteListPreviousCount + 1;
-
-            return songsCount > count ? count : songsCount;
+            return (int)((GetCount(songsCount) - 1) / 
+                Convert.ToDouble(shuffleCompleteListNextCount + shuffleCompleteListPreviousCount) * 
+                shuffleCompleteListPreviousCount);
         }
 
         protected override IShuffleCollection GetNewThis(IEnumerable<Song> songs)

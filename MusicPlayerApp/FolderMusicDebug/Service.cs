@@ -12,15 +12,17 @@ namespace MobileDebug
 {
     public static class Service
     {
+        private const int maxLengthOfOneData = 1000;
         private const char addChar = '&';
         public const string ForegroundId = "Foreground";
         private const string debugDataBackFileName = "FolderMusicBackDebugData.txt",
             debugDataForeFileName = "FolderMusicForeDebugData.txt";
+        public const string NullReferenceValue = "RefNull";
+
         private static readonly StorageFolder debugFolder = KnownFolders.VideosLibrary;
         private const int maxDebugDataStringLength = 100000, minDebugDataStringLength = 50000;
         private static readonly object lockObj = new object();
 
-        private static bool isAppending = false;
         private static int debugDataStringLength = -1;
         private static StorageFile foreDebugDataFile, backDebugDataFile;
         private static Queue<Event> eventsBuffer = new Queue<Event>();
@@ -38,10 +40,10 @@ namespace MobileDebug
             Id = id;
         }
 
-        public static void WriteEvent(string name, string data)
+        public static void WriteEvent(string name, string text)
         {
             //System.Diagnostics.Debug.WriteLine(name);
-            Event debugEvent = new Event(name, Enumerable.Repeat(data, 1));
+            Event debugEvent = new Event(name, ToEnumerable(text));
 
             Append(debugEvent);
         }
@@ -49,7 +51,7 @@ namespace MobileDebug
         public static void WriteEvent(string name, IEnumerable data)
         {
             //System.Diagnostics.Debug.WriteLine(name);
-            Event debugEvent = new Event(name, data);
+            Event debugEvent = new Event(name, ToEnumerable(data));
 
             Append(debugEvent);
         }
@@ -61,25 +63,23 @@ namespace MobileDebug
 
         public static void WriteEvent(string name, Exception exc, params object[] data)
         {
-            WriteEvent(name, data.Concat(GetMessages(exc)));
+            WriteEvent(name, data, GetMessages(exc));
         }
 
         public static void WriteEventPair(string name, IEnumerable data)
         {
             //System.Diagnostics.Debug.WriteLine(name);
-            Event debugEvent = Event.GetPair(name, data);
-
-            Append(debugEvent);
+            WriteEvent(name, ConcatPair(ToEnumerable(data)));
         }
 
         public static void WriteEventPair(string name, params object[] data)
         {
-            WriteEventPair(name, (IEnumerable)data);
+            WriteEventPair(name, data.AsEnumerable());
         }
 
         public static void WriteEventPair(string name, Exception exc, params object[] data)
         {
-            WriteEventPair(name, data.Concat(GetMessagesPair(exc)));
+            WriteEvent(name, ConcatPair(ToEnumerable(data)), GetMessages(exc));
         }
 
         private static IEnumerable<string> GetMessages(Exception e)
@@ -97,22 +97,48 @@ namespace MobileDebug
             yield return "Stack: " + stackTrace;
         }
 
-        private static IEnumerable<string> GetMessagesPair(Exception e)
+        private static IEnumerable<string> ToEnumerable(string text)
         {
-            string stackTrace = e.StackTrace;
+            yield return text;
+        }
 
-            while (e != null)
+        private static IEnumerable<string> ToEnumerable(IEnumerable data)
+        {
+            foreach (object obj in data)
             {
-                yield return "Typ: ";
-                yield return e.GetType().Name;
-                yield return "Mes: ";
-                yield return e.Message;
+                if (!(obj is IEnumerable) || obj is string) yield return ToString(obj);
+                else
+                {
+                    foreach (string text in ToEnumerable((IEnumerable)obj)) yield return text;
+                }
+            }
+        }
 
-                e = e.InnerException;
+        private static IEnumerable<string> ConcatPair(IEnumerable<string> data)
+        {
+            bool isFirst = true;
+            string last = string.Empty;
+
+            foreach (string text in data)
+            {
+                if (isFirst) last = text;
+                else yield return last + text;
+
+                isFirst = !isFirst;
             }
 
-            yield return "Stack: ";
-            yield return stackTrace;
+            if (!isFirst) yield return last;
+        }
+
+        private static string ToString(object obj)
+        {
+            if (ReferenceEquals(obj, null)) return NullReferenceValue;
+            long value;
+            string text = obj.ToString();
+
+            if (text.Length > maxLengthOfOneData) return text.Remove(maxLengthOfOneData) + "[...]";
+
+            return text;
         }
 
         private static void Append(Event debugEvent)
@@ -129,19 +155,23 @@ namespace MobileDebug
         {
             while (true)
             {
+                Event e;
                 string text;
 
                 lock (eventsBuffer)
                 {
                     while (eventsBuffer.Count == 0) Monitor.Wait(eventsBuffer);
 
-                    text = eventsBuffer.Dequeue().ToDataString();
+                    e = eventsBuffer.Dequeue();
+                    text = e.ToDataString();
                 }
 
+                System.Diagnostics.Debug.WriteLine(e.Name+"Before");
                 try
                 {
                     StorageFile file = Id == ForegroundId ? await GetForeDebugDataFile() : await GetBackDebugDataFile();
                     await FileIO.AppendTextAsync(file, text);
+                    System.Diagnostics.Debug.WriteLine(e.Name + "After");
 
                     if (eventsBuffer.Count > 0) continue;
 

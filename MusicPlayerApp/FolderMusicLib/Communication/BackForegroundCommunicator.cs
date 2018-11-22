@@ -206,7 +206,7 @@ namespace MusicPlayer.Communication
         private void ReceiveSongsPropertyChanged(ValueSet valueSet, string value)
         {
             string playlistPath = valueSet[playlistPathKey].ToString();
-
+            MobileDebug.Service.WriteEvent("ReceiveSongsPropertyChanged", playlistPath);
             IPlaylist changedPlaylist;
             if (!HavePlaylist(playlistPath, out changedPlaylist)) return;
 
@@ -427,11 +427,11 @@ namespace MusicPlayer.Communication
             SendLibrary();
         }
 
-        private void SendLibrary()
+        private async void SendLibrary()
         {
             string value = library.Playlists.Count > 0 ? XmlConverter.Serialize(library) : libraryEmptyValue;
             ValueSet valueSet = receivers[libraryPrimaryKey].GetValueSet(value);
-
+            await System.Threading.Tasks.Task.Delay(5000);
             Send(valueSet);
         }
 
@@ -442,6 +442,8 @@ namespace MusicPlayer.Communication
             if (value != libraryEmptyValue) receivedLibrary.ReadXml(XmlConverter.GetReader(value));
 
             library.Load(receivedLibrary.Playlists);
+
+            //if (value == libraryEmptyValue) library.Playlists.Change(library?.Playlists, null);
         }
 
 
@@ -470,7 +472,7 @@ namespace MusicPlayer.Communication
         private void Send(ValueSet valueSet)
         {
             bool send = AllowedToSend(valueSet);
-            MobileDebug.Service.WriteEvent("Send", GetPrimaryKey(valueSet), send);
+            MobileDebug.Service.WriteEvent("Send", GetPrimaryKey(valueSet), "Do: " + send, "Loaded: " + library.IsLoaded);
             if (!send) return;
 
             senderMethod(valueSet);

@@ -9,9 +9,6 @@ namespace MobileDebug
     public class Event : IEquatable<Event>
     {
         private const char partSplitter = ';', eventSplitter = '|';
-        private const int maxLengthOfOneData = 1000;
-
-        public const string NullReferenceValue = "RefNull";
 
         private static int count = 0;
 
@@ -37,30 +34,9 @@ namespace MobileDebug
             ThreadId = Environment.CurrentManagedThreadId;
         }
 
-        internal Event(string name, IEnumerable data) : this(name)
-        {
-            Data = data.Cast<object>().Select(x => ToString(x)).ToArray();
-        }
-
-        private Event(string name, IEnumerable<string> data) : this(name)
+        public Event(string name, IEnumerable<string> data) : this(name)
         {
             Data = data.ToArray();
-        }
-
-        internal static Event GetPair(string name, IEnumerable data)
-        {
-            bool isFirst = true;
-            List<string> list = new List<string>();
-
-            foreach (string text in data.OfType<object>().Select(x => ToString(x)))
-            {
-                if (isFirst) list.Add(text);
-                else list[list.Count - 1] += text;
-
-                isFirst = !isFirst;
-            }
-
-            return new Event(name, list);
         }
 
         internal Event(StringBuilder dataString)
@@ -113,22 +89,6 @@ namespace MobileDebug
             }
 
             return dataString + eventSplitter;
-        }
-
-        private static string ToString(object obj)
-        {
-            if (ReferenceEquals(obj, null)) return NullReferenceValue;
-            long value;
-            string text = obj.ToString();
-
-            if (long.TryParse(text, out value) && value > TimeSpan.TicksPerDay * 10000)
-            {
-                return GetDateTimeString(value);
-            }
-
-            if (text.Length > maxLengthOfOneData) return text.Remove(maxLengthOfOneData) + "[...]";
-
-            return text;
         }
 
         public static string GetDateTimeString(long ticks)

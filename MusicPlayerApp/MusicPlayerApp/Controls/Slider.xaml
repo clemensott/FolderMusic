@@ -15,6 +15,7 @@
     <UserControl.Resources>
         <con:IsIndeterminateToHideConverter x:Key="toHideConverter"/>
         <con:IsIndeterminateToShowConverter x:Key="toShowConverter"/>
+        <con:TimeSpanConverter x:Key="timeCon"/>
     </UserControl.Resources>
 
     <Grid>
@@ -24,16 +25,19 @@
         </Grid.RowDefinitions>
 
         <Slider Name="sld" Height="60" VerticalAlignment="Top" Minimum="0" 
-                Maximum="1" Value="0" SnapsTo="StepValues" StepFrequency="0.001" 
-                Visibility="{Binding ElementName=control,Path=IsIndeterminate,Converter={StaticResource toHideConverter}}"
+                Maximum="1" SnapsTo="StepValues" StepFrequency="0.001" 
+                Visibility="{Binding ElementName=control,Path=IsIndeterminate,
+                  Converter={StaticResource toHideConverter}}"
+                Value="{Binding ElementName=control,Path=CurrentSong.PositionRatio,Mode=OneWay}"
                 Holding="sld_Holding" ValueChanged="sld_ValueChanged" PointerEntered="sld_PointerEntered"/>
 
         <ProgressBar IsIndeterminate="True" Height="60" VerticalAlignment="Top"
-                Visibility="{Binding ElementName=control,Path=IsIndeterminate,Converter={StaticResource toShowConverter}}"/>
+                     Visibility="{Binding ElementName=control,Path=IsIndeterminate,
+                       Converter={StaticResource toShowConverter}}"/>
 
-        <TextBlock Name="tblPosition" Grid.Row="1" Text="0:00"
-                   VerticalAlignment="Bottom" HorizontalAlignment="Left" FontSize="20"/>
-        <TextBlock Name="tblDuration" Grid.Row="1" Text="0:00"
-                   VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="20"/>
+        <TextBlock Name="tblPosition" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Left" FontSize="20"
+                   Text="{Binding ElementName=control,Path=CurrentSong.Position,Converter={StaticResource timeCon}}"/>
+        <TextBlock Name="tblDuration" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="20"
+                   Text="{Binding ElementName=control,Path=CurrentSong.Duration,Converter={StaticResource timeCon}}"/>
     </Grid>
 </UserControl>

@@ -1,5 +1,7 @@
 ﻿using FolderMusic.ViewModels;
 using MusicPlayer;
+using MusicPlayer.Data;
+using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -9,26 +11,16 @@ namespace FolderMusic
 {
     public sealed partial class PlaylistPage : Page
     {
-        private static bool playlistPageOpen;
-
-        public static bool Open { get { return playlistPageOpen; } }
-
         private PlaylistViewModel viewModel;
 
         public PlaylistPage()
         {
             this.InitializeComponent();
-            playlistPageOpen = true;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            DataContext = viewModel = e.Parameter as PlaylistViewModel;
-        }
-
-        protected override void OnNavigatedFrom(NavigationEventArgs e)
-        {
-            playlistPageOpen = false;
+            DataContext = viewModel = new PlaylistViewModel(e.Parameter as IPlaylist);
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)

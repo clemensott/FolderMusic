@@ -115,16 +115,6 @@ namespace MusicPlayer.Data
             CurrentSongPosition = currentPlaySong.Position;
         }
 
-        private IEnumerable<Song> SetCurrentSongsOrderedWithAddedSongs(IEnumerable<Song> currentSongs, IEnumerable<Song> addSongs)
-        {
-            return GetOrderedSongs(currentSongs.Concat(addSongs));
-        }
-
-        private IEnumerable<Song> GetOrderedSongs(IEnumerable<Song> songs)
-        {
-            return songs.OrderBy(x => x.Title).ThenBy(x => x.Artist);
-        }
-
         private async Task<StorageFolder> GetStorageFolder()
         {
             if (AbsolutePath == string.Empty) return KnownFolders.MusicLibrary;
@@ -154,9 +144,8 @@ namespace MusicPlayer.Data
 
             if (Parent.Parent.CanceledLoading) return;
 
-            Song currentSong = foundSongs?.FirstOrDefault();
-            Songs = new SongCollection(foundSongs, ShuffleType.Off, currentSong);
-            CurrentSong = currentSong;
+            Songs = new SongCollection(foundSongs, ShuffleType.Off, null);
+            CurrentSong = Songs.Shuffle.FirstOrDefault();
         }
 
         private IEnumerable<Song> GetSongsFromStorageFiles(IEnumerable<StorageFile> files)

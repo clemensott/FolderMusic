@@ -1,4 +1,5 @@
-﻿using MusicPlayer.Data;
+﻿using FolderMusic.ViewModels;
+using MusicPlayer.Data;
 using System;
 using Windows.Media.Playback;
 using Windows.UI.Core;
@@ -11,7 +12,7 @@ namespace FolderMusic
 {
     public sealed partial class Slider : UserControl
     {
-        private const double intervall = 1000, zoomHalfWidth = 0.05;
+        private const double intervall = 100, zoomWidth = 0.1;
 
         public static readonly DependencyProperty IsIndeterminateProperty =
             DependencyProperty.Register("IsIndeterminate", typeof(bool), typeof(Slider),
@@ -23,18 +24,14 @@ namespace FolderMusic
             var value = (bool)e.NewValue;
         }
 
-        public static readonly DependencyProperty LibraryProperty =
-            DependencyProperty.Register("Library", typeof(ILibrary), typeof(Slider),
-                new PropertyMetadata(null, new PropertyChangedCallback(OnLibraryPropertyChanged)));
+        public static readonly DependencyProperty CurrentSongProperty =
+            DependencyProperty.Register("CurrentSong", typeof(CurrentSongViewModel), typeof(Slider),
+                new PropertyMetadata(null, new PropertyChangedCallback(OnCurrentSongPropertyChanged)));
 
-        private static void OnLibraryPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        private static void OnCurrentSongPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             var s = (Slider)sender;
-            var oldValue = (ILibrary)e.OldValue;
-            var newValue = (ILibrary)e.NewValue;
-
-            s.Unsubscribe(oldValue);
-            s.Subscribe(newValue);
+            var value = (CurrentSongViewModel)e.NewValue;
         }
 
         public static readonly DependencyProperty PlayerProperty =
@@ -43,17 +40,16 @@ namespace FolderMusic
 
         private static void OnPlayerPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
+            MobileDebug.Service.WriteEvent("SliderPlayerChanged1");
             var s = (Slider)sender;
             var oldValue = (MediaPlayer)e.OldValue;
             var newValue = (MediaPlayer)e.NewValue;
-
+            MobileDebug.Service.WriteEvent("SliderPlayerChanged2", oldValue?.CurrentState, newValue?.CurrentState);
             if (oldValue != null) oldValue.CurrentStateChanged -= s.MediaPlayer_CurrentStateChanged;
             if (newValue != null) newValue.CurrentStateChanged += s.MediaPlayer_CurrentStateChanged;
 
-            s.SetValuesSafe();
-
-            s.IsIndeterminate = newValue.CurrentState != MediaPlayerState.Playing &&
-                newValue.CurrentState != MediaPlayerState.Paused;
+            s.SetTimer();
+            s.SetIsIndeterminate();
         }
 
         private bool playerPositionEnabled = true;
@@ -70,7 +66,7 @@ namespace FolderMusic
         {
             get
             {
-                return Player?.Position.TotalMilliseconds ?? MusicPlayer.Data.Library.DefaultSongsPositionMillis;
+                return Player?.Position.TotalMilliseconds ?? Library.DefaultSongsPositionMillis;
             }
         }
 
@@ -82,16 +78,16 @@ namespace FolderMusic
             }
         }
 
+        public CurrentSongViewModel CurrentSong
+        {
+            get { return (CurrentSongViewModel)GetValue(CurrentSongProperty); }
+            set { SetValue(CurrentSongProperty, value); }
+        }
+
         public MediaPlayer Player
         {
             get { return (MediaPlayer)GetValue(PlayerProperty); }
             set { SetValue(PlayerProperty, value); }
-        }
-
-        public ILibrary Library
-        {
-            get { return (ILibrary)GetValue(LibraryProperty); }
-            set { SetValue(LibraryProperty, value); }
         }
 
         public Slider()
@@ -103,6 +99,21 @@ namespace FolderMusic
             timer.Tick += Timer_Tick;
 
             Window.Current.Activated += Window_Activated;
+
+            try
+            {
+                MobileDebug.Service.WriteEvent("SliderCtor1", Player);
+                Player = BackgroundMediaPlayer.Current;
+                MobileDebug.Service.WriteEvent("SliderCtor2", Player);
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Service.WriteEvent("SliderCtorFail", e);
+            }
+
+            //Timer_Tick(timer, null);
+            timer.Start();
+
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -128,153 +139,9 @@ namespace FolderMusic
             catch { }
         }
 
-        private void Subscribe(ILibrary library)
-        {
-            if (library == null) return;
-
-            library.PlayStateChanged += OnPlayStateChanged;
-            library.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
-
-            Subscribe(library.CurrentPlaylist);
-        }
-
-        private void Unsubscribe(ILibrary library)
-        {
-            if (library == null) return;
-
-            library.PlayStateChanged -= OnPlayStateChanged;
-            library.CurrentPlaylistChanged -= OnCurrentPlaylistChanged;
-
-            Unsubscribe(library.CurrentPlaylist);
-        }
-
-        private void Subscribe(IPlaylist playlist)
-        {
-            if (playlist == null) return;
-
-            playlist.CurrentSongChanged += OnCurrentSongChanged;
-            playlist.CurrentSongPositionChanged += OnCurrentSongPositionChanged;
-
-            Subscribe(playlist.CurrentSong);
-        }
-
-        private void Unsubscribe(IPlaylist playlist)
-        {
-            if (playlist == null) return;
-
-            playlist.CurrentSongChanged -= OnCurrentSongChanged;
-            playlist.CurrentSongPositionChanged -= OnCurrentSongPositionChanged;
-
-            Unsubscribe(playlist.CurrentSong);
-        }
-
-        private void Subscribe(Song song)
-        {
-            if (song == null) return;
-
-            song.DurationChanged += OnSongDurationChanged;
-        }
-
-        private void Unsubscribe(Song song)
-        {
-            if (song == null) return;
-
-            song.DurationChanged -= OnSongDurationChanged;
-        }
-
-        private void OnPlayStateChanged(object sender, PlayStateChangedEventArgs args)
-        {
-            if (args.NewValue) StartTimer();
-            else StopTimer();
-        }
-
-        private void OnCurrentPlaylistChanged(object sender, CurrentPlaylistChangedEventArgs args)
-        {
-            Unsubscribe(args.OldCurrentPlaylist);
-            Subscribe(args.NewCurrentPlaylist);
-
-            SetValuesSafe();
-        }
-
-        private void OnCurrentSongChanged(object sender, CurrentSongChangedEventArgs args)
-        {
-            Unsubscribe(args.OldCurrentSong);
-            Subscribe(args.NewCurrentSong);
-
-            SetValuesSafe();
-            previousUpdatedTime = DateTime.Now;
-        }
-
-        private void OnCurrentSongPositionChanged(object sender, CurrentSongPositionChangedEventArgs args)
-        {
-            SetValuesSafe();
-            previousUpdatedTime = DateTime.Now;
-        }
-
-        private void OnSongDurationChanged(object sender, SongDurationChangedEventArgs args)
-        {
-            SetValuesSafe();
-        }
-
-        private void SetValuesSafe()
-        {
-            Utils.DoSafe(SetValues);
-        }
-
-        private void SetValues()
-        {
-            try
-            {
-                double percent = Library?.CurrentPlaylist?.CurrentSongPosition ?? 0;
-                double duration = Library?.CurrentPlaylist?.CurrentSong?.DurationMilliseconds ?? Song.DefaultDuration;
-
-                if (duration == 0)
-                {
-                    duration = Song.DefaultDuration;
-                    MobileDebug.Service.WriteEvent("Slider.SetValues2", "Lib != null", Library != null,
-                        "Playlist != null", Library?.CurrentPlaylist != null,
-                        "Song != null", Library?.CurrentPlaylist?.CurrentSong != null,
-                        "Duration != null", Library?.CurrentPlaylist?.CurrentSong?.DurationMilliseconds != null);
-                }
-
-                try
-                {
-                    sld.Value = percent;
-                    tblPosition.Text = GetShowTime(percent * duration);
-                    tblDuration.Text = GetShowTime(duration);
-                }
-                catch (Exception e)
-                {
-                    MobileDebug.Service.WriteEvent("Slider.SetValues3", e, percent, duration);
-                }
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Service.WriteEvent("Slider.SetValues1", e);
-            }
-        }
-
-        private string GetShowTime(double totalMilliseconds)
-        {
-            try
-            {
-                int totalSeconds = Convert.ToInt32(totalMilliseconds / 1000);
-                int seconds = totalSeconds % 60, minutes = (totalSeconds / 60) % 60, hours = totalSeconds / 3600;
-                string time = string.Empty;
-
-                time += hours > 0 ? hours.ToString() + ":" : string.Empty;
-                time += hours > 0 ? string.Format("{0,2}", minutes) : minutes.ToString();
-                time += string.Format(":{0,2}", seconds);
-
-                return time.Replace(" ", "0");
-            }
-            catch { }
-
-            return "Catch";
-        }
-
         private void MediaPlayer_CurrentStateChanged(MediaPlayer sender, object args)
         {
+            MobileDebug.Service.WriteEvent("SliderCurrentStateChanged", Player?.CurrentState, CurrentSong?.Title, CurrentSong.Duration);
             Utils.DoSafe(SetTimer);
             Utils.DoSafe(SetIsIndeterminate);
         }
@@ -287,7 +154,7 @@ namespace FolderMusic
 
         private void SetIsIndeterminate()
         {
-            MediaPlayerState state = Player.CurrentState;
+            MediaPlayerState state = Player?.CurrentState ?? MediaPlayerState.Closed;
             IsIndeterminate = state != MediaPlayerState.Playing && state != MediaPlayerState.Paused;
         }
 
@@ -302,30 +169,39 @@ namespace FolderMusic
             timer.Stop();
         }
 
-        private void Timer_Tick(object sender, object e)
+        private void Timer_Tick(object sender, object args)
         {
-            timer.Stop();
-            timer.Interval = TimeSpan.FromMilliseconds(intervall - (PlayerPositionMilliseconds % intervall));
-            timer.Start();
+            //try
+            //{
+            //    timer.Stop();
+            //    timer.Interval = TimeSpan.FromMilliseconds(intervall - (PlayerPositionMilliseconds % intervall));
+            //    timer.Start();
+            //}
+            //catch(Exception e)
+            //{
+            //    MobileDebug.Service.WriteEvent("SliderTimerTickFail1", e);
+            //    MobileDebug.Service.WriteEvent("SliderTimerTickFail2", PlayerPositionMilliseconds);
+            //    timer.Start();
+            //    MobileDebug.Service.WriteEvent("SliderTimerTickFail3");
+            //}
 
-            if (!playerPositionEnabled || Library?.CurrentPlaylist == null) return;
+            if (!playerPositionEnabled || CurrentSong == null) return;
 
-            IPlaylist playlist = Library.CurrentPlaylist;
             DateTime currentDateTime = DateTime.Now;
             double position = PlayerPositionMilliseconds;
             double duration = PlayerNaturalDurationMilliseconds;
 
-            playlist.CurrentSong.DurationMilliseconds = duration;
+            CurrentSong.Duration = TimeSpan.FromMilliseconds(duration);
 
-            if (position > 500 && duration > 500) playlist.CurrentSongPosition = position / duration;
+            if (position > 500 && duration > 500) CurrentSong.PositionRatio = position / duration;
             else if (Player?.CurrentState == MediaPlayerState.Playing)
             {
-                position = playlist.CurrentSongPosition * playlist.CurrentSong.DurationMilliseconds;
-                position += (currentDateTime - previousUpdatedTime).TotalMilliseconds;
-                playlist.CurrentSongPosition = position / duration;
+                CurrentSong.Position += currentDateTime - previousUpdatedTime;
 
                 previousUpdatedTime = currentDateTime;
             }
+
+            SetIsIndeterminate();
         }
 
         private void sld_PointerEntered(object sender, PointerRoutedEventArgs e)
@@ -339,11 +215,7 @@ namespace FolderMusic
 
             playerPositionEnabled = true;
 
-            double percent = Library?.CurrentPlaylist?.CurrentSongPosition ?? 0;
-            double duration = Library?.CurrentPlaylist?.CurrentSong?.DurationMilliseconds ?? Song.DefaultDuration;
-
-            Player.Position = TimeSpan.FromMilliseconds(percent * duration);
-            //Player.Position = Library?.CurrentPlaylist?.GetCurrentSongPosition() ?? new TimeSpan();
+            Player.Position = CurrentSong.Position;
 
             sld.Minimum = 0;
             sld.Maximum = 1;
@@ -351,20 +223,14 @@ namespace FolderMusic
 
         private void sld_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
-            if (Library?.CurrentPlaylist == null) return;
-
-            Library.CurrentPlaylist.CurrentSongPosition = e.NewValue;
-
-            //if (!playerPositionEnabled) return;
-
-            //double duration = Library?.CurrentPlaylist?.CurrentSong?.DurationMilliseconds ?? Song.DefaultDuration;
-            //Player.Position = TimeSpan.FromMilliseconds(e.NewValue * duration);
+            if (CurrentSong != null) CurrentSong.PositionRatio = e.NewValue;
         }
 
         private void sld_Holding(object sender, HoldingRoutedEventArgs e)
         {
-            sld.Minimum = sld.Value - zoomHalfWidth;
-            sld.Maximum = sld.Value + zoomHalfWidth;
+            double value = sld.Value;
+            sld.Minimum = value - zoomWidth * value;
+            sld.Maximum = value + (1 - value) * zoomWidth;
         }
     }
 }

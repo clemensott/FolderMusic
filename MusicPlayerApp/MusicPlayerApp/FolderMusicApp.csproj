@@ -99,7 +99,6 @@
     </Compile>
     <Compile Include="Controls\ShuffleSongsCollection.cs" />
     <Compile Include="Converters\SongsCountConverter.cs" />
-    <Compile Include="Controls\PlaylistsUpdateCollection.cs" />
     <Compile Include="Controls\ShuffleOffSongsCollection.cs" />
     <Compile Include="Converters\SubstractConverter.cs" />
     <Compile Include="Converters\TimeSpanConverter.cs" />

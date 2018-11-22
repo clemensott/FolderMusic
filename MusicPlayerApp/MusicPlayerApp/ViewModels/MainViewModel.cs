@@ -1,6 +1,7 @@
 ﻿using MusicPlayer.Data;
 using MusicPlayer.Data.SubscriptionsHandler;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -35,14 +36,31 @@ namespace FolderMusic.ViewModels
             Library = library;
             CurrentSong = new CurrentSongViewModel(library);
             CurrentPlaylist = new CurrentPlaylistViewModel(library);
-            Playlists = new ObservableCollection<PlaylistViewModel>();
+            Playlists = new ObservableCollection<PlaylistViewModel>(Library.Playlists.Select(p => new PlaylistViewModel(p)));
 
             lsh = LibrarySubscriptionsHandler.GetInstance(library);
 
+            lsh.Loaded += OnLoaded;
             lsh.PlayStateChanged += OnPlayStateChanged;
             lsh.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
             lsh.PlaylistsPropertyChanged += OnPlaylistsPropertyChanged;
             lsh.PlaylistCollectionChanged += OnPlaylistCollectionChanged;
+        }
+
+        private void OnLoaded(object sender, SubscriptionsEventArgs<ILibrary, EventArgs> e)
+        {
+            foreach (PlaylistViewModel playlist in Playlists.Where(p => !e.Source.Playlists.Contains(p.Base)).ToArray())
+            {
+                Playlists.Remove(playlist);
+            }
+
+            int i = 0;
+            foreach (IPlaylist playlist in e.Source.Playlists)
+            {
+                if (!Playlists.Any(p => p.Base == playlist)) Playlists.Insert(i, new PlaylistViewModel(playlist));
+
+                i++;
+            }
         }
 
         private void OnPlayStateChanged(object sender, SubscriptionsEventArgs<ILibrary, PlayStateChangedEventArgs> e)

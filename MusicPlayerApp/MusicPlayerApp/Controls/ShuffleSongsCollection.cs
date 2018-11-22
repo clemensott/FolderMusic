@@ -15,6 +15,8 @@ namespace FolderMusic.Converters
         {
             source = songs;
 
+            if (source == null) return;
+
             source.ShuffleChanged += Songs_ShuffleChanged;
 
             Subscribe(source.Shuffle);

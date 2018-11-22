@@ -53,7 +53,7 @@ namespace MusicPlayer.Data
 
             List<ChangeCollectionItem<IPlaylist>> removed = ChangeCollectionItem<IPlaylist>.GetRemovedChanged(removeArray, this);
             List<ChangeCollectionItem<IPlaylist>> added = new List<ChangeCollectionItem<IPlaylist>>();
-            IEnumerable<IPlaylist> newList = list.Except(removed.Select(c => c.Item)).Concat(added.Select(c => c.Item)).ToArray();
+            IEnumerable<IPlaylist> newList = list.Except(removed.Select(c => c.Item)).Concat(added.Select(c => c.Item));
 
             foreach (IPlaylist playlist in addArray.OrderBy(p => p.AbsolutePath))
             {
@@ -91,6 +91,8 @@ namespace MusicPlayer.Data
         {
             List<string> list = paths.ToList();
             if (!list.Contains(path)) list.Add(path);
+
+            MobileDebug.Service.WriteEvent("WouldIndexOf", path, list.OrderBy(p => p).IndexOf(path), "Ordered:", list.OrderBy(p => p));
 
             return list.OrderBy(p => p).IndexOf(path);
         }

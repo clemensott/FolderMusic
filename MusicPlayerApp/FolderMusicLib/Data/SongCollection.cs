@@ -44,6 +44,9 @@ namespace MusicPlayer.Data
         public SongCollection(IEnumerable<Song> songs, ShuffleType type, Song currentSong)
         {
             list = new List<Song>(songs);
+
+            foreach (Song song in list) song.Parent = this;
+
             Shuffle = GetShuffleType(type, currentSong);
         }
 

@@ -10,7 +10,7 @@ namespace MusicPlayer
         public async static Task<T> LoadObjectAsync<T>(string filenameWithExtention)
         {
             string xmlText = await LoadTextAsync(filenameWithExtention);
-            MobileDebug.Service.WriteEvent("LoadObject", filenameWithExtention, xmlText);
+
             return XmlConverter.Deserialize<T>(xmlText);
         }
 
@@ -43,10 +43,8 @@ namespace MusicPlayer
             StorageFile file = null;
             try
             {
-                MobileDebug.Service.WriteEvent("IOSaveText1", filenameWithExtention, text);
                 file = await GetOrCreateStorageFileAsync(filenameWithExtention);
                 await FileIO.WriteTextAsync(file, text);
-                MobileDebug.Service.WriteEvent("IOSaveText2", filenameWithExtention, file.Path);
             }
             catch (Exception e)
             {

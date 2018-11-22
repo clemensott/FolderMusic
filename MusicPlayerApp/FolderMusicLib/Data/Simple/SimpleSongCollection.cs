@@ -123,6 +123,8 @@ namespace MusicPlayer.Data.Simple
             reader.ReadStartElement();
             list = new List<Song>(XmlConverter.DeserializeList<Song>(reader, "Song"));
 
+            foreach (Song song in list) song.Parent = this;
+
             Shuffle = new SimpleShuffleCollection(this, shuffleType);
         }
 

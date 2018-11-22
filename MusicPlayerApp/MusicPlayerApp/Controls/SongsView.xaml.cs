@@ -23,6 +23,8 @@ namespace FolderMusic
         {
             var s = (SongsView)sender;
             var value = (Song)e.NewValue;
+
+            s.SetSelectedItem();
         }
 
         public static readonly DependencyProperty SourceProperty =

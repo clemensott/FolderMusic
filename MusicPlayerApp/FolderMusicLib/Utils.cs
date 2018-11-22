@@ -90,6 +90,8 @@ namespace MusicPlayer
             foreach (T item in items)
             {
                 if (item.Equals(searchItem)) return i;
+
+                i++;
             }
 
             return -1;
