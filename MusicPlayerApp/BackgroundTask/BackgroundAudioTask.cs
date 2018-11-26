@@ -173,6 +173,8 @@ namespace BackgroundTask
 
         private void BackgroundMediaPlayer_CurrentStateChanged(MediaPlayer sender, object args)
         {
+            library.PlayerState = sender.CurrentState;
+
             bool pauseAllowed = false, playling = sender.CurrentState == MediaPlayerState.Playing;
             double curMillis = sender.Position.TotalMilliseconds;
             double natMillis = sender.NaturalDuration.TotalMilliseconds;

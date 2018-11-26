@@ -92,6 +92,7 @@
     <Compile Include="Data\Interfaces\IPlaylistCollection.cs" />
     <Compile Include="Data\Interfaces\ISongCollection.cs" />
     <Compile Include="Data\Interfaces\SongsChangedEventArgs.cs" />
+    <Compile Include="Data\EventArgs\PlayerStateChangedEventArgs.cs" />
     <Compile Include="Data\SubscriptionsHandler\LibrarySubscriptionsHandler.cs" />
     <Compile Include="Data\Simple\SimpleShuffleCollection.cs" />
     <Compile Include="Data\Simple\SimpleSongCollection.cs" />

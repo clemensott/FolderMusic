@@ -5,11 +5,17 @@
     xmlns:local="using:FolderMusic"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:con="using:FolderMusic.Converters"
     mc:Ignorable="d"
     x:Name="playlistPage"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     Loaded="Page_Loaded">
 
+    <Page.Resources>
+        <con:SongsCountConverter x:Key="songsCountConverter"/>
+        <con:RelativePathConverter x:Key="relativePathConverter"/>
+    </Page.Resources>
+    
     <Grid HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

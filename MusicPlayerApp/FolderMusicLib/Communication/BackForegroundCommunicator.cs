@@ -32,6 +32,7 @@ namespace MusicPlayer.Communication
             currentPlaylistPrimaryKey = "CurrentPlaylist" + primaryKey,
             settingsPrimaryKey = "Settings" + primaryKey,
             playStatePrimaryKey = "PlayState" + primaryKey,
+            playerStatePrimaryKey = "PlayerState" + primaryKey,
             getLibraryPrimaryKey = "GetLibrary" + primaryKey,
             skipPrimaryKey = "Skip" + primaryKey,
 
@@ -73,7 +74,9 @@ namespace MusicPlayer.Communication
             lsh.PlaylistsPropertyChanged += OnPlaylistsPropertyChanged;
             lsh.PlaylistCollectionChanged += OnPlaylistCollectionChanged;
             lsh.PlayStateChanged += OnPlayStateChanged;
+            lsh.PlayerStateChanged += OnPlayerStateChanged;
             lsh.AllPlaylists.CurrentSongChanged += OnAllPlaylists_CurrentSongChanged;
+            lsh.AllPlaylists.CurrentSongPositionChanged += OnAllPlaylists_CurrentSongPositionChanged;
             lsh.AllPlaylists.LoopChanged += OnAllPlaylists_LoopChanged;
             lsh.AllPlaylists.SongsPropertyChanged += OnAllPlaylists_SongsPropertyChanged;
             lsh.AllPlaylists.SongCollectionChanged += OnAllPlaylists_SongCollectionChanged;
@@ -92,6 +95,7 @@ namespace MusicPlayer.Communication
             yield return new Receiver(artistPrimaryKey, new Action<ValueSet, string>(ReceiveSongArtistChanged));
             yield return new Receiver(durationPrimaryKey, new Action<ValueSet, string>(ReceiveSongDurationChanged));
             yield return new Receiver(currentSongPrimaryKey, new Action<ValueSet, string>(ReceiveCurrentSongChanged));
+            yield return new Receiver(songPositionPrimaryKey, new Action<ValueSet, string>(ReceiveSongPositionChanged));
             yield return new Receiver(songsPropertPrimaryKey, new Action<ValueSet, string>(ReceiveSongsPropertyChanged));
             yield return new Receiver(songsCollectionPrimaryKey, new Action<ValueSet, string>(ReceiveSongsChanged));
             yield return new Receiver(shufflePropertyPrimaryKey, new Action<ValueSet, string>(ReceiveShufflePropertyChanged));
@@ -103,10 +107,10 @@ namespace MusicPlayer.Communication
             yield return new Receiver(currentPlaylistPrimaryKey, new Action<ValueSet, string>(ReceiveCurrentPlaylist));
             yield return new Receiver(settingsPrimaryKey, new Action<ValueSet, string>(ReceiveSettings));
             yield return new Receiver(playStatePrimaryKey, new Action<ValueSet, string>(ReceivePlayState));
+            yield return new Receiver(playerStatePrimaryKey, new Action<ValueSet, string>(ReceivePlayerState));
             yield return new Receiver(getLibraryPrimaryKey, new Action<ValueSet, string>(ReceiveGetLibrary));
             yield return new Receiver(skipPrimaryKey, new Action<ValueSet, string>(ReceiveSkippedSong));
         }
-
 
         private void OnAllPlaylists_AllSongs_ArtistChanged(object sender, SubscriptionsEventArgs<Song, SongArtistChangedEventArgs> e)
         {
@@ -192,6 +196,28 @@ namespace MusicPlayer.Communication
         }
 
 
+        private void OnAllPlaylists_CurrentSongPositionChanged(object sender, SubscriptionsEventArgs<IPlaylist, CurrentSongPositionChangedEventArgs> e)
+        {
+            string value = e.Base.NewCurrentSongPosition.ToString();
+            string playlistPath = e.Source.AbsolutePath;
+
+            ValueSet valueSet = receivers[songPositionPrimaryKey].GetValueSet(value);
+            valueSet.Add(playlistPathKey, playlistPath);
+
+            Send(valueSet);
+        }
+
+        private void ReceiveSongPositionChanged(ValueSet valueSet, string value)
+        {
+            string playlistPath = valueSet[playlistPathKey].ToString();
+
+            IPlaylist changedPlaylist;
+            if (!HavePlaylist(playlistPath, out changedPlaylist)) return;
+
+            changedPlaylist.CurrentSongPosition = double.Parse(value);
+        }
+
+
         private void OnAllPlaylists_SongsPropertyChanged(object sender, SubscriptionsEventArgs<IPlaylist, SongsChangedEventArgs> e)
         {
             string value = XmlConverter.Serialize(e.Source.Songs);
@@ -206,7 +232,7 @@ namespace MusicPlayer.Communication
         private void ReceiveSongsPropertyChanged(ValueSet valueSet, string value)
         {
             string playlistPath = valueSet[playlistPathKey].ToString();
-            MobileDebug.Service.WriteEvent("ReceiveSongsPropertyChanged", playlistPath);
+
             IPlaylist changedPlaylist;
             if (!HavePlaylist(playlistPath, out changedPlaylist)) return;
 
@@ -394,6 +420,20 @@ namespace MusicPlayer.Communication
         private void ReceivePlayState(ValueSet valueSet, string value)
         {
             library.IsPlaying = bool.Parse(value);
+        }
+
+
+        private void OnPlayerStateChanged(object sender, SubscriptionsEventArgs<ILibrary, PlayerStateChangedEventArgs> e)
+        {
+            string value = Enum.GetName(typeof(MediaPlayerState), e.Base.NewState);
+            ValueSet valueSet = receivers[playerStatePrimaryKey].GetValueSet(value);
+
+            Send(valueSet);
+        }
+
+        private void ReceivePlayerState(ValueSet valueSet, string value)
+        {
+            library.PlayerState = (MediaPlayerState)Enum.Parse(typeof(MediaPlayerState), value);
         }
 
 

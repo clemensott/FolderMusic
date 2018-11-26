@@ -3,6 +3,7 @@ using MusicPlayer.Data.Shuffle;
 using MusicPlayer.Data.SubscriptionsHandler;
 using System;
 using System.ComponentModel;
+using Windows.Media.Playback;
 
 namespace FolderMusic.ViewModels
 {
@@ -41,12 +42,6 @@ namespace FolderMusic.ViewModels
             set { if (library?.CurrentPlaylist != null) library.CurrentPlaylist.CurrentSongPosition = value; }
         }
 
-        public TimeSpan Position
-        {
-            get { return TimeSpan.FromDays(PositionRatio * Duration.TotalDays); }
-            set { if (Duration.TotalDays > 0) library.CurrentPlaylist.CurrentSongPosition = value.TotalDays / Duration.TotalDays; }
-        }
-
         public TimeSpan Duration
         {
             get { return TimeSpan.FromMilliseconds(library?.CurrentPlaylist?.CurrentSong?.DurationMilliseconds ?? 0); }
@@ -75,11 +70,14 @@ namespace FolderMusic.ViewModels
             }
         }
 
+        public MediaPlayerState PlayerState { get { return library?.PlayerState ?? MediaPlayerState.Closed; } }
+
         public CurrentSongViewModel(ILibrary library)
         {
             this.library = library;
             lsh = LibrarySubscriptionsHandler.GetInstance(library);
 
+            lsh.PlayerStateChanged += OnPlayerStateChanged;
             lsh.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
             lsh.CurrentPlaylist.CurrentSong.ArtistChanged += OnArtistChanged;
             lsh.CurrentPlaylist.CurrentSong.TitleChanged += OnTitleChanged;
@@ -90,15 +88,20 @@ namespace FolderMusic.ViewModels
             lsh.CurrentPlaylist.ShuffleChanged += onShuffleChanged;
         }
 
+        private void OnPlayerStateChanged(object sender, SubscriptionsEventArgs<ILibrary, PlayerStateChangedEventArgs> e)
+        {
+            OnPropertyChanged(nameof(PlayerState));
+        }
+
         private void OnCurrentPlaylistChanged(object sender, EventArgs e)
         {
             OnPropertyChanged(nameof(Artist));
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(PositionRatio));
-            OnPropertyChanged(nameof(Position));
             OnPropertyChanged(nameof(Duration));
             OnPropertyChanged(nameof(Loop));
             OnPropertyChanged(nameof(Shuffle));
+            OnPropertyChanged(nameof(PlayerState));
         }
 
         private void OnArtistChanged(object sender, EventArgs e)
@@ -114,7 +117,6 @@ namespace FolderMusic.ViewModels
         private void OnDurationChanged(object sender, EventArgs e)
         {
             OnPropertyChanged(nameof(PositionRatio));
-            OnPropertyChanged(nameof(Position));
             OnPropertyChanged(nameof(Duration));
         }
 
@@ -123,14 +125,12 @@ namespace FolderMusic.ViewModels
             OnPropertyChanged(nameof(Artist));
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(PositionRatio));
-            OnPropertyChanged(nameof(Position));
             OnPropertyChanged(nameof(Duration));
         }
 
         private void OnPositionChanged(object sender, EventArgs e)
         {
             OnPropertyChanged(nameof(PositionRatio));
-            OnPropertyChanged(nameof(Position));
         }
 
         private void OnLoopChanged(object sender, EventArgs e)

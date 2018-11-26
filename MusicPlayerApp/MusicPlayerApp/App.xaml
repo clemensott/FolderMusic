@@ -24,7 +24,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
         <Style x:Key="HHeader" TargetType="Hub">
             <Setter Property="HeaderTemplate">
                 <Setter.Value>
@@ -34,12 +34,5 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <con:ShuffleIconConverter x:Key="shuffleConverter"/>
-        <con:LoopIconConverter x:Key="loopConverter"/>
-        <con:PlayPauseIconConverter x:Key="playPauseIconConverter"/>
-        <con:PlayPauseTextConverter x:Key="playPauseTextConverter"/>
-        <con:SongsCountConverter x:Key="songsCountConverter"/>
-        <con:RelativePathConverter x:Key="relativePathConverter"/>
     </Application.Resources>
 </Application>

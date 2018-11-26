@@ -26,6 +26,7 @@ namespace MusicPlayer.Data.SubscriptionsHandler
         public event EventHandler<SubscriptionsEventArgs<ILibrary, EventArgs>> Loaded;
         public event EventHandler<SubscriptionsEventArgs<ILibrary, EventArgs>> SettingsChanged;
         public event EventHandler<SubscriptionsEventArgs<ILibrary, PlayStateChangedEventArgs>> PlayStateChanged;
+        public event EventHandler<SubscriptionsEventArgs<ILibrary, PlayerStateChangedEventArgs>> PlayerStateChanged;
         public event EventHandler<SubscriptionsEventArgs<ILibrary, CurrentPlaylistChangedEventArgs>> CurrentPlaylistChanged;
         public event EventHandler<SubscriptionsEventArgs<ILibrary, PlaylistsChangedEventArgs>> PlaylistsPropertyChanged;
         public event EventHandler<SubscriptionsEventArgs<IPlaylistCollection, PlaylistCollectionChangedEventArgs>> PlaylistCollectionChanged;
@@ -54,6 +55,7 @@ namespace MusicPlayer.Data.SubscriptionsHandler
                 library.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
                 library.PlaylistsChanged += OnPlaylistsPropertyChanged;
                 library.PlayStateChanged += OnPlayStateChanged;
+                library.PlayerStateChanged += OnPlayerStateChanged;
                 library.SettingsChanged += OnSettingsChanged;
                 library.SkippedSongs.SkippedSong += OnSkippedSong;
 
@@ -147,6 +149,11 @@ namespace MusicPlayer.Data.SubscriptionsHandler
         private void OnPlayStateChanged(object sender, PlayStateChangedEventArgs e)
         {
             PlayStateChanged?.Invoke(this, new SubscriptionsEventArgs<ILibrary, PlayStateChangedEventArgs>(sender, e));
+        }
+
+        private void OnPlayerStateChanged(object sender, PlayerStateChangedEventArgs e)
+        {
+            PlayerStateChanged?.Invoke(this, new SubscriptionsEventArgs<ILibrary, PlayerStateChangedEventArgs>(sender, e));
         }
 
         private void OnSettingsChanged(object sender, EventArgs e)

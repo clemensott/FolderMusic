@@ -15,11 +15,13 @@ namespace MusicPlayer.Data
         public const double DefaultSongsPosition = 0, DefaultSongsPositionMillis = 1;
 
         private bool isPlaying;
+        private MediaPlayerState playerState;
         private IPlaylist currentPlaylist;
         private IPlaylistCollection playlists;
         private BackForegroundCommunicator communicator;
 
         public event EventHandler<PlayStateChangedEventArgs> PlayStateChanged;
+        public event EventHandler<PlayerStateChangedEventArgs> PlayerStateChanged;
         public event EventHandler<PlaylistsChangedEventArgs> PlaylistsChanged;
         public event EventHandler<CurrentPlaylistChangedEventArgs> CurrentPlaylistChanged;
         public event EventHandler SettingsChanged;
@@ -43,6 +45,19 @@ namespace MusicPlayer.Data
                 isPlaying = value;
                 var args = new PlayStateChangedEventArgs(value);
                 PlayStateChanged?.Invoke(this, args);
+            }
+        }
+
+        public MediaPlayerState PlayerState
+        {
+            get { return playerState; }
+            set
+            {
+                if (value == playerState) return;
+
+                var args = new PlayerStateChangedEventArgs(playerState, value);
+                playerState = value;
+
             }
         }
 

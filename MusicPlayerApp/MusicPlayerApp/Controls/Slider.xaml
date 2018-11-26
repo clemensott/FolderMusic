@@ -28,16 +28,16 @@
                 Maximum="1" SnapsTo="StepValues" StepFrequency="0.001" 
                 Visibility="{Binding ElementName=control,Path=IsIndeterminate,
                   Converter={StaticResource toHideConverter}}"
-                Value="{Binding ElementName=control,Path=CurrentSong.PositionRatio,Mode=OneWay}"
-                Holding="sld_Holding" ValueChanged="sld_ValueChanged" PointerEntered="sld_PointerEntered"/>
+                Value="{Binding ElementName=control,Path=control.ViewPositionRatio,Mode=TwoWay}"
+                PointerEntered="sld_PointerEntered" Holding="sld_Holding"/>
 
         <ProgressBar IsIndeterminate="True" Height="60" VerticalAlignment="Top"
                      Visibility="{Binding ElementName=control,Path=IsIndeterminate,
                        Converter={StaticResource toShowConverter}}"/>
 
         <TextBlock Name="tblPosition" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Left" FontSize="20"
-                   Text="{Binding ElementName=control,Path=CurrentSong.Position,Converter={StaticResource timeCon}}"/>
+                   Text="{Binding ElementName=control,Path=Position,Converter={StaticResource timeCon}}"/>
         <TextBlock Name="tblDuration" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="20"
-                   Text="{Binding ElementName=control,Path=CurrentSong.Duration,Converter={StaticResource timeCon}}"/>
+                   Text="{Binding ElementName=control,Path=Duration,Converter={StaticResource timeCon}}"/>
     </Grid>
 </UserControl>

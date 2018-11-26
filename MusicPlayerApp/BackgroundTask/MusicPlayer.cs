@@ -3,6 +3,7 @@ using MusicPlayer.Data;
 using MusicPlayer.Data.SubscriptionsHandler;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Media;
 using Windows.Media.Playback;
@@ -12,13 +13,14 @@ namespace BackgroundTask
 {
     class MusicPlayer : IBackgroundPlayer
     {
-        private const int maxFailOrSetCount = 15;
+        private const int maxFailOrSetCount = 15, updateSongPositionMillis = 200;
 
-        private bool playNext = true;
+        private bool playNext = true, isUpdatingSongPosition;
         private int failedCount = 0, setSongCount = 0;
         private Song openSong;
         private ILibrary library;
         private LibrarySubscriptionsHandler lsh;
+        private Timer timer;
         private SystemMediaTransportControls smtc;
 
         private Song CurrentSong { get { return library.CurrentPlaylist?.CurrentSong; } }
@@ -31,8 +33,11 @@ namespace BackgroundTask
             this.library = library;
 
             lsh = LibrarySubscriptionsHandler.GetInstance(library);
+            lsh.CurrentPlaylist.CurrentSongPositionChanged += OnCurrentSongPositionChanged;
             lsh.CurrentPlaylist.CurrentSong.ArtistChanged += OnCurrentSongArtistOrTitleChanged;
             lsh.CurrentPlaylist.CurrentSong.TitleChanged += OnCurrentSongArtistOrTitleChanged;
+
+            timer = new Timer(Timer_Tick, null, Timeout.Infinite, Timeout.Infinite);
 
             ActivateSystemMediaTransportControl();
         }
@@ -46,6 +51,8 @@ namespace BackgroundTask
 
         public void Play()
         {
+            timer.Change(0, updateSongPositionMillis);
+
             if (setSongCount >= maxFailOrSetCount)
             {
                 setSongCount = 0;
@@ -100,6 +107,8 @@ namespace BackgroundTask
 
         public void Pause()
         {
+            timer.Change(Timeout.Infinite, Timeout.Infinite);
+
             try
             {
                 if (library.CurrentPlaylist != null)
@@ -202,6 +211,11 @@ namespace BackgroundTask
             UpdateSystemMediaTransportControl();
         }
 
+        private void OnCurrentSongPositionChanged(object sender, SubscriptionsEventArgs<IPlaylist, CurrentSongPositionChangedEventArgs> e)
+        {
+            if (!isUpdatingSongPosition) BackgroundMediaPlayer.Current.Position = e.Source.GetCurrentSongPosition();
+        }
+
         private void OnCurrentSongArtistOrTitleChanged(object sender, EventArgs args)
         {
             UpdateSystemMediaTransportControl();
@@ -223,7 +237,7 @@ namespace BackgroundTask
         public async void MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
         {
             MobileDebug.Service.WriteEvent("Fail", args.ExtendedErrorCode, args.Error, args.ErrorMessage, CurrentSong);
-           await Task.Delay(100);
+            await Task.Delay(100);
 
             failedCount++;
 
@@ -240,10 +254,10 @@ namespace BackgroundTask
             //{
             //    library.IsPlaying = false;
             //    return;
-            //}4
+            //}
 
             CurrentSong.SetFailed();
-            library.SkippedSongs.Add(CurrentSong);
+            await library.SkippedSongs.Add(CurrentSong);
 
             if (playNext) Next(true);
             else Previous();
@@ -259,8 +273,23 @@ namespace BackgroundTask
             Next(true);
         }
 
+        private void Timer_Tick(object state)
+        {
+            if (library?.CurrentPlaylist == null) return;
+
+            TimeSpan position = BackgroundMediaPlayer.Current.Position;
+            TimeSpan duration = BackgroundMediaPlayer.Current.NaturalDuration;
+
+            if (duration <= TimeSpan.Zero) return;
+
+            isUpdatingSongPosition = true;
+            library.CurrentPlaylist.CurrentSongPosition = position.TotalDays / duration.TotalDays;
+            isUpdatingSongPosition = false;
+        }
+
         public void Dispose()
         {
+            timer.Dispose();
         }
     }
 }

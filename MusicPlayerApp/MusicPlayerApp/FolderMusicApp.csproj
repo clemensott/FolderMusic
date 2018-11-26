@@ -89,6 +89,7 @@
     <Compile Include="Converters\IsNotNullConverter.cs" />
     <Compile Include="Converters\LoopIconConverter.cs" />
     <Compile Include="Converters\MusicPropertiesListConverter.cs" />
+    <Compile Include="Converters\PlayerStateToIsIndeterminateConverter.cs" />
     <Compile Include="Converters\PlayIconConverter.cs" />
     <Compile Include="Converters\PlayPauseIconConverter.cs" />
     <Compile Include="Converters\PlayPauseTextConverter.cs" />
