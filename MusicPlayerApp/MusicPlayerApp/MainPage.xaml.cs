@@ -34,11 +34,9 @@ namespace FolderMusic
             {
                 library = (ILibrary)e.Parameter;
                 viewModel = new MainViewModel(library);
-
                 DataContext = viewModel;
-
+         
                 library.Loaded += Library_Loaded;
-                library.SkippedSongs.SkippedSong += SkippedSongs_SkippedSong;
             }
         }
 

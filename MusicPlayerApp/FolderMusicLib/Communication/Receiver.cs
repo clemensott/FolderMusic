@@ -25,11 +25,12 @@ namespace MusicPlayer.Communication
 
         public void Handle(ValueSet valueSet)
         {
+			bool write = Key != "SongPositionPrimary";
             try
             {
-                MobileDebug.Service.WriteEvent("Handle1", Key, valueSet.ContainsKey(Key));
+              if (write) MobileDebug.Service.WriteEvent("Handle1", Key, valueSet.ContainsKey(Key));
                 if (valueSet.ContainsKey(Key)) messageReceived(valueSet, valueSet[Key].ToString());
-                MobileDebug.Service.WriteEvent("Handle2", Key, valueSet.ContainsKey(Key));
+              if (write)  MobileDebug.Service.WriteEvent("Handle2", Key, valueSet.ContainsKey(Key));
             }
             catch (Exception e)
             {

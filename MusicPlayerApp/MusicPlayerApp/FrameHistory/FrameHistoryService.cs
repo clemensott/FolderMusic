@@ -32,7 +32,7 @@ namespace FolderMusic.FrameHistory
 
         private void RootFrame_Navigating(object sender, NavigatingCancelEventArgs e)
         {
-            MobileDebug.Service.WriteEventPair("Navigating", "Page: ", e.SourcePageType, "Mode: ", e.NavigationMode,
+            MobileDebug.Service.WriteEventPair("Navigating1", "Page: ", e.SourcePageType, "Mode: ", e.NavigationMode,
                 "Parameter: ", e.Parameter ?? "null", "TransInfo: ", e.NavigationTransitionInfo);
 
             HistoricFrameHandler handler;
@@ -62,6 +62,7 @@ namespace FolderMusic.FrameHistory
                     history.Pop();
                     break;
             }
+MobileDebug.Service.WriteEventPair("Navigating2");
         }
 
         private void RootFrame_Navigated(object sender, NavigationEventArgs e)

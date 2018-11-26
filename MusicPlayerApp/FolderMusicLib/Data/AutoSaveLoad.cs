@@ -29,6 +29,7 @@ namespace MusicPlayer.Data
 
             sh = new LibrarySubscriptionsHandler();
 
+            sh.PlayStateChanged += OnPlayStateChanged;
             sh.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
             sh.PlaylistsPropertyChanged += OnPlaylistsPropertyChanged;
             sh.PlaylistCollectionChanged += OnPlaylistCollectionChanged;
@@ -42,6 +43,15 @@ namespace MusicPlayer.Data
             sh.CurrentPlaylist.CurrentSongPositionChanged += CurrentPlaylist_CurrentSongPositionChanged;
             sh.CurrentPlaylist.AllSongs.SomethingChanged += CurrentPlaylist_AllSongs_SomethingChanged;
             sh.CurrentPlaylist.CurrentSong.SomethingChanged += CurrentPlaylist_CurrentSong_SomethingChanged;
+            sh.OtherPlaylists.CurrentSongPositionChanged += OtherPlaylists_CurrentSongPositionChanged;
+        }
+
+        private async void OnPlayStateChanged(object sender, SubscriptionsEventArgs<ILibrary, PlayStateChangedEventArgs> e)
+        {
+            if(e.Base.NewValue)return;
+
+              await SaveSimple(e.Source);
+            await SaveCurrentSong(e.Source);
         }
 
         private async void OnCurrentPlaylistChanged(object sender, SubscriptionsEventArgs<ILibrary, CurrentPlaylistChangedEventArgs> e)
@@ -103,6 +113,8 @@ namespace MusicPlayer.Data
 
         private async void CurrentPlaylist_CurrentSongPositionChanged(object sender, SubscriptionsEventArgs<IPlaylist, CurrentSongPositionChangedEventArgs> e)
         {
+            if(e.Source.Parent.Parent.IsPlaying) return;
+
             await SaveSimple(e.Source.Parent.Parent);
             await SaveCurrentSong(e.Source.Parent.Parent);
         }
@@ -117,6 +129,12 @@ namespace MusicPlayer.Data
         {
             await SaveSimple(e.Source.Parent.Parent.Parent.Parent);
             await SaveCurrentSong(e.Source.Parent.Parent.Parent.Parent);
+        }
+
+        private async void OtherPlaylists_CurrentSongPositionChanged(object sender, SubscriptionsEventArgs<IPlaylist, CurrentSongPositionChangedEventArgs> e)
+        {
+            await SaveSimple(e.Source.Parent.Parent);
+            await SaveComplete(e.Source.Parent.Parent);
         }
 
         public void Add(ILibrary lib)

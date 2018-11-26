@@ -92,7 +92,7 @@ namespace MusicPlayer.Data
             List<string> list = paths.ToList();
             if (!list.Contains(path)) list.Add(path);
 
-            MobileDebug.Service.WriteEvent("WouldIndexOf", path, list.OrderBy(p => p).IndexOf(path), "Ordered:", list.OrderBy(p => p));
+            //MobileDebug.Service.WriteEvent("WouldIndexOf2", path, list.OrderBy(p => p).IndexOf(path), "Ordered:", list.OrderBy(p => p));
 
             return list.OrderBy(p => p).IndexOf(path);
         }

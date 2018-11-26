@@ -13,6 +13,7 @@
     <UserControl.Resources>
         <con:PlayIconConverter x:Key="playConverter"/>
         <con:DetailIconConverter x:Key="detailConverter"/>
+		<con:SongsCountConverter x:Key="songsCountConverter"/>
     </UserControl.Resources>
 
     <ListBox x:Name="lbxPlaylists" SelectionMode="Single" Background="Transparent"

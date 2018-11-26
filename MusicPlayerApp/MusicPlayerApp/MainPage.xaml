@@ -87,7 +87,7 @@
             </Grid>
 
             <local:Slider Grid.Column="1" Height="60"
-                          IsIndeterminate="{Binding PlayerState,Mode=OneWay,Converter={StaticResource playerCon}}"
+                          IsIndeterminate="{Binding PlayerState,Mode=OneWay,Converter={StaticResource playerStateCon}}"
                           PositionRatio="{Binding PositionRatio,Mode=TwoWay}" Duration="{Binding Duration,Mode=OneWay}"/>
 
             <Grid Grid.Column="2">

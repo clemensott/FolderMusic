@@ -28,7 +28,7 @@
                 Maximum="1" SnapsTo="StepValues" StepFrequency="0.001" 
                 Visibility="{Binding ElementName=control,Path=IsIndeterminate,
                   Converter={StaticResource toHideConverter}}"
-                Value="{Binding ElementName=control,Path=control.ViewPositionRatio,Mode=TwoWay}"
+                Value="{Binding ElementName=control,Path=ViewPositionRatio,Mode=TwoWay}"
                 PointerEntered="sld_PointerEntered" Holding="sld_Holding"/>
 
         <ProgressBar IsIndeterminate="True" Height="60" VerticalAlignment="Top"

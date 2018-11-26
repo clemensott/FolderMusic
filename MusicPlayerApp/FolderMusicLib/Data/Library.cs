@@ -332,7 +332,7 @@ namespace MusicPlayer.Data
             lib.Playlists = Playlists.ToSimple();
             lib.CurrentPlaylist = lib.Playlists.FirstOrDefault(p => p.AbsolutePath == CurrentPlaylist?.AbsolutePath);
 
-            AutoSaveLoad.CheckLibrary(lib, "ToSimple");
+            //AutoSaveLoad.CheckLibrary(lib, "ToSimple");
 
             return lib;
         }

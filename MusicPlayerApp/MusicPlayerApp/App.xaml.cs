@@ -75,7 +75,7 @@ namespace FolderMusic
                 rootFrame.CacheSize = 1;
                 rootFrame.Language = Windows.Globalization.ApplicationLanguages.Languages[0];
 
-                MobileDebug.Service.WriteEventPair("OnLaunched", "PreviousExecutionState", e.PreviousExecutionState);
+                MobileDebug.Service.WriteEventPair("OnLaunched1", "PreviousExecutionState", e.PreviousExecutionState);
                 //if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
                     // TODO: Zustand von zuvor angehaltener Anwendung laden
