@@ -101,11 +101,9 @@ namespace MusicPlayer.Data
             this.artist = artist;
         }
 
-        public static Song GetLoaded(ISongCollection parent, StorageFile file)
+        public async static Task<Song> GetLoaded(StorageFile file)
         {
-            Task<MusicProperties> task = file.Properties.GetMusicPropertiesAsync().AsTask();
-            task.Wait();
-            MusicProperties properties = task.Result;
+            MusicProperties properties = await file.Properties.GetMusicPropertiesAsync();
 
             string title = properties.Title;
             string artist = properties.Artist;
@@ -219,6 +217,8 @@ namespace MusicPlayer.Data
             Artist = reader.GetAttribute("Artist");
             Path = reader.GetAttribute("Path");
             failed = false;
+
+            reader.ReadStartElement();
         }
 
         public void WriteXml(XmlWriter writer)

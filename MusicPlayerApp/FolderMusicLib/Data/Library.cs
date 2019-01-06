@@ -154,7 +154,7 @@ namespace MusicPlayer.Data
 
             SetCurrentPlaylistAndCurrentSong(currentSongPath, currentSongPosition);
 
-            AutoSaveLoad.CheckLibrary(this, "LoadedComplete");
+            //AutoSaveLoad.CheckLibrary(this, "LoadedComplete");
             IsLoaded = true;
             Loaded?.Invoke(this, EventArgs.Empty);
         }

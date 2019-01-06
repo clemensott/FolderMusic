@@ -54,5 +54,9 @@ namespace MusicPlayer.Data.Simple
         public void WriteXml(XmlWriter writer)
         {
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

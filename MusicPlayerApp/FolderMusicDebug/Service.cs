@@ -156,22 +156,26 @@ namespace MobileDebug
             while (true)
             {
                 Event e;
-                string text;
+                string text = string.Empty;
 
                 lock (eventsBuffer)
                 {
                     while (eventsBuffer.Count == 0) Monitor.Wait(eventsBuffer);
 
-                    e = eventsBuffer.Dequeue();
-                    text = e.ToDataString();
+                    do
+                    {
+                        e = eventsBuffer.Dequeue();
+                        text += e.ToDataString();
+                    }
+                    while (eventsBuffer.Count > 0);
                 }
 
-                System.Diagnostics.Debug.WriteLine(e.Name+"Before");
+                //System.Diagnostics.Debug.WriteLine(e.Name + "Before");
                 try
                 {
                     StorageFile file = Id == ForegroundId ? await GetForeDebugDataFile() : await GetBackDebugDataFile();
                     await FileIO.AppendTextAsync(file, text);
-                    System.Diagnostics.Debug.WriteLine(e.Name + "After");
+                    //System.Diagnostics.Debug.WriteLine(e.Name + "After");
 
                     if (eventsBuffer.Count > 0) continue;
 

@@ -32,7 +32,7 @@ namespace MusicPlayer.Data.Shuffle
         private void Parent_CollectionChanged(object sender, SongCollectionChangedEventArgs e)
         {
             Song[] ordered = GetOrdered(Parent).ToArray();
-
+            MobileDebug.Service.WriteEvent("ShuffleOffCollection.OarentChange", e.RemovedSongs.Length, e.AddedSongs.Length);
             Change(e.GetRemoved(), e.GetAdded().Select(s => new ChangeCollectionItem<Song>(Array.IndexOf(ordered, s), s)));
         }
 
@@ -101,6 +101,20 @@ namespace MusicPlayer.Data.Shuffle
             if (removes.Any()) Change(removes, adds);
         }
 
+        protected override void UpdateCurrentSong(Song[] oldShuffle)
+        {
+            Song currentSong = Parent.Parent.CurrentSong;
+
+            if (currentSong != null)
+            {
+                IEnumerable<Song> shuffleWithCurrentSong = this.Concat(Enumerable.Repeat(Parent.Parent.CurrentSong, 1));
+                int index = GetOrdered(shuffleWithCurrentSong).IndexOf(currentSong) % Count;
+
+                Parent.Parent.CurrentSong = this.ElementAt(index);
+            }
+            else Parent.Parent.CurrentSong = this.FirstOrDefault();
+        }
+
         private static IOrderedEnumerable<Song> GetOrdered(IEnumerable<Song> songs)
         {
             return songs.OrderBy(s => s.Title).ThenBy(s => s.Artist);
@@ -109,6 +123,13 @@ namespace MusicPlayer.Data.Shuffle
         protected override IShuffleCollection GetNewThis(IEnumerable<Song> songs)
         {
             return new ShuffleOffCollection(Parent, songs);
+        }
+
+        public override void Dispose()
+        {
+            if (Parent != null) Parent.Changed -= Parent_CollectionChanged;
+
+            foreach (Song song in this) Unsubscribe(song);
         }
     }
 }

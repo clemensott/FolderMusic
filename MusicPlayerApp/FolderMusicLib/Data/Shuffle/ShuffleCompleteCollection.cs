@@ -168,14 +168,29 @@ namespace MusicPlayer.Data.Shuffle
 
         private static int GetCount(int songsCount)
         {
-            return (int)((GetCount(songsCount) - 1) / 
-                Convert.ToDouble(shuffleCompleteListNextCount + shuffleCompleteListPreviousCount) * 
+            return (int)((GetCount(songsCount) - 1) /
+                Convert.ToDouble(shuffleCompleteListNextCount + shuffleCompleteListPreviousCount) *
                 shuffleCompleteListPreviousCount);
+        }
+
+        protected override void UpdateCurrentSong(Song[] oldShuffle)
+        {
+            Parent.Parent.CurrentSong = Count > 0 ? this.ElementAtOrDefault(GetCurrentSongIndex(Count)) : null;
         }
 
         protected override IShuffleCollection GetNewThis(IEnumerable<Song> songs)
         {
             return new ShuffleCompleteCollection(Parent, songs);
+        }
+
+        public override void Dispose()
+        {
+            if (Parent != null)
+            {
+                Parent.Changed -= Parent_CollectionChanged;
+
+                if (Parent.Parent != null) Parent.Parent.CurrentSongChanged -= Playlist_CurrentSongChanged;
+            }
         }
     }
 }

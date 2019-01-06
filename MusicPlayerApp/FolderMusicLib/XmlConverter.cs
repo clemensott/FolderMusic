@@ -58,11 +58,20 @@ namespace MusicPlayer
         public static T Deserialize<T>(string xmlText)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(T));
-
             TextReader tr = new StringReader(xmlText);
-            object deObj = serializer.Deserialize(tr);
+            if ((typeof(T) == typeof(Data.Song[]))) MobileDebug.Service.WriteEvent("DeserializeSong[]1");
+            try
+            {
+                object deObj = serializer.Deserialize(tr);
+                if ((typeof(T) == typeof(Data.Song[]))) MobileDebug.Service.WriteEvent("DeserializeSong[]2", deObj?.GetType()?.Name);
+                return (T)deObj;
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Service.WriteEvent("DeserializeFail", e);
+                throw;
+            }
 
-            return (T)deObj;
         }
 
         public static string Serialize(object obj)

@@ -71,6 +71,7 @@ namespace MusicPlayer.Data
                 if (value == songs) return;
 
                 var args = new SongsChangedEventArgs(songs, value);
+                songs?.Shuffle?.Dispose();
                 songs = value;
                 songs.Parent = this;
                 SongsChanged?.Invoke(this, args);
@@ -140,7 +141,7 @@ namespace MusicPlayer.Data
         public virtual async Task Reset()
         {
             StorageFile[] files = (await GetStorageFolderFiles()).ToArray();
-            Song[] foundSongs = GetSongsFromStorageFiles(files).ToArray();
+            Song[] foundSongs = (await GetSongsFromStoragefiles(files)).ToArray();
 
             if (Parent.Parent.CanceledLoading) return;
 
@@ -148,27 +149,22 @@ namespace MusicPlayer.Data
             CurrentSong = Songs.Shuffle.FirstOrDefault();
         }
 
-        private IEnumerable<Song> GetSongsFromStorageFiles(IEnumerable<StorageFile> files)
-        {
-            return files.AsParallel().Select(f => GetLoadedSong(f)).Where(s => !s.IsEmpty);
-        }
-
         public virtual async Task ResetSongs()
         {
-            foreach (Song song in Songs) await song.Reset();
+            await Task.WhenAll(Songs.Select(s => s.Reset()).ToArray());
         }
 
         public virtual async Task Update()
         {
-            IReadOnlyList<StorageFile> files = await GetStorageFolderFiles();
             Song[] songs = Songs.ToArray();
+            IReadOnlyList<StorageFile> files = await GetStorageFolderFiles();
             IEnumerable<StorageFile> addFiles = files.Where(f => !songs.Any(s => s.Path == f.Path));
-            Song[] addSongs = addFiles.Select(f => GetLoadedSong(f)).Where(s => !s.IsEmpty).ToArray();
+            Song[] addSongs = (await GetSongsFromStoragefiles(addFiles)).ToArray();
             Song[] removeSongs = songs.Where(s => !files.Any(f => f.Path == s.Path)).ToArray();
 
             if (Parent.Parent.CanceledLoading) return;
 
-            if (removeSongs.Length == Songs.Count)
+            if (Songs.Count + addSongs.Length - removeSongs.Length == 0)
             {
                 Parent.Remove(this);
                 return;
@@ -183,7 +179,7 @@ namespace MusicPlayer.Data
             Song[] songs = Songs.ToArray();
 
             IEnumerable<StorageFile> addFiles = files.Where(f => !songs.Any(s => s.Path == f.Path));
-            Song[] addSongs = addFiles.Select(f => GetLoadedSong(f)).Where(s => s != null && !s.IsEmpty).ToArray();
+            Song[] addSongs = (await GetSongsFromStoragefiles(addFiles)).ToArray();
 
             if (Parent.Parent.CanceledLoading) return;
             if (addSongs.Length == 0) return;
@@ -191,13 +187,22 @@ namespace MusicPlayer.Data
             Songs.Change(null, addSongs);
         }
 
-        private Song GetLoadedSong(StorageFile file)
+        private async Task<IEnumerable<Song>> GetSongsFromStoragefiles(IEnumerable<StorageFile> files)
+        {
+            Task<Song>[] tasks = files.Select(GetLoadedSong).ToArray();
+
+            await Task.WhenAll(tasks);
+
+            return tasks.Select(t => t.Result).Where(s => s != null && !s.IsEmpty);
+        }
+
+        private async Task<Song> GetLoadedSong(StorageFile file)
         {
             if (Parent.Parent.CanceledLoading) return null;
 
             try
             {
-                return Song.GetLoaded(Songs, file);
+                return await Song.GetLoaded(file);
             }
             catch (Exception e)
             {

@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 
 namespace MusicPlayer.Data.Shuffle
 {
-    public interface IShuffleCollection : IEnumerable<Song>, IXmlSerializable
+    public interface IShuffleCollection : IEnumerable<Song>, IXmlSerializable, IDisposable
     {
         int Count { get; }
         ISongCollection Parent { get; }

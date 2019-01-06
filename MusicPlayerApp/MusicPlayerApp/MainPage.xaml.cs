@@ -2,9 +2,11 @@
 using MusicPlayer;
 using MusicPlayer.Data;
 using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Windows.Phone.UI.Input;
 using Windows.Storage;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -35,7 +37,7 @@ namespace FolderMusic
                 library = (ILibrary)e.Parameter;
                 viewModel = new MainViewModel(library);
                 DataContext = viewModel;
-         
+
                 library.Loaded += Library_Loaded;
             }
         }
@@ -47,7 +49,7 @@ namespace FolderMusic
             Frame.Navigate(typeof(LoadingPage), library);
             await library.Reset();
             Frame.GoBack();
-            AutoSaveLoad.CheckLibrary(library, "ResetedOnLoaded");
+            //AutoSaveLoad.CheckLibrary(library, "ResetedOnLoaded");
         }
 
         private async void SkippedSongs_SkippedSong(object sender, EventArgs e)
@@ -178,6 +180,7 @@ namespace FolderMusic
 
         private async void AbbComReset_Click(object sender, RoutedEventArgs e)
         {
+                await new MessageDialog(SongsView.ItemSource.GetHashCode()+"\r\n"+viewModel.CurrentPlaylist.Songs.Shuffle.GetHashCode()).ShowAsync();
         }
 
         private void hub_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)

@@ -29,7 +29,7 @@ namespace MusicPlayer.Data.Shuffle
 
             foreach (Song addSong in e.GetAdded())
             {
-                int index = ran.Next(Count - e.RemovedSongs.Length + adds.Count + 1);
+                int index = ran.Next(Count - e.RemovedSongs.Length + adds.Count);
 
                 adds.Add(new ChangeCollectionItem<Song>(index, addSong));
             }
@@ -60,6 +60,35 @@ namespace MusicPlayer.Data.Shuffle
         protected override IShuffleCollection GetNewThis(IEnumerable<Song> songs)
         {
             return new ShuffleOneTimeCollection(Parent, songs);
+        }
+
+        public override void Dispose()
+        {
+            Parent.Changed -= Parent_CollectionChanged;
+        }
+
+        protected override void UpdateCurrentSong(Song[] oldShuffle)
+        {
+            Song currentSong = Parent.Parent.CurrentSong;
+            int index = oldShuffle.IndexOf(currentSong);
+
+            if (index != -1)
+            {
+                currentSong = null;
+
+                for (int i = 1; i < oldShuffle.Length; i++)
+                {
+                    Song nextSong = oldShuffle[(index + i) % oldShuffle.Length];
+
+                    if (!this.Contains(nextSong)) continue;
+
+                    currentSong = nextSong;
+                    break;
+                }
+            }
+            else currentSong = this.FirstOrDefault();
+
+            Parent.Parent.CurrentSong = currentSong;
         }
     }
 }

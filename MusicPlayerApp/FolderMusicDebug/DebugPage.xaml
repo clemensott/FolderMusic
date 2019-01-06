@@ -32,7 +32,7 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid Margin="5">
-                        <TextBlock Text="{Binding}" TextWrapping="WrapWholeWords" Margin="-5"
+                        <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="-5"
                                    Foreground="{StaticResource AppBarItemForegroundThemeBrush}"/>
                     </Grid>
                 </DataTemplate>

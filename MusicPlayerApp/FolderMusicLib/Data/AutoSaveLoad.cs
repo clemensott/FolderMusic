@@ -219,7 +219,7 @@ namespace MusicPlayer.Data
                 {
                     library = new Library(true);
                     string xmlText = await IO.LoadTextAsync(Simple);
-                    MobileDebug.Service.WriteEvent("LoadSimpleForeground", xmlText);
+                    //MobileDebug.Service.WriteEvent("LoadSimpleForeground", xmlText);
                     library.ReadXml(XmlConverter.GetReader(xmlText));
                 }
                 else
@@ -314,6 +314,7 @@ namespace MusicPlayer.Data
                     text += "\nSongs: " + (p?.Songs?.Count.ToString() ?? "null");
                     text += "\nDif: " + (p?.Songs?.GroupBy(s => s?.Path ?? "null")?.Count().ToString() ?? "null");
                     text += "\nShuffle: " + (p?.Songs?.Shuffle?.Type.ToString() ?? "null");
+                    text += "\nShuffle: " + (p?.Songs?.Shuffle?.GetType().Name ?? "null");
                     text += "\nShuffle: " + (p?.Songs?.Shuffle?.Count.ToString() ?? "null");
 
                     text += "\nHash: " + (p?.GetHashCode() ?? -1);

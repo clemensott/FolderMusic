@@ -142,6 +142,7 @@ namespace MusicPlayer.Data.SubscriptionsHandler
 
         private void OnSongsCollectionChanged(object sender, SongCollectionChangedEventArgs e)
         {
+            MobileDebug.Service.WriteEvent("PlaylistSubscribtionHandler.OnSongsCollectionChanged", (sender as ISongCollection)?.Parent?.Name);
             Unsubscribe(e.GetRemoved());
             Subscribe(e.GetAdded());
 
@@ -158,7 +159,7 @@ namespace MusicPlayer.Data.SubscriptionsHandler
 
         private void OnShuffleCollectionChanged(object sender, ShuffleCollectionChangedEventArgs e)
         {
-            ShuffleCollectionChanged.Invoke(this, new SubscriptionsEventArgs<IShuffleCollection, ShuffleCollectionChangedEventArgs>(sender, e));
+            ShuffleCollectionChanged?.Invoke(this, new SubscriptionsEventArgs<IShuffleCollection, ShuffleCollectionChangedEventArgs>(sender, e));
         }
     }
 }

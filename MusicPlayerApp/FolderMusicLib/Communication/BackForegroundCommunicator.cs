@@ -3,10 +3,13 @@ using MusicPlayer.Data.Shuffle;
 using MusicPlayer.Data.SubscriptionsHandler;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation.Collections;
 using Windows.Media.Playback;
+using Windows.Storage;
 using Windows.UI.Core;
 
 namespace MusicPlayer.Communication
@@ -242,6 +245,7 @@ namespace MusicPlayer.Communication
 
         private void OnAllPlaylists_SongCollectionChanged(object sender, SubscriptionsEventArgs<ISongCollection, SongCollectionChangedEventArgs> e)
         {
+            MobileDebug.Service.WriteEvent("Com.SongCollectionChanged");
             string removeXml = XmlConverter.Serialize(e.Base.GetRemoved().ToArray());
             string addXml = XmlConverter.Serialize(e.Base.GetAdded().ToArray());
             string playlistPath = e.Source.Parent.AbsolutePath;
@@ -256,6 +260,7 @@ namespace MusicPlayer.Communication
 
         private void ReceiveSongsChanged(ValueSet valueSet, string value)
         {
+            MobileDebug.Service.WriteEvent("ReceiveSongs1");
             string playlistPath = valueSet[playlistPathKey].ToString();
             string removeXml = valueSet[removeKey].ToString();
             string addXml = valueSet[addKey].ToString();
@@ -265,7 +270,23 @@ namespace MusicPlayer.Communication
 
             Song[] removes = XmlConverter.Deserialize<Song[]>(removeXml);
             Song[] adds = XmlConverter.Deserialize<Song[]>(addXml);
+            MobileDebug.Service.WriteEvent("ReceiveSongs2", adds.Length, removes.Length);
+            for (int i = 0; i < removes.Length; i++)
+            {
+                Song song = removes[i];
+                song = changedPlaylist.Songs.FirstOrDefault(s => s.Path == song.Path);
 
+                if (song != null) removes[i] = song;
+            }
+
+            for (int i = 0; i < adds.Length; i++)
+            {
+                Song song = adds[i];
+                song = changedPlaylist.Songs.Shuffle.FirstOrDefault(s => s.Path == song.Path);
+
+                if (song != null) adds[i] = song;
+            }
+            MobileDebug.Service.WriteEvent("ReceiveSongs3");
             changedPlaylist.Songs.Change(removes, adds);
         }
 
@@ -316,13 +337,60 @@ namespace MusicPlayer.Communication
             string removeXml = valueSet[removeKey].ToString();
             string addXml = valueSet[addKey].ToString();
 
+            SaveText(removeXml);
+
             IPlaylist changedPlaylist;
             if (!HavePlaylist(playlistPath, out changedPlaylist)) return;
 
             Song[] removes = XmlConverter.Deserialize<Song[]>(removeXml);
             ChangeCollectionItem<Song>[] adds = XmlConverter.Deserialize<ChangeCollectionItem<Song>[]>(addXml);
 
+            for (int i = 0; i < removes.Length; i++)
+            {
+                Song song = removes[i];
+                song = changedPlaylist.Songs.Shuffle.FirstOrDefault(s => s.Path == song.Path);
+
+                if (song != null) removes[i] = song;
+            }
+
+            for (int i = 0; i < adds.Length; i++)
+            {
+                Song song = adds[i].Item;
+                song = changedPlaylist.Songs.FirstOrDefault(s => s.Path == song.Path);
+
+                if (song != null) adds[i].Item = song;
+            }
+
             changedPlaylist.Songs.Shuffle.Change(removes, adds);
+        }
+
+        private async void SaveText(string text)
+        {
+            MobileDebug.Service.WriteEvent("Com.SaveText1");
+            StorageFile file;
+
+            try
+            {
+                file = await KnownFolders.VideosLibrary.GetFileAsync("text.txt");
+            }
+            catch (Exception e1)
+            {
+                MobileDebug.Service.WriteEvent("Com.SaveTextFail1", e1);
+
+                try
+                {
+                    file = await KnownFolders.VideosLibrary.CreateFileAsync("text.txt");
+                }
+                catch (Exception e2)
+                {
+                    MobileDebug.Service.WriteEvent("Com.SaveTextFail2", e2);
+                    return;
+                }
+            }
+
+            MobileDebug.Service.WriteEvent("Com.SaveText2", file.Name);
+            await FileIO.WriteTextAsync(file, text);
+            MobileDebug.Service.WriteEvent("Com.SaveText3");
         }
 
 
@@ -467,11 +535,11 @@ namespace MusicPlayer.Communication
             SendLibrary();
         }
 
-        private  void SendLibrary()
+        private void SendLibrary()
         {
             string value = library.Playlists.Count > 0 ? XmlConverter.Serialize(library) : libraryEmptyValue;
             ValueSet valueSet = receivers[libraryPrimaryKey].GetValueSet(value);
-         
+
             Send(valueSet);
         }
 
@@ -512,13 +580,13 @@ namespace MusicPlayer.Communication
         private void Send(ValueSet valueSet)
         {
             bool send = AllowedToSend(valueSet);
-       
-	   if(GetPrimaryKey(valueSet)!=songPositionPrimaryKey)
-		{
-			MobileDebug.Service.WriteEvent("Send", GetPrimaryKey(valueSet), "Do: " + send, "Loaded: " + library.IsLoaded);
-		}
 
-		if (!send) return;
+            if (GetPrimaryKey(valueSet) != songPositionPrimaryKey)
+            {
+                MobileDebug.Service.WriteEvent("Send", GetPrimaryKey(valueSet), "Do: " + send, "Loaded: " + library.IsLoaded);
+            }
+
+            if (!send) return;
 
             senderMethod(valueSet);
         }
@@ -605,7 +673,7 @@ namespace MusicPlayer.Communication
         {
             foreach (IPlaylist playlist in library.Playlists)
             {
-                foreach (Song s in playlist.Songs)
+                foreach (Song s in playlist.Songs.Concat(playlist.Songs.Shuffle))
                 {
                     if (s.Path != path) continue;
 

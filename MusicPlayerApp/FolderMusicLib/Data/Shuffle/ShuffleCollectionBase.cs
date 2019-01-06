@@ -38,33 +38,96 @@ namespace MusicPlayer.Data.Shuffle
 
         protected void Change(IEnumerable<Song> removes, IEnumerable<Song> adds)
         {
-            if (removes == null) removes = Enumerable.Empty<Song>();
-            if (adds == null) adds = Enumerable.Empty<Song>();
+            Song[] oldShuffle = this.ToArray();
 
-            ChangeCollectionItem<Song>[] removeChanges = ChangeCollectionItem<Song>.GetRemovedChanged(removes, list).ToArray();
-            ChangeCollectionItem<Song>[] addChanges = ChangeCollectionItem<Song>.GetAddedChanged(adds, list.Except(removes)).ToArray();
+            Song[] removeArray = removes?.ToArray() ?? new Song[0];
+            Song[] addArray = adds?.ToArray() ?? new Song[0];
 
-            Change(removeChanges, addChanges);
+            List<ChangeCollectionItem<Song>> removeChanges = new List<ChangeCollectionItem<Song>>();
+            List<ChangeCollectionItem<Song>> addChanges = new List<ChangeCollectionItem<Song>>();
+
+            foreach (Song song in removeArray)
+            {
+                int index = list.IndexOf(song);
+
+                if (index == -1) continue;
+
+                list.RemoveAt(index);
+                removeChanges.Add(new ChangeCollectionItem<Song>(index, song));
+            }
+
+            foreach (Song song in addArray)
+            {
+                int index = list.IndexOf(song);
+
+                if (index == -1) continue;
+
+                list.RemoveAt(index);
+                removeChanges.Add(new ChangeCollectionItem<Song>(index, song));
+            }
+
+            foreach (Song song in addArray)
+            {
+                addChanges.Add(new ChangeCollectionItem<Song>(Count, song));
+                list.Add(song);
+            }
+
+            Change(removeChanges.ToArray(), addChanges.ToArray(), oldShuffle);
         }
 
         public void Change(IEnumerable<Song> removes, IEnumerable<ChangeCollectionItem<Song>> adds)
         {
-            ChangeCollectionItem<Song>[] removeChanges = ChangeCollectionItem<Song>.GetRemovedChanged(removes, list).ToArray();
-            ChangeCollectionItem<Song>[] addChanges = (adds ?? Enumerable.Empty<ChangeCollectionItem<Song>>()).ToArray();
+            Song[] oldShuffle = this.ToArray();
 
-            Change(removeChanges, addChanges);
+            Song[] removeArray = removes?.ToArray() ?? new Song[0];
+            ChangeCollectionItem<Song>[] addArray = adds?.ToArray() ?? new ChangeCollectionItem<Song>[0];
+
+            List<ChangeCollectionItem<Song>> removeChanges = new List<ChangeCollectionItem<Song>>();
+
+            foreach (Song song in removeArray)
+            {
+                int index = list.IndexOf(song);
+
+                if (index == -1) continue;
+
+                list.RemoveAt(index);
+                removeChanges.Add(new ChangeCollectionItem<Song>(index, song));
+            }
+
+            foreach (ChangeCollectionItem<Song> change in addArray)
+            {
+                int index = list.IndexOf(change.Item);
+
+                if (index == -1) continue;
+
+                list.RemoveAt(index);
+                removeChanges.Add(new ChangeCollectionItem<Song>(index, change.Item));
+            }
+
+            foreach (ChangeCollectionItem<Song> change in addArray.OrderBy(c => c.Index))
+            {
+                list.Insert(change.Index, change.Item);
+            }
+
+            Change(removeChanges.ToArray(), addArray.ToArray(), oldShuffle);
         }
 
-        private void Change(ChangeCollectionItem<Song>[] removeChanges, ChangeCollectionItem<Song>[] addChanges)
+        private void Change(ChangeCollectionItem<Song>[] removeChanges, ChangeCollectionItem<Song>[] addChanges, Song[] oldShuffle)
         {
             if (removeChanges.Length == 0 && addChanges.Length == 0) return;
 
-            foreach (ChangeCollectionItem<Song> change in removeChanges) list.Remove(change.Item);
-            foreach (ChangeCollectionItem<Song> change in addChanges) list.Insert(change.Index, change.Item);
-
             var args = new ShuffleCollectionChangedEventArgs(addChanges, removeChanges);
+            
             Changed?.Invoke(this, args);
+
+            if (Parent?.Parent == null) return;
+
+            Song currentSong = Parent.Parent.CurrentSong;
+
+            if (this.Contains(currentSong)) UpdateCurrentSong(oldShuffle);
         }
+
+        protected abstract void UpdateCurrentSong(Song[] oldShuffle);
 
         public IShuffleCollection Repalce(IEnumerable<Song> songsToRepalce)
         {
@@ -120,5 +183,7 @@ namespace MusicPlayer.Data.Shuffle
                 writer.WriteElementString("string", song.Path);
             }
         }
+
+        public abstract void Dispose();
     }
 }

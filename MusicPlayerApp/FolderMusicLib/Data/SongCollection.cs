@@ -30,6 +30,7 @@ namespace MusicPlayer.Data
                 if (value == shuffle) return;
 
                 var args = new ShuffleChangedEventArgs(shuffle, value);
+                shuffle?.Dispose();
                 shuffle = value;
                 ShuffleChanged?.Invoke(this, args);
             }
@@ -67,38 +68,47 @@ namespace MusicPlayer.Data
 
         public void Change(IEnumerable<Song> removes, IEnumerable<Song> adds)
         {
-            Song oldCurrentSong, newCurrentSong;
-            newCurrentSong = oldCurrentSong = Parent.CurrentSong;
-            int currentSongIndex = list.IndexOf(oldCurrentSong);
+            //Song oldCurrentSong, newCurrentSong;
+            //newCurrentSong = oldCurrentSong = Parent.CurrentSong;
 
+            //int currentSongIndex = list.IndexOf(oldCurrentSong);
             Song[] removeArray = removes?.ToArray() ?? new Song[0];
             Song[] addArray = adds?.ToArray() ?? new Song[0];
-            Song[] newList = list.Except(removeArray).Concat(addArray).ToArray();
 
-            ChangeCollectionItem<Song>[] removed = ChangeCollectionItem<Song>.GetRemovedChanged(removeArray, list).ToArray();
-            ChangeCollectionItem<Song>[] added = ChangeCollectionItem<Song>.GetAddedChanged(addArray, list).ToArray();
+            List<ChangeCollectionItem<Song>> removeChanges = new List<ChangeCollectionItem<Song>>();
+            List<ChangeCollectionItem<Song>> addChanges = new List<ChangeCollectionItem<Song>>();
 
-            if (removed.Length == 0 && added.Length == 0) return;
-
-            if (!newList.Contains(oldCurrentSong))
+            foreach (Song song in removeArray)
             {
-                if (currentSongIndex < 0) currentSongIndex = 0;
-                if (currentSongIndex >= newList.Length) currentSongIndex = newList.Length - 1;
+                int index = list.IndexOf(song);
 
-                newCurrentSong = list.ElementAtOrDefault(currentSongIndex);
+                if (index == -1) continue;
+
+                list.RemoveAt(index);
+                removeChanges.Add(new ChangeCollectionItem<Song>(index, song));
             }
 
-            foreach (ChangeCollectionItem<Song> change in removed) list.Remove(change.Item);
-            foreach (ChangeCollectionItem<Song> change in added)
+            foreach (Song song in addArray)
             {
-                change.Item.Parent = this;
-                list.Insert(change.Index, change.Item);
+                int index = list.IndexOf(song);
+
+                if (index == -1) continue;
+
+                list.RemoveAt(index);
+                removeChanges.Add(new ChangeCollectionItem<Song>(index, song));
             }
 
-            var args = new SongCollectionChangedEventArgs(added, removed);
+            foreach (Song song in addArray)
+            {
+                addChanges.Add(new ChangeCollectionItem<Song>(Count, song));
+                list.Add(song);
+
+                song.Parent = this;
+            }
+
+            var args = new SongCollectionChangedEventArgs(addChanges.ToArray(), removeChanges.ToArray());
+            
             Changed?.Invoke(this, args);
-
-            Parent.CurrentSong = newCurrentSong;
         }
 
         public ISongCollection ToSimple()
