@@ -180,7 +180,6 @@ namespace FolderMusic
 
         private async void AbbComReset_Click(object sender, RoutedEventArgs e)
         {
-                await new MessageDialog(SongsView.ItemSource.GetHashCode()+"\r\n"+viewModel.CurrentPlaylist.Songs.Shuffle.GetHashCode()).ShowAsync();
         }
 
         private void hub_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)

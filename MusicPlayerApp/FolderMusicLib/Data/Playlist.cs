@@ -140,7 +140,7 @@ namespace MusicPlayer.Data
 
         public virtual async Task Reset()
         {
-            StorageFile[] files = (await GetStorageFolderFiles()).ToArray();
+            IReadOnlyList<StorageFile> files = await GetStorageFolderFiles();
             Song[] foundSongs = (await GetSongsFromStoragefiles(files)).ToArray();
 
             if (Parent.Parent.CanceledLoading) return;

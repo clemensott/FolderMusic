@@ -47,8 +47,8 @@ namespace MusicPlayer.Data
             list = new List<Song>(songs);
 
             foreach (Song song in list) song.Parent = this;
-
-            Shuffle = GetShuffleType(type, currentSong);
+            
+            Shuffle = CreateShuffle(type, currentSong);
         }
 
         public int IndexOf(Song song)
@@ -166,7 +166,7 @@ namespace MusicPlayer.Data
         {
             if (type == Shuffle.Type) return;
 
-            Shuffle = GetShuffleType(type, Parent?.CurrentSong);
+            Shuffle = CreateShuffle(type, Parent?.CurrentSong);
         }
 
         private IShuffleCollection GetShuffleType(ShuffleType type)
@@ -186,7 +186,7 @@ namespace MusicPlayer.Data
             throw new NotImplementedException("Value \"" + type + "\"of LoopType is not implemented in GetShuffleType");
         }
 
-        private IShuffleCollection GetShuffleType(ShuffleType type, Song currentSong)
+        private IShuffleCollection CreateShuffle(ShuffleType type, Song currentSong)
         {
             switch (type)
             {

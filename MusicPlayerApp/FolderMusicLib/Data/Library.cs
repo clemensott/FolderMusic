@@ -230,14 +230,17 @@ namespace MusicPlayer.Data
         {
             CanceledLoading = false;
 
+            List<StorageFolder> folders = await GetStorageFolders();
             List<IPlaylist> adds = new List<IPlaylist>();
 
-            foreach (StorageFolder folder in (await GetStorageFolders()).OrderBy(f => f.Path))
+            foreach (StorageFolder folder in folders.OrderBy(f => f.Path))
             {
                 if (CanceledLoading) return;
                 if (Playlists.Any(p => p.AbsolutePath == folder.Path)) continue;
 
                 IPlaylist playlist = new Playlist(folder.Path);
+                playlist.Parent = Playlists;
+
                 await playlist.Reset();
 
                 if (playlist.Songs.Count > 0) adds.Add(playlist);
