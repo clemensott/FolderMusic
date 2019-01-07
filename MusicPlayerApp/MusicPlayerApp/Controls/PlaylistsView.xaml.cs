@@ -146,7 +146,8 @@ namespace FolderMusic
             IPlaylist playlist = ((PlaylistViewModel)((FrameworkElement)sender).DataContext).Base;
             MobileDebug.Service.WriteEvent("ImgDetailTapped1", playlist?.AbsolutePath);
 
-            GetFrame().Navigate(typeof(PlaylistPage), playlist);
+            bool navigeted = GetFrame().Navigate(typeof(PlaylistPage), playlist);
+            MobileDebug.Service.WriteEvent("ImgDetailTapped2", playlist?.AbsolutePath, navigeted);
         }
 
         private void DetailPlaylist_PointerEntered(object sender, PointerRoutedEventArgs e)
@@ -167,7 +168,7 @@ namespace FolderMusic
         private void DeletePlaylist_Click(object sender, RoutedEventArgs e)
         {
             PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
-
+            MobileDebug.Service.WriteEvent("PlaylistViewRemove", playlist.AbsolutePath);
             playlist.Base.Parent.Remove(playlist.Base);
         }
 

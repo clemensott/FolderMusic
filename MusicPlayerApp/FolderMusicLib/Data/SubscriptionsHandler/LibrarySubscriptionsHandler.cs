@@ -90,7 +90,7 @@ namespace MusicPlayer.Data.SubscriptionsHandler
         {
             if (playlists == null) return;
 
-            playlists.Changed += OnPlaylistsCollectionChanged;
+            playlists.Changed -= OnPlaylistsCollectionChanged;
 
             Unsubscribe(playlists.AsEnumerable());
         }

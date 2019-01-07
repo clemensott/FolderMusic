@@ -189,8 +189,12 @@ namespace FolderMusic
             await FileIO.WriteTextAsync(file, XmlConverter.Serialize(library));
         }
 
-        private async void AbbComReset_Click(object sender, RoutedEventArgs e)
+        private void AbbComReset_Click(object sender, RoutedEventArgs e)
         {
+            IPlaylist playlist = viewModel.Playlists[0].Base;
+            bool navigated = Frame.Navigate(typeof(PlaylistPage), playlist);
+
+            MobileDebug.Service.WriteEvent("NavigateToPlaylistPage", playlist.AbsolutePath, navigated);
         }
 
         private void hub_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)

@@ -85,7 +85,7 @@ namespace FolderMusic
                 }
                 //else
                 {
-                    frameHistoryService = new FrameHistoryService(Enumerable.Empty<HistoricFrame>(), rootFrame, library);
+                    //frameHistoryService = new FrameHistoryService(Enumerable.Empty<HistoricFrame>(), rootFrame, library);
                 }
 
                 Window.Current.Content = rootFrame;
@@ -105,7 +105,11 @@ namespace FolderMusic
                 rootFrame.ContentTransitions = null;
                 rootFrame.Navigated += this.RootFrame_FirstNavigated;
 
-                if (!frameHistoryService.Restore() && !rootFrame.Navigate(typeof(MainPage), library))
+                //if (!frameHistoryService.Restore() && !rootFrame.Navigate(typeof(MainPage), library))
+                //{
+                //    throw new Exception("Failed to create initial page");
+                //}
+                if (!rootFrame.Navigate(typeof(MainPage), library))
                 {
                     throw new Exception("Failed to create initial page");
                 }
@@ -126,7 +130,7 @@ namespace FolderMusic
         {
             if (e.WindowActivationState != CoreWindowActivationState.Deactivated) return;
 
-            await WriteHistoricFrames(frameHistoryService.GetFrames().Reverse().ToArray());
+            //await WriteHistoricFrames(frameHistoryService.GetFrames().Reverse().ToArray());
         }
 
         private async Task<IEnumerable<HistoricFrame>> ReadHistoricFrames()

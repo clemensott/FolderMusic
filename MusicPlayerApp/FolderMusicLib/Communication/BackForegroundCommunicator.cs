@@ -433,8 +433,8 @@ namespace MusicPlayer.Communication
 
         private void OnPlaylistCollectionChanged(object sender, SubscriptionsEventArgs<IPlaylistCollection, PlaylistCollectionChangedEventArgs> e)
         {
-            string removeXml = XmlConverter.Serialize(e.Base.GetRemoved().ToArray());
-            string addXml = XmlConverter.Serialize(e.Base.GetAdded().ToArray());
+            string removeXml = XmlConverter.Serialize(e.Base.GetRemoved().Select(p => p.AbsolutePath).ToArray());
+            string addXml = XmlConverter.SerializeList(e.Base.GetAdded().ToArray());
 
             ValueSet valueSet = receivers[playlistsCollectionPrimaryKey].GetValueSet(string.Empty);
             valueSet.Add(removeKey, removeXml);
@@ -448,8 +448,16 @@ namespace MusicPlayer.Communication
             string removeXml = valueSet[removeKey].ToString();
             string addXml = valueSet[addKey].ToString();
 
-            IPlaylist[] removes = XmlConverter.Deserialize<IPlaylist[]>(removeXml);
-            IPlaylist[] adds = XmlConverter.Deserialize<IPlaylist[]>(addXml);
+            string[] removePaths = XmlConverter.Deserialize<string[]>(removeXml);
+            Playlist[] adds = XmlConverter.DeserializeList<Playlist>(addXml).ToArray();
+
+            List<IPlaylist> removes = new List<IPlaylist>();
+            foreach(string path in removePaths)
+            {
+                IPlaylist playlist;
+
+                if (HavePlaylist(path, out playlist)) removes.Add(playlist);
+            }
 
             library.Playlists.Change(removes, adds);
         }

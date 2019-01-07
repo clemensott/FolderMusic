@@ -43,12 +43,16 @@ namespace MusicPlayer
             StorageFile file = null;
             try
             {
+                Guid guid = Guid.NewGuid();
+                MobileDebug.Service.WriteEvent("SaveTextAsync1", filenameWithExtention, guid);
                 file = await GetOrCreateStorageFileAsync(filenameWithExtention);
+                MobileDebug.Service.WriteEvent("SaveTextAsync2", filenameWithExtention, guid);
                 await FileIO.WriteTextAsync(file, text);
+                MobileDebug.Service.WriteEvent("SaveTextAsync3", filenameWithExtention, guid);
             }
             catch (Exception e)
             {
-                MobileDebug.Service.WriteEvent("IOSaveTextFail", e, filenameWithExtention,file?.Path);
+                MobileDebug.Service.WriteEvent("IOSaveTextFail", e, filenameWithExtention, file?.Path);
             }
         }
 

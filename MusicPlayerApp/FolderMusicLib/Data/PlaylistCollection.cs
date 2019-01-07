@@ -68,11 +68,14 @@ namespace MusicPlayer.Data
 
                 addChanges.Add(new ChangeCollectionItem<IPlaylist>(index, playlist));
                 list.Insert(index, playlist);
+
+                playlist.Parent = this;
             }
 
             if (removeChanges.Count == 0 && addChanges.Count == 0) return;
 
             var args = new PlaylistCollectionChangedEventArgs(addChanges.ToArray(), removeChanges.ToArray());
+            MobileDebug.Service.WriteEvent("PlaylistCollectionChange", removeChanges.Count, addChanges.Count);
             Changed?.Invoke(this, args);
 
             UpdateCurrentPlaylist();

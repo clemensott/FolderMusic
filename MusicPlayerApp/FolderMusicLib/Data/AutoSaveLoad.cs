@@ -10,6 +10,7 @@ namespace MusicPlayer.Data
 {
     public class AutoSaveLoad
     {
+        private DoOneAtATimeHandler completeSaveHnadler, simpleSaveHandler, currentSongSaveHandler;
         private LibrarySubscriptionsHandler sh;
 
         public string Complete { get; private set; }
@@ -26,6 +27,24 @@ namespace MusicPlayer.Data
             Backup = backup;
             Simple = simple;
             CurrentSong = currentSong;
+
+            completeSaveHnadler = new DoOneAtATimeHandler()
+            {
+                WaitBeforeDo = TimeSpan.FromMilliseconds(500),
+                WaitAfterDo = TimeSpan.FromMilliseconds(500)
+            };
+
+            simpleSaveHandler = new DoOneAtATimeHandler()
+            {
+                WaitBeforeDo = TimeSpan.FromMilliseconds(500),
+                WaitAfterDo = TimeSpan.FromMilliseconds(500)
+            };
+
+            currentSongSaveHandler = new DoOneAtATimeHandler()
+            {
+                WaitBeforeDo = TimeSpan.FromMilliseconds(500),
+                WaitAfterDo = TimeSpan.FromMilliseconds(500)
+            };
 
             sh = new LibrarySubscriptionsHandler();
 
@@ -48,91 +67,104 @@ namespace MusicPlayer.Data
 
         private async void OnPlayStateChanged(object sender, SubscriptionsEventArgs<ILibrary, PlayStateChangedEventArgs> e)
         {
-            if(e.Base.NewValue)return;
-
-              await SaveSimple(e.Source);
+            if (e.Base.NewValue) return;
+            MobileDebug.Service.WriteEvent("ASL.OnPlayStateChanged");
+            await SaveSimple(e.Source);
             await SaveCurrentSong(e.Source);
         }
 
         private async void OnCurrentPlaylistChanged(object sender, SubscriptionsEventArgs<ILibrary, CurrentPlaylistChangedEventArgs> e)
         {
+            MobileDebug.Service.WriteEvent("ASL.OnCurrentPlaylistChanged");
             await SaveAll(e.Source);
         }
 
         private async void OnPlaylistsPropertyChanged(object sender, SubscriptionsEventArgs<ILibrary, PlaylistsChangedEventArgs> e)
         {
+            MobileDebug.Service.WriteEvent("ASL.OnPlaylistsPropertyChanged");
             await SaveSimple(e.Source);
             await SaveComplete(e.Source);
         }
 
         private async void OnPlaylistCollectionChanged(object sender, SubscriptionsEventArgs<IPlaylistCollection, PlaylistCollectionChangedEventArgs> e)
         {
+            MobileDebug.Service.WriteEvent("ASL.OnPlaylistCollectionChanged");
             await SaveSimple(e.Source.Parent);
             await SaveComplete(e.Source.Parent);
         }
 
         private async void AllPlaylists_LoopChanged(object sender, SubscriptionsEventArgs<IPlaylist, LoopChangedEventArgs> e)
         {
+            MobileDebug.Service.WriteEvent("ASL.AllPlaylists_LoopChanged");
             await SaveSimple(e.Source.Parent.Parent);
             await SaveComplete(e.Source.Parent.Parent);
         }
 
         private async void AllPlaylists_ShuffleChanged(object sender, SubscriptionsEventArgs<ISongCollection, ShuffleChangedEventArgs> e)
         {
+            MobileDebug.Service.WriteEvent("ASL.AllPlaylists_ShuffleChanged");
             await SaveSimple(e.Source.Parent.Parent.Parent);
             await SaveComplete(e.Source.Parent.Parent.Parent);
         }
 
         private async void AllPlaylists_ShuffleCollectionChanged(object sender, SubscriptionsEventArgs<IShuffleCollection, ShuffleCollectionChangedEventArgs> e)
         {
+            MobileDebug.Service.WriteEvent("ASL.AllPlaylists_ShuffleCollectionChanged");
             await SaveSimple(e.Source.Parent.Parent.Parent.Parent);
             await SaveComplete(e.Source.Parent.Parent.Parent.Parent);
         }
 
         private async void AllPlaylists_SongsPropertyChanged(object sender, SubscriptionsEventArgs<IPlaylist, SongsChangedEventArgs> e)
         {
+            MobileDebug.Service.WriteEvent("ASL.AllPlaylists_SongsPropertyChanged");
             await SaveComplete(e.Source.Parent.Parent);
         }
 
         private async void AllPlaylists_SongCollectionChanged(object sender, SubscriptionsEventArgs<ISongCollection, SongCollectionChangedEventArgs> e)
         {
+            MobileDebug.Service.WriteEvent("ASL.AllPlaylists_SongCollectionChanged");
             await SaveComplete(e.Source.Parent.Parent.Parent);
         }
 
         private async void AllPlaylists_AllSongs_SomethingChanged(object sender, SubscriptionsEventArgs<Song, EventArgs> e)
         {
+            MobileDebug.Service.WriteEvent("ASL.AllPlaylists_AllSongs_SomethingChanged");
             await SaveSimple(e.Source.Parent.Parent.Parent.Parent);
             await SaveComplete(e.Source.Parent.Parent.Parent.Parent);
         }
 
         private async void CurrentPlaylist_CurrentSongChanged(object sender, SubscriptionsEventArgs<IPlaylist, CurrentSongChangedEventArgs> e)
         {
+            MobileDebug.Service.WriteEvent("ASL.CurrentPlaylist_CurrentSongChanged");
             await SaveSimple(e.Source.Parent.Parent);
             await SaveCurrentSong(e.Source.Parent.Parent);
         }
 
         private async void CurrentPlaylist_CurrentSongPositionChanged(object sender, SubscriptionsEventArgs<IPlaylist, CurrentSongPositionChangedEventArgs> e)
         {
-            if(e.Source.Parent.Parent.IsPlaying) return;
-
+            if (e.Source.Parent.Parent.IsPlaying) return;
+            MobileDebug.Service.WriteEvent("ASL.CurrentPlaylist_CurrentSongPositionChanged");
             await SaveSimple(e.Source.Parent.Parent);
             await SaveCurrentSong(e.Source.Parent.Parent);
         }
 
         private async void CurrentPlaylist_AllSongs_SomethingChanged(object sender, SubscriptionsEventArgs<Song, EventArgs> e)
         {
+            MobileDebug.Service.WriteEvent("ASL.CurrentPlaylist_AllSongs_SomethingChanged");
             await SaveSimple(e.Source.Parent.Parent.Parent.Parent);
             await SaveCurrentSong(e.Source.Parent.Parent.Parent.Parent);
         }
 
         private async void CurrentPlaylist_CurrentSong_SomethingChanged(object sender, SubscriptionsEventArgs<Song, EventArgs> e)
         {
+            MobileDebug.Service.WriteEvent("ASL.CurrentPlaylist_CurrentSong_SomethingChanged");
             await SaveSimple(e.Source.Parent.Parent.Parent.Parent);
             await SaveCurrentSong(e.Source.Parent.Parent.Parent.Parent);
         }
 
         private async void OtherPlaylists_CurrentSongPositionChanged(object sender, SubscriptionsEventArgs<IPlaylist, CurrentSongPositionChangedEventArgs> e)
         {
+            MobileDebug.Service.WriteEvent("ASL.OtherPlaylists_CurrentSongPositionChanged");
             await SaveSimple(e.Source.Parent.Parent);
             await SaveComplete(e.Source.Parent.Parent);
         }
@@ -158,16 +190,17 @@ namespace MusicPlayer.Data
 
         private async Task SaveComplete(ILibrary lib)
         {
-            MobileDebug.Service.WriteEvent("SaveComplete", lib?.Playlists != null && lib.Playlists.Count > 0);
-
             try
             {
-                if (lib?.Playlists != null && lib.Playlists.Count > 0) await IO.SaveObjectAsync(Complete, lib);
-                else
+                await completeSaveHnadler.DoAsync(async () =>
                 {
-                    await IO.DeleteAsync(Complete);
-                    await IO.DeleteAsync(Backup);
-                }
+                    if (lib?.Playlists != null && lib.Playlists.Count > 0) await IO.SaveObjectAsync(Complete, lib);
+                    else
+                    {
+                        await IO.DeleteAsync(Complete);
+                        await IO.DeleteAsync(Backup);
+                    }
+                });
             }
             catch (Exception e)
             {
@@ -177,31 +210,33 @@ namespace MusicPlayer.Data
 
         private async Task SaveSimple(ILibrary lib)
         {
-            MobileDebug.Service.WriteEvent("SaveSimple", lib?.Playlists != null && lib.Playlists.Count > 0);
-
             try
             {
-                if (lib?.Playlists != null && lib.Playlists.Count > 0) await IO.SaveObjectAsync(Simple, lib.ToSimple());
-                else await IO.DeleteAsync(Simple);
-
+                await simpleSaveHandler.DoAsync(async () =>
+                {
+                    if (lib?.Playlists != null && lib.Playlists.Count > 0) await IO.SaveObjectAsync(Simple, lib.ToSimple());
+                    else await IO.DeleteAsync(Simple);
+                });
             }
             catch (Exception e)
             {
                 MobileDebug.Service.WriteEvent("SaveSimpleFail", e);
             }
+
         }
 
         private async Task SaveCurrentSong(ILibrary lib)
         {
-            MobileDebug.Service.WriteEvent("SaveCurrentSong", lib?.CurrentPlaylist?.CurrentSong != null);
-
             try
             {
-                if (lib?.CurrentPlaylist?.CurrentSong != null)
+                await currentSongSaveHandler.DoAsync(async () =>
                 {
-                    await IO.SaveObjectAsync(CurrentSong, new CurrentPlaySong(lib));
-                }
-                else await IO.DeleteAsync(CurrentSong);
+                    if (lib?.CurrentPlaylist?.CurrentSong != null)
+                    {
+                        await IO.SaveObjectAsync(CurrentSong, new CurrentPlaySong(lib));
+                    }
+                    else await IO.DeleteAsync(CurrentSong);
+                });
             }
             catch (Exception e)
             {

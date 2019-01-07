@@ -20,11 +20,13 @@ namespace FolderMusic
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            MobileDebug.Service.WriteEvent("PlaylistPageNavigtedTo", e.Parameter);
             DataContext = viewModel = new PlaylistViewModel(e.Parameter as IPlaylist);
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            MobileDebug.Service.WriteEvent("PlaylistPageLoaded");
         }
 
         private void Shuffle_Tapped(object sender, TappedRoutedEventArgs e)
