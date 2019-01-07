@@ -39,8 +39,10 @@ namespace FolderMusic
 
         private async void ResetThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(LoadingPage), viewModel.Base.Parent.Parent);
-            await viewModel.Base.Reset();
+            StopOperationToken stopToken = new StopOperationToken();
+
+            Frame.Navigate(typeof(LoadingPage), stopToken);
+            await viewModel.Base.Reset(stopToken);
             Frame.GoBack();
 
             if (viewModel.Base.Songs.Count == 0) Frame.GoBack();
@@ -48,15 +50,19 @@ namespace FolderMusic
 
         private async void SearchForNewSongs_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(LoadingPage), viewModel.Base.Parent.Parent);
-            await viewModel.Base.AddNew();
+            StopOperationToken stopToken = new StopOperationToken();
+
+            Frame.Navigate(typeof(LoadingPage), stopToken);
+            await viewModel.Base.AddNew(stopToken);
             Frame.GoBack();
         }
 
         private async void UpdateThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(LoadingPage), viewModel.Base.Parent.Parent);
-            await viewModel.Base.Update();
+            StopOperationToken stopToken = new StopOperationToken();
+
+            Frame.Navigate(typeof(LoadingPage), stopToken);
+            await viewModel.Base.Update(stopToken);
             Frame.GoBack();
         }
 

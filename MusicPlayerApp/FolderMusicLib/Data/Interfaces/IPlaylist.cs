@@ -22,11 +22,11 @@ namespace MusicPlayer.Data
         IPlaylistCollection Parent { get; set; }
         ISongCollection Songs { get; set; }
 
-        Task Reset();
-        Task ResetSongs();
-        Task AddNew();
+        Task Reset(StopOperationToken stopToken);
+        Task ResetSongs(StopOperationToken stopToken);
+        Task AddNew(StopOperationToken stopToken);
         IPlaylist ToSimple();
         string ToString();
-        Task Update();
+        Task Update(StopOperationToken stopToken);
     }
 }

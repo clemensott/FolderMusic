@@ -1,4 +1,5 @@
 ﻿using FolderMusic.ViewModels;
+using MusicPlayer;
 using MusicPlayer.Data;
 using System;
 using System.Collections.Generic;
@@ -93,36 +94,40 @@ namespace FolderMusic
         private async void ResetPlaylist_Click(object sender, RoutedEventArgs e)
         {
             PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
+            StopOperationToken stopToken = new StopOperationToken();
 
-            GetFrame().Navigate(typeof(LoadingPage), playlist.Base.Parent.Parent);
-            await playlist.Base.Reset();
+            GetFrame().Navigate(typeof(LoadingPage), stopToken);
+            await playlist.Base.Reset(stopToken);
             GetFrame().GoBack();
         }
 
         private async void UpdatePlaylist_Click(object sender, RoutedEventArgs e)
         {
             PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
+            StopOperationToken stopToken = new StopOperationToken();
 
-            GetFrame().Navigate(typeof(LoadingPage), playlist.Base.Parent.Parent);
-            await playlist.Base.Update();
+            GetFrame().Navigate(typeof(LoadingPage), stopToken);
+            await playlist.Base.Update(stopToken);
             GetFrame().GoBack();
         }
 
         private async void ResetSongsPlaylist_Click(object sender, RoutedEventArgs e)
         {
             PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
+            StopOperationToken stopToken = new StopOperationToken();
 
-            GetFrame().Navigate(typeof(LoadingPage), playlist.Base.Parent.Parent);
-            await playlist.Base.ResetSongs();
+            GetFrame().Navigate(typeof(LoadingPage), stopToken);
+            await playlist.Base.ResetSongs(stopToken);
             GetFrame().GoBack();
         }
 
         private async void SearchForNewSongsPlaylist_Click(object sender, RoutedEventArgs e)
         {
             PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
+            StopOperationToken stopToken = new StopOperationToken();
 
-            GetFrame().Navigate(typeof(LoadingPage), playlist.Base.Parent.Parent);
-            await playlist.Base.AddNew();
+            GetFrame().Navigate(typeof(LoadingPage), stopToken);
+            await playlist.Base.AddNew(stopToken);
             GetFrame().GoBack();
         }
 

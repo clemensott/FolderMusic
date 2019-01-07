@@ -29,8 +29,6 @@ namespace MusicPlayer.Data
 
         public IPlaylist this[int index] { get { return Playlists.ElementAtOrDefault(index); } }
 
-        public bool CanceledLoading { get; private set; }
-
         public bool IsForeground { get; private set; }
 
         public bool IsLoaded { get; private set; }
@@ -178,9 +176,8 @@ namespace MusicPlayer.Data
             if (CurrentPlaylist != null) CurrentPlaylist.CurrentSong = CurrentPlaylist.Songs.FirstOrDefault();
         }
 
-        public async Task Reset()
+        public async Task Reset(StopOperationToken stopToken)
         {
-            CanceledLoading = false;
             IsPlaying = false;
 
             List<IPlaylist> refreshedPlaylists = new List<IPlaylist>();
@@ -191,79 +188,62 @@ namespace MusicPlayer.Data
                 IPlaylist playlist = new Playlist(folder.Path);
                 playlist.Parent = Playlists;
 
-                await playlist.Reset();
+                await playlist.Reset(stopToken);
 
-                if (CanceledLoading) return;
+                if (stopToken.IsStopped) return;
                 if (playlist.Songs.Count > 0) refreshedPlaylists.Add(playlist);
             }
 
             IPlaylistCollection playlists = new PlaylistCollection();
             playlists.Change(null, refreshedPlaylists);
 
-            if (CanceledLoading) return;
+            if (stopToken.IsStopped) return;
 
             Playlists = playlists;
             CurrentPlaylist = playlists.FirstOrDefault();
         }
 
-        public async Task Update()
+        public async Task Update(StopOperationToken stopToken)
         {
             foreach (IPlaylist playlist in Playlists.ToArray())
             {
-                if (CanceledLoading) return;
+                if (stopToken.IsStopped) return;
 
-                await playlist.Update();
+                await playlist.Update(stopToken);
             }
         }
 
-        public async Task ResetSongs()
+        public async Task ResetSongs(StopOperationToken stopToken)
         {
             foreach (IPlaylist playlist in Playlists.ToArray())
             {
-                if (CanceledLoading) return;
+                if (stopToken.IsStopped) return;
 
-                await playlist.ResetSongs();
+                await playlist.ResetSongs(stopToken);
             }
         }
 
-        public async Task AddNew()
+        public async Task AddNew(StopOperationToken stopToken)
         {
-            CanceledLoading = false;
-
             List<StorageFolder> folders = await GetStorageFolders();
             List<IPlaylist> adds = new List<IPlaylist>();
 
             foreach (StorageFolder folder in folders.OrderBy(f => f.Path))
             {
-                if (CanceledLoading) return;
+                if (stopToken.IsStopped) return;
                 if (Playlists.Any(p => p.AbsolutePath == folder.Path)) continue;
 
                 IPlaylist playlist = new Playlist(folder.Path);
                 playlist.Parent = Playlists;
 
-                await playlist.Reset();
+                await playlist.Reset(stopToken);
 
                 if (playlist.Songs.Count > 0) adds.Add(playlist);
             }
 
-            if (CanceledLoading) return;
+            if (stopToken.IsStopped) return;
 
             Playlists.Change(null, adds);
-        }
-
-        private async Task AddOldOrLoadedPlaylist(string folderPath, IPlaylistCollection playlists)
-        {
-            IPlaylist playlist = Playlists.FirstOrDefault(x => x.AbsolutePath == folderPath);
-
-            if (playlist == null)
-            {
-                playlist = new Playlist(folderPath);
-                await playlist.Reset();
-
-                if (playlist.Songs.Count == 0) return;
-            }
-
-            playlists.Add(playlist);
         }
 
         private async Task<List<StorageFolder>> GetStorageFolders()
@@ -289,11 +269,6 @@ namespace MusicPlayer.Data
             catch { }
 
             return list;
-        }
-
-        public void CancelLoading()
-        {
-            CanceledLoading = true;
         }
 
         public XmlSchema GetSchema()

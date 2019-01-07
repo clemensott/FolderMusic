@@ -15,7 +15,7 @@ namespace BackgroundTask
     {
         private const int maxFailOrSetCount = 15, updateSongPositionMillis = 200;
 
-        private bool playNext = true, isUpdatingSongPosition;
+        private bool playNext = true, mediaEndedHappend, isUpdatingSongPosition;
         private int failedCount = 0, setSongCount = 0;
         private Song openSong;
         private ILibrary library;
@@ -40,6 +40,7 @@ namespace BackgroundTask
             timer = new Timer(Timer_Tick, null, Timeout.Infinite, Timeout.Infinite);
 
             ActivateSystemMediaTransportControl();
+            SetNextSongIfMediaEndedNotHappens();
         }
 
         public void ActivateSystemMediaTransportControl()
@@ -47,6 +48,29 @@ namespace BackgroundTask
             smtc.IsEnabled = smtc.IsPauseEnabled = smtc.IsPlayEnabled =
                 //smtc.IsRewindEnabled = smtc.IsFastForwardEnabled = 
                 smtc.IsPreviousEnabled = smtc.IsNextEnabled = true;
+        }
+
+        private async void SetNextSongIfMediaEndedNotHappens()
+        {
+            while (!mediaEndedHappend)
+            {
+                TimeSpan position = BackgroundMediaPlayer.Current.Position;
+                TimeSpan duration = BackgroundMediaPlayer.Current.NaturalDuration;
+
+                if (duration > TimeSpan.Zero && position >= duration)
+                {
+                    MobileDebug.Service.WriteEvent("SetNextSongIfMediaEndedNotHappens1", position, duration, CurrentSong);
+                    await Task.Delay(1000);
+                    MobileDebug.Service.WriteEvent("SetNextSongIfMediaEndedNotHappens2", position, duration, CurrentSong);
+
+                    if (mediaEndedHappend) break;
+
+                    MobileDebug.Service.WriteEvent("SetNextSongIfMediaEndedNotHappens3", position, duration, CurrentSong);
+                    Next(true);
+                }
+
+                await Task.Delay(1000);
+            }
         }
 
         public void Play()
@@ -265,6 +289,7 @@ namespace BackgroundTask
 
         public void MediaEnded(MediaPlayer sender, object args)
         {
+            mediaEndedHappend = true;
             smtc.PlaybackStatus = MediaPlaybackStatus.Playing;
 
             MobileDebug.Service.WriteEventPair("MusicEnded", "SMTC-State: ", smtc.PlaybackStatus,

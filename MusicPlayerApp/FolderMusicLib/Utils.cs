@@ -82,6 +82,9 @@ namespace MusicPlayer
 
         public static int IndexOf<T>(this IEnumerable<T> items, T searchItem)
         {
+            IList<T> list = items as IList<T>;
+            if (list != null) return list.IndexOf(searchItem);
+
             int i = 0;
 
             foreach (T item in items)

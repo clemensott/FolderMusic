@@ -44,57 +44,61 @@ namespace MusicPlayer.Data
 
         public void Change(IEnumerable<IPlaylist> removes, IEnumerable<IPlaylist> adds)
         {
-            IPlaylist oldCurrentPlaylist, newCurrentPlaylist;
-            newCurrentPlaylist = oldCurrentPlaylist = Parent?.CurrentPlaylist;
-            int currentPlaylistIndex = list.IndexOf(oldCurrentPlaylist);
-
             IPlaylist[] removeArray = removes?.ToArray() ?? new IPlaylist[0];
             IPlaylist[] addArray = adds?.ToArray() ?? new IPlaylist[0];
 
-            List<ChangeCollectionItem<IPlaylist>> removed = ChangeCollectionItem<IPlaylist>.GetRemovedChanged(removeArray, this);
-            List<ChangeCollectionItem<IPlaylist>> added = new List<ChangeCollectionItem<IPlaylist>>();
-            IEnumerable<IPlaylist> newList = list.Except(removed.Select(c => c.Item)).Concat(added.Select(c => c.Item));
+            List<ChangeCollectionItem<IPlaylist>> removeChanges = new List<ChangeCollectionItem<IPlaylist>>();
+            List<ChangeCollectionItem<IPlaylist>> addChanges = new List<ChangeCollectionItem<IPlaylist>>();
+
+            foreach (IPlaylist playlist in removeArray)
+            {
+                int index = IndexOf(playlist);
+
+                if (index == -1) continue;
+
+                removeChanges.Add(new ChangeCollectionItem<IPlaylist>(index, playlist));
+                list.RemoveAt(index);
+            }
 
             foreach (IPlaylist playlist in addArray.OrderBy(p => p.AbsolutePath))
             {
-                int index = WouldIndexOf(newList.Select(p => p.AbsolutePath).OrderBy(p => p), playlist.AbsolutePath);
-                ChangeCollectionItem<IPlaylist> addChange = new ChangeCollectionItem<IPlaylist>(index, playlist);
+                if (this.Contains(playlist)) continue;
 
-                added.Add(addChange);
+                int index = WouldIndexOf(this.Select(p => p.AbsolutePath), playlist.AbsolutePath);
+
+                addChanges.Add(new ChangeCollectionItem<IPlaylist>(index, playlist));
+                list.Insert(index, playlist);
             }
 
-            if (removed.Count == 0 && added.Count == 0) return;
+            if (removeChanges.Count == 0 && addChanges.Count == 0) return;
 
-            if (oldCurrentPlaylist == null) newCurrentPlaylist = newList.FirstOrDefault();
-            else if (Parent?.Playlists == this && !newList.Contains(oldCurrentPlaylist))
-            {
-                if (currentPlaylistIndex < 0) currentPlaylistIndex = 0;
-                if (currentPlaylistIndex >= newList.Count()) currentPlaylistIndex = newList.Count() - 1;
-
-                newCurrentPlaylist = newList.ElementAtOrDefault(currentPlaylistIndex);
-            }
-
-            foreach (ChangeCollectionItem<IPlaylist> change in removed) list.Remove(change.Item);
-            foreach (ChangeCollectionItem<IPlaylist> change in added)
-            {
-                change.Item.Parent = this;
-                list.Insert(change.Index, change.Item);
-            }
-
-            var args = new PlaylistCollectionChangedEventArgs(added.ToArray(), removed.ToArray());
+            var args = new PlaylistCollectionChangedEventArgs(addChanges.ToArray(), removeChanges.ToArray());
             Changed?.Invoke(this, args);
 
-            if (Parent != null) Parent.CurrentPlaylist = newCurrentPlaylist;
+            UpdateCurrentPlaylist();
         }
 
         private static int WouldIndexOf(IEnumerable<string> paths, string path)
         {
-            List<string> list = paths.ToList();
-            if (!list.Contains(path)) list.Add(path);
+            return paths.Concat(Enumerable.Repeat(path, 1)).OrderBy(p => p).IndexOf(path);
+        }
 
-            //MobileDebug.Service.WriteEvent("WouldIndexOf2", path, list.OrderBy(p => p).IndexOf(path), "Ordered:", list.OrderBy(p => p));
+        private void UpdateCurrentPlaylist()
+        {
+            if (Parent == null) return;
 
-            return list.OrderBy(p => p).IndexOf(path);
+            IPlaylist currentPlaylist = Parent.CurrentPlaylist;
+
+            if (currentPlaylist != null)
+            {
+                if (Count == 0) Parent.CurrentPlaylist = null;
+                else
+                {
+                    int index = WouldIndexOf(this.Select(p => p.AbsolutePath), currentPlaylist.AbsolutePath) % Count;
+                    Parent.CurrentPlaylist = this.ElementAtOrDefault(index);
+                }
+            }
+            else Parent.CurrentPlaylist = this.FirstOrDefault();
         }
 
         public IPlaylistCollection ToSimple()

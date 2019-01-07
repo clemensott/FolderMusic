@@ -436,7 +436,7 @@ namespace MusicPlayer.Communication
             string removeXml = XmlConverter.Serialize(e.Base.GetRemoved().ToArray());
             string addXml = XmlConverter.Serialize(e.Base.GetAdded().ToArray());
 
-            ValueSet valueSet = receivers[playlistsPropertyPrimaryKey].GetValueSet(string.Empty);
+            ValueSet valueSet = receivers[playlistsCollectionPrimaryKey].GetValueSet(string.Empty);
             valueSet.Add(removeKey, removeXml);
             valueSet.Add(addKey, addXml);
 

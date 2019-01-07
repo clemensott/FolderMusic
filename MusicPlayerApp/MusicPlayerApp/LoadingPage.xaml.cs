@@ -1,4 +1,4 @@
-﻿using MusicPlayer.Data;
+﻿using MusicPlayer;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
@@ -11,7 +11,7 @@ namespace FolderMusic
     /// </summary>
     public sealed partial class LoadingPage : Page
     {
-        ILibrary library;
+        private StopOperationToken stopToken;
 
         public LoadingPage()
         {
@@ -20,14 +20,27 @@ namespace FolderMusic
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            //library = e.Parameter as ILibrary;
+            stopToken = (StopOperationToken)e.Parameter;
         }
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            library?.CancelLoading();
+            stopToken.Stopped -= CancelToken_Canceled;
+            stopToken.Stop();
 
             base.OnNavigatingFrom(e);
+        }
+
+        private void Page_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            stopToken.Stopped += CancelToken_Canceled;
+
+            if (stopToken.IsStopped) Frame.GoBack();
+        }
+
+        private void CancelToken_Canceled(object sender, System.EventArgs e)
+        {
+            Frame.GoBack();
         }
     }
 }

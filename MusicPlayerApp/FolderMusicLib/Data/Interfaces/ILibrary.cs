@@ -16,8 +16,7 @@ namespace MusicPlayer.Data
         event EventHandler Loaded;
 
         IPlaylist this[int index] { get; }
-
-        bool CanceledLoading { get; }
+        
         IPlaylist CurrentPlaylist { get; set; }
         bool IsForeground { get; }
         bool IsLoaded { get; }
@@ -27,12 +26,11 @@ namespace MusicPlayer.Data
         SkipSongs SkippedSongs { get; }
 
         void BeginCommunication();
-        Task AddNew();
-        void CancelLoading();
-        Task Reset();
-        Task ResetSongs();
+        Task AddNew(StopOperationToken stopToken);
+        Task Reset(StopOperationToken stopToken);
+        Task ResetSongs(StopOperationToken stopToken);
         void Load(IEnumerable<IPlaylist> playlists);
         ILibrary ToSimple();
-        Task Update();
+        Task Update(StopOperationToken stopToken);
     }
 }

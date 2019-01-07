@@ -138,31 +138,31 @@ namespace MusicPlayer.Data
             }
         }
 
-        public virtual async Task Reset()
+        public async Task Reset(StopOperationToken stopToken)
         {
             IReadOnlyList<StorageFile> files = await GetStorageFolderFiles();
-            Song[] foundSongs = (await GetSongsFromStoragefiles(files)).ToArray();
+            Song[] foundSongs = (await GetSongsFromStoragefiles(files, stopToken)).ToArray();
 
-            if (Parent.Parent.CanceledLoading) return;
+            if (stopToken.IsStopped) return;
 
             Songs = new SongCollection(foundSongs, ShuffleType.Off, null);
             CurrentSong = Songs.Shuffle.FirstOrDefault();
         }
 
-        public virtual async Task ResetSongs()
+        public async Task ResetSongs(StopOperationToken stopToken)
         {
             await Task.WhenAll(Songs.Select(s => s.Reset()).ToArray());
         }
 
-        public virtual async Task Update()
+        public async Task Update(StopOperationToken stopToken)
         {
             Song[] songs = Songs.ToArray();
             IReadOnlyList<StorageFile> files = await GetStorageFolderFiles();
             IEnumerable<StorageFile> addFiles = files.Where(f => !songs.Any(s => s.Path == f.Path));
-            Song[] addSongs = (await GetSongsFromStoragefiles(addFiles)).ToArray();
+            Song[] addSongs = (await GetSongsFromStoragefiles(addFiles, stopToken)).ToArray();
             Song[] removeSongs = songs.Where(s => !files.Any(f => f.Path == s.Path)).ToArray();
 
-            if (Parent.Parent.CanceledLoading) return;
+            if (stopToken.IsStopped) return;
 
             if (Songs.Count + addSongs.Length - removeSongs.Length == 0)
             {
@@ -173,32 +173,32 @@ namespace MusicPlayer.Data
             Songs.Change(removeSongs, addSongs);
         }
 
-        public virtual async Task AddNew()
+        public async Task AddNew(StopOperationToken stopToken)
         {
             IReadOnlyList<StorageFile> files = await GetStorageFolderFiles();
             Song[] songs = Songs.ToArray();
 
             IEnumerable<StorageFile> addFiles = files.Where(f => !songs.Any(s => s.Path == f.Path));
-            Song[] addSongs = (await GetSongsFromStoragefiles(addFiles)).ToArray();
+            Song[] addSongs = (await GetSongsFromStoragefiles(addFiles, stopToken)).ToArray();
 
-            if (Parent.Parent.CanceledLoading) return;
+            if (stopToken.IsStopped) return;
             if (addSongs.Length == 0) return;
 
             Songs.Change(null, addSongs);
         }
 
-        private async Task<IEnumerable<Song>> GetSongsFromStoragefiles(IEnumerable<StorageFile> files)
+        private async Task<IEnumerable<Song>> GetSongsFromStoragefiles(IEnumerable<StorageFile> files, StopOperationToken stopToken)
         {
-            Task<Song>[] tasks = files.Select(GetLoadedSong).ToArray();
+            Task<Song>[] tasks = files.Select(f => GetLoadedSong(f, stopToken)).ToArray();
 
             await Task.WhenAll(tasks);
 
             return tasks.Select(t => t.Result).Where(s => s != null && !s.IsEmpty);
         }
 
-        private async Task<Song> GetLoadedSong(StorageFile file)
+        private async Task<Song> GetLoadedSong(StorageFile file, StopOperationToken stopToken)
         {
-            if (Parent.Parent.CanceledLoading) return null;
+            if (stopToken.IsStopped) return null;
 
             try
             {

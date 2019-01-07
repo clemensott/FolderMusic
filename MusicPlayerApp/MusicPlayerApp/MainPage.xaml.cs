@@ -46,10 +46,13 @@ namespace FolderMusic
         {
             if (library.Playlists.Count > 0) return;
 
-            Frame.Navigate(typeof(LoadingPage), library);
-            await library.Reset();
+            StopOperationToken stopToken = new StopOperationToken();
+
+            Frame.Navigate(typeof(LoadingPage), stopToken);
+            await library.Reset(stopToken);
             Frame.GoBack();
-            //AutoSaveLoad.CheckLibrary(library, "ResetedOnLoaded");
+
+            AutoSaveLoad.CheckLibrary(library, "ResetedOnLoaded");
         }
 
         private async void SkippedSongs_SkippedSong(object sender, EventArgs e)
@@ -119,29 +122,37 @@ namespace FolderMusic
 
         private async void ResetLibraryFromStorage_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(LoadingPage), library);
-            await library.Reset();
+            StopOperationToken stopToken = new StopOperationToken();
+
+            Frame.Navigate(typeof(LoadingPage), stopToken);
+            await library.Reset(stopToken);
             Frame.GoBack();
         }
 
         private async void UpdateExistingPlaylists_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(LoadingPage), library);
-            await library.Update();
+            StopOperationToken stopToken = new StopOperationToken();
+
+            Frame.Navigate(typeof(LoadingPage), stopToken);
+            await library.Update(stopToken);
             Frame.GoBack();
         }
 
         private async void ResetAllSongs_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(LoadingPage), library);
-            await library.ResetSongs();
+            StopOperationToken stopToken = new StopOperationToken();
+
+            Frame.Navigate(typeof(LoadingPage), stopToken);
+            await library.ResetSongs(stopToken);
             Frame.GoBack();
         }
 
         private async void AddNotExistingPlaylists_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(LoadingPage), library);
-            await library.AddNew();
+            StopOperationToken stopToken = new StopOperationToken();
+
+            Frame.Navigate(typeof(LoadingPage), stopToken);
+            await library.AddNew(stopToken);
             Frame.GoBack();
         }
 
