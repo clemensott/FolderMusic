@@ -62,11 +62,11 @@ namespace FolderMusic
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            if (!checkedSkippedSongs && await library.SkippedSongs.HasSongs())
-            {
-                checkedSkippedSongs = true;
-                Frame.Navigate(typeof(SkipSongsPage), library.SkippedSongs);
-            }
+            //if (!checkedSkippedSongs && await library.SkippedSongs.HasSongs())
+            //{
+            //    checkedSkippedSongs = true;
+            //    Frame.Navigate(typeof(SkipSongsPage), library.SkippedSongs);
+            //}
         }
 
         private void Shuffle_Tapped(object sender, TappedRoutedEventArgs e)
