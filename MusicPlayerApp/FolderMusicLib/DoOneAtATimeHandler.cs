@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace MusicPlayer
@@ -47,6 +43,8 @@ namespace MusicPlayer
                         break;
                     }
                 }
+                
+                MobileDebug.Service.WriteEvent("DoOneAtATimeHandler.DoAsync1");
             }
         }
     }

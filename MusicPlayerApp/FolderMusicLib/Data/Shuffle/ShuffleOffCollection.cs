@@ -32,7 +32,7 @@ namespace MusicPlayer.Data.Shuffle
         private void Parent_CollectionChanged(object sender, SongCollectionChangedEventArgs e)
         {
             Song[] ordered = GetOrdered(Parent).ToArray();
-            MobileDebug.Service.WriteEvent("ShuffleOffCollection.OarentChange", e.RemovedSongs.Length, e.AddedSongs.Length);
+            MobileDebug.Service.WriteEvent("ShuffleOffCollection.ParentChange", e.RemovedSongs.Length, e.AddedSongs.Length);
             Change(e.GetRemoved(), e.GetAdded().Select(s => new ChangeCollectionItem<Song>(Array.IndexOf(ordered, s), s)));
         }
 

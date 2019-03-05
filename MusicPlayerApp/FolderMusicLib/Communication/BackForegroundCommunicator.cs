@@ -337,7 +337,7 @@ namespace MusicPlayer.Communication
             string removeXml = valueSet[removeKey].ToString();
             string addXml = valueSet[addKey].ToString();
 
-            SaveText(removeXml);
+            //SaveText(removeXml);
 
             IPlaylist changedPlaylist;
             if (!HavePlaylist(playlistPath, out changedPlaylist)) return;
@@ -364,34 +364,34 @@ namespace MusicPlayer.Communication
             changedPlaylist.Songs.Shuffle.Change(removes, adds);
         }
 
-        private async void SaveText(string text)
-        {
-            MobileDebug.Service.WriteEvent("Com.SaveText1");
-            StorageFile file;
+        //private async void SaveText(string text)
+        //{
+        //    MobileDebug.Service.WriteEvent("Com.SaveText1");
+        //    StorageFile file;
 
-            try
-            {
-                file = await KnownFolders.VideosLibrary.GetFileAsync("text.txt");
-            }
-            catch (Exception e1)
-            {
-                MobileDebug.Service.WriteEvent("Com.SaveTextFail1", e1);
+        //    try
+        //    {
+        //        file = await KnownFolders.VideosLibrary.GetFileAsync("text.txt");
+        //    }
+        //    catch (Exception e1)
+        //    {
+        //        MobileDebug.Service.WriteEvent("Com.SaveTextFail1", e1);
 
-                try
-                {
-                    file = await KnownFolders.VideosLibrary.CreateFileAsync("text.txt");
-                }
-                catch (Exception e2)
-                {
-                    MobileDebug.Service.WriteEvent("Com.SaveTextFail2", e2);
-                    return;
-                }
-            }
+        //        try
+        //        {
+        //            file = await KnownFolders.VideosLibrary.CreateFileAsync("text.txt");
+        //        }
+        //        catch (Exception e2)
+        //        {
+        //            MobileDebug.Service.WriteEvent("Com.SaveTextFail2", e2);
+        //            return;
+        //        }
+        //    }
 
-            MobileDebug.Service.WriteEvent("Com.SaveText2", file.Name);
-            await FileIO.WriteTextAsync(file, text);
-            MobileDebug.Service.WriteEvent("Com.SaveText3");
-        }
+        //    MobileDebug.Service.WriteEvent("Com.SaveText2", file.Name);
+        //    await FileIO.WriteTextAsync(file, text);
+        //    MobileDebug.Service.WriteEvent("Com.SaveText3");
+        //}
 
 
         private void OnAllPlaylists_LoopChanged(object sender, SubscriptionsEventArgs<IPlaylist, LoopChangedEventArgs> e)

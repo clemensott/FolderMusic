@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Schema;
@@ -8,7 +9,7 @@ using Windows.Storage.FileProperties;
 
 namespace MusicPlayer.Data
 {
-    public class Song : IXmlSerializable
+    public class Song : INotifyPropertyChanged, IXmlSerializable
     {
         public const double DefaultDuration = 400;
 
@@ -36,6 +37,7 @@ namespace MusicPlayer.Data
                 var args = new SongDurationChangedEventArgs(durationMilliseconds, value);
                 durationMilliseconds = value;
                 DurationChanged?.Invoke(this, args);
+                OnPropertyChanged(nameof(DurationMilliseconds));
             }
         }
 
@@ -49,6 +51,7 @@ namespace MusicPlayer.Data
                 var args = new SongTitleChangedEventArgs(title, value);
                 title = value;
                 TitleChanged?.Invoke(this, args);
+                OnPropertyChanged(nameof(Title));
             }
         }
 
@@ -62,13 +65,20 @@ namespace MusicPlayer.Data
                 var args = new SongArtistChangedEventArgs(artist, value);
                 artist = value;
                 ArtistChanged?.Invoke(this, args);
+                OnPropertyChanged(nameof(Artist));
             }
         }
 
         public string Path
         {
             get { return path; }
-            set { path = value; }
+            set
+            {
+                if (value == path) return;
+
+                path = value;
+                OnPropertyChanged(nameof(DurationMilliseconds));
+            }
         }
 
         public Song()
@@ -176,6 +186,13 @@ namespace MusicPlayer.Data
         public void SetFailed()
         {
             failed = true;
+        }
+
+		public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         public override bool Equals(object obj)

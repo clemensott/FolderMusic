@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Xml.Serialization;
 
 namespace MusicPlayer.Data
 {
-    public interface IPlaylistCollection : IEnumerable<IPlaylist>, IXmlSerializable
+    public interface IPlaylistCollection : IEnumerable<IPlaylist>, INotifyPropertyChanged, IXmlSerializable
     {
         int Count { get; }
         ILibrary Parent { get; set; }

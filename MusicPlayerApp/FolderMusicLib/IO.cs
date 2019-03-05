@@ -43,12 +43,8 @@ namespace MusicPlayer
             StorageFile file = null;
             try
             {
-                Guid guid = Guid.NewGuid();
-                MobileDebug.Service.WriteEvent("SaveTextAsync1", filenameWithExtention, guid);
                 file = await GetOrCreateStorageFileAsync(filenameWithExtention);
-                MobileDebug.Service.WriteEvent("SaveTextAsync2", filenameWithExtention, guid);
                 await FileIO.WriteTextAsync(file, text);
-                MobileDebug.Service.WriteEvent("SaveTextAsync3", filenameWithExtention, guid);
             }
             catch (Exception e)
             {
@@ -135,21 +131,7 @@ namespace MusicPlayer
 
         private async static Task<StorageFile> GetOrCreateStorageFileAsync(string fileName)
         {
-            return await GetOrCreateStorageFileAsync(ApplicationData.Current.LocalFolder, fileName);
-        }
-
-        private async static Task<StorageFile> GetOrCreateStorageFileAsync(StorageFolder folder, string fileName)
-        {
-            try
-            {
-                return await folder.GetFileAsync(fileName);
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Service.WriteEvent("GetOrCreateStorageFileAsyncFail", e, folder.Path, fileName);
-            }
-
-            return await folder.CreateFileAsync(fileName);
+            return await ApplicationData.Current.LocalFolder.CreateFileAsync(fileName, CreationCollisionOption.OpenIfExists);
         }
     }
 }

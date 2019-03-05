@@ -6,6 +6,7 @@ using System.Xml;
 using System.Xml.Schema;
 using MusicPlayer.Data.Shuffle;
 using MusicPlayer.Data.Simple;
+using System.ComponentModel;
 
 namespace MusicPlayer.Data
 {
@@ -114,6 +115,13 @@ namespace MusicPlayer.Data
         public ISongCollection ToSimple()
         {
             return new SimpleSongCollection(Shuffle, Parent.CurrentSong);
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         public IEnumerator<Song> GetEnumerator()

@@ -2,6 +2,7 @@
 using MusicPlayer.Data.Shuffle;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace FolderMusic.Converters
 {
@@ -65,7 +66,7 @@ namespace FolderMusic.Converters
         private void OnShuffleCollectionChanged(object sender, ShuffleCollectionChangedEventArgs e)
         {
             foreach (Song song in e.GetRemoved()) Remove(song);
-            foreach (ChangeCollectionItem<Song> change in e.AddedSongs) Insert(change.Index, change.Item);
+            foreach (ChangeCollectionItem<Song> change in e.AddedSongs.OrderBy(c => c.Index)) Insert(change.Index, change.Item);
 
             UpdateFinished?.Invoke(this, EventArgs.Empty);
         }

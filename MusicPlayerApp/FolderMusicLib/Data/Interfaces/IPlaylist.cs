@@ -1,5 +1,6 @@
 ﻿using MusicPlayer.Data.Shuffle;
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
@@ -7,7 +8,7 @@ namespace MusicPlayer.Data
 {
     public enum LoopType { Off, All, Current }
 
-    public interface IPlaylist : IXmlSerializable
+    public interface IPlaylist : INotifyPropertyChanged, IXmlSerializable
     {
         event EventHandler<CurrentSongChangedEventArgs> CurrentSongChanged;
         event EventHandler<CurrentSongPositionChangedEventArgs> CurrentSongPositionChanged;

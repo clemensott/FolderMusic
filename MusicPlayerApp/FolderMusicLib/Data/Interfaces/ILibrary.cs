@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Windows.Media.Playback;
 
 namespace MusicPlayer.Data
 {
-    public interface ILibrary : IXmlSerializable
+    public interface ILibrary : INotifyPropertyChanged, IXmlSerializable
     {
         event EventHandler<PlayStateChangedEventArgs> PlayStateChanged;
         event EventHandler<PlayerStateChangedEventArgs> PlayerStateChanged;
@@ -16,7 +17,7 @@ namespace MusicPlayer.Data
         event EventHandler Loaded;
 
         IPlaylist this[int index] { get; }
-        
+
         IPlaylist CurrentPlaylist { get; set; }
         bool IsForeground { get; }
         bool IsLoaded { get; }

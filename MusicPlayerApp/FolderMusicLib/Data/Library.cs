@@ -1,6 +1,7 @@
 ﻿using MusicPlayer.Communication;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
@@ -43,6 +44,7 @@ namespace MusicPlayer.Data
                 isPlaying = value;
                 var args = new PlayStateChangedEventArgs(value);
                 PlayStateChanged?.Invoke(this, args);
+                OnPropertyChanged(nameof(IsPlaying));
             }
         }
 
@@ -55,7 +57,8 @@ namespace MusicPlayer.Data
 
                 var args = new PlayerStateChangedEventArgs(playerState, value);
                 playerState = value;
-
+                PlayerStateChanged?.Invoke(this, args);
+                OnPropertyChanged(nameof(PlayerState));
             }
         }
 
@@ -83,6 +86,7 @@ namespace MusicPlayer.Data
                 var args = new CurrentPlaylistChangedEventArgs(currentPlaylist, value);
                 currentPlaylist = value;
                 CurrentPlaylistChanged?.Invoke(this, args);
+                OnPropertyChanged(nameof(CurrentPlaylist));
             }
         }
 
@@ -97,6 +101,7 @@ namespace MusicPlayer.Data
                 playlists = value;
                 playlists.Parent = this;
                 PlaylistsChanged?.Invoke(this, args);
+                OnPropertyChanged(nameof(Playlists));
             }
         }
 
@@ -269,6 +274,13 @@ namespace MusicPlayer.Data
             catch { }
 
             return list;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         public XmlSchema GetSchema()

@@ -2,6 +2,7 @@
 using MusicPlayer.Data.Simple;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -60,6 +61,7 @@ namespace MusicPlayer.Data
                 currentSong = value;
                 CurrentSongPosition = 0;
                 CurrentSongChanged?.Invoke(this, args);
+                OnPropertyChanged(nameof(CurrentSong));
             }
         }
 
@@ -75,6 +77,7 @@ namespace MusicPlayer.Data
                 songs = value;
                 songs.Parent = this;
                 SongsChanged?.Invoke(this, args);
+                OnPropertyChanged(nameof(Songs));
             }
         }
 
@@ -88,6 +91,7 @@ namespace MusicPlayer.Data
                 var args = new LoopChangedEventArgs(loop, value);
                 loop = value;
                 LoopChanged?.Invoke(this, args);
+                OnPropertyChanged(nameof(Loop));
             }
         }
 
@@ -223,6 +227,13 @@ namespace MusicPlayer.Data
             playlist.Songs = Songs.ToSimple();
 
             return playlist;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         public override bool Equals(object obj)
