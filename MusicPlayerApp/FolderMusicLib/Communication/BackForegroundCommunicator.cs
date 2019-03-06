@@ -34,7 +34,7 @@ namespace MusicPlayer.Communication
             playlistsCollectionPrimaryKey = "PlaylistsCollection" + primaryKey,
             currentPlaylistPrimaryKey = "CurrentPlaylist" + primaryKey,
             settingsPrimaryKey = "Settings" + primaryKey,
-            playStatePrimaryKey = "PlayState" + primaryKey,
+            isPlayingPrimaryKey = "IsPlaying" + primaryKey,
             playerStatePrimaryKey = "PlayerState" + primaryKey,
             getLibraryPrimaryKey = "GetLibrary" + primaryKey,
             skipPrimaryKey = "Skip" + primaryKey,
@@ -76,7 +76,7 @@ namespace MusicPlayer.Communication
             lsh.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
             lsh.PlaylistsPropertyChanged += OnPlaylistsPropertyChanged;
             lsh.PlaylistCollectionChanged += OnPlaylistCollectionChanged;
-            lsh.PlayStateChanged += OnPlayStateChanged;
+            lsh.IsPlayingChanged += OnIsPlayingChanged;
             lsh.PlayerStateChanged += OnPlayerStateChanged;
             lsh.AllPlaylists.CurrentSongChanged += OnAllPlaylists_CurrentSongChanged;
             lsh.AllPlaylists.CurrentSongPositionChanged += OnAllPlaylists_CurrentSongPositionChanged;
@@ -88,8 +88,6 @@ namespace MusicPlayer.Communication
             lsh.AllPlaylists.AllSongs.ArtistChanged += OnAllPlaylists_AllSongs_ArtistChanged;
             lsh.AllPlaylists.AllSongs.TitleChanged += OnAllPlaylist_AllSongs_TitleChanged;
             lsh.AllPlaylists.AllSongs.DurationChanged += OnAllPlaylists_AllSongs_DurationChanged;
-
-            lsh.Subscribe(library);
         }
 
         private IEnumerable<Receiver> GetAllReceiver()
@@ -109,7 +107,7 @@ namespace MusicPlayer.Communication
             yield return new Receiver(playlistsCollectionPrimaryKey, new Action<ValueSet, string>(ReceivePlaylistsCollectionChanged));
             yield return new Receiver(currentPlaylistPrimaryKey, new Action<ValueSet, string>(ReceiveCurrentPlaylist));
             yield return new Receiver(settingsPrimaryKey, new Action<ValueSet, string>(ReceiveSettings));
-            yield return new Receiver(playStatePrimaryKey, new Action<ValueSet, string>(ReceivePlayState));
+            yield return new Receiver(isPlayingPrimaryKey, new Action<ValueSet, string>(ReceivePlayState));
             yield return new Receiver(playerStatePrimaryKey, new Action<ValueSet, string>(ReceivePlayerState));
             yield return new Receiver(getLibraryPrimaryKey, new Action<ValueSet, string>(ReceiveGetLibrary));
             yield return new Receiver(skipPrimaryKey, new Action<ValueSet, string>(ReceiveSkippedSong));
@@ -245,7 +243,6 @@ namespace MusicPlayer.Communication
 
         private void OnAllPlaylists_SongCollectionChanged(object sender, SubscriptionsEventArgs<ISongCollection, SongCollectionChangedEventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("Com.SongCollectionChanged");
             string removeXml = XmlConverter.Serialize(e.Base.GetRemoved().ToArray());
             string addXml = XmlConverter.Serialize(e.Base.GetAdded().ToArray());
             string playlistPath = e.Source.Parent.AbsolutePath;
@@ -480,15 +477,15 @@ namespace MusicPlayer.Communication
         }
 
 
-        private void OnPlayStateChanged(object sender, SubscriptionsEventArgs<ILibrary, PlayStateChangedEventArgs> e)
+        private void OnIsPlayingChanged(object sender, SubscriptionsEventArgs<ILibrary, IsPlayingChangedEventArgs> e)
         {
-            SendPlayState(e.Base.NewValue);
+            SendIsPlaying(e.Base.NewValue);
         }
 
-        private void SendPlayState(bool isPlayling)
+        private void SendIsPlaying(bool isPlayling)
         {
             string value = isPlayling.ToString();
-            ValueSet valueSet = receivers[playStatePrimaryKey].GetValueSet(value);
+            ValueSet valueSet = receivers[isPlayingPrimaryKey].GetValueSet(value);
 
             Send(valueSet);
         }
@@ -516,7 +513,7 @@ namespace MusicPlayer.Communication
         private void OnLoaded(object sender, SubscriptionsEventArgs<ILibrary, EventArgs> e)
         {
             if (!library.IsForeground) SendLibrary();
-            if (library.IsPlaying) SendPlayState(true);
+            if (library.IsPlaying) SendIsPlaying(true);
         }
 
 

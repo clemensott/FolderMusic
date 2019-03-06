@@ -1,5 +1,7 @@
 ﻿using MusicPlayer.Data;
+using MusicPlayer.Data.Shuffle;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Windows.Storage;
@@ -11,7 +13,7 @@ using Windows.UI.Xaml.Input;
 
 namespace FolderMusic
 {
-    public abstract partial class SongsView : UserControl
+    public partial class SongsView : UserControl
     {
         enum ScrollToType { No, Last, Current }
 
@@ -37,7 +39,7 @@ namespace FolderMusic
             var oldSongs = e.OldValue as ISongCollection;
             var newSongs = e.NewValue as ISongCollection;
 
-            s.SetItemsSource();
+            s.OnSouceChanged(oldSongs, newSongs);
             s.scrollTo = ScrollToType.Last;
         }
 
@@ -67,20 +69,64 @@ namespace FolderMusic
             scrollTo = ScrollToType.Last;
         }
 
-        private void SetItemsSource()
+        protected virtual void OnSouceChanged(ISongCollection oldSongs, ISongCollection newSongs)
         {
-            IUpdateSelectedItemCollection<Song> collection = GetItemsSource(Source);
-            collection.UpdateFinished += ItemsSource_UpdateFinished;
+            Unsubscribe(oldSongs);
+            Subscribe(newSongs);
 
-            lbxSongs.ItemsSource = collection;
-            SetSelectedItem();
+            SetItemsSource(Source.Shuffle.ToArray());
         }
 
-        protected abstract IUpdateSelectedItemCollection<Song> GetItemsSource(ISongCollection songs);
-
-        private void ItemsSource_UpdateFinished(object sender, EventArgs e)
+        private void Subscribe(ISongCollection songs)
         {
+            if (songs == null) return;
+
+            songs.ShuffleChanged += Songs_ShuffleChanged;
+
+            Subscribe(songs.Shuffle);
+        }
+
+        private void Unsubscribe(ISongCollection songs)
+        {
+            if (songs == null) return;
+
+            songs.ShuffleChanged -= Songs_ShuffleChanged;
+
+            Unsubscribe(songs.Shuffle);
+        }
+
+        private void Subscribe(IShuffleCollection shuffle)
+        {
+            if (shuffle == null) return;
+
+            shuffle.Changed += Shuffle_Changed;
+        }
+
+        private void Unsubscribe(IShuffleCollection shuffle)
+        {
+            if (shuffle == null) return;
+
+            shuffle.Changed -= Shuffle_Changed;
+        }
+
+        private void Songs_ShuffleChanged(object sender, ShuffleChangedEventArgs e)
+        {
+            Unsubscribe(e.OldShuffleSongs);
+            Subscribe(e.NewShuffleSongs);
+
+            SetItemsSource(Source.Shuffle.ToArray());
+        }
+
+        private void Shuffle_Changed(object sender, ShuffleCollectionChangedEventArgs e)
+        {
+            SetItemsSource(Source.Shuffle.ToArray());
+        }
+
+        protected void SetItemsSource(IEnumerable<Song> songs)
+        {
+            lbxSongs.ItemsSource = songs;
             SetSelectedItemSafe();
+            ScrollToCurrentSongDirect();
         }
 
         private void SetSelectedItemSafe()

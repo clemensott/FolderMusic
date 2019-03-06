@@ -11,14 +11,7 @@ namespace FolderMusic
         private const double intervall = 100, zoomWidth = 0.1;
 
         public static readonly DependencyProperty IsIndeterminateProperty =
-            DependencyProperty.Register("IsIndeterminate", typeof(bool), typeof(Slider),
-                new PropertyMetadata(false, new PropertyChangedCallback(OnIsIndeterminatePropertyChanged)));
-
-        private static void OnIsIndeterminatePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
-        {
-            var s = (Slider)sender;
-            var value = (bool)e.NewValue;
-        }
+            DependencyProperty.Register("IsIndeterminate", typeof(bool), typeof(Slider), new PropertyMetadata(false));
 
         public static readonly DependencyProperty ViewPositionRatioProperty =
             DependencyProperty.Register("ViewPositionRatio", typeof(double), typeof(Slider),

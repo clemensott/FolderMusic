@@ -1,5 +1,4 @@
 ﻿using MusicPlayer.Data;
-using MusicPlayer.Data.Shuffle;
 using MusicPlayer.Data.SubscriptionsHandler;
 using System;
 using Windows.ApplicationModel.Background;
@@ -69,7 +68,7 @@ namespace BackgroundTask
 
             BackgroundPlayer.SetCurrent();
 
-            MobileDebug.Service.WriteEvent("RunFinish");
+            MobileDebug.Service.WriteEventPair("RunFinish", "This: ", GetHashCode(), "Lib: ", library.GetHashCode());
         }
 
         private static void Subscribe(BackgroundAudioTask task)
@@ -87,9 +86,7 @@ namespace BackgroundTask
             BackgroundMediaPlayer.Current.MediaOpened += task.BackgroundMediaPlayer_MediaOpened;
             BackgroundMediaPlayer.Current.MediaFailed += task.BackgroundMediaPlayer_MediaFailed;
 
-            task.lsh.Subscribe(task.library);
-
-            task.lsh.PlayStateChanged += task.OnPlayStateChanged;
+            task.lsh.IsPlayingChanged += task.OnPlayStateChanged;
             task.lsh.CurrentPlaylistChanged += task.OnCurrentPlaylistChanged;
             task.lsh.SettingsChanged += task.OnSettingsChanged;
             task.lsh.CurrentPlaylist.CurrentSongChanged += task.OnCurrentSongChanged;
@@ -111,7 +108,7 @@ namespace BackgroundTask
             BackgroundMediaPlayer.Current.MediaOpened -= task.BackgroundMediaPlayer_MediaOpened;
             BackgroundMediaPlayer.Current.MediaFailed -= task.BackgroundMediaPlayer_MediaFailed;
 
-            task.lsh.PlayStateChanged -= task.OnPlayStateChanged;
+            task.lsh.IsPlayingChanged -= task.OnPlayStateChanged;
             task.lsh.CurrentPlaylistChanged -= task.OnCurrentPlaylistChanged;
             task.lsh.SettingsChanged -= task.OnSettingsChanged;
             task.lsh.CurrentPlaylist.CurrentSongChanged -= task.OnCurrentSongChanged;
@@ -199,9 +196,9 @@ namespace BackgroundTask
             ringer.ReloadTimes();
         }
 
-        private void OnPlayStateChanged(object sender, SubscriptionsEventArgs<ILibrary, PlayStateChangedEventArgs> e)
+        private void OnPlayStateChanged(object sender, SubscriptionsEventArgs<ILibrary, IsPlayingChangedEventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("BackgroundPlayStateChanged", e.Base.NewValue);
+            MobileDebug.Service.WriteEvent("BackgroundIsPlayingChanged", e.Base.NewValue);
 
             if (e.Base.NewValue) BackgroundPlayer.Play();
             else BackgroundPlayer.Pause();
@@ -218,7 +215,7 @@ namespace BackgroundTask
             BackgroundPlayer.SetCurrent();
         }
 
-        private void OnCurrentPlaylistChanged(object sender,SubscriptionsEventArgs<ILibrary, CurrentPlaylistChangedEventArgs>e)
+        private void OnCurrentPlaylistChanged(object sender, SubscriptionsEventArgs<ILibrary, CurrentPlaylistChangedEventArgs> e)
         {
             BackgroundPlayer.SetCurrent();
         }

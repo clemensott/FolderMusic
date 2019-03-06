@@ -21,7 +21,7 @@ namespace MusicPlayer.Data
         private IPlaylistCollection playlists;
         private BackForegroundCommunicator communicator;
 
-        public event EventHandler<PlayStateChangedEventArgs> PlayStateChanged;
+        public event EventHandler<IsPlayingChangedEventArgs> IsPlayingChanged;
         public event EventHandler<PlayerStateChangedEventArgs> PlayerStateChanged;
         public event EventHandler<PlaylistsChangedEventArgs> PlaylistsChanged;
         public event EventHandler<CurrentPlaylistChangedEventArgs> CurrentPlaylistChanged;
@@ -42,8 +42,8 @@ namespace MusicPlayer.Data
                 if (value == isPlaying) return;
 
                 isPlaying = value;
-                var args = new PlayStateChangedEventArgs(value);
-                PlayStateChanged?.Invoke(this, args);
+                var args = new IsPlayingChangedEventArgs(value);
+                IsPlayingChanged?.Invoke(this, args);
                 OnPropertyChanged(nameof(IsPlaying));
             }
         }
@@ -53,6 +53,7 @@ namespace MusicPlayer.Data
             get { return playerState; }
             set
             {
+                MobileDebug.Service.WriteEvent("SetPlayerState", playerState, value);
                 if (value == playerState) return;
 
                 var args = new PlayerStateChangedEventArgs(playerState, value);

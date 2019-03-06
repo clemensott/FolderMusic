@@ -25,7 +25,7 @@ namespace FolderMusic
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            stopToken.Stopped -= CancelToken_Canceled;
+            stopToken.Stopped -= CancelToken_Stopped;
             stopToken.Stop();
 
             base.OnNavigatingFrom(e);
@@ -33,12 +33,12 @@ namespace FolderMusic
 
         private void Page_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            stopToken.Stopped += CancelToken_Canceled;
+            stopToken.Stopped += CancelToken_Stopped;
 
             if (stopToken.IsStopped) Frame.GoBack();
         }
 
-        private void CancelToken_Canceled(object sender, System.EventArgs e)
+        private void CancelToken_Stopped(object sender, System.EventArgs e)
         {
             Frame.GoBack();
         }

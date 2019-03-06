@@ -76,8 +76,8 @@ namespace MusicPlayer.Data
             if (removeChanges.Count == 0 && addChanges.Count == 0) return;
 
             var args = new PlaylistCollectionChangedEventArgs(addChanges.ToArray(), removeChanges.ToArray());
-            MobileDebug.Service.WriteEvent("PlaylistCollectionChange", removeChanges.Count, addChanges.Count);
             Changed?.Invoke(this, args);
+            OnPropertyChanged(nameof(Count));
 
             UpdateCurrentPlaylist();
         }

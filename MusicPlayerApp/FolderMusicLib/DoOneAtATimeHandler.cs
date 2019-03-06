@@ -37,14 +37,12 @@ namespace MusicPlayer
 
                 lock (lockObj)
                 {
-                    if (doAgain)
+                    if (!doAgain)
                     {
                         isDoing = false;
                         break;
                     }
                 }
-                
-                MobileDebug.Service.WriteEvent("DoOneAtATimeHandler.DoAsync1");
             }
         }
     }

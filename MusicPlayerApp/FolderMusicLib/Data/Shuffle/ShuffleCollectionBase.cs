@@ -78,10 +78,14 @@ namespace MusicPlayer.Data.Shuffle
 
         public void Change(IEnumerable<Song> removes, IEnumerable<ChangeCollectionItem<Song>> adds)
         {
+            MobileDebug.Service.WriteEvent("ShuffleCollectionChange1", removes != null, adds != null, list?.Count ?? -1);
             Song[] oldShuffle = this.ToArray();
+            MobileDebug.Service.WriteEvent("ShuffleCollectionChange1.1", oldShuffle.Length);
 
             Song[] removeArray = removes?.ToArray() ?? new Song[0];
+            MobileDebug.Service.WriteEvent("ShuffleCollectionChange1.2");
             ChangeCollectionItem<Song>[] addArray = adds?.ToArray() ?? new ChangeCollectionItem<Song>[0];
+            MobileDebug.Service.WriteEvent("ShuffleCollectionChange2", removeArray.Length, addArray.Length);
 
             List<ChangeCollectionItem<Song>> removeChanges = new List<ChangeCollectionItem<Song>>();
 
@@ -91,7 +95,6 @@ namespace MusicPlayer.Data.Shuffle
 
                 if (index == -1) continue;
 
-                list.RemoveAt(index);
                 removeChanges.Add(new ChangeCollectionItem<Song>(index, song));
             }
 
@@ -101,16 +104,19 @@ namespace MusicPlayer.Data.Shuffle
 
                 if (index == -1) continue;
 
-                list.RemoveAt(index);
                 removeChanges.Add(new ChangeCollectionItem<Song>(index, change.Item));
             }
+
+            foreach (ChangeCollectionItem<Song> change in removeChanges) list.Remove(change.Item);
 
             foreach (ChangeCollectionItem<Song> change in addArray.OrderBy(c => c.Index))
             {
                 list.Insert(change.Index, change.Item);
             }
 
-            Change(removeChanges.ToArray(), addArray.ToArray(), oldShuffle);
+            MobileDebug.Service.WriteEvent("ShuffleCollectionChange3", removeChanges.Count, addArray.Length);
+
+            Change(removeChanges.OrderBy(c => c.Index).ToArray(), addArray.OrderBy(c => c.Index).ToArray(), oldShuffle);
         }
 
         private void Change(ChangeCollectionItem<Song>[] removeChanges, ChangeCollectionItem<Song>[] addChanges, Song[] oldShuffle)
@@ -118,13 +124,13 @@ namespace MusicPlayer.Data.Shuffle
             if (removeChanges.Length == 0 && addChanges.Length == 0) return;
 
             var args = new ShuffleCollectionChangedEventArgs(addChanges, removeChanges);
-            
             Changed?.Invoke(this, args);
+            OnPropertyChanged(nameof(Count));
 
             if (Parent?.Parent == null) return;
 
             Song currentSong = Parent.Parent.CurrentSong;
-
+            
             if (this.Contains(currentSong)) UpdateCurrentSong(oldShuffle);
         }
 

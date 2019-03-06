@@ -9,8 +9,8 @@ namespace FolderMusic.Converters
         public object Convert(object value, Type targetType, object parameter, string language)
         {
             MediaPlayerState state = (MediaPlayerState)value;
-
-            return state != MediaPlayerState.Playing && state == MediaPlayerState.Paused;
+            MobileDebug.Service.WriteEvent("PlayerStateToIsIndeterminateConverter", state);
+            return state != MediaPlayerState.Playing && state != MediaPlayerState.Paused;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)

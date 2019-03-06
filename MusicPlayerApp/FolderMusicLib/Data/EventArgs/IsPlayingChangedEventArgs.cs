@@ -2,11 +2,11 @@
 
 namespace MusicPlayer.Data
 {
-    public class PlayStateChangedEventArgs:EventArgs
+    public class IsPlayingChangedEventArgs : EventArgs
     {
         public bool NewValue { get; private set; }
 
-        internal PlayStateChangedEventArgs(bool newValue)
+        internal IsPlayingChangedEventArgs(bool newValue)
         {
             NewValue = newValue;
         }

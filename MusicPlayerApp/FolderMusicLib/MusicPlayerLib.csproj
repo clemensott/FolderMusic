@@ -100,7 +100,7 @@
     <Compile Include="Data\Simple\SimpleSongCollection.cs" />
     <Compile Include="Data\PlaylistCollection.cs" />
     <Compile Include="Data\EventArgs\PlaylistCollectionChangedEventArgs.cs" />
-    <Compile Include="Data\EventArgs\PlayStateChangedEventArgs.cs" />
+    <Compile Include="Data\EventArgs\IsPlayingChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\ShuffleChangedEventArgs.cs" />
     <Compile Include="Data\EventArgs\PlaylistsChangedEventArgs.cs" />
     <Compile Include="Data\Shuffle\IShuffleCollection.cs" />

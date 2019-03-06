@@ -9,7 +9,7 @@ namespace MusicPlayer.Data
 {
     public interface ILibrary : INotifyPropertyChanged, IXmlSerializable
     {
-        event EventHandler<PlayStateChangedEventArgs> PlayStateChanged;
+        event EventHandler<IsPlayingChangedEventArgs> IsPlayingChanged;
         event EventHandler<PlayerStateChangedEventArgs> PlayerStateChanged;
         event EventHandler<PlaylistsChangedEventArgs> PlaylistsChanged;
         event EventHandler<CurrentPlaylistChangedEventArgs> CurrentPlaylistChanged;

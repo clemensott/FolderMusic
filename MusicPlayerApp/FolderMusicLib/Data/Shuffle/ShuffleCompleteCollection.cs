@@ -10,9 +10,12 @@ namespace MusicPlayer.Data.Shuffle
 
         private static Random random = new Random();
 
-        public ShuffleCompleteCollection(ISongCollection songs, Song currentSong) : this(songs)
+        public ShuffleCompleteCollection(ISongCollection songs, Song currentSong) : base(songs)
         {
             Change(null, GetStart(songs, currentSong));
+
+            Parent.Changed += Parent_CollectionChanged;
+            Parent.Parent.CurrentSongChanged += Playlist_CurrentSongChanged;
         }
 
         public ShuffleCompleteCollection(ISongCollection songs) : base(songs)
@@ -36,12 +39,12 @@ namespace MusicPlayer.Data.Shuffle
             List<Song> remaining = new List<Song>(songs);
             int shuffleCount = GetCount(songs.Count);
             int currentSongIndex = GetCurrentSongIndex(songs.Count);
-            MobileDebug.Service.WriteEvent("ShuffleCompleteGetStart1", shuffleCount, currentSongIndex, currentSong.Path);
+
             for (int i = 0; i < shuffleCount; i++)
             {
                 Song addSong = i == currentSongIndex && currentSong != null ?
                     currentSong : remaining[random.Next(remaining.Count)];
-                MobileDebug.Service.WriteEvent("ShuffleCompleteGetStart2", i, addSong);
+                
                 remaining.Remove(addSong);
 
                 yield return new ChangeCollectionItem<Song>(i, addSong);
@@ -108,10 +111,10 @@ namespace MusicPlayer.Data.Shuffle
             Song currentSong = args.NewCurrentSong;
             int shuffleIndex = GetCurrentSongIndex(Parent.Count);
             int currentSongIndex = IndexOf(currentSong);
-
+            MobileDebug.Service.WriteEvent("Playlist_CurrentSongChanged1", currentSong, shuffleIndex, currentSongIndex);
             if (currentSongIndex == -1)
             {
-                Song[] removes = this.Take(Count - shuffleIndex).ToArray();
+                Song[] removes = this.Skip(Count - shuffleIndex - 1).ToArray();
                 List<Song> adds = GetRandomSongs(Parent, removes, Count - shuffleIndex);
 
                 if (!adds.Remove(currentSong)) adds.RemoveAt(0);
@@ -122,11 +125,12 @@ namespace MusicPlayer.Data.Shuffle
             else if (currentSongIndex > shuffleIndex)
             {
                 Song[] removes = this.Take(currentSongIndex - shuffleIndex).ToArray();
+                MobileDebug.Service.WriteEvent("Playlist_CurrentSongChanged2", removes.Length);
                 List<Song> adds = GetRandomSongs(Parent, removes, currentSongIndex - shuffleIndex);
 
                 Change(removes, adds);
             }
-            else
+            else if (currentSongIndex < shuffleIndex)
             {
                 Song[] removes = this.Skip(Count - shuffleIndex + currentSongIndex).ToArray();
                 List<ChangeCollectionItem<Song>> adds = GetRandomSongs(Parent, removes, shuffleIndex - currentSongIndex).
@@ -140,7 +144,7 @@ namespace MusicPlayer.Data.Shuffle
         {
             List<Song> adds = new List<Song>();
 
-            for (int i = 0; i < Count; i++)
+            for (int i = 0; i < count; i++)
             {
                 adds.Add(GetRandomSong(songs, removes, adds));
             }
@@ -155,7 +159,7 @@ namespace MusicPlayer.Data.Shuffle
             if (adds == null) adds = Enumerable.Empty<Song>();
 
             IEnumerable<Song> remainingSongs = songs.Except(this.Except(removes)).Except(adds);
-
+            MobileDebug.Service.WriteEvent("GetRandomSong", remainingSongs.Count());
             return remainingSongs.ElementAt(random.Next(remainingSongs.Count()));
         }
 
@@ -168,13 +172,12 @@ namespace MusicPlayer.Data.Shuffle
 
         private static int GetCount(int songsCount)
         {
-            return (int)((GetCount(songsCount) - 1) /
-                Convert.ToDouble(shuffleCompleteListNextCount + shuffleCompleteListPreviousCount) *
-                shuffleCompleteListPreviousCount);
+            return Math.Min(songsCount, shuffleCompleteListNextCount + shuffleCompleteListPreviousCount + 1);
         }
 
         protected override void UpdateCurrentSong(Song[] oldShuffle)
         {
+            MobileDebug.Service.WriteEvent("UpdateCurrentSong", Count, this.ElementAtOrDefault(GetCurrentSongIndex(Count)));
             Parent.Parent.CurrentSong = Count > 0 ? this.ElementAtOrDefault(GetCurrentSongIndex(Count)) : null;
         }
 

@@ -55,7 +55,7 @@
                             <TextBlock Text="{Binding Name}" TextWrapping="WrapWholeWords"
                                        Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"
                                        Margin="10,0,0,0" FontSize="20" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding SongsCount,Converter={StaticResource songsCountConverter}}" 
+                            <TextBlock Text="{Binding Songs.Count,Converter={StaticResource songsCountConverter}}" 
                                        Foreground="{ThemeResource ApplicationPointerOverForegroundThemeBrush}"
                                        Margin="10,0,0,0" FontSize="10" VerticalAlignment="Center"/>
                         </StackPanel>

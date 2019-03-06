@@ -1,5 +1,4 @@
-﻿using FolderMusic.ViewModels;
-using MusicPlayer;
+﻿using MusicPlayer;
 using MusicPlayer.Data;
 using System;
 using Windows.UI.Xaml;
@@ -11,7 +10,7 @@ namespace FolderMusic
 {
     public sealed partial class PlaylistPage : Page
     {
-        private PlaylistViewModel viewModel;
+        private IPlaylist viewModel;
 
         public PlaylistPage()
         {
@@ -21,7 +20,7 @@ namespace FolderMusic
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             MobileDebug.Service.WriteEvent("PlaylistPageNavigtedTo", e.Parameter);
-            DataContext = viewModel = new PlaylistViewModel(e.Parameter as IPlaylist);
+            DataContext = viewModel = e.Parameter as IPlaylist;
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -31,12 +30,12 @@ namespace FolderMusic
 
         private void Shuffle_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            viewModel.Base.Songs.SetNextShuffle();
+            viewModel.Songs.SetNextShuffle();
         }
 
         private void Loop_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            viewModel.Base.SetNextLoop();
+            viewModel.SetNextLoop();
         }
 
         private async void ResetThisPlaylist_Click(object sender, RoutedEventArgs e)
@@ -44,10 +43,10 @@ namespace FolderMusic
             StopOperationToken stopToken = new StopOperationToken();
 
             Frame.Navigate(typeof(LoadingPage), stopToken);
-            await viewModel.Base.Reset(stopToken);
+            await viewModel.Reset(stopToken);
             Frame.GoBack();
 
-            if (viewModel.Base.Songs.Count == 0) Frame.GoBack();
+            if (viewModel.Songs.Count == 0) Frame.GoBack();
         }
 
         private async void SearchForNewSongs_Click(object sender, RoutedEventArgs e)
@@ -55,7 +54,7 @@ namespace FolderMusic
             StopOperationToken stopToken = new StopOperationToken();
 
             Frame.Navigate(typeof(LoadingPage), stopToken);
-            await viewModel.Base.AddNew(stopToken);
+            await viewModel.AddNew(stopToken);
             Frame.GoBack();
         }
 
@@ -64,13 +63,13 @@ namespace FolderMusic
             StopOperationToken stopToken = new StopOperationToken();
 
             Frame.Navigate(typeof(LoadingPage), stopToken);
-            await viewModel.Base.Update(stopToken);
+            await viewModel.Update(stopToken);
             Frame.GoBack();
         }
 
         private void DeleteThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            viewModel.Base.Parent.Remove(viewModel.Base);
+            viewModel.Parent.Remove(viewModel);
 
             Frame.GoBack();
         }
@@ -79,12 +78,12 @@ namespace FolderMusic
         {
             try
             {
-                viewModel.Base.Parent.Parent.CurrentPlaylist = viewModel.Base;
+                viewModel.Parent.Parent.CurrentPlaylist = viewModel;
             }
             catch (System.Exception exc)
             {
                 MobileDebug.Service.WriteEventPair("OnSelectedSongChangedManuallyFail", exc,
-                    "CurrentPlaylist: ", viewModel.Base?.Parent?.Parent?.CurrentPlaylist);
+                    "CurrentPlaylist: ", viewModel?.Parent?.Parent?.CurrentPlaylist);
             }
 
             Frame.GoBack();

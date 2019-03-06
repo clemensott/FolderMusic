@@ -1,12 +1,12 @@
-﻿using System;
+﻿using MusicPlayer.Data.Shuffle;
+using MusicPlayer.Data.Simple;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
-using MusicPlayer.Data.Shuffle;
-using MusicPlayer.Data.Simple;
-using System.ComponentModel;
 
 namespace MusicPlayer.Data
 {
@@ -34,6 +34,7 @@ namespace MusicPlayer.Data
                 shuffle?.Dispose();
                 shuffle = value;
                 ShuffleChanged?.Invoke(this, args);
+                OnPropertyChanged(nameof(Shuffle));
             }
         }
 
@@ -108,8 +109,8 @@ namespace MusicPlayer.Data
             }
 
             var args = new SongCollectionChangedEventArgs(addChanges.ToArray(), removeChanges.ToArray());
-            
             Changed?.Invoke(this, args);
+            OnPropertyChanged(nameof(Count));
         }
 
         public ISongCollection ToSimple()
@@ -196,9 +197,11 @@ namespace MusicPlayer.Data
 
         private IShuffleCollection CreateShuffle(ShuffleType type, Song currentSong)
         {
+            MobileDebug.Service.WriteEvent("CreateShuffle1", type,currentSong);
             switch (type)
             {
                 case ShuffleType.Complete:
+                    MobileDebug.Service.WriteEvent("CreateShuffle1", type, currentSong);
                     return new ShuffleCompleteCollection(this, currentSong);
 
                 case ShuffleType.Off:
@@ -208,7 +211,7 @@ namespace MusicPlayer.Data
                     return new ShuffleOneTimeCollection(this, currentSong);
             }
 
-            throw new NotImplementedException("Value \"" + type + "\"of LoopType is not implemented in GetShuffleType");
+            throw new NotImplementedException("Value \"" + type + "\"of LoopType is not implemented in CreateShuffle");
         }
     }
 }

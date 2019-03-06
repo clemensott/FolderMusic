@@ -38,11 +38,12 @@ namespace MusicPlayer.Data
             set
             {
                 if (value == currentSongPosition) return;
+                //MobileDebug.Service.WriteEvent("SetCurrentSongPosition", Name, CurrentSong, currentSongPosition, value);
 
-                //MobileDebug.Service.WriteEvent("SetCurrentSongPosition1", Name, currentSongPosition, value);
                 var args = new CurrentSongPositionChangedEventArgs(currentSongPosition, value);
                 currentSongPosition = value;
                 CurrentSongPositionChanged?.Invoke(this, args);
+                OnPropertyChanged(nameof(CurrentSongPosition));
             }
         }
 
@@ -308,7 +309,9 @@ namespace MusicPlayer.Data
             ISongCollection songs = reader.Name == typeof(SongCollection).Name ?
                 (ISongCollection)new SongCollection() : new SimpleSongCollection();
 
+            songs.Parent = this;
             Songs = XmlConverter.Deserialize(songs, reader.ReadOuterXml());
+            
             CurrentSong = songs.FirstOrDefault(s => s.Path == currentSongPath) ?? songs.FirstOrDefault();
             CurrentSongPosition = currentSongPosition;
         }

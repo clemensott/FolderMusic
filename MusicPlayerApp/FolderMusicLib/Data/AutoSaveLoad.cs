@@ -45,27 +45,9 @@ namespace MusicPlayer.Data
                 WaitBeforeDo = TimeSpan.FromMilliseconds(500),
                 WaitAfterDo = TimeSpan.FromMilliseconds(500)
             };
-
-            sh = new LibrarySubscriptionsHandler();
-
-            sh.PlayStateChanged += OnPlayStateChanged;
-            sh.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
-            sh.PlaylistsPropertyChanged += OnPlaylistsPropertyChanged;
-            sh.PlaylistCollectionChanged += OnPlaylistCollectionChanged;
-            sh.AllPlaylists.LoopChanged += AllPlaylists_LoopChanged;
-            sh.AllPlaylists.ShuffleChanged += AllPlaylists_ShuffleChanged;
-            sh.AllPlaylists.ShuffleCollectionChanged += AllPlaylists_ShuffleCollectionChanged;
-            sh.AllPlaylists.SongsPropertyChanged += AllPlaylists_SongsPropertyChanged;
-            sh.AllPlaylists.SongCollectionChanged += AllPlaylists_SongCollectionChanged;
-            sh.AllPlaylists.AllSongs.SomethingChanged += AllPlaylists_AllSongs_SomethingChanged;
-            sh.CurrentPlaylist.CurrentSongChanged += CurrentPlaylist_CurrentSongChanged;
-            sh.CurrentPlaylist.CurrentSongPositionChanged += CurrentPlaylist_CurrentSongPositionChanged;
-            sh.CurrentPlaylist.AllSongs.SomethingChanged += CurrentPlaylist_AllSongs_SomethingChanged;
-            sh.CurrentPlaylist.CurrentSong.SomethingChanged += CurrentPlaylist_CurrentSong_SomethingChanged;
-            sh.OtherPlaylists.CurrentSongPositionChanged += OtherPlaylists_CurrentSongPositionChanged;
         }
 
-        private async void OnPlayStateChanged(object sender, SubscriptionsEventArgs<ILibrary, PlayStateChangedEventArgs> e)
+        private async void OnPlayStateChanged(object sender, SubscriptionsEventArgs<ILibrary, IsPlayingChangedEventArgs> e)
         {
             if (e.Base.NewValue) return;
             MobileDebug.Service.WriteEvent("ASL.OnPlayStateChanged");
@@ -171,12 +153,44 @@ namespace MusicPlayer.Data
 
         public void Add(ILibrary lib)
         {
-            sh.Subscribe(lib);
+            sh = LibrarySubscriptionsHandler.GetInstance(lib);
+
+            sh.IsPlayingChanged += OnPlayStateChanged;
+            sh.CurrentPlaylistChanged += OnCurrentPlaylistChanged;
+            sh.PlaylistsPropertyChanged += OnPlaylistsPropertyChanged;
+            sh.PlaylistCollectionChanged += OnPlaylistCollectionChanged;
+            sh.AllPlaylists.LoopChanged += AllPlaylists_LoopChanged;
+            sh.AllPlaylists.ShuffleChanged += AllPlaylists_ShuffleChanged;
+            sh.AllPlaylists.ShuffleCollectionChanged += AllPlaylists_ShuffleCollectionChanged;
+            sh.AllPlaylists.SongsPropertyChanged += AllPlaylists_SongsPropertyChanged;
+            sh.AllPlaylists.SongCollectionChanged += AllPlaylists_SongCollectionChanged;
+            sh.AllPlaylists.AllSongs.SomethingChanged += AllPlaylists_AllSongs_SomethingChanged;
+            sh.CurrentPlaylist.CurrentSongChanged += CurrentPlaylist_CurrentSongChanged;
+            sh.CurrentPlaylist.CurrentSongPositionChanged += CurrentPlaylist_CurrentSongPositionChanged;
+            sh.CurrentPlaylist.AllSongs.SomethingChanged += CurrentPlaylist_AllSongs_SomethingChanged;
+            sh.CurrentPlaylist.CurrentSong.SomethingChanged += CurrentPlaylist_CurrentSong_SomethingChanged;
+            sh.OtherPlaylists.CurrentSongPositionChanged += OtherPlaylists_CurrentSongPositionChanged;
         }
 
         public void Remove(ILibrary lib)
         {
             sh.Unsubscribe(lib);
+
+            sh.IsPlayingChanged -= OnPlayStateChanged;
+            sh.CurrentPlaylistChanged -= OnCurrentPlaylistChanged;
+            sh.PlaylistsPropertyChanged -= OnPlaylistsPropertyChanged;
+            sh.PlaylistCollectionChanged -= OnPlaylistCollectionChanged;
+            sh.AllPlaylists.LoopChanged -= AllPlaylists_LoopChanged;
+            sh.AllPlaylists.ShuffleChanged -= AllPlaylists_ShuffleChanged;
+            sh.AllPlaylists.ShuffleCollectionChanged -= AllPlaylists_ShuffleCollectionChanged;
+            sh.AllPlaylists.SongsPropertyChanged -= AllPlaylists_SongsPropertyChanged;
+            sh.AllPlaylists.SongCollectionChanged -= AllPlaylists_SongCollectionChanged;
+            sh.AllPlaylists.AllSongs.SomethingChanged -= AllPlaylists_AllSongs_SomethingChanged;
+            sh.CurrentPlaylist.CurrentSongChanged -= CurrentPlaylist_CurrentSongChanged;
+            sh.CurrentPlaylist.CurrentSongPositionChanged -= CurrentPlaylist_CurrentSongPositionChanged;
+            sh.CurrentPlaylist.AllSongs.SomethingChanged -= CurrentPlaylist_AllSongs_SomethingChanged;
+            sh.CurrentPlaylist.CurrentSong.SomethingChanged -= CurrentPlaylist_CurrentSong_SomethingChanged;
+            sh.OtherPlaylists.CurrentSongPositionChanged -= OtherPlaylists_CurrentSongPositionChanged;
         }
 
         private async Task SaveAll(ILibrary lib)

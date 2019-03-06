@@ -129,9 +129,13 @@ namespace BackgroundTask
             }
         }
 
-        public void Pause()
+        public async void Pause()
         {
             timer.Change(Timeout.Infinite, Timeout.Infinite);
+
+            smtc.PlaybackStatus = MediaPlaybackStatus.Paused;
+
+            if (BackgroundMediaPlayer.Current.CurrentState != MediaPlayerState.Paused) await Volume1To0AndPause();
 
             try
             {
@@ -146,22 +150,18 @@ namespace BackgroundTask
             {
                 MobileDebug.Service.WriteEvent("MusicPauseFail", e);
             }
-
-            smtc.PlaybackStatus = MediaPlaybackStatus.Paused;
-
-            if (BackgroundMediaPlayer.Current.CurrentState != MediaPlayerState.Paused) Volume1To0AndPause();
         }
 
-        private async void Volume1To0AndPause()
+        private async Task Volume1To0AndPause()
         {
             double step = 0.1;
 
             for (double i = 1; i > 0; i -= step)
             {
-                BackgroundMediaPlayer.Current.Volume = Math.Sqrt(i);
-                await Task.Delay(1);
+                BackgroundMediaPlayer.Current.Volume = i;
+                await Task.Delay(10);
             }
-
+            
             BackgroundMediaPlayer.Current.Pause();
         }
 
@@ -182,9 +182,9 @@ namespace BackgroundTask
 
         public async void SetCurrent()
         {
-            MobileDebug.Service.WriteEvent("TrySet", "OpenPath: " + openSong?.Path,
-                "CurSongEmpty: " + CurrentSong?.IsEmpty + "CurSongFailed: " + CurrentSong?.Failed,
-                "IsOpen: " + (CurrentSong == openSong), "CurrentSong: " + CurrentSong);
+            MobileDebug.Service.WriteEventPair("TrySet", "OpenPath: ", openSong?.Path,
+                "CurSongEmpty: ", CurrentSong?.IsEmpty, "CurSongFailed: ", CurrentSong?.Failed,
+                "IsOpen: ", (CurrentSong == openSong), "CurrentSong: ", CurrentSong);
 
             if (CurrentSong == null || CurrentSong.IsEmpty || CurrentSong.Failed) return;
 
@@ -200,7 +200,7 @@ namespace BackgroundTask
             catch (Exception e)
             {
                 MobileDebug.Service.WriteEvent("Catch", e, CurrentSong);
-                await library.SkippedSongs.Add(CurrentSong);
+                //await library.SkippedSongs.Add(CurrentSong);
                 await Task.Delay(100);
 
                 if (playNext) Next(false);
@@ -210,7 +210,7 @@ namespace BackgroundTask
 
         public void MediaOpened(MediaPlayer sender, object args)
         {
-            MobileDebug.Service.WriteEventPair("Open", "SetSongCount", setSongCount, "Sender.State: ", sender.CurrentState,
+            MobileDebug.Service.WriteEventPair("Open", "SetSongCount: ", setSongCount, "Sender.State: ", sender.CurrentState,
                 "IsPlayling: ", library.IsPlaying, "Pos: ", CurrentPlaylist.GetCurrentSongPosition().TotalSeconds,
                 "CurrentSong: ", CurrentSong);
 
@@ -281,10 +281,11 @@ namespace BackgroundTask
             //}
 
             CurrentSong.SetFailed();
-            await library.SkippedSongs.Add(CurrentSong);
+            //await library.SkippedSongs.Add(CurrentSong);
 
-            if (playNext) Next(true);
-            else Previous();
+            //if (playNext) Next(true);
+            //else Previous();
+            library.IsPlaying = false;
         }
 
         public void MediaEnded(MediaPlayer sender, object args)

@@ -1,5 +1,4 @@
-﻿using FolderMusic.ViewModels;
-using MusicPlayer;
+﻿using MusicPlayer;
 using MusicPlayer.Data;
 using System;
 using System.Collections.Generic;
@@ -15,25 +14,24 @@ namespace FolderMusic
     public sealed partial class PlaylistsView : UserControl
     {
         public static readonly DependencyProperty CurrentPlaylistProperty =
-            DependencyProperty.Register("CurrentPlaylist", typeof(PlaylistViewModel), typeof(PlaylistsView),
+            DependencyProperty.Register("CurrentPlaylist", typeof(IPlaylist), typeof(PlaylistsView),
                 new PropertyMetadata(null, new PropertyChangedCallback(OnCurrentPlaylistPropertyChanged)));
 
         private static void OnCurrentPlaylistPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             var s = (PlaylistsView)sender;
-            var value = (PlaylistViewModel)e.NewValue;
 
             s.SetSelectedPlaylist();
         }
 
         public static readonly DependencyProperty PlaylistsProperty =
-            DependencyProperty.Register("Playlists", typeof(IEnumerable<PlaylistViewModel>), typeof(PlaylistsView),
+            DependencyProperty.Register("Playlists", typeof(IEnumerable<IPlaylist>), typeof(PlaylistsView),
                 new PropertyMetadata(null, new PropertyChangedCallback(OnPlaylistsPropertyChanged)));
 
         private static void OnPlaylistsPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             var s = (PlaylistsView)sender;
-            var value = (IEnumerable<PlaylistViewModel>)e.NewValue;
+            var value = (IEnumerable<IPlaylist>)e.NewValue;
 
             s.lbxPlaylists.ItemsSource = value;
             s.SetSelectedPlaylist();
@@ -41,15 +39,23 @@ namespace FolderMusic
 
         private bool isPointerOnDetailIcon;
 
-        public PlaylistViewModel CurrentPlaylist
+        public event EventHandler<PlaylistActionEventArgs> UpdateClick;
+        public event EventHandler<PlaylistActionEventArgs> ResetClick;
+        public event EventHandler<PlaylistActionEventArgs> ResetSongsClick;
+        public event EventHandler<PlaylistActionEventArgs> AddNewClick;
+        public event EventHandler<PlaylistActionEventArgs> RemoveClick;
+        public event EventHandler<PlaylistActionEventArgs> PlayClick;
+        public event EventHandler<PlaylistActionEventArgs> DetailsClick;
+
+        public IPlaylist CurrentPlaylist
         {
-            get { return (PlaylistViewModel)GetValue(CurrentPlaylistProperty); }
+            get { return (IPlaylist)GetValue(CurrentPlaylistProperty); }
             set { SetValue(CurrentPlaylistProperty, value); }
         }
 
-        public IEnumerable<PlaylistViewModel> Playlists
+        public IEnumerable<IPlaylist> Playlists
         {
-            get { return (IEnumerable<PlaylistViewModel>)GetValue(PlaylistsProperty); }
+            get { return (IEnumerable<IPlaylist>)GetValue(PlaylistsProperty); }
             set { SetValue(PlaylistsProperty, value); }
         }
 
@@ -70,14 +76,9 @@ namespace FolderMusic
             lbxPlaylists.SelectedItem = CurrentPlaylist;
         }
 
-        private void ItemsSource_UpdateFinished(IUpdateSelectedItemCollection<PlaylistViewModel> sender)
-        {
-            SetSelectedPlaylistSafe();
-        }
-
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            PlaylistViewModel selectedPlaylist = lbxPlaylists.SelectedItem as PlaylistViewModel;
+            IPlaylist selectedPlaylist = lbxPlaylists.SelectedItem as IPlaylist;
 
             if (!isPointerOnDetailIcon && selectedPlaylist != null) CurrentPlaylist = selectedPlaylist;
             else if (lbxPlaylists.Items.Contains(CurrentPlaylist))
@@ -91,63 +92,48 @@ namespace FolderMusic
             FlyoutBase.ShowAttachedFlyout(sender as FrameworkElement);
         }
 
-        private async void ResetPlaylist_Click(object sender, RoutedEventArgs e)
+        private void ResetPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
-            StopOperationToken stopToken = new StopOperationToken();
+            IPlaylist playlist = (IPlaylist)((FrameworkElement)sender).DataContext;
 
-            GetFrame().Navigate(typeof(LoadingPage), stopToken);
-            await playlist.Base.Reset(stopToken);
-            GetFrame().GoBack();
+            ResetClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
         }
 
-        private async void UpdatePlaylist_Click(object sender, RoutedEventArgs e)
+        private void UpdatePlaylist_Click(object sender, RoutedEventArgs e)
         {
-            PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
-            StopOperationToken stopToken = new StopOperationToken();
+            IPlaylist playlist = (IPlaylist)((FrameworkElement)sender).DataContext;
 
-            GetFrame().Navigate(typeof(LoadingPage), stopToken);
-            await playlist.Base.Update(stopToken);
-            GetFrame().GoBack();
+            UpdateClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
         }
 
-        private async void ResetSongsPlaylist_Click(object sender, RoutedEventArgs e)
+        private void ResetSongsPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
-            StopOperationToken stopToken = new StopOperationToken();
+            IPlaylist playlist = (IPlaylist)((FrameworkElement)sender).DataContext;
 
-            GetFrame().Navigate(typeof(LoadingPage), stopToken);
-            await playlist.Base.ResetSongs(stopToken);
-            GetFrame().GoBack();
+            ResetSongsClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
         }
 
-        private async void SearchForNewSongsPlaylist_Click(object sender, RoutedEventArgs e)
+        private void SearchForNewSongsPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
-            StopOperationToken stopToken = new StopOperationToken();
+            IPlaylist playlist = (IPlaylist)((FrameworkElement)sender).DataContext;
 
-            GetFrame().Navigate(typeof(LoadingPage), stopToken);
-            await playlist.Base.AddNew(stopToken);
-            GetFrame().GoBack();
+            AddNewClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
         }
 
         private void PlayPlaylist_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            PlaylistViewModel playlist = (sender as Image).DataContext as PlaylistViewModel;
-            MobileDebug.Service.WriteEvent("ImgPlayTapped1", playlist?.Base?.AbsolutePath);
+            IPlaylist playlist = (IPlaylist)((FrameworkElement)sender).DataContext;
+            MobileDebug.Service.WriteEvent("ImgPlayTapped1", playlist?.AbsolutePath);
 
-            CurrentPlaylist = playlist;
-            playlist.Base.Parent.Parent.CurrentPlaylist = CurrentPlaylist.Base;
-            playlist.Base.Parent.Parent.IsPlaying = true;
+            PlayClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
         }
 
         private void DetailPlaylist_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            IPlaylist playlist = ((PlaylistViewModel)((FrameworkElement)sender).DataContext).Base;
+            IPlaylist playlist = (IPlaylist)((FrameworkElement)sender).DataContext;
             MobileDebug.Service.WriteEvent("ImgDetailTapped1", playlist?.AbsolutePath);
 
-            bool navigeted = GetFrame().Navigate(typeof(PlaylistPage), playlist);
-            MobileDebug.Service.WriteEvent("ImgDetailTapped2", playlist?.AbsolutePath, navigeted);
+            DetailsClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
         }
 
         private void DetailPlaylist_PointerEntered(object sender, PointerRoutedEventArgs e)
@@ -167,14 +153,14 @@ namespace FolderMusic
 
         private void DeletePlaylist_Click(object sender, RoutedEventArgs e)
         {
-            PlaylistViewModel playlist = (sender as MenuFlyoutItem).DataContext as PlaylistViewModel;
-            MobileDebug.Service.WriteEvent("PlaylistViewRemove", playlist.AbsolutePath);
-            playlist.Base.Parent.Remove(playlist.Base);
+            IPlaylist playlist = (IPlaylist)((FrameworkElement)sender).DataContext;
+
+            RemoveClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
         }
 
         private void Playlist_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            CurrentPlaylist = (sender as Grid).DataContext as PlaylistViewModel;
+            CurrentPlaylist = (sender as Grid).DataContext as IPlaylist;
         }
     }
 }
