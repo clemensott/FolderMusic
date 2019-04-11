@@ -23,9 +23,9 @@ namespace FolderMusic
 
         private static void OnCurrentSongPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (SongsView)sender;
-            var value = (Song)e.NewValue;
+            SongsView s = (SongsView)sender;
 
+            MobileDebug.Service.WriteEvent(s.GetType() + ".OnCurrentSongChanged", e.OldValue, e.NewValue);
             s.SetSelectedItem();
         }
 
@@ -35,11 +35,11 @@ namespace FolderMusic
 
         private static void OnSourcePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = sender as SongsView;
-            var oldSongs = e.OldValue as ISongCollection;
-            var newSongs = e.NewValue as ISongCollection;
+            SongsView s = (SongsView)sender;
+            ISongCollection oldSongs = e.OldValue as ISongCollection;
+            ISongCollection newSongs = e.NewValue as ISongCollection;
 
-            s.OnSouceChanged(oldSongs, newSongs);
+            s.OnSourceChanged(oldSongs, newSongs);
             s.scrollTo = ScrollToType.Last;
         }
 
@@ -69,7 +69,7 @@ namespace FolderMusic
             scrollTo = ScrollToType.Last;
         }
 
-        protected virtual void OnSouceChanged(ISongCollection oldSongs, ISongCollection newSongs)
+        protected virtual void OnSourceChanged(ISongCollection oldSongs, ISongCollection newSongs)
         {
             Unsubscribe(oldSongs);
             Subscribe(newSongs);
@@ -124,8 +124,8 @@ namespace FolderMusic
 
         protected void SetItemsSource(IEnumerable<Song> songs)
         {
-            lbxSongs.ItemsSource = songs;
-            SetSelectedItemSafe();
+            lbxSongs.ItemsSource = songs?.ToArray();
+            SetSelectedItem();
             ScrollToCurrentSongDirect();
         }
 
@@ -147,11 +147,13 @@ namespace FolderMusic
 
             if (selectedSong != null && CurrentSong != selectedSong)
             {
-                var args = new SelectedSongChangedManuallyEventArgs(CurrentSong, selectedSong);
+                SelectedSongChangedManuallyEventArgs args =
+                    new SelectedSongChangedManuallyEventArgs(CurrentSong, selectedSong);
+
                 CurrentSong = selectedSong;
                 SelectedSongChangedManually?.Invoke(this, args);
             }
-            else if (lbxSongs.Items.Contains(CurrentSong))
+            else if (selectedSong != CurrentSong && lbxSongs.Items.Contains(CurrentSong))
             {
                 lbxSongs.SelectedItem = CurrentSong;
             }
@@ -212,28 +214,28 @@ namespace FolderMusic
         private void Song_Holding(object sender, HoldingRoutedEventArgs e)
         {
             MobileDebug.Service.WriteEvent("Song_Holding", ActualWidth);
-            if (((sender as Grid).DataContext as Song).IsEmpty) return;
+            if (((Song)((FrameworkElement)sender).DataContext).IsEmpty) return;
 
-            FlyoutBase.ShowAttachedFlyout(sender as FrameworkElement);
+            FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
         }
 
         private async void ResetSong_Click(object sender, RoutedEventArgs e)
         {
-            Song song = (sender as MenuFlyoutItem).DataContext as Song;
+            Song song = (Song)((MenuFlyoutItem)sender).DataContext;
 
             await song.Reset();
         }
 
         private void RemoveSong_Click(object sender, RoutedEventArgs e)
         {
-            Song song = (sender as MenuFlyoutItem).DataContext as Song;
+            Song song = (Song)((MenuFlyoutItem)sender).DataContext;
 
             Source.Remove(song);
         }
 
         private async void DeleteSong_Click(object sender, RoutedEventArgs e)
         {
-            Song song = (sender as MenuFlyoutItem).DataContext as Song;
+            Song song = (Song)((MenuFlyoutItem)sender).DataContext;
 
             try
             {

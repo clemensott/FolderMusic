@@ -6,7 +6,7 @@ namespace FolderMusic
 {
     class ShuffleOffSongsView : SongsView
     {
-        protected override void OnSouceChanged(ISongCollection oldSongs, ISongCollection newSongs)
+        protected override void OnSourceChanged(ISongCollection oldSongs, ISongCollection newSongs)
         {
             Unsubscribe(oldSongs);
             Subscribe(newSongs);
