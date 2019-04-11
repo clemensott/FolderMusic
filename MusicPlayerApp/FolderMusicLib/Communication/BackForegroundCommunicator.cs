@@ -3,13 +3,10 @@ using MusicPlayer.Data.Shuffle;
 using MusicPlayer.Data.SubscriptionsHandler;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Xml.Serialization;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation.Collections;
 using Windows.Media.Playback;
-using Windows.Storage;
 using Windows.UI.Core;
 
 namespace MusicPlayer.Communication
@@ -43,11 +40,11 @@ namespace MusicPlayer.Communication
             shuffleKey = "Shuffle",
             libraryEmptyValue = "LibraryIsEmpty";
 
-        private List<Tuple<int, ValueSet>> receivingItems;
-        private Dictionary<string, Receiver> receivers;
-        private LibrarySubscriptionsHandler lsh;
-        private ILibrary library;
-        private Action<ValueSet> senderMethod;
+        private readonly List<Tuple<int, ValueSet>> receivingItems;
+        private readonly Dictionary<string, Receiver> receivers;
+        private readonly LibrarySubscriptionsHandler lsh;
+        private readonly ILibrary library;
+        private readonly Action<ValueSet> senderMethod;
 
         public BackForegroundCommunicator(ILibrary library)
         {
@@ -449,7 +446,7 @@ namespace MusicPlayer.Communication
             Playlist[] adds = XmlConverter.DeserializeList<Playlist>(addXml).ToArray();
 
             List<IPlaylist> removes = new List<IPlaylist>();
-            foreach(string path in removePaths)
+            foreach (string path in removePaths)
             {
                 IPlaylist playlist;
 
@@ -482,9 +479,9 @@ namespace MusicPlayer.Communication
             SendIsPlaying(e.Base.NewValue);
         }
 
-        private void SendIsPlaying(bool isPlayling)
+        private void SendIsPlaying(bool isPlaying)
         {
-            string value = isPlayling.ToString();
+            string value = isPlaying.ToString();
             ValueSet valueSet = receivers[isPlayingPrimaryKey].GetValueSet(value);
 
             Send(valueSet);
@@ -498,7 +495,12 @@ namespace MusicPlayer.Communication
 
         private void OnPlayerStateChanged(object sender, SubscriptionsEventArgs<ILibrary, PlayerStateChangedEventArgs> e)
         {
-            string value = Enum.GetName(typeof(MediaPlayerState), e.Base.NewState);
+            SendPlayerState(e.Base.NewState);
+        }
+
+        private void SendPlayerState(MediaPlayerState playerState)
+        {
+            string value = Enum.GetName(typeof(MediaPlayerState), playerState);
             ValueSet valueSet = receivers[playerStatePrimaryKey].GetValueSet(value);
 
             Send(valueSet);
@@ -537,7 +539,10 @@ namespace MusicPlayer.Communication
         {
             if (library.IsForeground || !library.IsLoaded) return;
 
+            if (value == true.ToString()) library.IsPlaying = true;
+
             SendLibrary();
+
         }
 
         private void SendLibrary()
@@ -546,6 +551,8 @@ namespace MusicPlayer.Communication
             ValueSet valueSet = receivers[libraryPrimaryKey].GetValueSet(value);
 
             Send(valueSet);
+            SendIsPlaying(library.IsPlaying);
+            SendPlayerState(library.PlayerState);
         }
 
         private void ReceiveLibrary(ValueSet valueSet, string value)
@@ -598,7 +605,7 @@ namespace MusicPlayer.Communication
 
         private bool AllowedToSend(ValueSet valueSet)
         {
-            foreach (var receivingItem in receivingItems.Where(f => f.Item1 == Environment.CurrentManagedThreadId))
+            foreach (Tuple<int, ValueSet> receivingItem in receivingItems.Where(f => f.Item1 == Environment.CurrentManagedThreadId))
             {
                 if (Same(valueSet, receivingItem.Item2)) return false;
             }
@@ -640,7 +647,7 @@ namespace MusicPlayer.Communication
 
         private void Handle(ValueSet valueSet)
         {
-            var receivingItem = new Tuple<int, ValueSet>(Environment.CurrentManagedThreadId, valueSet);
+            Tuple<int, ValueSet> receivingItem = new Tuple<int, ValueSet>(Environment.CurrentManagedThreadId, valueSet);
             receivingItems.Add(receivingItem);
 
             string currentReceivedPrimaryKey = GetPrimaryKey(valueSet);
