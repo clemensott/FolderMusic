@@ -529,7 +529,7 @@ namespace MusicPlayer.Communication
 
         public void GetLibrary()
         {
-            string value = string.Empty;
+            string value = library.IsPlaying.ToString();
             ValueSet valueSet = receivers[getLibraryPrimaryKey].GetValueSet(value);
 
             Send(valueSet);
