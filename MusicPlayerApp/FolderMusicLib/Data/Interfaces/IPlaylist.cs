@@ -1,5 +1,4 @@
-﻿using MusicPlayer.Data.Shuffle;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Xml.Serialization;

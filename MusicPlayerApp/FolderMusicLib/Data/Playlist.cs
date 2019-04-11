@@ -40,7 +40,7 @@ namespace MusicPlayer.Data
                 if (value == currentSongPosition) return;
                 //MobileDebug.Service.WriteEvent("SetCurrentSongPosition", Name, CurrentSong, currentSongPosition, value);
 
-                var args = new CurrentSongPositionChangedEventArgs(currentSongPosition, value);
+                CurrentSongPositionChangedEventArgs args = new CurrentSongPositionChangedEventArgs(currentSongPosition, value);
                 currentSongPosition = value;
                 CurrentSongPositionChanged?.Invoke(this, args);
                 OnPropertyChanged(nameof(CurrentSongPosition));
@@ -58,7 +58,7 @@ namespace MusicPlayer.Data
             {
                 if (value == currentSong) return;
 
-                var args = new CurrentSongChangedEventArgs(currentSong, value);
+                CurrentSongChangedEventArgs args = new CurrentSongChangedEventArgs(currentSong, value);
                 currentSong = value;
                 CurrentSongPosition = 0;
                 CurrentSongChanged?.Invoke(this, args);
@@ -73,7 +73,7 @@ namespace MusicPlayer.Data
             {
                 if (value == songs) return;
 
-                var args = new SongsChangedEventArgs(songs, value);
+                SongsChangedEventArgs args = new SongsChangedEventArgs(songs, value);
                 songs?.Shuffle?.Dispose();
                 songs = value;
                 songs.Parent = this;
@@ -89,7 +89,7 @@ namespace MusicPlayer.Data
             {
                 if (value == loop) return;
 
-                var args = new LoopChangedEventArgs(loop, value);
+                LoopChangedEventArgs args = new LoopChangedEventArgs(loop, value);
                 loop = value;
                 LoopChanged?.Invoke(this, args);
                 OnPropertyChanged(nameof(Loop));

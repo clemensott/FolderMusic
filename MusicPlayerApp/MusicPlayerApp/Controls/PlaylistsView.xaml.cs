@@ -1,5 +1,4 @@
-﻿using MusicPlayer;
-using MusicPlayer.Data;
+﻿using MusicPlayer.Data;
 using System;
 using System.Collections.Generic;
 using Windows.UI.Xaml;
@@ -19,7 +18,7 @@ namespace FolderMusic
 
         private static void OnCurrentPlaylistPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (PlaylistsView)sender;
+            PlaylistsView s = (PlaylistsView)sender;
 
             s.SetSelectedPlaylist();
         }
@@ -30,8 +29,8 @@ namespace FolderMusic
 
         private static void OnPlaylistsPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (PlaylistsView)sender;
-            var value = (IEnumerable<IPlaylist>)e.NewValue;
+            PlaylistsView s = (PlaylistsView)sender;
+            IEnumerable<IPlaylist> value = (IEnumerable<IPlaylist>)e.NewValue;
 
             s.lbxPlaylists.ItemsSource = value;
             s.SetSelectedPlaylist();
@@ -160,7 +159,7 @@ namespace FolderMusic
 
         private void Playlist_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            CurrentPlaylist = (sender as Grid).DataContext as IPlaylist;
+            CurrentPlaylist = ((FrameworkElement)sender).DataContext as IPlaylist;
         }
     }
 }

@@ -123,7 +123,7 @@ namespace MusicPlayer.Data.Shuffle
         {
             if (removeChanges.Length == 0 && addChanges.Length == 0) return;
 
-            var args = new ShuffleCollectionChangedEventArgs(addChanges, removeChanges);
+            ShuffleCollectionChangedEventArgs args = new ShuffleCollectionChangedEventArgs(addChanges, removeChanges);
             Changed?.Invoke(this, args);
             OnPropertyChanged(nameof(Count));
 

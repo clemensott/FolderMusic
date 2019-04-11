@@ -30,7 +30,7 @@ namespace MusicPlayer.Data
             {
                 if (value == shuffle) return;
 
-                var args = new ShuffleChangedEventArgs(shuffle, value);
+                ShuffleChangedEventArgs args = new ShuffleChangedEventArgs(shuffle, value);
                 shuffle?.Dispose();
                 shuffle = value;
                 ShuffleChanged?.Invoke(this, args);
@@ -108,7 +108,7 @@ namespace MusicPlayer.Data
                 song.Parent = this;
             }
 
-            var args = new SongCollectionChangedEventArgs(addChanges.ToArray(), removeChanges.ToArray());
+            SongCollectionChangedEventArgs args = new SongCollectionChangedEventArgs(addChanges.ToArray(), removeChanges.ToArray());
             Changed?.Invoke(this, args);
             OnPropertyChanged(nameof(Count));
         }

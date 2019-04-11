@@ -42,7 +42,7 @@ namespace MusicPlayer.Data
                 if (value == isPlaying) return;
 
                 isPlaying = value;
-                var args = new IsPlayingChangedEventArgs(value);
+                IsPlayingChangedEventArgs args = new IsPlayingChangedEventArgs(value);
                 IsPlayingChanged?.Invoke(this, args);
                 OnPropertyChanged(nameof(IsPlaying));
             }
@@ -56,7 +56,7 @@ namespace MusicPlayer.Data
                 MobileDebug.Service.WriteEvent("SetPlayerState", playerState, value);
                 if (value == playerState) return;
 
-                var args = new PlayerStateChangedEventArgs(playerState, value);
+                PlayerStateChangedEventArgs args = new PlayerStateChangedEventArgs(playerState, value);
                 playerState = value;
                 PlayerStateChanged?.Invoke(this, args);
                 OnPropertyChanged(nameof(PlayerState));
@@ -84,7 +84,7 @@ namespace MusicPlayer.Data
                     MobileDebug.Service.WriteEvent("SetCurrentPlaylistSaveOldPositionFail", e, currentPlaylist?.AbsolutePath);
                 }
 
-                var args = new CurrentPlaylistChangedEventArgs(currentPlaylist, value);
+                CurrentPlaylistChangedEventArgs args = new CurrentPlaylistChangedEventArgs(currentPlaylist, value);
                 currentPlaylist = value;
                 CurrentPlaylistChanged?.Invoke(this, args);
                 OnPropertyChanged(nameof(CurrentPlaylist));
@@ -98,7 +98,7 @@ namespace MusicPlayer.Data
             {
                 if (value == playlists) return;
 
-                var args = new PlaylistsChangedEventArgs(playlists, value);
+                PlaylistsChangedEventArgs args = new PlaylistsChangedEventArgs(playlists, value);
                 playlists = value;
                 playlists.Parent = this;
                 PlaylistsChanged?.Invoke(this, args);
@@ -187,7 +187,7 @@ namespace MusicPlayer.Data
             IsPlaying = false;
 
             List<IPlaylist> refreshedPlaylists = new List<IPlaylist>();
-            var folders = await GetStorageFolders();
+            List<StorageFolder> folders = await GetStorageFolders();
 
             foreach (StorageFolder folder in await GetStorageFolders())
             {
@@ -265,7 +265,7 @@ namespace MusicPlayer.Data
             {
                 list.Add(folder);
 
-                var folders = await folder.GetFoldersAsync();
+                IReadOnlyList<StorageFolder> folders = await folder.GetFoldersAsync();
 
                 foreach (StorageFolder listFolder in folders)
                 {

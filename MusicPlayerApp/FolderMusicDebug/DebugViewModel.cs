@@ -310,7 +310,7 @@ namespace MobileDebug
         private async void SaveUncheckedNames()
         {
             AppandLoadingLog("\nUncheckedNames: ");
-            var uncheckedNames = ShowEventNames.Where(x => !x.IsChecked).Select(x => x.Name);
+            IEnumerable<string> uncheckedNames = ShowEventNames.Where(x => !x.IsChecked).Select(x => x.Name);
             AppandLoadingLog(uncheckedNames.Count());
 
             try

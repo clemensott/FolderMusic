@@ -1,7 +1,5 @@
-﻿using FolderMusic.Converters;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Windows.UI;
 using Windows.UI.Xaml;

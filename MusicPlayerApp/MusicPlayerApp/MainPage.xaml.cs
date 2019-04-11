@@ -1,12 +1,9 @@
 ﻿using MusicPlayer;
 using MusicPlayer.Data;
 using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Phone.UI.Input;
 using Windows.Storage;
-using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -176,8 +173,8 @@ namespace FolderMusic
 
         private void PlaylistsView_DetailsClick(object sender, PlaylistActionEventArgs e)
         {
-            bool navigeted = Frame.Navigate(typeof(PlaylistPage), e.Playlist);
-            MobileDebug.Service.WriteEvent("ImgDetailTapped2", e.Playlist?.AbsolutePath, navigeted);
+            bool navigated = Frame.Navigate(typeof(PlaylistPage), e.Playlist);
+            MobileDebug.Service.WriteEvent("ImgDetailTapped2", e.Playlist?.AbsolutePath, navigated);
         }
 
         private async void ResetLibraryFromStorage_Click(object sender, RoutedEventArgs e)

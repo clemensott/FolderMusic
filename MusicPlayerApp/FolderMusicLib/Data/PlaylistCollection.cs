@@ -75,7 +75,7 @@ namespace MusicPlayer.Data
 
             if (removeChanges.Count == 0 && addChanges.Count == 0) return;
 
-            var args = new PlaylistCollectionChangedEventArgs(addChanges.ToArray(), removeChanges.ToArray());
+            PlaylistCollectionChangedEventArgs args = new PlaylistCollectionChangedEventArgs(addChanges.ToArray(), removeChanges.ToArray());
             Changed?.Invoke(this, args);
             OnPropertyChanged(nameof(Count));
 
@@ -146,7 +146,7 @@ namespace MusicPlayer.Data
 
         public void WriteXml(XmlWriter writer)
         {
-            foreach (var playlist in this)
+            foreach (IPlaylist playlist in this)
             {
                 writer.WriteStartElement("Playlist");
                 playlist.WriteXml(writer);

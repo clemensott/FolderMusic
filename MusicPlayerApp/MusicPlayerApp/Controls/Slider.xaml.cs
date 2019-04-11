@@ -1,7 +1,6 @@
 ﻿using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
 
 namespace FolderMusic
@@ -19,8 +18,8 @@ namespace FolderMusic
 
         private static void OnViewPositionRatioPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (Slider)sender;
-            var value = (double)e.NewValue;
+            Slider s = (Slider)sender;
+            double value = (double)e.NewValue;
 
             s.ViewPosition = TimeSpan.FromDays(value * s.Duration.TotalDays);
         }
@@ -31,8 +30,8 @@ namespace FolderMusic
 
         private static void OnViewPositionPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (Slider)sender;
-            var value = (TimeSpan)e.NewValue;
+            Slider s = (Slider)sender;
+            TimeSpan value = (TimeSpan)e.NewValue;
 
             if (s.Duration > TimeSpan.Zero) s.ViewPositionRatio = value.TotalDays / s.Duration.TotalDays;
         }
@@ -43,8 +42,8 @@ namespace FolderMusic
 
         private static void OnPositionRatioPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (Slider)sender;
-            var value = (double)e.NewValue;
+            Slider s = (Slider)sender;
+            double value = (double)e.NewValue;
 
             s.ViewPositionRatio = value;
             s.Position = TimeSpan.FromDays(value * s.Duration.TotalDays);
@@ -56,8 +55,8 @@ namespace FolderMusic
 
         private static void OnPositionPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (Slider)sender;
-            var value = (TimeSpan)e.NewValue;
+            Slider s = (Slider)sender;
+            TimeSpan value = (TimeSpan)e.NewValue;
 
             s.ViewPosition = value;
 
@@ -70,8 +69,8 @@ namespace FolderMusic
 
         private static void OnDurationPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var s = (Slider)sender;
-            var value = (TimeSpan)e.NewValue;
+            Slider s = (Slider)sender;
+            TimeSpan value = (TimeSpan)e.NewValue;
 
             s.Position = TimeSpan.FromDays(s.PositionRatio * value.TotalDays);
         }

@@ -61,7 +61,7 @@ namespace MusicPlayer.Data
         public async Task<IEnumerable<Song>> GetSongs()
         {
             List<string> ssps = await GetSkipSongsPaths();
-            var selected = ssps.Select(ssp => Parent.Playlists.SelectMany(p => p.Songs).FirstOrDefault(s => s.Path == ssp));
+            IEnumerable<Song> selected = ssps.Select(ssp => Parent.Playlists.SelectMany(p => p.Songs).FirstOrDefault(s => s.Path == ssp));
             return selected.Where(s => s != null);
         }
 

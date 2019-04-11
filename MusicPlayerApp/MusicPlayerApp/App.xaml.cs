@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
-using Windows.Media.Playback;
 using Windows.Phone.UI.Input;
 using Windows.Storage;
 using Windows.UI.Core;
@@ -96,7 +95,7 @@ namespace FolderMusic
                 if (rootFrame.ContentTransitions != null)
                 {
                     this.transitions = new TransitionCollection();
-                    foreach (var c in rootFrame.ContentTransitions)
+                    foreach (Transition c in rootFrame.ContentTransitions)
                     {
                         this.transitions.Add(c);
                     }
@@ -121,7 +120,7 @@ namespace FolderMusic
 
         private void RootFrame_FirstNavigated(object sender, NavigationEventArgs e)
         {
-            var rootFrame = sender as Frame;
+            Frame rootFrame = sender as Frame;
             rootFrame.ContentTransitions = this.transitions ?? new TransitionCollection() { new NavigationThemeTransition() };
             rootFrame.Navigated -= this.RootFrame_FirstNavigated;
         }
@@ -193,7 +192,7 @@ namespace FolderMusic
 
         private void OnSuspending(object sender, SuspendingEventArgs e)
         {
-            var deferral = e.SuspendingOperation.GetDeferral();
+            SuspendingDeferral deferral = e.SuspendingOperation.GetDeferral();
 
             deferral.Complete();
         }

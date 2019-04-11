@@ -8,12 +8,12 @@ namespace MusicPlayer.Data
 {
     class SkipSongsEnumerator : IEnumerator<SkipSong>
     {
-        private ILibrary library;
+        private readonly ILibrary library;
         private SkipSong currentSkip;
 
-        public SkipSong Current { get { return currentSkip; } }
+        public SkipSong Current => currentSkip;
 
-        object IEnumerator.Current { get { return Current; } }
+        object IEnumerator.Current => Current;
 
         public SkipSongsEnumerator(ILibrary library)
         {
@@ -39,9 +39,9 @@ namespace MusicPlayer.Data
             return true;
         }
 
-        private TResult Await<TResult>(Func<Task<TResult>> func)
+        private static TResult Await<TResult>(Func<Task<TResult>> func)
         {
-            var task = Task.Factory.StartNew(async () => await func());
+            Task<Task<TResult>> task = Task.Factory.StartNew(async () => await func());
 
             task.Wait();
             task.Result.Wait();
@@ -49,9 +49,9 @@ namespace MusicPlayer.Data
             return task.Result.Result;
         }
 
-        private void Await<T1>(Func<T1, Task> func, T1 param1)
+        private static void Await<T1>(Func<T1, Task> func, T1 param1)
         {
-            var task = Task.Factory.StartNew(async () => await func(param1));
+            Task<Task> task = Task.Factory.StartNew(async () => await func(param1));
 
             task.Wait();
             task.Result.Wait();

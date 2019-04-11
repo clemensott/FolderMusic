@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -53,7 +52,7 @@ namespace MobileDebug
         internal static IEnumerable<Event> GetEvents(string eventsDataString)
         {
             StringBuilder dataString = new StringBuilder(eventsDataString);
-            var dataStrings = Service.Split(dataString, eventSplitter);
+            IEnumerable<string> dataStrings = Service.Split(dataString, eventSplitter);
 
             foreach (string eventDataString in dataStrings)
             {
@@ -93,7 +92,7 @@ namespace MobileDebug
 
         public static string GetDateTimeString(long ticks)
         {
-            var t = new DateTime(ticks);
+            DateTime t = new DateTime(ticks);
 
             string date = string.Format("{0,2}.{1,2}.{2,4}", t.Day, t.Month, t.Year);
             string time = string.Format("{0,2}:{1,2}:{2,2},{3,3}", t.Hour, t.Minute, t.Second, t.Millisecond);

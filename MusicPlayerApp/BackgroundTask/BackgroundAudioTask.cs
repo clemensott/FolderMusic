@@ -73,8 +73,8 @@ namespace BackgroundTask
 
         private static void Subscribe(BackgroundAudioTask task)
         {
-            var smtcType = task?.smtc.DisplayUpdater.Type.ToString() ?? "null";
-            var smtcHash = task?.smtc.DisplayUpdater.GetHashCode().ToString() ?? "null";
+            string smtcType = task?.smtc.DisplayUpdater.Type.ToString() ?? "null";
+            string smtcHash = task?.smtc.DisplayUpdater.GetHashCode().ToString() ?? "null";
             MobileDebug.Service.WriteEventPair("BackSubscribe", "SmtcType: ", smtcType, "SmtcHash: ", smtcHash);
 
             if (task == null) return;
@@ -95,8 +95,8 @@ namespace BackgroundTask
 
         private static void Unsubscribe(BackgroundAudioTask task)
         {
-            var smtcType = task?.smtc.DisplayUpdater.Type.ToString() ?? "null";
-            var smtcHash = task?.smtc.DisplayUpdater.GetHashCode().ToString() ?? "null";
+            string smtcType = task?.smtc.DisplayUpdater.Type.ToString() ?? "null";
+            string smtcHash = task?.smtc.DisplayUpdater.GetHashCode().ToString() ?? "null";
             MobileDebug.Service.WriteEventPair("BackUnsubscribe", "SmtcType: ", smtcType, "SmtcHash: ", smtcHash);
 
             if (task == null) return;

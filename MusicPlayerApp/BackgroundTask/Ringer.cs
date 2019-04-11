@@ -1,5 +1,6 @@
 ﻿using MusicPlayer.Data;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Media.Playback;
@@ -136,7 +137,7 @@ namespace BackgroundTask
 
             try
             {
-                var ringerData = await PathIO.ReadLinesAsync(dataPath);
+                IList<string> ringerData = await PathIO.ReadLinesAsync(dataPath);
 
                 isOn = bool.Parse(ringerData[0]);
                 periodSpanMillis = int.Parse(ringerData[1]) * 60000;

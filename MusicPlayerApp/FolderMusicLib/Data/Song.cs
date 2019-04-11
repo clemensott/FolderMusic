@@ -34,7 +34,7 @@ namespace MusicPlayer.Data
             {
                 if (value < DefaultDuration || value == durationMilliseconds) return;
 
-                var args = new SongDurationChangedEventArgs(durationMilliseconds, value);
+                SongDurationChangedEventArgs args = new SongDurationChangedEventArgs(durationMilliseconds, value);
                 durationMilliseconds = value;
                 DurationChanged?.Invoke(this, args);
                 OnPropertyChanged(nameof(DurationMilliseconds));
@@ -48,7 +48,7 @@ namespace MusicPlayer.Data
             {
                 if (value == title) return;
 
-                var args = new SongTitleChangedEventArgs(title, value);
+                SongTitleChangedEventArgs args = new SongTitleChangedEventArgs(title, value);
                 title = value;
                 TitleChanged?.Invoke(this, args);
                 OnPropertyChanged(nameof(Title));
@@ -62,7 +62,7 @@ namespace MusicPlayer.Data
             {
                 if (value == artist) return;
 
-                var args = new SongArtistChangedEventArgs(artist, value);
+                SongArtistChangedEventArgs args = new SongArtistChangedEventArgs(artist, value);
                 artist = value;
                 ArtistChanged?.Invoke(this, args);
                 OnPropertyChanged(nameof(Artist));

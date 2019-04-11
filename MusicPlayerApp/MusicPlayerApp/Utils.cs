@@ -4,9 +4,9 @@ using Windows.UI.Core;
 
 namespace FolderMusic
 {
-    class Utils
+    static class Utils
     {
-        public async static void DoSafe(DispatchedHandler handler)
+        public static async void DoSafe(DispatchedHandler handler)
         {
             if (CoreApplication.MainView.CoreWindow.Dispatcher.HasThreadAccess) handler();
             else await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, handler);

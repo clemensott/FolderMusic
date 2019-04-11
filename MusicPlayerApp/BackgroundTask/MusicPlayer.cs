@@ -247,7 +247,7 @@ namespace BackgroundTask
 
         public void UpdateSystemMediaTransportControl()
         {
-            var du = smtc.DisplayUpdater;
+            SystemMediaTransportControlsDisplayUpdater du = smtc.DisplayUpdater;
 
             if (du.Type != MediaPlaybackType.Music) du.Type = MediaPlaybackType.Music;
             if (du.MusicProperties.Title != CurrentSong.Title || du.MusicProperties.Artist != CurrentSong.Artist)

@@ -30,7 +30,7 @@ namespace MusicPlayer.Data.Simple
             {
                 if (value == shuffle) return;
 
-                var args = new ShuffleChangedEventArgs(shuffle, value);
+                ShuffleChangedEventArgs args = new ShuffleChangedEventArgs(shuffle, value);
                 shuffle = value;
                 ShuffleChanged?.Invoke(this, args);
             }
