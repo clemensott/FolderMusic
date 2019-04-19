@@ -237,6 +237,7 @@ namespace BackgroundTask
         private void Cancel()
         {
             ringer?.Dispose();
+            musicPlayer?.Dispose();
 
             BackgroundMediaPlayer.Shutdown();
             deferral.Complete();
