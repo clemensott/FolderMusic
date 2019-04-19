@@ -50,74 +50,74 @@ namespace MusicPlayer.Data
         private async void OnPlayStateChanged(object sender, SubscriptionsEventArgs<ILibrary, IsPlayingChangedEventArgs> e)
         {
             if (e.Base.NewValue) return;
-            MobileDebug.Service.WriteEvent("ASL.OnPlayStateChanged");
+            //MobileDebug.Service.WriteEvent("ASL.OnPlayStateChanged");
             await SaveSimple(e.Source);
             await SaveCurrentSong(e.Source);
         }
 
         private async void OnCurrentPlaylistChanged(object sender, SubscriptionsEventArgs<ILibrary, CurrentPlaylistChangedEventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("ASL.OnCurrentPlaylistChanged");
+            //MobileDebug.Service.WriteEvent("ASL.OnCurrentPlaylistChanged");
             await SaveAll(e.Source);
         }
 
         private async void OnPlaylistsPropertyChanged(object sender, SubscriptionsEventArgs<ILibrary, PlaylistsChangedEventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("ASL.OnPlaylistsPropertyChanged");
+            //MobileDebug.Service.WriteEvent("ASL.OnPlaylistsPropertyChanged");
             await SaveSimple(e.Source);
             await SaveComplete(e.Source);
         }
 
         private async void OnPlaylistCollectionChanged(object sender, SubscriptionsEventArgs<IPlaylistCollection, PlaylistCollectionChangedEventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("ASL.OnPlaylistCollectionChanged");
+            //MobileDebug.Service.WriteEvent("ASL.OnPlaylistCollectionChanged");
             await SaveSimple(e.Source.Parent);
             await SaveComplete(e.Source.Parent);
         }
 
         private async void AllPlaylists_LoopChanged(object sender, SubscriptionsEventArgs<IPlaylist, LoopChangedEventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("ASL.AllPlaylists_LoopChanged");
+            //MobileDebug.Service.WriteEvent("ASL.AllPlaylists_LoopChanged");
             await SaveSimple(e.Source.Parent.Parent);
             await SaveComplete(e.Source.Parent.Parent);
         }
 
         private async void AllPlaylists_ShuffleChanged(object sender, SubscriptionsEventArgs<ISongCollection, ShuffleChangedEventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("ASL.AllPlaylists_ShuffleChanged");
+            //MobileDebug.Service.WriteEvent("ASL.AllPlaylists_ShuffleChanged");
             await SaveSimple(e.Source.Parent.Parent.Parent);
             await SaveComplete(e.Source.Parent.Parent.Parent);
         }
 
         private async void AllPlaylists_ShuffleCollectionChanged(object sender, SubscriptionsEventArgs<IShuffleCollection, ShuffleCollectionChangedEventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("ASL.AllPlaylists_ShuffleCollectionChanged");
+            //MobileDebug.Service.WriteEvent("ASL.AllPlaylists_ShuffleCollectionChanged");
             await SaveSimple(e.Source.Parent.Parent.Parent.Parent);
             await SaveComplete(e.Source.Parent.Parent.Parent.Parent);
         }
 
         private async void AllPlaylists_SongsPropertyChanged(object sender, SubscriptionsEventArgs<IPlaylist, SongsChangedEventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("ASL.AllPlaylists_SongsPropertyChanged");
+            //MobileDebug.Service.WriteEvent("ASL.AllPlaylists_SongsPropertyChanged");
             await SaveComplete(e.Source.Parent.Parent);
         }
 
         private async void AllPlaylists_SongCollectionChanged(object sender, SubscriptionsEventArgs<ISongCollection, SongCollectionChangedEventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("ASL.AllPlaylists_SongCollectionChanged");
+            //MobileDebug.Service.WriteEvent("ASL.AllPlaylists_SongCollectionChanged");
             await SaveComplete(e.Source.Parent.Parent.Parent);
         }
 
         private async void AllPlaylists_AllSongs_SomethingChanged(object sender, SubscriptionsEventArgs<Song, EventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("ASL.AllPlaylists_AllSongs_SomethingChanged");
+            //MobileDebug.Service.WriteEvent("ASL.AllPlaylists_AllSongs_SomethingChanged");
             await SaveSimple(e.Source.Parent.Parent.Parent.Parent);
             await SaveComplete(e.Source.Parent.Parent.Parent.Parent);
         }
 
         private async void CurrentPlaylist_CurrentSongChanged(object sender, SubscriptionsEventArgs<IPlaylist, CurrentSongChangedEventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("ASL.CurrentPlaylist_CurrentSongChanged");
+            //MobileDebug.Service.WriteEvent("ASL.CurrentPlaylist_CurrentSongChanged");
             await SaveSimple(e.Source.Parent.Parent);
             await SaveCurrentSong(e.Source.Parent.Parent);
         }
@@ -125,28 +125,28 @@ namespace MusicPlayer.Data
         private async void CurrentPlaylist_CurrentSongPositionChanged(object sender, SubscriptionsEventArgs<IPlaylist, CurrentSongPositionChangedEventArgs> e)
         {
             if (e.Source.Parent.Parent.IsPlaying) return;
-            MobileDebug.Service.WriteEvent("ASL.CurrentPlaylist_CurrentSongPositionChanged");
+            //MobileDebug.Service.WriteEvent("ASL.CurrentPlaylist_CurrentSongPositionChanged");
             await SaveSimple(e.Source.Parent.Parent);
             await SaveCurrentSong(e.Source.Parent.Parent);
         }
 
         private async void CurrentPlaylist_AllSongs_SomethingChanged(object sender, SubscriptionsEventArgs<Song, EventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("ASL.CurrentPlaylist_AllSongs_SomethingChanged");
+            //MobileDebug.Service.WriteEvent("ASL.CurrentPlaylist_AllSongs_SomethingChanged");
             await SaveSimple(e.Source.Parent.Parent.Parent.Parent);
             await SaveCurrentSong(e.Source.Parent.Parent.Parent.Parent);
         }
 
         private async void CurrentPlaylist_CurrentSong_SomethingChanged(object sender, SubscriptionsEventArgs<Song, EventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("ASL.CurrentPlaylist_CurrentSong_SomethingChanged");
+            //MobileDebug.Service.WriteEvent("ASL.CurrentPlaylist_CurrentSong_SomethingChanged");
             await SaveSimple(e.Source.Parent.Parent.Parent.Parent);
             await SaveCurrentSong(e.Source.Parent.Parent.Parent.Parent);
         }
 
         private async void OtherPlaylists_CurrentSongPositionChanged(object sender, SubscriptionsEventArgs<IPlaylist, CurrentSongPositionChangedEventArgs> e)
         {
-            MobileDebug.Service.WriteEvent("ASL.OtherPlaylists_CurrentSongPositionChanged");
+            //MobileDebug.Service.WriteEvent("ASL.OtherPlaylists_CurrentSongPositionChanged");
             await SaveSimple(e.Source.Parent.Parent);
             await SaveComplete(e.Source.Parent.Parent);
         }
@@ -354,19 +354,19 @@ namespace MusicPlayer.Data
 
                 if (p != null)
                 {
-                    text += "\nName: " + (p?.Name ?? "null");
-                    text += "\nPath: " + (p?.AbsolutePath ?? "null");
-                    text += "\nSong: " + (p?.CurrentSong?.Path ?? "null");
-                    text += "\nContainsCurrentSong: " + (p?.Songs?.Contains(p?.CurrentSong).ToString() ?? "null");
-                    text += "\nPos: " + (p?.CurrentSongPosition.ToString() ?? "null");
-                    text += "\nLoop: " + (p?.Loop.ToString() ?? "null");
-                    text += "\nSongs: " + (p?.Songs?.Count.ToString() ?? "null");
-                    text += "\nDif: " + (p?.Songs?.GroupBy(s => s?.Path ?? "null")?.Count().ToString() ?? "null");
-                    text += "\nShuffle: " + (p?.Songs?.Shuffle?.Type.ToString() ?? "null");
-                    text += "\nShuffle: " + (p?.Songs?.Shuffle?.GetType().Name ?? "null");
-                    text += "\nShuffle: " + (p?.Songs?.Shuffle?.Count.ToString() ?? "null");
+                    text += "\nName: " + (p.Name ?? "null");
+                    text += "\nPath: " + (p.AbsolutePath ?? "null");
+                    text += "\nSong: " + (p.CurrentSong?.Path ?? "null");
+                    text += "\nContainsCurrentSong: " + (p.Songs?.Contains(p.CurrentSong).ToString() ?? "null");
+                    text += "\nPos: " + (p.CurrentSongPosition.ToString() ?? "null");
+                    text += "\nLoop: " + (p.Loop.ToString() ?? "null");
+                    text += "\nSongs: " + (p.Songs?.Count.ToString() ?? "null");
+                    text += "\nDif: " + (p.Songs?.GroupBy(s => s?.Path ?? "null")?.Count().ToString() ?? "null");
+                    text += "\nShuffle: " + (p.Songs?.Shuffle?.Type.ToString() ?? "null");
+                    text += "\nShuffle: " + (p.Songs?.Shuffle?.GetType().Name ?? "null");
+                    text += "\nShuffle: " + (p.Songs?.Shuffle?.Count.ToString() ?? "null");
 
-                    text += "\nHash: " + (p?.GetHashCode() ?? -1);
+                    text += "\nHash: " + p.GetHashCode();
                 }
 
                 list.Add(text);

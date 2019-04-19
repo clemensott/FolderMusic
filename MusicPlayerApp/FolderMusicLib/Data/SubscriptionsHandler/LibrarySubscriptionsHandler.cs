@@ -49,7 +49,6 @@ namespace MusicPlayer.Data.SubscriptionsHandler
         {
             if (library == null) return;
 
-            MobileDebug.Service.WriteEvent("Lsh.Subscribe", "lib: " + library.GetHashCode(), "IsLoaded: ", library.IsLoaded);
             if (!library.IsLoaded) library.Loaded += OnLoaded;
             else
             {
@@ -101,7 +100,7 @@ namespace MusicPlayer.Data.SubscriptionsHandler
         {
             foreach (IPlaylist playlist in playlists ?? Enumerable.Empty<IPlaylist>())
             {
-                bool isCurrentPlaylist = playlist == playlist.Parent.Parent.CurrentPlaylist;
+                bool isCurrentPlaylist = Equals(playlist, playlist.Parent.Parent.CurrentPlaylist);
 
                 if (isCurrentPlaylist) CurrentPlaylist.Subscribe(playlist);
                 else OtherPlaylists.Subscribe(playlist);

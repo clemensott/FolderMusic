@@ -25,7 +25,6 @@ namespace FolderMusic
         {
             SongsView s = (SongsView)sender;
 
-            MobileDebug.Service.WriteEvent(s.GetType() + ".OnCurrentSongChanged", e.OldValue, e.NewValue);
             s.SetSelectedItem();
         }
 

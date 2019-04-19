@@ -8,7 +8,7 @@ namespace MusicPlayer.Data.Shuffle
     {
         private const int shuffleCompleteListNextCount = 5, shuffleCompleteListPreviousCount = 3;
 
-        private static Random random = new Random();
+        private static readonly Random rnd = new Random();
 
         public ShuffleCompleteCollection(ISongCollection songs, Song currentSong) : base(songs)
         {
@@ -24,7 +24,7 @@ namespace MusicPlayer.Data.Shuffle
             Parent.Parent.CurrentSongChanged += Playlist_CurrentSongChanged;
         }
 
-        public ShuffleCompleteCollection(ISongCollection songs, IEnumerable<Song> shuffleSongs) : this(songs)
+        private ShuffleCompleteCollection(ISongCollection songs, IEnumerable<Song> shuffleSongs) : this(songs)
         {
             Change(null, shuffleSongs.Select((s, i) => new ChangeCollectionItem<Song>(i, s)));
         }
@@ -34,7 +34,7 @@ namespace MusicPlayer.Data.Shuffle
             return ShuffleType.Complete;
         }
 
-        protected static IEnumerable<ChangeCollectionItem<Song>> GetStart(ISongCollection songs, Song currentSong)
+        private static IEnumerable<ChangeCollectionItem<Song>> GetStart(ISongCollection songs, Song currentSong)
         {
             List<Song> remaining = new List<Song>(songs);
             int shuffleCount = GetCount(songs.Count);
@@ -43,8 +43,8 @@ namespace MusicPlayer.Data.Shuffle
             for (int i = 0; i < shuffleCount; i++)
             {
                 Song addSong = i == currentSongIndex && currentSong != null ?
-                    currentSong : remaining[random.Next(remaining.Count)];
-                
+                    currentSong : remaining[rnd.Next(remaining.Count)];
+
                 remaining.Remove(addSong);
 
                 yield return new ChangeCollectionItem<Song>(i, addSong);
@@ -86,6 +86,8 @@ namespace MusicPlayer.Data.Shuffle
             {
                 Song add = GetRandomSong(Parent, removes, adds.Select(c => c.Item));
                 ChangeCollectionItem<Song> addChange = new ChangeCollectionItem<Song>(i, add);
+
+                adds.Add(addChange);
             }
 
             while (Parent.Count - removes.Count + adds.Count > shuffleCount)
@@ -111,7 +113,7 @@ namespace MusicPlayer.Data.Shuffle
             Song currentSong = args.NewCurrentSong;
             int shuffleIndex = GetCurrentSongIndex(Parent.Count);
             int currentSongIndex = IndexOf(currentSong);
-            MobileDebug.Service.WriteEvent("Playlist_CurrentSongChanged1", currentSong, shuffleIndex, currentSongIndex);
+
             if (currentSongIndex == -1)
             {
                 Song[] removes = this.Skip(Count - shuffleIndex - 1).ToArray();
@@ -125,7 +127,6 @@ namespace MusicPlayer.Data.Shuffle
             else if (currentSongIndex > shuffleIndex)
             {
                 Song[] removes = this.Take(currentSongIndex - shuffleIndex).ToArray();
-                MobileDebug.Service.WriteEvent("Playlist_CurrentSongChanged2", removes.Length);
                 List<Song> adds = GetRandomSongs(Parent, removes, currentSongIndex - shuffleIndex);
 
                 Change(removes, adds);
@@ -142,6 +143,9 @@ namespace MusicPlayer.Data.Shuffle
 
         private List<Song> GetRandomSongs(IEnumerable<Song> songs, IEnumerable<Song> removes, int count)
         {
+            songs = songs as IList<Song> ?? songs?.ToArray();
+            removes = removes as IList<Song> ?? removes?.ToArray();
+
             List<Song> adds = new List<Song>();
 
             for (int i = 0; i < count; i++)
@@ -158,14 +162,14 @@ namespace MusicPlayer.Data.Shuffle
             if (removes == null) removes = Enumerable.Empty<Song>();
             if (adds == null) adds = Enumerable.Empty<Song>();
 
-            IEnumerable<Song> remainingSongs = songs.Except(this.Except(removes)).Except(adds);
-            MobileDebug.Service.WriteEvent("GetRandomSong", remainingSongs.Count());
-            return remainingSongs.ElementAt(random.Next(remainingSongs.Count()));
+            Song[] remainingSongs = songs.Except(this.Except(removes)).Except(adds).ToArray();
+
+            return remainingSongs[rnd.Next(remainingSongs.Length)];
         }
 
         private static int GetCurrentSongIndex(int songsCount)
         {
-            double divisor = (shuffleCompleteListNextCount + shuffleCompleteListPreviousCount);
+            const double divisor = (shuffleCompleteListNextCount + shuffleCompleteListPreviousCount);
 
             return (int)((GetCount(songsCount) - 1) / divisor * shuffleCompleteListPreviousCount);
         }
