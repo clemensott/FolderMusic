@@ -252,27 +252,23 @@ namespace MusicPlayer.Data
             Playlists.Change(null, adds);
         }
 
-        private async Task<List<StorageFolder>> GetStorageFolders()
+        private static async Task<List<StorageFolder>> GetStorageFolders()
         {
             return await GetStorageFolders(KnownFolders.MusicLibrary);
         }
 
-        private async Task<List<StorageFolder>> GetStorageFolders(StorageFolder folder)
+        private static async Task<List<StorageFolder>> GetStorageFolders(StorageFolder folder)
         {
             List<StorageFolder> list = new List<StorageFolder>();
 
-            try
+            list.Add(folder);
+
+            IReadOnlyList<StorageFolder> folders = await folder.GetFoldersAsync();
+
+            foreach (StorageFolder listFolder in folders)
             {
-                list.Add(folder);
-
-                IReadOnlyList<StorageFolder> folders = await folder.GetFoldersAsync();
-
-                foreach (StorageFolder listFolder in folders)
-                {
-                    list.AddRange(await GetStorageFolders(listFolder));
-                }
+                list.AddRange(await GetStorageFolders(listFolder));
             }
-            catch { }
 
             return list;
         }
