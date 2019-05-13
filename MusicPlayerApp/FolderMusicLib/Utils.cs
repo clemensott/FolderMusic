@@ -59,10 +59,13 @@ namespace MusicPlayer
 
         public static void SetNextShuffle(this ISongCollection songs)
         {
-            MobileDebug.Service.WriteEvent("SetNextShuffle1", songs?.Shuffle.Type);
             switch (songs.Shuffle.Type)
             {
                 case ShuffleType.Off:
+                    songs.SetShuffleType(ShuffleType.Path);
+                    break;
+
+                case ShuffleType.Path:
                     songs.SetShuffleType(ShuffleType.OneTime);
                     break;
 
@@ -71,9 +74,7 @@ namespace MusicPlayer
                     break;
 
                 case ShuffleType.Complete:
-                    MobileDebug.Service.WriteEvent("SetNextShuffle2", songs?.Shuffle.Type);
                     songs.SetShuffleType(ShuffleType.Off);
-                    MobileDebug.Service.WriteEvent("SetNextShuffle3", songs?.Shuffle.Type);
                     break;
             }
         }

@@ -20,7 +20,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="76"/>
+            <RowDefinition Height="56"/>
         </Grid.RowDefinitions>
 
         <TextBlock Text="{Binding Name}" FontSize="50" Margin="15,0,0,5"/>

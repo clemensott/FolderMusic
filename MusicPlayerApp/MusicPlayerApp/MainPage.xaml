@@ -84,7 +84,7 @@
                     </Storyboard>
                 </Grid.Resources>
 
-                <Image Grid.Column="0" x:Name="ShuffleImage" 
+                <Image Grid.Column="0" x:Name="ShuffleImage" Margin="10"
                        Source="{Binding Songs.Shuffle.Type,Converter={StaticResource shuffleConverter}}"
                        Tapped="Shuffle_Tapped" PointerEntered="ShuffleImage_PointerEntered" 
                        PointerExited="ShuffleImage_PointerExited">

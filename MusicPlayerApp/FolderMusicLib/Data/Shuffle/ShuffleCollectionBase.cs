@@ -8,13 +8,12 @@ using System.Xml.Schema;
 
 namespace MusicPlayer.Data.Shuffle
 {
-    public enum ShuffleType { Off, OneTime, Complete }
+    public enum ShuffleType { Off, Path, OneTime, Complete }
 
     abstract class ShuffleCollectionBase : IShuffleCollection
     {
         public event EventHandler<ShuffleCollectionChangedEventArgs> Changed;
 
-        private ISongCollection songs;
         private List<Song> list;
 
         public ISongCollection Parent { get; private set; }
@@ -135,14 +134,6 @@ namespace MusicPlayer.Data.Shuffle
         }
 
         protected abstract void UpdateCurrentSong(Song[] oldShuffle);
-
-        public IShuffleCollection Repalce(IEnumerable<Song> songsToRepalce)
-        {
-            Song[] array = songs.ToArray();
-            IEnumerable<Song> newSongs = this.Select(s1 => array.FirstOrDefault(s2 => s2.Path == s1.Path) ?? s1);
-
-            return GetNewThis(newSongs);
-        }
 
         protected abstract IShuffleCollection GetNewThis(IEnumerable<Song> songs);
 

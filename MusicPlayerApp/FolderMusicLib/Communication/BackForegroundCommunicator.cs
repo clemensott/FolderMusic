@@ -641,7 +641,7 @@ namespace MusicPlayer.Communication
             {
                 string currentReceivedPrimaryKey = GetPrimaryKey(e.Data);
                 string primaryData = e.Data[currentReceivedPrimaryKey].ToString();
-                MobileDebug.Service.WriteEvent("ReceiveFail1", exc1, currentReceivedPrimaryKey);
+                MobileDebug.Service.WriteEvent("ReceiveFail1", exc1, currentReceivedPrimaryKey, primaryData);
             }
         }
 
@@ -712,7 +712,7 @@ namespace MusicPlayer.Communication
             return false;
         }
 
-        private IShuffleCollection GetShuffleCollection(ShuffleType type, ISongCollection songs, string xmlText)
+        private static IShuffleCollection GetShuffleCollection(ShuffleType type, ISongCollection songs, string xmlText)
         {
             IShuffleCollection shuffle;
 
@@ -726,12 +726,15 @@ namespace MusicPlayer.Communication
                     shuffle = new ShuffleOneTimeCollection(songs);
                     break;
 
+                case ShuffleType.Path:
+                    shuffle = new ShufflePathCollection(songs);
+                    break;
+
                 case ShuffleType.Complete:
                     shuffle = new ShuffleCompleteCollection(songs);
                     break;
 
                 default:
-                    MobileDebug.Service.WriteEvent("Com.GetShuffleCollection", type);
                     throw new NotImplementedException();
             }
 

@@ -79,6 +79,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Data\Shuffle\ShufflePathCollection.cs" />
     <Compile Include="DoOneAtATimeHandler.cs" />
     <Compile Include="StopOperationToken.cs" />
     <Compile Include="Communication\BackForegroundCommunicator.cs" />

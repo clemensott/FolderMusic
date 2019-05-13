@@ -190,6 +190,9 @@ namespace MusicPlayer.Data
 
                 case ShuffleType.OneTime:
                     return new ShuffleOneTimeCollection(this);
+
+                case ShuffleType.Path:
+                    return new ShufflePathCollection(this);
             }
 
             throw new NotImplementedException("Value \"" + type + "\"of LoopType is not implemented in GetShuffleType");
@@ -201,7 +204,6 @@ namespace MusicPlayer.Data
             switch (type)
             {
                 case ShuffleType.Complete:
-                    MobileDebug.Service.WriteEvent("CreateShuffle1", type, currentSong);
                     return new ShuffleCompleteCollection(this, currentSong);
 
                 case ShuffleType.Off:
@@ -209,6 +211,9 @@ namespace MusicPlayer.Data
 
                 case ShuffleType.OneTime:
                     return new ShuffleOneTimeCollection(this, currentSong);
+
+                case ShuffleType.Path:
+                    return new ShufflePathCollection(this);
             }
 
             throw new NotImplementedException("Value \"" + type + "\"of LoopType is not implemented in CreateShuffle");

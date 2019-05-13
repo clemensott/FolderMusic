@@ -16,7 +16,7 @@ namespace MusicPlayer.Data.Shuffle
         {
         }
 
-        public ShuffleOneTimeCollection(ISongCollection parent, IEnumerable<Song> songs) : base(parent)
+        private ShuffleOneTimeCollection(ISongCollection parent, IEnumerable<Song> songs) : base(parent)
         {
             parent.Changed += Parent_CollectionChanged;
 
@@ -42,7 +42,7 @@ namespace MusicPlayer.Data.Shuffle
             return ShuffleType.OneTime;
         }
 
-        protected static IEnumerable<Song> GetStart(ISongCollection songs, Song currentSong)
+        private static IEnumerable<Song> GetStart(ISongCollection songs, Song currentSong)
         {
             List<Song> remaining = new List<Song>(songs);
 
