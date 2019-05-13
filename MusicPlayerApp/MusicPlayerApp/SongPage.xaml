@@ -56,60 +56,67 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="Title:" HorizontalAlignment="Left"
+            <TextBlock Grid.Row="0" Text="Path:" HorizontalAlignment="Left"
                        Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
-            <TextBox Grid.Row="1" HorizontalAlignment="Stretch" Margin="{StaticResource dataMargin}"
+            <TextBlock Grid.Row="1" Name="tblPath" HorizontalAlignment="Left"
+                       Margin="{StaticResource dataMargin}" FontSize="{StaticResource dataTextSize}"/>
+
+            <TextBlock Grid.Row="2" Text="Title:" HorizontalAlignment="Left"
+                       Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
+            <TextBox Grid.Row="3" HorizontalAlignment="Stretch" Margin="{StaticResource dataMargin}"
                      FontSize="{StaticResource dataTextSize}" Text="{Binding Title,Mode=TwoWay}"
                      MinHeight="0" Height="{StaticResource textBoxHeight}"/>
 
-            <TextBlock Grid.Row="2" Text="Artist:" HorizontalAlignment="Left"
+            <TextBlock Grid.Row="4" Text="Artist:" HorizontalAlignment="Left"
                        Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
-            <TextBox Grid.Row="3" HorizontalAlignment="Stretch" Margin="{StaticResource dataMargin}"
+            <TextBox Grid.Row="5" HorizontalAlignment="Stretch" Margin="{StaticResource dataMargin}"
                      FontSize="{StaticResource dataTextSize}" Text="{Binding Artist,Mode=TwoWay}"
                      MinHeight="0" Height="{StaticResource textBoxHeight}"/>
 
-            <TextBlock Grid.Row="4" Text="Album:" HorizontalAlignment="Left"
+            <TextBlock Grid.Row="6" Text="Album:" HorizontalAlignment="Left"
                        Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
-            <TextBox Grid.Row="5" HorizontalAlignment="Stretch" Margin="{StaticResource dataMargin}"
+            <TextBox Grid.Row="7" HorizontalAlignment="Stretch" Margin="{StaticResource dataMargin}"
                      FontSize="{StaticResource dataTextSize}" Text="{Binding Album,Mode=TwoWay}"
                      MinHeight="0" Height="{StaticResource textBoxHeight}"/>
 
-            <TextBlock Grid.Row="6" Text="Year:" HorizontalAlignment="Left"
+            <TextBlock Grid.Row="8" Text="Year:" HorizontalAlignment="Left"
                        Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
-            <TextBox Grid.Row="7" HorizontalAlignment="Stretch" Margin="{StaticResource dataMargin}"
+            <TextBox Grid.Row="9" HorizontalAlignment="Stretch" Margin="{StaticResource dataMargin}"
                      FontSize="{StaticResource dataTextSize}"
                      Text="{Binding Year,Mode=TwoWay,Converter={StaticResource yearCon}}"
                      MinHeight="0" Height="{StaticResource textBoxHeight}"/>
 
-            <TextBlock Grid.Row="8" Text="Album-Artist:" HorizontalAlignment="Left"
+            <TextBlock Grid.Row="10" Text="Album-Artist:" HorizontalAlignment="Left"
                        Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
-            <TextBox Grid.Row="9" HorizontalAlignment="Stretch" Margin="{StaticResource dataMargin}"
+            <TextBox Grid.Row="11" HorizontalAlignment="Stretch" Margin="{StaticResource dataMargin}"
                      FontSize="{StaticResource dataTextSize}" Text="{Binding AlbumArtist,Mode=TwoWay}"
                      MinHeight="0" Height="{StaticResource textBoxHeight}"/>
 
-            <!--<TextBlock Grid.Row="10" Text="Rating:" HorizontalAlignment="Left"
+            <!--<TextBlock Grid.Row="12" Text="Rating:" HorizontalAlignment="Left"
                        Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
-            <TextBox Grid.Row="11" HorizontalAlignment="Stretch" 
+            <TextBox Grid.Row="13" HorizontalAlignment="Stretch" 
                      FontSize="{StaticResource dataTextSize}" Margin="{StaticResource dataMargin}"
                      Text="{Binding Rating,Mode=TwoWay,Converter={StaticResource rateCon}}"
                      MinHeight="0" Height="{StaticResource textBoxHeight}"/>-->
 
-            <TextBlock Grid.Row="12" Text="Publisher:" HorizontalAlignment="Left"
+            <TextBlock Grid.Row="14" Text="Publisher:" HorizontalAlignment="Left"
                        Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
-            <TextBox Grid.Row="13" HorizontalAlignment="Stretch" Margin="{StaticResource dataMargin}"
+            <TextBox Grid.Row="15" HorizontalAlignment="Stretch" Margin="{StaticResource dataMargin}"
                      FontSize="{StaticResource dataTextSize}" Text="{Binding Publisher,Mode=TwoWay}"
                      MinHeight="0" Height="{StaticResource textBoxHeight}"/>
 
-            <StackPanel Grid.Row="14" Orientation="Horizontal" Margin="{StaticResource titleMargin}">
+            <StackPanel Grid.Row="16" Orientation="Horizontal" Margin="{StaticResource titleMargin}">
                 <TextBlock Text="Duration:" VerticalAlignment="Center"
                            FontSize="{StaticResource titleTextSize}"/>
                 <TextBlock Margin="5,0,0,0" Text="{Binding Duration,Converter={StaticResource timeCon}}"
                            VerticalAlignment="Center" FontSize="{StaticResource dataTextSize}"/>
             </StackPanel>
 
-            <StackPanel Grid.Row="15" Orientation="Horizontal" Margin="{StaticResource titleMargin}">
+            <StackPanel Grid.Row="17" Orientation="Horizontal" Margin="{StaticResource titleMargin}">
                 <TextBlock Text="Bitrate:" VerticalAlignment="Center"
                            FontSize="{StaticResource titleTextSize}"/>
                 <TextBlock VerticalAlignment="Center" Text="{Binding Bitrate}"
@@ -118,39 +125,39 @@
                            FontSize="{StaticResource dataTextSize}"/>
             </StackPanel>
 
-            <TextBlock Grid.Row="16" Text="Genre:" HorizontalAlignment="Left"
-                       Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
-            <local:IListStringControl Grid.Row="17" Margin="10,0" FontSize="{StaticResource dataTextSize}"
-                                      DataContext="{Binding Converter={StaticResource listCon},
-                                        ConverterParameter=Genre}"/>
-
-            <TextBlock Grid.Row="18" Text="Composers:" HorizontalAlignment="Left"
+            <TextBlock Grid.Row="18" Text="Genre:" HorizontalAlignment="Left"
                        Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
             <local:IListStringControl Grid.Row="19" Margin="10,0" FontSize="{StaticResource dataTextSize}"
                                       DataContext="{Binding Converter={StaticResource listCon},
-                                        ConverterParameter=Composers}"/>
+                                        ConverterParameter=Genre}"/>
 
-            <TextBlock Grid.Row="20" Text="Conductors:" HorizontalAlignment="Left"
+            <TextBlock Grid.Row="20" Text="Composers:" HorizontalAlignment="Left"
                        Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
             <local:IListStringControl Grid.Row="21" Margin="10,0" FontSize="{StaticResource dataTextSize}"
                                       DataContext="{Binding Converter={StaticResource listCon},
-                                        ConverterParameter=Conductors}"/>
+                                        ConverterParameter=Composers}"/>
 
-            <TextBlock Grid.Row="22" Text="Producers:" HorizontalAlignment="Left"
+            <TextBlock Grid.Row="22" Text="Conductors:" HorizontalAlignment="Left"
                        Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
             <local:IListStringControl Grid.Row="23" Margin="10,0" FontSize="{StaticResource dataTextSize}"
                                       DataContext="{Binding Converter={StaticResource listCon},
-                                        ConverterParameter=Producers}"/>
+                                        ConverterParameter=Conductors}"/>
 
-            <TextBlock Grid.Row="24" Text="Writers:" HorizontalAlignment="Left"
+            <TextBlock Grid.Row="24" Text="Producers:" HorizontalAlignment="Left"
                        Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
             <local:IListStringControl Grid.Row="25" Margin="10,0" FontSize="{StaticResource dataTextSize}"
                                       DataContext="{Binding Converter={StaticResource listCon},
+                                        ConverterParameter=Producers}"/>
+
+            <TextBlock Grid.Row="26" Text="Writers:" HorizontalAlignment="Left"
+                       Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
+            <local:IListStringControl Grid.Row="27" Margin="10,0" FontSize="{StaticResource dataTextSize}"
+                                      DataContext="{Binding Converter={StaticResource listCon},
                                         ConverterParameter=Writers}"/>
 
-            <TextBlock Grid.Row="26" Text="Subtitle:" HorizontalAlignment="Left"
+            <TextBlock Grid.Row="28" Text="Subtitle:" HorizontalAlignment="Left"
                        Margin="{StaticResource titleMargin}" FontSize="{StaticResource titleTextSize}"/>
-            <TextBox Grid.Row="27" HorizontalAlignment="Stretch" Margin="{StaticResource dataMargin}"
+            <TextBox Grid.Row="29" HorizontalAlignment="Stretch" Margin="{StaticResource dataMargin}"
                      FontSize="{StaticResource dataTextSize}" Text="{Binding Subtitle,Mode=TwoWay}"
                      MinHeight="0" Height="{StaticResource textBoxHeight}"/>
         </Grid>

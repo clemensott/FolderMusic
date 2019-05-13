@@ -29,43 +29,45 @@ namespace FolderMusic
         /// </summary>
         /// <param name="e">Ereignisdaten, die beschreiben, wie diese Seite erreicht wurde.
         /// Dieser Parameter wird normalerweise zum Konfigurieren der Seite verwendet.</param>
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             song = e.Parameter as Song;
 
             if (song == null) return;
 
-            StorageFile.GetFileFromPathAsync(song.Path).Completed = LoadedStorageFile;
-        }
+            tblPath.Text = song.Path;
 
-        private void LoadedStorageFile(IAsyncOperation<StorageFile> asyncInfo, AsyncStatus asyncStatus)
-        {
-            StorageFile file = asyncInfo.GetResults();
+            StorageFile file = await StorageFile.GetFileFromPathAsync(song.Path);
 
             file.Properties.GetMusicPropertiesAsync().Completed = LoadedMusicProperties;
         }
 
         private async void LoadedMusicProperties(IAsyncOperation<MusicProperties> asyncInfo, AsyncStatus asyncStatus)
         {
-            if (asyncStatus == AsyncStatus.Completed)
-            {
-                MusicProperties props = asyncInfo.GetResults();
+            string message;
+            MessageDialog dialog;
 
-                Utils.DoSafe(() => { DataContext = props; });
-            }
-            else if (asyncStatus == AsyncStatus.Error)
+            switch (asyncStatus)
             {
-                string message = "Loading Properties failed.\n" + asyncInfo.ErrorCode.Message;
-                MessageDialog dialog = new MessageDialog(message);
+                case AsyncStatus.Completed:
+                    MusicProperties props = asyncInfo.GetResults();
 
-                await dialog.ShowAsync();
-            }
-            else if (asyncStatus == AsyncStatus.Canceled)
-            {
-                string message = "Loading Properties has been canceled.";
-                MessageDialog dialog = new MessageDialog(message);
+                    Utils.DoSafe(() => DataContext = props);
+                    break;
 
-                await dialog.ShowAsync();
+                case AsyncStatus.Error:
+                    message = "Loading Properties failed.\n" + asyncInfo.ErrorCode.Message;
+                    dialog = new MessageDialog(message);
+
+                    await dialog.ShowAsync();
+                    break;
+
+                case AsyncStatus.Canceled:
+                    message = "Loading Properties has been canceled.";
+                    dialog = new MessageDialog(message);
+
+                    await dialog.ShowAsync();
+                    break;
             }
         }
 
@@ -76,7 +78,8 @@ namespace FolderMusic
                 MusicProperties props = (MusicProperties)DataContext;
 
                 await props.SavePropertiesAsync();
-                await song?.Reset();
+
+                if (song != null) await song.Reset();
             }
             catch (Exception exc)
             {
