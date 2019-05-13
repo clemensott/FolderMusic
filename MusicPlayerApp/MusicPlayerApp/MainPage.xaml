@@ -84,7 +84,7 @@
                     </Storyboard>
                 </Grid.Resources>
 
-                <Image Grid.Column="0" x:Name="ShuffleImage" Margin="10"
+                <Image Grid.Column="0" x:Name="ShuffleImage" Margin="13"
                        Source="{Binding Songs.Shuffle.Type,Converter={StaticResource shuffleConverter}}"
                        Tapped="Shuffle_Tapped" PointerEntered="ShuffleImage_PointerEntered" 
                        PointerExited="ShuffleImage_PointerExited">
@@ -111,7 +111,7 @@
                     </Storyboard>
                 </Grid.Resources>
 
-                <Image Grid.Column="2" x:Name="LoopImage" 
+                <Image Grid.Column="2" x:Name="LoopImage" Margin="15"
                        Source="{Binding Loop,Converter={StaticResource loopConverter}}"
                        Tapped="Loop_Tapped" PointerEntered="LoopImage_PointerEntered" 
                        PointerExited="LoopImage_PointerExited">

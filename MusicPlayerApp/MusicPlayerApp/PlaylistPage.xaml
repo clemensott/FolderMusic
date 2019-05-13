@@ -54,7 +54,7 @@
 
             <Image Grid.Column="0" Name="imgShuffle" Tapped="Shuffle_Tapped"
                    Source="{Binding Songs.Shuffle.Type, Converter={StaticResource shuffleConverter}}"/>
-            <Image Grid.Column="1" Name="imgLoop" Tapped="Loop_Tapped"
+            <Image Grid.Column="1" Name="imgLoop" Margin="5" Tapped="Loop_Tapped"
                    Source="{Binding Loop, Converter={StaticResource loopConverter}}"/>
         </Grid>
     </Grid>
