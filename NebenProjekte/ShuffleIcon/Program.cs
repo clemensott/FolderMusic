@@ -16,7 +16,8 @@ namespace ShuffleIcon
             new IconColor( "Blue", Color.Blue),
             new IconColor( "Yellow", Color.Yellow),
             new IconColor( "Gray", Color.Gray),
-            new IconColor( "LightGray", Color.LightGray)
+            new IconColor( "LightGray", Color.LightGray),
+            new IconColor( "DarkGray", Color.DarkGray)
         };
 
 
