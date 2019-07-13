@@ -89,25 +89,25 @@ namespace MusicPlayer.Communication
 
         private IEnumerable<Receiver> GetAllReceiver()
         {
-            yield return new Receiver(titlePrimaryKey, new Action<ValueSet, string>(ReceiveSongTitleChanged));
-            yield return new Receiver(artistPrimaryKey, new Action<ValueSet, string>(ReceiveSongArtistChanged));
-            yield return new Receiver(durationPrimaryKey, new Action<ValueSet, string>(ReceiveSongDurationChanged));
-            yield return new Receiver(currentSongPrimaryKey, new Action<ValueSet, string>(ReceiveCurrentSongChanged));
-            yield return new Receiver(songPositionPrimaryKey, new Action<ValueSet, string>(ReceiveSongPositionChanged));
-            yield return new Receiver(songsPropertPrimaryKey, new Action<ValueSet, string>(ReceiveSongsPropertyChanged));
-            yield return new Receiver(songsCollectionPrimaryKey, new Action<ValueSet, string>(ReceiveSongsChanged));
-            yield return new Receiver(shufflePropertyPrimaryKey, new Action<ValueSet, string>(ReceiveShufflePropertyChanged));
-            yield return new Receiver(shuffleCollectionPrimaryKey, new Action<ValueSet, string>(ReceiveShuffleCollectionChanged));
-            yield return new Receiver(loopPrimaryKey, new Action<ValueSet, string>(ReceiveLoop));
-            yield return new Receiver(libraryPrimaryKey, new Action<ValueSet, string>(ReceiveLibrary));
-            yield return new Receiver(playlistsPropertyPrimaryKey, new Action<ValueSet, string>(ReceivePlaylistsPropertyChanged));
-            yield return new Receiver(playlistsCollectionPrimaryKey, new Action<ValueSet, string>(ReceivePlaylistsCollectionChanged));
-            yield return new Receiver(currentPlaylistPrimaryKey, new Action<ValueSet, string>(ReceiveCurrentPlaylist));
-            yield return new Receiver(settingsPrimaryKey, new Action<ValueSet, string>(ReceiveSettings));
-            yield return new Receiver(isPlayingPrimaryKey, new Action<ValueSet, string>(ReceivePlayState));
-            yield return new Receiver(playerStatePrimaryKey, new Action<ValueSet, string>(ReceivePlayerState));
-            yield return new Receiver(getLibraryPrimaryKey, new Action<ValueSet, string>(ReceiveGetLibrary));
-            yield return new Receiver(skipPrimaryKey, new Action<ValueSet, string>(ReceiveSkippedSong));
+            yield return new Receiver(titlePrimaryKey, ReceiveSongTitleChanged);
+            yield return new Receiver(artistPrimaryKey, ReceiveSongArtistChanged);
+            yield return new Receiver(durationPrimaryKey, ReceiveSongDurationChanged);
+            yield return new Receiver(currentSongPrimaryKey, ReceiveCurrentSongChanged);
+            yield return new Receiver(songPositionPrimaryKey, ReceiveSongPositionChanged);
+            yield return new Receiver(songsPropertPrimaryKey, ReceiveSongsPropertyChanged);
+            yield return new Receiver(songsCollectionPrimaryKey, ReceiveSongsChanged);
+            yield return new Receiver(shufflePropertyPrimaryKey, ReceiveShufflePropertyChanged);
+            yield return new Receiver(shuffleCollectionPrimaryKey, ReceiveShuffleCollectionChanged);
+            yield return new Receiver(loopPrimaryKey, ReceiveLoop);
+            yield return new Receiver(libraryPrimaryKey, ReceiveLibrary);
+            yield return new Receiver(playlistsPropertyPrimaryKey, ReceivePlaylistsPropertyChanged);
+            yield return new Receiver(playlistsCollectionPrimaryKey, ReceivePlaylistsCollectionChanged);
+            yield return new Receiver(currentPlaylistPrimaryKey, ReceiveCurrentPlaylist);
+            yield return new Receiver(settingsPrimaryKey, ReceiveSettings);
+            yield return new Receiver(isPlayingPrimaryKey, ReceivePlayState);
+            yield return new Receiver(playerStatePrimaryKey, ReceivePlayerState);
+            yield return new Receiver(getLibraryPrimaryKey, ReceiveGetLibrary);
+            yield return new Receiver(skipPrimaryKey, ReceiveSkippedSong);
         }
 
         private void OnAllPlaylists_AllSongs_ArtistChanged(object sender, SubscriptionsEventArgs<Song, SongArtistChangedEventArgs> e)

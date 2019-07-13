@@ -19,7 +19,7 @@ namespace FolderMusic
 
         public static readonly DependencyProperty CurrentSongProperty =
             DependencyProperty.Register("CurrentSong", typeof(Song), typeof(SongsView),
-                new PropertyMetadata(null, new PropertyChangedCallback(OnCurrentSongPropertyChanged)));
+                new PropertyMetadata(null, OnCurrentSongPropertyChanged));
 
         private static void OnCurrentSongPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
@@ -30,7 +30,7 @@ namespace FolderMusic
 
         public static readonly DependencyProperty SourceProperty =
             DependencyProperty.Register("Source", typeof(ISongCollection), typeof(SongsView),
-                new PropertyMetadata(null, new PropertyChangedCallback(OnSourcePropertyChanged)));
+                new PropertyMetadata(null, OnSourcePropertyChanged));
 
         private static void OnSourcePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
@@ -123,7 +123,7 @@ namespace FolderMusic
 
         protected void SetItemsSource(IEnumerable<Song> songs)
         {
-            lbxSongs.ItemsSource = songs?.ToArray();
+            lbxSongs.ItemsSource = songs as IList<Song>?? songs?.ToArray();
             SetSelectedItem();
             ScrollToCurrentSongDirect();
         }

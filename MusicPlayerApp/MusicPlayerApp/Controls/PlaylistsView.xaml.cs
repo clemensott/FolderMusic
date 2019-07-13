@@ -14,7 +14,7 @@ namespace FolderMusic
     {
         public static readonly DependencyProperty CurrentPlaylistProperty =
             DependencyProperty.Register("CurrentPlaylist", typeof(IPlaylist), typeof(PlaylistsView),
-                new PropertyMetadata(null, new PropertyChangedCallback(OnCurrentPlaylistPropertyChanged)));
+                new PropertyMetadata(null, OnCurrentPlaylistPropertyChanged));
 
         private static void OnCurrentPlaylistPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
