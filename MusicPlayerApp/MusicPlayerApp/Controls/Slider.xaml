@@ -36,8 +36,8 @@
                        Converter={StaticResource toShowConverter}}"/>
 
         <TextBlock Name="tblPosition" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Left" FontSize="20"
-                   Text="{Binding ElementName=control,Path=Position,Converter={StaticResource timeCon}}"/>
+                   Text="{Binding ElementName=control,Path=ViewPosition,Converter={StaticResource timeCon}}"/>
         <TextBlock Name="tblDuration" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="20"
-                   Text="{Binding ElementName=control,Path=Duration,Converter={StaticResource timeCon}}"/>
+                   Text="{Binding ElementName=control,Path=ViewDuration,Converter={StaticResource timeCon}}"/>
     </Grid>
 </UserControl>

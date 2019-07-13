@@ -7,26 +7,27 @@ namespace FolderMusic
 {
     public sealed partial class Slider : UserControl
     {
-        private const double intervall = 100, zoomWidth = 0.1;
+        private const double zoomWidth = 0.1;
 
         public static readonly DependencyProperty IsIndeterminateProperty =
-            DependencyProperty.Register("IsIndeterminate", typeof(bool), typeof(Slider), new PropertyMetadata(false));
+            DependencyProperty.Register("IsIndeterminate", typeof(bool),
+                typeof(Slider), new PropertyMetadata(false));
 
         public static readonly DependencyProperty ViewPositionRatioProperty =
             DependencyProperty.Register("ViewPositionRatio", typeof(double), typeof(Slider),
-                new PropertyMetadata(TimeSpan.Zero, new PropertyChangedCallback(OnViewPositionRatioPropertyChanged)));
+                new PropertyMetadata(TimeSpan.Zero, OnViewPositionRatioPropertyChanged));
 
         private static void OnViewPositionRatioPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             Slider s = (Slider)sender;
             double value = (double)e.NewValue;
 
-            s.ViewPosition = TimeSpan.FromDays(value * s.Duration.TotalDays);
+            s.ViewPosition = s.Duration.Multiply(value);
         }
 
         public static readonly DependencyProperty ViewPositionProperty =
             DependencyProperty.Register("ViewPosition", typeof(TimeSpan), typeof(Slider),
-                new PropertyMetadata(TimeSpan.Zero, new PropertyChangedCallback(OnViewPositionPropertyChanged)));
+                new PropertyMetadata(TimeSpan.Zero, OnViewPositionPropertyChanged));
 
         private static void OnViewPositionPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
@@ -38,7 +39,7 @@ namespace FolderMusic
 
         public static readonly DependencyProperty PositionRatioProperty =
             DependencyProperty.Register("PositionRatio", typeof(double), typeof(Slider),
-                new PropertyMetadata(TimeSpan.Zero, new PropertyChangedCallback(OnPositionRatioPropertyChanged)));
+                new PropertyMetadata(TimeSpan.Zero, OnPositionRatioPropertyChanged));
 
         private static void OnPositionRatioPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
@@ -46,12 +47,12 @@ namespace FolderMusic
             double value = (double)e.NewValue;
 
             s.ViewPositionRatio = value;
-            s.Position = TimeSpan.FromDays(value * s.Duration.TotalDays);
+            s.Position = s.Duration.Multiply(value);
         }
 
         public static readonly DependencyProperty PositionProperty =
             DependencyProperty.Register("Position", typeof(TimeSpan), typeof(Slider),
-                new PropertyMetadata(TimeSpan.Zero, new PropertyChangedCallback(OnPositionPropertyChanged)));
+                new PropertyMetadata(TimeSpan.Zero, OnPositionPropertyChanged));
 
         private static void OnPositionPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
@@ -63,16 +64,23 @@ namespace FolderMusic
             if (s.Duration > TimeSpan.Zero) s.PositionRatio = value.TotalDays / s.Duration.TotalDays;
         }
 
+        public static readonly DependencyProperty ViewDurationProperty =
+            DependencyProperty.Register("ViewDuration", typeof(TimeSpan),
+                typeof(Slider), new PropertyMetadata(TimeSpan.Zero));
+
+
         public static readonly DependencyProperty DurationProperty =
             DependencyProperty.Register("Duration", typeof(TimeSpan), typeof(Slider),
-                new PropertyMetadata(TimeSpan.Zero, new PropertyChangedCallback(OnDurationPropertyChanged)));
+                new PropertyMetadata(TimeSpan.Zero, OnDurationPropertyChanged));
 
         private static void OnDurationPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             Slider s = (Slider)sender;
             TimeSpan value = (TimeSpan)e.NewValue;
 
-            s.Position = TimeSpan.FromDays(s.PositionRatio * value.TotalDays);
+            s.Position = value.Multiply(s.PositionRatio);
+
+            if (s.playerPositionEnabled) s.ViewDuration = value;
         }
 
         private bool playerPositionEnabled = true;
@@ -107,6 +115,12 @@ namespace FolderMusic
             set { SetValue(PositionProperty, value); }
         }
 
+        public TimeSpan ViewDuration
+        {
+            get { return (TimeSpan)GetValue(ViewDurationProperty); }
+            set { SetValue(ViewDurationProperty, value); }
+        }
+
         public TimeSpan Duration
         {
             get { return (TimeSpan)GetValue(DurationProperty); }
@@ -122,7 +136,7 @@ namespace FolderMusic
         {
             FrameworkElement highestParent = this;
 
-            while (highestParent.Parent as FrameworkElement != null) highestParent = highestParent.Parent as FrameworkElement;
+            while (highestParent.Parent is FrameworkElement) highestParent = (FrameworkElement)highestParent.Parent;
 
             highestParent.PointerExited += HighestParent_PointerExited;
         }
@@ -142,6 +156,7 @@ namespace FolderMusic
 
             sld.Minimum = 0;
             sld.Maximum = 1;
+            ViewDuration = Duration;
         }
 
         private void sld_Holding(object sender, HoldingRoutedEventArgs e)
@@ -149,6 +164,7 @@ namespace FolderMusic
             double value = sld.Value;
             sld.Minimum = value - zoomWidth * value;
             sld.Maximum = value + (1 - value) * zoomWidth;
+            ViewDuration = Duration.Multiply(sld.Maximum);
         }
     }
 }

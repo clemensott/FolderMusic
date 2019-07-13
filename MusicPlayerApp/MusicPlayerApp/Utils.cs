@@ -11,5 +11,10 @@ namespace FolderMusic
             if (CoreApplication.MainView.CoreWindow.Dispatcher.HasThreadAccess) handler();
             else await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, handler);
         }
+
+        public static TimeSpan Multiply(this TimeSpan timeSpan, double factor)
+        {
+            return TimeSpan.FromDays(timeSpan.TotalDays * factor);
+        }
     }
 }
