@@ -18,7 +18,7 @@ namespace FolderMusic
         {
             if (songs == null) return;
 
-            songs.ShuffleChanged += OnSomethingChanged;
+            songs.Changed += OnSomethingChanged;
 
             foreach (Song song in songs) Subscribe(song);
         }
@@ -27,7 +27,7 @@ namespace FolderMusic
         {
             if (songs == null) return;
 
-            songs.ShuffleChanged -= OnSomethingChanged;
+            songs.Changed -= OnSomethingChanged;
 
             foreach (Song song in songs) Unsubscribe(song);
         }
