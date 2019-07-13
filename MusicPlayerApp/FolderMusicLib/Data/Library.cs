@@ -53,7 +53,6 @@ namespace MusicPlayer.Data
             get { return playerState; }
             set
             {
-                MobileDebug.Service.WriteEvent("SetPlayerState", playerState, value);
                 if (value == playerState) return;
 
                 PlayerStateChangedEventArgs args = new PlayerStateChangedEventArgs(playerState, value);
