@@ -1,5 +1,4 @@
 ﻿using MusicPlayer;
-using MusicPlayer.Data;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,6 +7,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
+using MusicPlayer.Models.Interfaces;
 
 namespace FolderMusic
 {
@@ -30,10 +30,7 @@ namespace FolderMusic
         {
             if ((ILibrary)e.Parameter != library)
             {
-                library = (ILibrary)e.Parameter;
-                //viewModel = new MainViewModel(library);
-                //DataContext = viewModel;
-                DataContext = library;
+                DataContext = library = (ILibrary)e.Parameter;
 
                 library.Loaded += Library_Loaded;
             }
@@ -41,6 +38,7 @@ namespace FolderMusic
 
         private async void Library_Loaded(object sender, EventArgs args)
         {
+            MobileDebug.Service.WriteEvent("MainPageLibLoaded");
             if (library.Playlists.Count > 0) return;
 
             StopOperationToken stopToken = new StopOperationToken();
@@ -59,6 +57,7 @@ namespace FolderMusic
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            MobileDebug.Service.WriteEvent("MainPageLoaded");
             //if (!checkedSkippedSongs && await library.SkippedSongs.HasSongs())
             //{
             //    checkedSkippedSongs = true;
@@ -225,6 +224,7 @@ namespace FolderMusic
 
         private void SongListView_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
+            MobileDebug.Service.WriteEvent("SongsViewDataContextChanged");
             currentPlaylistSongListView = sender as SongsView;
         }
 

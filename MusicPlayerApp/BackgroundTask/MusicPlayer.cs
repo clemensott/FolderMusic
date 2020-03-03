@@ -1,6 +1,4 @@
 ﻿using MusicPlayer;
-using MusicPlayer.Data;
-using MusicPlayer.Data.SubscriptionsHandler;
 using System;
 using System.Linq;
 using System.Threading;
@@ -8,6 +6,10 @@ using System.Threading.Tasks;
 using Windows.Media;
 using Windows.Media.Playback;
 using Windows.Storage;
+using MusicPlayer.Models;
+using MusicPlayer.Models.EventArgs;
+using MusicPlayer.Models.Interfaces;
+using MusicPlayer.SubscriptionsHandler;
 
 namespace BackgroundTask
 {

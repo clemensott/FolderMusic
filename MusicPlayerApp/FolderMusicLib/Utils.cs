@@ -1,8 +1,9 @@
-﻿using MusicPlayer.Data;
-using MusicPlayer.Data.Shuffle;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MusicPlayer.Models;
+using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Models.Shuffle;
 
 namespace MusicPlayer
 {

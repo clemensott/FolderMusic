@@ -1,6 +1,7 @@
 ﻿using System;
-using MusicPlayer.Data;
 using System.Linq;
+using MusicPlayer.Models;
+using MusicPlayer.Models.Interfaces;
 
 namespace FolderMusic
 {

@@ -1,6 +1,4 @@
-﻿using MusicPlayer.Data;
-using MusicPlayer.Data.Shuffle;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,6 +8,10 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
+using MusicPlayer.Models;
+using MusicPlayer.Models.EventArgs;
+using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Models.Shuffle;
 
 namespace FolderMusic
 {
@@ -18,7 +20,7 @@ namespace FolderMusic
         enum ScrollToType { No, Last, Current }
 
         public static readonly DependencyProperty CurrentSongProperty =
-            DependencyProperty.Register("CurrentSongFileName", typeof(Song), typeof(SongsView),
+            DependencyProperty.Register("CurrentSong", typeof(Song), typeof(SongsView),
                 new PropertyMetadata(null, OnCurrentSongPropertyChanged));
 
         private static void OnCurrentSongPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)

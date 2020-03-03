@@ -1,13 +1,16 @@
-﻿using MusicPlayer.Data;
-using MusicPlayer.Data.Shuffle;
-using MusicPlayer.Data.SubscriptionsHandler;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation.Collections;
 using Windows.Media.Playback;
 using Windows.UI.Core;
+using MusicPlayer.Models;
+using MusicPlayer.Models.EventArgs;
+using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Models.Shuffle;
+using MusicPlayer.Models.Skip;
+using MusicPlayer.SubscriptionsHandler;
 
 namespace MusicPlayer.Communication
 {
@@ -21,7 +24,7 @@ namespace MusicPlayer.Communication
             durationPrimaryKey = "Duration" + primaryKey,
             songPositionPrimaryKey = "SongPosition" + primaryKey,
             currentSongPrimaryKey = "CurrentSongFileName" + primaryKey,
-            songsPropertPrimaryKey = "SongsProperty" + primaryKey,
+            songsPropertyPrimaryKey = "SongsProperty" + primaryKey,
             songsCollectionPrimaryKey = "SongsCollection" + primaryKey,
             shufflePropertyPrimaryKey = "ShuffleProperty" + primaryKey,
             shuffleCollectionPrimaryKey = "ShuffleCollection" + primaryKey,
@@ -94,7 +97,7 @@ namespace MusicPlayer.Communication
             yield return new Receiver(durationPrimaryKey, ReceiveSongDurationChanged);
             yield return new Receiver(currentSongPrimaryKey, ReceiveCurrentSongChanged);
             yield return new Receiver(songPositionPrimaryKey, ReceiveSongPositionChanged);
-            yield return new Receiver(songsPropertPrimaryKey, ReceiveSongsPropertyChanged);
+            yield return new Receiver(songsPropertyPrimaryKey, ReceiveSongsPropertyChanged);
             yield return new Receiver(songsCollectionPrimaryKey, ReceiveSongsChanged);
             yield return new Receiver(shufflePropertyPrimaryKey, ReceiveShufflePropertyChanged);
             yield return new Receiver(shuffleCollectionPrimaryKey, ReceiveShuffleCollectionChanged);
@@ -221,7 +224,7 @@ namespace MusicPlayer.Communication
             string value = XmlConverter.Serialize(e.Source.Songs);
             string playlistPath = e.Source.AbsolutePath;
 
-            ValueSet valueSet = receivers[songsPropertPrimaryKey].GetValueSet(value);
+            ValueSet valueSet = receivers[songsPropertyPrimaryKey].GetValueSet(value);
             valueSet.Add(playlistPathKey, playlistPath);
 
             Send(valueSet);
@@ -325,13 +328,11 @@ namespace MusicPlayer.Communication
             Send(valueSet);
         }
 
-        public void ReceiveShuffleCollectionChanged(ValueSet valueSet, string value)
+        private void ReceiveShuffleCollectionChanged(ValueSet valueSet, string value)
         {
             string playlistPath = valueSet[playlistPathKey].ToString();
             string removeXml = valueSet[removeKey].ToString();
             string addXml = valueSet[addKey].ToString();
-
-            //SaveText(removeXml);
 
             IPlaylist changedPlaylist;
             if (!HavePlaylist(playlistPath, out changedPlaylist)) return;
@@ -358,42 +359,13 @@ namespace MusicPlayer.Communication
             changedPlaylist.Songs.Shuffle.Change(removes, adds);
         }
 
-        //private async void SaveText(string text)
-        //{
-        //    MobileDebug.Service.WriteEvent("Com.SaveText1");
-        //    StorageFile file;
-
-        //    try
-        //    {
-        //        file = await KnownFolders.VideosLibrary.GetFileAsync("text.txt");
-        //    }
-        //    catch (Exception e1)
-        //    {
-        //        MobileDebug.Service.WriteEvent("Com.SaveTextFail1", e1);
-
-        //        try
-        //        {
-        //            file = await KnownFolders.VideosLibrary.CreateFileAsync("text.txt");
-        //        }
-        //        catch (Exception e2)
-        //        {
-        //            MobileDebug.Service.WriteEvent("Com.SaveTextFail2", e2);
-        //            return;
-        //        }
-        //    }
-
-        //    MobileDebug.Service.WriteEvent("Com.SaveText2", file.Name);
-        //    await FileIO.WriteTextAsync(file, text);
-        //    MobileDebug.Service.WriteEvent("Com.SaveText3");
-        //}
-
 
         private void OnAllPlaylists_LoopChanged(object sender, SubscriptionsEventArgs<IPlaylist, LoopChangedEventArgs> e)
         {
             string value = Enum.GetName(typeof(LoopType), e.Source.Loop);
             string playlistPath = e.Source.AbsolutePath;
 
-            ValueSet valueSet = receivers[loopPrimaryKey].GetValueSet(value.ToString());
+            ValueSet valueSet = receivers[loopPrimaryKey].GetValueSet(value);
             valueSet.Add(playlistPathKey, playlistPath);
 
             Send(valueSet);

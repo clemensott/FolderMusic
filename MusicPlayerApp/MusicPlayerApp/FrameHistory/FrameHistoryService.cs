@@ -1,11 +1,11 @@
 ﻿using FolderMusic.FrameHistory.Handlers;
-using MusicPlayer.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
+using MusicPlayer.Models.Interfaces;
 
 namespace FolderMusic.FrameHistory
 {

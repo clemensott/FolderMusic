@@ -1,5 +1,5 @@
-﻿using MusicPlayer.Data;
-using System;
+﻿using System;
+using MusicPlayer.Models.Interfaces;
 
 namespace FolderMusic
 {

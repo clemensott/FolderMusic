@@ -1,4 +1,4 @@
-﻿using MusicPlayer.Data;
+﻿using MusicPlayer.Models.Interfaces;
 
 namespace FolderMusic.FrameHistory.Handlers
 {

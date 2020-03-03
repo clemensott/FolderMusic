@@ -1,7 +1,7 @@
-﻿using MusicPlayer.Data.Shuffle;
-using PlayerIcons;
+﻿using PlayerIcons;
 using System;
 using Windows.UI.Xaml.Data;
+using MusicPlayer.Models.Shuffle;
 
 namespace FolderMusic.Converters
 {

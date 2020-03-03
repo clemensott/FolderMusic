@@ -1,5 +1,5 @@
-﻿using MusicPlayer.Data;
-using System.Linq;
+﻿using System.Linq;
+using MusicPlayer.Models.Interfaces;
 
 namespace FolderMusic.FrameHistory.Handlers
 {

@@ -1,5 +1,4 @@
 ﻿using FolderMusic.FrameHistory;
-using MusicPlayer.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,6 +14,8 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
+using MusicPlayer;
+using MusicPlayer.Models.Interfaces;
 
 namespace FolderMusic
 {
@@ -63,7 +64,7 @@ namespace FolderMusic
             }
 #endif
 
-            AutoSaveLoad asl = new AutoSaveLoad(null, null, simpleFileName, null);
+            AutoSaveLoad asl = new AutoSaveLoad(null, null, simpleFileName);
             ILibrary library = await asl.LoadSimple(true);
 
             rootFrame = Window.Current.Content as Frame;

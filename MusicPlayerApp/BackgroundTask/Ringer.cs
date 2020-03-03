@@ -1,10 +1,10 @@
-﻿using MusicPlayer.Data;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Media.Playback;
 using Windows.Storage;
+using MusicPlayer.Models.Interfaces;
 
 namespace BackgroundTask
 {

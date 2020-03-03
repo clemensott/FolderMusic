@@ -1,7 +1,8 @@
-﻿using MusicPlayer.Data;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage.FileProperties;
+using MusicPlayer.Models;
+using MusicPlayer.Models.Interfaces;
 
 namespace FolderMusic.FrameHistory.Handlers
 {

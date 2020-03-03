@@ -1,9 +1,11 @@
-﻿using MusicPlayer.Data;
-using MusicPlayer.Data.SubscriptionsHandler;
-using System;
+﻿using System;
 using Windows.ApplicationModel.Background;
 using Windows.Media;
 using Windows.Media.Playback;
+using MusicPlayer;
+using MusicPlayer.Models.EventArgs;
+using MusicPlayer.Models.Interfaces;
+using MusicPlayer.SubscriptionsHandler;
 
 namespace BackgroundTask
 {
@@ -12,7 +14,7 @@ namespace BackgroundTask
     public sealed class BackgroundAudioTask : IBackgroundTask
     {
         private const string completeFileName = "Data.xml", backupFileName = "Data.bak",
-              simpleFileName = "SimpleData.xml", currentSongFileName = "CurrentSongFileName.xml";
+              simpleFileName = "SimpleData.xml";
 
         private static BackgroundAudioTask task;
 
@@ -46,7 +48,7 @@ namespace BackgroundTask
 
             Unsubscribe(task);
 
-            saveLoad = new AutoSaveLoad(completeFileName, backupFileName, simpleFileName, currentSongFileName);
+            saveLoad = new AutoSaveLoad(completeFileName, backupFileName, simpleFileName);
             library = await saveLoad.LoadSimple(false);
             lsh = LibrarySubscriptionsHandler.GetInstance(library);
             smtc = SystemMediaTransportControls.GetForCurrentView();

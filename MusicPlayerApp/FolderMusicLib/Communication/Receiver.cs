@@ -5,7 +5,7 @@ namespace MusicPlayer.Communication
 {
     class Receiver
     {
-        private Action<ValueSet, string> messageReceived;
+        private readonly Action<ValueSet, string> messageReceived;
 
         public string Key { get; private set; }
 
