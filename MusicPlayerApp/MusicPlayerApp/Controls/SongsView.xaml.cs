@@ -18,7 +18,7 @@ namespace FolderMusic
         enum ScrollToType { No, Last, Current }
 
         public static readonly DependencyProperty CurrentSongProperty =
-            DependencyProperty.Register("CurrentSong", typeof(Song), typeof(SongsView),
+            DependencyProperty.Register("CurrentSongFileName", typeof(Song), typeof(SongsView),
                 new PropertyMetadata(null, OnCurrentSongPropertyChanged));
 
         private static void OnCurrentSongPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)

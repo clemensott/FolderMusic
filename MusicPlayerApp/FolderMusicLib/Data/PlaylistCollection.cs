@@ -14,7 +14,7 @@ namespace MusicPlayer.Data
 
         public event EventHandler<PlaylistCollectionChangedEventArgs> Changed;
 
-        public int Count { get { return list.Count; } }
+        public int Count => list.Count;
 
         public ILibrary Parent { get; set; }
 

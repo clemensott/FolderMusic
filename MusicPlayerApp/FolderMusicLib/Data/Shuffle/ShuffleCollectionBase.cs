@@ -18,9 +18,9 @@ namespace MusicPlayer.Data.Shuffle
 
         public ISongCollection Parent { get; private set; }
 
-        public ShuffleType Type { get { return GetShuffleType(); } }
+        public ShuffleType Type => GetShuffleType();
 
-        public int Count { get { return list.Count; } }
+        public int Count => list.Count;
 
         public ShuffleCollectionBase(ISongCollection parent)
         {

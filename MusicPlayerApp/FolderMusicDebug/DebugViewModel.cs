@@ -57,7 +57,7 @@ namespace MobileDebug
             }
         }
 
-        public bool ShowLog { get { return IsLoading || ForceLog; } }
+        public bool ShowLog => IsLoading || ForceLog;
 
         public bool AllNamesIsChecked
         {

@@ -264,11 +264,11 @@ namespace FolderMusic
             AutoSaveLoad.CheckLibrary(library, "Abb");
         }
 
-        public static string LoadText(string filenameWithExtention)
+        public static string LoadText(string filenameWithExtension)
         {
             try
             {
-                string path = ApplicationData.Current.LocalFolder.Path + "\\" + filenameWithExtention;
+                string path = ApplicationData.Current.LocalFolder.Path + "\\" + filenameWithExtension;
                 Task<string> load = PathIO.ReadTextAsync(path).AsTask();
                 load.Wait();
 
@@ -276,7 +276,7 @@ namespace FolderMusic
             }
             catch (Exception e)
             {
-                MobileDebug.Service.WriteEvent("IOLoadTextFail", e, filenameWithExtention);
+                MobileDebug.Service.WriteEvent("IOLoadTextFail", e, filenameWithExtension);
             }
 
             return null;

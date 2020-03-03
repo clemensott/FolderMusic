@@ -12,7 +12,7 @@ namespace FolderMusic
     {
         private static volatile bool open = false;
 
-        public static bool Open { get { return open; } }
+        public static bool Open => open;
 
         private SkipSongs list;
 

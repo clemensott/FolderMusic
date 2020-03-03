@@ -27,7 +27,7 @@ namespace MusicPlayer.Data
         public event EventHandler<LoopChangedEventArgs> LoopChanged;
         public event EventHandler<SongsChangedEventArgs> SongsChanged;
 
-        public bool IsEmpty { get { return Songs.Count == 0; } }
+        public bool IsEmpty => Songs.Count == 0;
 
         public double CurrentSongPosition
         {
@@ -38,7 +38,6 @@ namespace MusicPlayer.Data
             set
             {
                 if (value == currentSongPosition) return;
-                //MobileDebug.Service.WriteEvent("SetCurrentSongPosition", Name, CurrentSong, currentSongPosition, value);
 
                 CurrentSongPositionChangedEventArgs args = new CurrentSongPositionChangedEventArgs(currentSongPosition, value);
                 currentSongPosition = value;
@@ -163,9 +162,9 @@ namespace MusicPlayer.Data
         {
             Song[] songs = Songs.ToArray();
             IReadOnlyList<StorageFile> files = await GetStorageFolderFiles();
-            IEnumerable<StorageFile> addFiles = files.Where(f => !songs.Any(s => s.Path == f.Path));
+            IEnumerable<StorageFile> addFiles = files.Where(f => songs.All(s => s.Path != f.Path));
             Song[] addSongs = (await GetSongsFromStoragefiles(addFiles, stopToken)).ToArray();
-            Song[] removeSongs = songs.Where(s => !files.Any(f => f.Path == s.Path)).ToArray();
+            Song[] removeSongs = songs.Where(s => files.All(f => f.Path != s.Path)).ToArray();
 
             if (stopToken.IsStopped) return;
 
@@ -255,11 +254,6 @@ namespace MusicPlayer.Data
             if (!Songs.Shuffle.SequenceEqual(other.Songs.Shuffle)) return false;
 
             return true;
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
         }
 
         public static bool operator ==(Playlist playlist1, IPlaylist playlist2)

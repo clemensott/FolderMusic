@@ -23,7 +23,7 @@ namespace MusicPlayer.Data
             Path = library.CurrentPlaylist.CurrentSong.Path;
         }
 
-        public async static Task Delete()
+        public static async Task Delete()
         {
             await IO.DeleteAsync(fileName);
         }

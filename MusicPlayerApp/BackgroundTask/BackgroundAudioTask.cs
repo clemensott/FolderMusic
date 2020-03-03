@@ -12,7 +12,7 @@ namespace BackgroundTask
     public sealed class BackgroundAudioTask : IBackgroundTask
     {
         private const string completeFileName = "Data.xml", backupFileName = "Data.bak",
-              simpleFileName = "SimpleData.xml", currentSongFileName = "CurrentSong.xml";
+              simpleFileName = "SimpleData.xml", currentSongFileName = "CurrentSongFileName.xml";
 
         private static BackgroundAudioTask task;
 
@@ -31,13 +31,7 @@ namespace BackgroundTask
             set { playerType = value; }
         }
 
-        internal IBackgroundPlayer BackgroundPlayer
-        {
-            get
-            {
-                return playerType == BackgroundPlayerType.Music ? (IBackgroundPlayer)musicPlayer : ringer;
-            }
-        }
+        internal IBackgroundPlayer BackgroundPlayer => playerType == BackgroundPlayerType.Music ? (IBackgroundPlayer)musicPlayer : ringer;
 
         public async void Run(IBackgroundTaskInstance taskInstance)
         {
@@ -181,7 +175,7 @@ namespace BackgroundTask
             MobileDebug.Service.WriteEventPair("StateChanged", "Playerstate", sender.CurrentState,
                 "SMTC-State", smtc.PlaybackStatus, "PlayerPosition [s]", sender.Position.TotalMilliseconds,
                 "PlayerDuration [s]", sender.NaturalDuration.TotalMilliseconds, "PauseAllowed", pauseAllowed,
-                "LibraryIsPlaying", library.IsPlaying, "CurrentSong", library.CurrentPlaylist?.CurrentSong,
+                "LibraryIsPlaying", library.IsPlaying, "CurrentSongFileName", library.CurrentPlaylist?.CurrentSong,
                 "LibIsCompleteLoaded", library.IsLoaded);
 
             if (playing)
@@ -211,7 +205,7 @@ namespace BackgroundTask
 
         private async void OnCurrentSongChanged(object sender, EventArgs args)
         {
-            //MobileDebug.Manager.WriteEvent("SetOnCurrentSong", library.CurrentPlaylist?.CurrentSong);
+            //MobileDebug.Manager.WriteEvent("SetOnCurrentSong", library.CurrentPlaylist?.CurrentSongFileName);
             await BackgroundPlayer.SetCurrent();
         }
 

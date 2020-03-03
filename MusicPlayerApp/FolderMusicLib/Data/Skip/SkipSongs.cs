@@ -35,13 +35,13 @@ namespace MusicPlayer.Data
             SkippedSong?.Invoke(this, EventArgs.Empty);
         }
 
-        internal async static Task<List<string>> GetSkipSongsPaths()
+        internal static async Task<List<string>> GetSkipSongsPaths()
         {
             string text = await IO.LoadTextAsync(skipSongsFileName);
             return text.Split(';').Where(s => s.Length > 0).Distinct().ToList();
         }
 
-        internal async static Task SaveSkipSongsPaths(IEnumerable<string> songsPaths)
+        internal static async Task SaveSkipSongsPaths(IEnumerable<string> songsPaths)
         {
             string text = string.Join(";", songsPaths);
 

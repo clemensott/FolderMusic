@@ -20,7 +20,7 @@ namespace MusicPlayer.Communication
             titlePrimaryKey = "Title" + primaryKey,
             durationPrimaryKey = "Duration" + primaryKey,
             songPositionPrimaryKey = "SongPosition" + primaryKey,
-            currentSongPrimaryKey = "CurrentSong" + primaryKey,
+            currentSongPrimaryKey = "CurrentSongFileName" + primaryKey,
             songsPropertPrimaryKey = "SongsProperty" + primaryKey,
             songsCollectionPrimaryKey = "SongsCollection" + primaryKey,
             shufflePropertyPrimaryKey = "ShuffleProperty" + primaryKey,

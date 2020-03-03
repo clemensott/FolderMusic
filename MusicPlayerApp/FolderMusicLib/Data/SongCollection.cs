@@ -17,7 +17,7 @@ namespace MusicPlayer.Data
         public event EventHandler<SongCollectionChangedEventArgs> Changed;
         public event EventHandler<ShuffleChangedEventArgs> ShuffleChanged;
 
-        public int Count { get { return list.Count; } }
+        public int Count => list.Count;
 
         public IPlaylist Parent { get; set; }
 
@@ -71,7 +71,7 @@ namespace MusicPlayer.Data
         public void Change(IEnumerable<Song> removes, IEnumerable<Song> adds)
         {
             //Song oldCurrentSong, newCurrentSong;
-            //newCurrentSong = oldCurrentSong = Parent.CurrentSong;
+            //newCurrentSong = oldCurrentSong = Parent.CurrentSongFileName;
 
             //int currentSongIndex = list.IndexOf(oldCurrentSong);
             Song[] removeArray = removes?.ToArray() ?? new Song[0];

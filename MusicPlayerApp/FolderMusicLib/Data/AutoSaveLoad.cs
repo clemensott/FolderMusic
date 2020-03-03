@@ -10,25 +10,25 @@ namespace MusicPlayer.Data
 {
     public class AutoSaveLoad
     {
-        private DoOneAtATimeHandler completeSaveHnadler, simpleSaveHandler, currentSongSaveHandler;
+        private readonly DoOneAtATimeHandler completeSaveHandler, simpleSaveHandler, currentSongSaveHandler;
         private LibrarySubscriptionsHandler sh;
 
-        public string Complete { get; private set; }
+        private string CompleteFileName { get; }
 
-        public string Backup { get; private set; }
+        private string BackupFileName { get; }
 
-        public string Simple { get; private set; }
+        private string SimpleFileName { get; }
 
-        public string CurrentSong { get; private set; }
+        private string CurrentSongFileName { get; }
 
-        public AutoSaveLoad(string complete, string backup, string simple, string currentSong)
+        public AutoSaveLoad(string completeFileName, string backupFileName, string simpleFileName, string currentSongFileName)
         {
-            Complete = complete;
-            Backup = backup;
-            Simple = simple;
-            CurrentSong = currentSong;
+            CompleteFileName = completeFileName;
+            BackupFileName = backupFileName;
+            SimpleFileName = simpleFileName;
+            CurrentSongFileName = currentSongFileName;
 
-            completeSaveHnadler = new DoOneAtATimeHandler()
+            completeSaveHandler = new DoOneAtATimeHandler()
             {
                 WaitBeforeDo = TimeSpan.FromMilliseconds(500),
                 WaitAfterDo = TimeSpan.FromMilliseconds(500)
@@ -206,13 +206,13 @@ namespace MusicPlayer.Data
         {
             try
             {
-                await completeSaveHnadler.DoAsync(async () =>
+                await completeSaveHandler.DoAsync(async () =>
                 {
-                    if (lib?.Playlists != null && lib.Playlists.Count > 0) await IO.SaveObjectAsync(Complete, lib);
+                    if (lib?.Playlists != null && lib.Playlists.Count > 0) await IO.SaveObjectAsync(CompleteFileName, lib);
                     else
                     {
-                        await IO.DeleteAsync(Complete);
-                        await IO.DeleteAsync(Backup);
+                        await IO.DeleteAsync(CompleteFileName);
+                        await IO.DeleteAsync(BackupFileName);
                     }
                 });
             }
@@ -228,8 +228,8 @@ namespace MusicPlayer.Data
             {
                 await simpleSaveHandler.DoAsync(async () =>
                 {
-                    if (lib?.Playlists != null && lib.Playlists.Count > 0) await IO.SaveObjectAsync(Simple, lib.ToSimple());
-                    else await IO.DeleteAsync(Simple);
+                    if (lib?.Playlists != null && lib.Playlists.Count > 0) await IO.SaveObjectAsync(SimpleFileName, lib.ToSimple());
+                    else await IO.DeleteAsync(SimpleFileName);
                 });
             }
             catch (Exception e)
@@ -247,9 +247,9 @@ namespace MusicPlayer.Data
                 {
                     if (lib?.CurrentPlaylist?.CurrentSong != null)
                     {
-                        await IO.SaveObjectAsync(CurrentSong, new CurrentPlaySong(lib));
+                        await IO.SaveObjectAsync(CurrentSongFileName, new CurrentPlaySong(lib));
                     }
-                    else await IO.DeleteAsync(CurrentSong);
+                    else await IO.DeleteAsync(CurrentSongFileName);
                 });
             }
             catch (Exception e)
@@ -267,13 +267,13 @@ namespace MusicPlayer.Data
                 if (isForeground)
                 {
                     library = new Library(true);
-                    string xmlText = await IO.LoadTextAsync(Simple);
+                    string xmlText = await IO.LoadTextAsync(SimpleFileName);
                     //MobileDebug.Service.WriteEvent("LoadSimpleForeground", xmlText);
                     library.ReadXml(XmlConverter.GetReader(xmlText));
                 }
                 else
                 {
-                    library = new Library(await IO.LoadObjectAsync<CurrentPlaySong>(CurrentSong));
+                    library = new Library(await IO.LoadObjectAsync<CurrentPlaySong>(CurrentSongFileName));
                     MobileDebug.Service.WriteEvent("LoadSimpleBack", library?.CurrentPlaylist?.CurrentSong?.Path);
                 }
             }
@@ -302,8 +302,8 @@ namespace MusicPlayer.Data
             {
                 try
                 {
-                    completeLib.ReadXml(XmlConverter.GetReader(await IO.LoadTextAsync(Complete)));
-                    IO.CopyAsync(Complete, Backup);
+                    completeLib.ReadXml(XmlConverter.GetReader(await IO.LoadTextAsync(CompleteFileName)));
+                    IO.CopyAsync(CompleteFileName, BackupFileName);
                     return completeLib;
                 }
                 catch (Exception e)
@@ -316,19 +316,19 @@ namespace MusicPlayer.Data
             {
                 try
                 {
-                    completeLib.ReadXml(XmlConverter.GetReader(await IO.LoadTextAsync(Backup)));
-                    IO.CopyAsync(Backup, Complete);
+                    completeLib.ReadXml(XmlConverter.GetReader(await IO.LoadTextAsync(BackupFileName)));
+                    IO.CopyAsync(BackupFileName, CompleteFileName);
                     return completeLib;
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Service.WriteEvent("Coundn't load backup", e);
+                    MobileDebug.Service.WriteEvent("Coundn't load backupFileName", e);
                 }
             }
 
             MobileDebug.Service.WriteEvent("Coundn't load any data");
-            IO.CopyAsync(Complete, KnownFolders.VideosLibrary, Complete);
-            IO.CopyAsync(Backup, KnownFolders.VideosLibrary, Backup);
+            IO.CopyAsync(CompleteFileName, KnownFolders.VideosLibrary, CompleteFileName);
+            IO.CopyAsync(BackupFileName, KnownFolders.VideosLibrary, BackupFileName);
 
             return completeLib;
         }

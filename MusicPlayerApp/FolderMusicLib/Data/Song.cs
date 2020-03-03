@@ -21,9 +21,9 @@ namespace MusicPlayer.Data
         private double durationMilliseconds;
         private string title, artist, path;
 
-        public bool IsEmpty { get { return path == string.Empty; } }
+        public bool IsEmpty => path == string.Empty;
 
-        public bool Failed { get { return failed; } }
+        public bool Failed => failed;
 
         public ISongCollection Parent { get; set; }
 
@@ -111,7 +111,7 @@ namespace MusicPlayer.Data
             this.artist = artist;
         }
 
-        public async static Task<Song> GetLoaded(StorageFile file)
+        public static async Task<Song> GetLoaded(StorageFile file)
         {
             MusicProperties properties = await file.Properties.GetMusicPropertiesAsync();
 

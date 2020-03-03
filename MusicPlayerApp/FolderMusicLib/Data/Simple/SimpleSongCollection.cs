@@ -19,7 +19,7 @@ namespace MusicPlayer.Data.Simple
         public event EventHandler<SongCollectionChangedEventArgs> Changed;
         public event EventHandler<ShuffleChangedEventArgs> ShuffleChanged;
 
-        public int Count { get { return list.Count; } }
+        public int Count => list.Count;
 
         public IPlaylist Parent { get; set; }
 

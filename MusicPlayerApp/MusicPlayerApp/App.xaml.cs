@@ -54,7 +54,7 @@ namespace FolderMusic
             MobileDebug.Service.WriteEvent("UnhandledException", e.Exception, e.Exception.StackTrace);
         }
 
-        protected async override void OnLaunched(LaunchActivatedEventArgs e)
+        protected override async void OnLaunched(LaunchActivatedEventArgs e)
         {
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)

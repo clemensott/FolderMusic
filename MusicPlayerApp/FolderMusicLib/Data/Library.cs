@@ -28,7 +28,7 @@ namespace MusicPlayer.Data
         public event EventHandler SettingsChanged;
         public event EventHandler Loaded;
 
-        public IPlaylist this[int index] { get { return Playlists.ElementAtOrDefault(index); } }
+        public IPlaylist this[int index] => Playlists.ElementAtOrDefault(index);
 
         public bool IsForeground { get; private set; }
 

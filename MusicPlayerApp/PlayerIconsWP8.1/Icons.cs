@@ -45,23 +45,23 @@ namespace PlayerIcons
         private BitmapImage shuffleComplete, shuffleOff, shuffleOneTime, shufflePath;
         private BitmapImage detail;
 
-        public BitmapImage Play { get { return Get(ref play, "PlayButton"); } }
+        public BitmapImage Play => Get(ref play, "PlayButton");
 
-        public BitmapImage LoopCurrent { get { return Get(ref loopCurrent, "LoopCurrent"); } }
+        public BitmapImage LoopCurrent => Get(ref loopCurrent, "LoopCurrent");
 
-        public BitmapImage LoopOff { get { return Get(ref loopOff, "LoopOff"); } }
+        public BitmapImage LoopOff => Get(ref loopOff, "LoopOff");
 
-        public BitmapImage LoopAll { get { return Get(ref loopOn, "LoopAll"); } }
+        public BitmapImage LoopAll => Get(ref loopOn, "LoopAll");
 
-        public BitmapImage ShuffleComplete { get { return Get(ref shuffleComplete, "ShuffleComplete"); } }
+        public BitmapImage ShuffleComplete => Get(ref shuffleComplete, "ShuffleComplete");
 
-        public BitmapImage ShuffleOff { get { return Get(ref shuffleOff, "ShuffleOff"); } }
+        public BitmapImage ShuffleOff => Get(ref shuffleOff, "ShuffleOff");
 
-        public BitmapImage ShuffleOneTime { get { return Get(ref shuffleOneTime, "ShuffleOneTime"); } }
+        public BitmapImage ShuffleOneTime => Get(ref shuffleOneTime, "ShuffleOneTime");
 
-        public BitmapImage ShufflePath { get { return Get(ref shufflePath, "ShufflePath"); } }
+        public BitmapImage ShufflePath => Get(ref shufflePath, "ShufflePath");
 
-        public BitmapImage Detail { get { return Get(ref detail, "DetailButton"); } }
+        public BitmapImage Detail => Get(ref detail, "DetailButton");
 
         private BitmapImage Get(ref BitmapImage image, string part)
         {

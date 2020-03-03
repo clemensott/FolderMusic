@@ -12,7 +12,7 @@ namespace MusicPlayer.Data.Simple
     {
         public event EventHandler<ShuffleCollectionChangedEventArgs> Changed;
 
-        public int Count { get { return Parent.Count; } }
+        public int Count => Parent.Count;
 
         public ISongCollection Parent { get; private set; }
 
