@@ -20,24 +20,30 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Slider Name="sld" Height="60" VerticalAlignment="Top" Minimum="0" 
-                Maximum="1" SnapsTo="StepValues" StepFrequency="0.001" 
+        <TextBlock Grid.Row="0" Name="tblBegin" VerticalAlignment="Top" 
+                   HorizontalAlignment="Left" FontSize="20" Visibility="Collapsed"/>
+        <TextBlock Grid.Row="0" Name="tblEnd" VerticalAlignment="Top"
+                   HorizontalAlignment="Right" FontSize="20" Visibility="Collapsed"/>
+
+        <Slider Grid.Row="1" Name="sld" Margin="0,-15,0,-20" VerticalAlignment="Bottom"
+                Minimum="0" Maximum="1" SnapsTo="StepValues" StepFrequency="0.001" 
                 Visibility="{Binding ElementName=control,Path=IsIndeterminate,
                   Converter={StaticResource toHideConverter}}"
                 Value="{Binding ElementName=control,Path=ViewPositionRatio,Mode=TwoWay}"
                 PointerEntered="sld_PointerEntered" Holding="sld_Holding"/>
 
-        <ProgressBar IsIndeterminate="True" Height="60" VerticalAlignment="Top"
+        <ProgressBar Grid.Row="1" IsIndeterminate="True" VerticalAlignment="Top"
                      Visibility="{Binding ElementName=control,Path=IsIndeterminate,
                        Converter={StaticResource toShowConverter}}"/>
 
-        <TextBlock Name="tblPosition" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Left" FontSize="20"
+        <TextBlock Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" FontSize="20"
                    Text="{Binding ElementName=control,Path=ViewPosition,Converter={StaticResource timeCon}}"/>
-        <TextBlock Name="tblDuration" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="20"
+        <TextBlock Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="20"
                    Text="{Binding ElementName=control,Path=ViewDuration,Converter={StaticResource timeCon}}"/>
     </Grid>
 </UserControl>

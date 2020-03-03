@@ -18,6 +18,8 @@ namespace BackgroundTask
         private bool playNext = true, mediaEndedHappened, isUpdatingSongPosition;
         private int failedCount, setSongCount;
         private Song openSong;
+        private DateTime setPositionTime;
+        private TimeSpan setPositionPosition;
         private readonly ILibrary library;
         private readonly LibrarySubscriptionsHandler lsh;
         private readonly Timer timer;
@@ -61,26 +63,31 @@ namespace BackgroundTask
 
                 if (duration > TimeSpan.Zero && position >= duration)
                 {
-                    MobileDebug.Service.WriteEventPair("SetNextSongIfMediaEndedNotHappens1", "Pos: ", position, "Dur: ", duration,
-                        "Player: ", BackgroundMediaPlayer.Current.CurrentState, "Lib: ", library.PlayerState, "IsPlaying: ", library.IsPlaying, CurrentSong);
+                    MobileDebug.Service.WriteEventPair("SetNextSongIfMediaEndedNotHappens1", "Pos", position,
+                        "Dur", duration, "Player", BackgroundMediaPlayer.Current.CurrentState,
+                        "Lib", library.PlayerState, "IsPlaying", library.IsPlaying,
+                        "CurrentSong", CurrentSong);
                     await Task.Delay(5000);
-                    MobileDebug.Service.WriteEventPair("SetNextSongIfMediaEndedNotHappens2", "Pos: ", position, "Dur: ", duration,
-                        "Player: ", BackgroundMediaPlayer.Current.CurrentState, "Lib: ", library.PlayerState, "IsPlaying: ", library.IsPlaying, CurrentSong);
+                    MobileDebug.Service.WriteEventPair("SetNextSongIfMediaEndedNotHappens2", "Pos", position,
+                        "Dur", duration, "Player", BackgroundMediaPlayer.Current.CurrentState,
+                        "Lib", library.PlayerState, "IsPlaying", library.IsPlaying,
+                        "CurrentSong", CurrentSong);
 
                     if (mediaEndedHappened) break;
 
-                    MobileDebug.Service.WriteEventPair("SetNextSongIfMediaEndedNotHappens3");
+                    MobileDebug.Service.WriteEvent("SetNextSongIfMediaEndedNotHappens3");
                     Next(true);
                 }
 
                 await Task.Delay(1000);
             }
 
-            MobileDebug.Service.WriteEventPair("SetNextSongIfMediaEndedNotHappens4", "Hash: ", GetHashCode(), "Player: ",
-                BackgroundMediaPlayer.Current.CurrentState, "Lib: ", library.PlayerState, "IsPlaying: ", library.IsPlaying, CurrentSong);
+            MobileDebug.Service.WriteEventPair("SetNextSongIfMediaEndedNotHappens4", "Hash", GetHashCode(),
+                "Player", BackgroundMediaPlayer.Current.CurrentState, "Lib", library.PlayerState,
+                "IsPlaying", library.IsPlaying, "CurrentSong", CurrentSong);
         }
 
-        public void Play()
+        public async Task Play()
         {
             timer.Change(0, updateSongPositionMillis);
 
@@ -95,14 +102,14 @@ namespace BackgroundTask
             else if (BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Closed ||
                  BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Stopped)
             {
-                MobileDebug.Service.WriteEventPair("SetOnPlayClosedAndStopped", "SetCount: ", setSongCount,
-                    "CurrentSong: ", library.CurrentPlaylist?.CurrentSong, "OpenSong: ", openSong);
-                SetCurrent();
+                MobileDebug.Service.WriteEventPair("SetOnPlayClosedAndStopped", "SetCount", setSongCount,
+                    "CurrentSong", library.CurrentPlaylist?.CurrentSong, "OpenSong", openSong);
+                await SetCurrent();
             }
             else if (BackgroundMediaPlayer.Current.NaturalDuration.Ticks == 0)
             {
                 MobileDebug.Service.WriteEvent("SetOnPlayDurationZero", library.CurrentPlaylist?.CurrentSong);
-                SetCurrent();
+                await SetCurrent();
             }
             else if (BackgroundMediaPlayer.Current.CurrentState != MediaPlayerState.Playing)
             {
@@ -127,7 +134,7 @@ namespace BackgroundTask
             BackgroundMediaPlayer.Current.Volume = 0;
             BackgroundMediaPlayer.Current.Play();
 
-            double step = 0.1;
+            const double step = 0.1;
 
             for (double i = step; i < 1; i += step)
             {
@@ -146,12 +153,11 @@ namespace BackgroundTask
 
             try
             {
-                if (library.CurrentPlaylist != null)
-                {
-                    TimeSpan position = BackgroundMediaPlayer.Current.Position;
-                    TimeSpan duration = BackgroundMediaPlayer.Current.NaturalDuration;
-                    library.CurrentPlaylist.CurrentSongPosition = position.TotalMilliseconds / duration.TotalMilliseconds;
-                }
+                if (library.CurrentPlaylist == null) return;
+
+                TimeSpan position = BackgroundMediaPlayer.Current.Position;
+                TimeSpan duration = BackgroundMediaPlayer.Current.NaturalDuration;
+                library.CurrentPlaylist.CurrentSongPosition = position.TotalMilliseconds / duration.TotalMilliseconds;
             }
             catch (Exception e)
             {
@@ -187,11 +193,11 @@ namespace BackgroundTask
             CurrentPlaylist.ChangeCurrentSong(-1);
         }
 
-        public async void SetCurrent()
+        public async Task SetCurrent()
         {
-            MobileDebug.Service.WriteEventPair("TrySet", "OpenPath: ", openSong?.Path,
-                "CurSongEmpty: ", CurrentSong?.IsEmpty, "CurSongFailed: ", CurrentSong?.Failed,
-                "IsOpen: ", (CurrentSong == openSong), "CurrentSong: ", CurrentSong);
+            MobileDebug.Service.WriteEventPair("TrySet", "OpenPath", openSong?.Path,
+                "CurSongEmpty", CurrentSong?.IsEmpty, "CurSongFailed", CurrentSong?.Failed,
+                "IsOpen", (CurrentSong == openSong), "CurrentSong", CurrentSong);
 
             if (CurrentSong == null || CurrentSong.IsEmpty || CurrentSong.Failed) return;
 
@@ -217,9 +223,9 @@ namespace BackgroundTask
 
         public void MediaOpened(MediaPlayer sender, object args)
         {
-            MobileDebug.Service.WriteEventPair("Open", "SetSongCount: ", setSongCount, "Sender.State: ", sender.CurrentState,
-                "IsPlaying: ", library.IsPlaying, "Pos: ", CurrentPlaylist.GetCurrentSongPosition().TotalSeconds,
-                "CurrentSong: ", CurrentSong);
+            MobileDebug.Service.WriteEventPair("Open", "SetSongCount", setSongCount, "Sender.State", sender.CurrentState,
+                "IsPlaying", library.IsPlaying, "Pos", CurrentPlaylist.GetCurrentSongPosition().TotalSeconds,
+                "CurrentSong", CurrentSong);
 
             playNext = true;
             failedCount = 0;
@@ -230,7 +236,12 @@ namespace BackgroundTask
                 CurrentSong.DurationMilliseconds = sender.NaturalDuration.TotalMilliseconds;
             }
 
-            sender.Position = CurrentPlaylist.GetCurrentSongPosition();
+            setPositionTime = DateTime.Now;
+            setPositionPosition = CurrentPlaylist.GetCurrentSongPosition();
+            if (setPositionPosition > TimeSpan.Zero) sender.Position = setPositionPosition;
+
+            MobileDebug.Service.WriteEventPair("OpenSetPosition",
+                "set position", setPositionPosition, "get position", sender.Position);
 
             if (library.IsPlaying)
             {
@@ -244,7 +255,11 @@ namespace BackgroundTask
 
         private void OnCurrentSongPositionChanged(object sender, SubscriptionsEventArgs<IPlaylist, CurrentSongPositionChangedEventArgs> e)
         {
-            if (!isUpdatingSongPosition) BackgroundMediaPlayer.Current.Position = e.Source.GetCurrentSongPosition();
+            if (isUpdatingSongPosition) return;
+
+
+            setPositionTime = DateTime.Now;
+            setPositionPosition = BackgroundMediaPlayer.Current.Position = e.Source.GetCurrentSongPosition();
         }
 
         private void OnCurrentSongArtistOrTitleChanged(object sender, EventArgs args)
@@ -265,7 +280,7 @@ namespace BackgroundTask
             }
         }
 
-        public async void MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
+        public async Task MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
         {
             MobileDebug.Service.WriteEvent("Fail", args.ExtendedErrorCode, args.Error, args.ErrorMessage, CurrentSong);
             await Task.Delay(100);
@@ -277,7 +292,7 @@ namespace BackgroundTask
             {
                 await Task.Delay(2000);
 
-                SetCurrent();
+                await SetCurrent();
                 return;
             }
 
@@ -295,15 +310,31 @@ namespace BackgroundTask
             library.IsPlaying = false;
         }
 
-        public void MediaEnded(MediaPlayer sender, object args)
+        public async Task MediaEnded(MediaPlayer sender, object args)
         {
             mediaEndedHappened = true;
             smtc.PlaybackStatus = MediaPlaybackStatus.Playing;
 
-            MobileDebug.Service.WriteEventPair("MusicEnded", "SMTC-State: ", smtc.PlaybackStatus,
-                "CurrentSong: ", CurrentSong);
+            TimeSpan durationLeft = BackgroundMediaPlayer.Current.NaturalDuration - setPositionPosition;
+            bool passedEnoughTime = (DateTime.Now - setPositionTime).TotalDays > durationLeft.TotalDays / 2;
 
-            Next(true);
+            MobileDebug.Service.WriteEventPair("MusicEnded", "SMTC-State", smtc.PlaybackStatus,
+                "CurrentSong", CurrentSong, "setPositionTime", setPositionTime,
+                "setPositionPosition", setPositionPosition, "passedTime", passedEnoughTime);
+
+            if (DateTime.Now - setPositionTime < TimeSpan.FromSeconds(2))
+            {
+                MobileDebug.Service.WriteEvent("Skipped Song bug", "CurrentSong", CurrentSong,
+                    "setPositionTime", setPositionTime, "setPositionPosition", setPositionPosition,
+                    "passedTime", passedEnoughTime);
+            }
+
+            if (passedEnoughTime) Next(true);
+            else
+            {
+                BackgroundMediaPlayer.Current.Position = TimeSpan.Zero;
+                BackgroundMediaPlayer.Current.Play();
+            }
         }
 
         private void Timer_Tick(object state)

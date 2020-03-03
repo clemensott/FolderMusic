@@ -94,8 +94,8 @@ namespace MusicPlayer
             }
             catch (Exception e)
             {
-                MobileDebug.Service.WriteEventPair("IOCopyGetSrcFail", e, "Src: ", srcFileName,
-                    "DestFolder: ", destFolder.Path, "DestFile: ", destFileName);
+                MobileDebug.Service.WriteEventPair("IOCopyGetSrcFail", "Src", srcFileName,
+                    "DestFolder", destFolder.Path, "DestFile", destFileName, e);
                 return;
             }
 
@@ -107,15 +107,15 @@ namespace MusicPlayer
             }
             catch (FileNotFoundException e)
             {
-                MobileDebug.Service.WriteEventPair("IOCopyFileNotFound", e, "Src: ", srcFileName,
-                    "DestFolder: ", destFolder.Path, "DestFile: ", destFileName);
+                MobileDebug.Service.WriteEventPair("IOCopyFileNotFound", "Src", srcFileName,
+                    "DestFolder", destFolder.Path, "DestFile", destFileName, e);
 
                 await srcFile.CopyAsync(destFolder, destFileName);
             }
             catch (Exception e)
             {
-                MobileDebug.Service.WriteEventPair("IOCopyFail", e, "Src: ", srcFileName,
-                    "DestFolder: ", destFolder.Path, "DestFile: ", destFileName);
+                MobileDebug.Service.WriteEventPair("IOCopyFail", "Src", srcFileName,
+                    "DestFolder", destFolder.Path, "DestFile", destFileName, e);
             }
         }
 

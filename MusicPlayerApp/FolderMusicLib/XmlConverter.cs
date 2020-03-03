@@ -55,8 +55,8 @@ namespace MusicPlayer
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Service.WriteEventPair("XmlReadListFail", e, "Type: ", typeof(T).FullName,
-                        "Name: ", reader.Name, "Node: ", reader.NodeType, "UntilName: ", elementName);
+                    MobileDebug.Service.WriteEventPair("XmlReadListFail", "Type", typeof(T).FullName,
+                        "Name", reader.Name, "Node", reader.NodeType, "UntilName", elementName, e);
 
                     yield break;
                 }

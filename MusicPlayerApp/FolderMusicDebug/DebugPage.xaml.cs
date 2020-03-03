@@ -16,9 +16,8 @@ namespace MobileDebug
     public sealed partial class DebugPage : Page
     {
         private static readonly TimeSpan minHoldingTimeSpan = TimeSpan.FromMilliseconds(300);
-
-        private bool isHolding;
-        private ViewModelDebug viewModel;
+        
+        private readonly ViewModelDebug viewModel;
 
         public DebugPage()
         {

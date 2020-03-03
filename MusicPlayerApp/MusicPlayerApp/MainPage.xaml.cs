@@ -88,7 +88,7 @@ namespace FolderMusic
             if (!shuffleImageEntered) return;
 
             shuffleImageEntered = false;
-            ShuffleImageTap.Begin();
+            sbdShuffleImageTap.Begin();
         }
 
         private void Previous_Click(object sender, RoutedEventArgs e)
@@ -121,7 +121,7 @@ namespace FolderMusic
             if (!loopImageEntered) return;
 
             loopImageEntered = false;
-            LoopImageTap.Begin();
+            sbdLoopImageTap.Begin();
         }
 
         private async void PlaylistsView_UpdateClick(object sender, PlaylistActionEventArgs e)

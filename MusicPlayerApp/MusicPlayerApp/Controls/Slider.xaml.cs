@@ -2,6 +2,7 @@
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
+using FolderMusic.Converters;
 
 namespace FolderMusic
 {
@@ -157,6 +158,8 @@ namespace FolderMusic
             sld.Minimum = 0;
             sld.Maximum = 1;
             ViewDuration = Duration;
+
+            tblBegin.Visibility = tblEnd.Visibility = Visibility.Collapsed;
         }
 
         private void sld_Holding(object sender, HoldingRoutedEventArgs e)
@@ -164,7 +167,16 @@ namespace FolderMusic
             double value = sld.Value;
             sld.Minimum = value - zoomWidth * value;
             sld.Maximum = value + (1 - value) * zoomWidth;
-            ViewDuration = Duration.Multiply(sld.Maximum);
+
+            double min = sld.Minimum;
+            double max = sld.Maximum;
+            TimeSpan duration = Duration;
+            TimeSpan beginTime = duration.Multiply(min);
+            TimeSpan endTime = duration.Multiply(max);
+
+            tblBegin.Text = TimeSpanConverter.Convert(beginTime);
+            tblEnd.Text = TimeSpanConverter.Convert(endTime);
+            tblBegin.Visibility = tblEnd.Visibility = Visibility.Visible;
         }
     }
 }

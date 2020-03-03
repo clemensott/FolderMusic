@@ -1,10 +1,11 @@
-﻿using Windows.Media.Playback;
+﻿using System.Threading.Tasks;
+using Windows.Media.Playback;
 
 namespace BackgroundTask
 {
     interface IBackgroundPlayer
     {
-        void Play();
+        Task Play();
 
         void Pause();
 
@@ -12,12 +13,12 @@ namespace BackgroundTask
 
         void Previous();
 
-        void SetCurrent();
+        Task SetCurrent();
 
         void MediaOpened(MediaPlayer sender, object args);
 
-        void MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args);
+        Task MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args);
 
-        void MediaEnded(MediaPlayer sender, object args);
+        Task MediaEnded(MediaPlayer sender, object args);
     }
 }

@@ -79,8 +79,8 @@ namespace FolderMusic
             }
             catch (System.Exception exc)
             {
-                MobileDebug.Service.WriteEventPair("OnSelectedSongChangedManuallyFail", exc,
-                    "CurrentPlaylist: ", viewModel?.Parent?.Parent?.CurrentPlaylist);
+                MobileDebug.Service.WriteEventPair("OnSelectedSongChangedManuallyFail",
+                    "CurrentPlaylist", viewModel?.Parent?.Parent?.CurrentPlaylist, exc);
             }
 
             Frame.GoBack();

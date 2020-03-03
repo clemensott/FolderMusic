@@ -21,12 +21,11 @@ namespace MobileDebug
 
         private static readonly StorageFolder debugFolder = KnownFolders.VideosLibrary;
         private const int maxDebugDataStringLength = 100000, minDebugDataStringLength = 50000;
-        private static readonly object lockObj = new object();
 
         private static int debugDataStringLength = -1;
         private static StorageFile foreDebugDataFile, backDebugDataFile;
-        private static Queue<Event> eventsBuffer = new Queue<Event>();
-        private static Task writeTask = Task.Run((Action)Append);
+        private static readonly Queue<Event> eventsBuffer = new Queue<Event>();
+        private static Task writeTask = Task.Run(Append);
 
         public static string Id { get; private set; } = "None";
 
@@ -63,38 +62,178 @@ namespace MobileDebug
 
         public static void WriteEvent(string name, Exception exc, params object[] data)
         {
-            WriteEvent(name, data, GetMessages(exc));
+            WriteEvent(name, data, exc.ToString());
         }
 
-        public static void WriteEventPair(string name, IEnumerable data)
+        public static void WriteEventPair(string name, string key0, object value0, Exception exception = null)
+        {
+            WriteEventPair(name, new[] { GetPair(key0, value0) }, exception);
+        }
+
+        public static void WriteEventPair(string name, string key0, object value0,
+            string key1, object value1, Exception exception = null)
+        {
+            WriteEventPair(name, new[]
+            {
+                GetPair(key0, value0),
+                GetPair(key1, value1),
+            }, exception);
+        }
+
+        public static void WriteEventPair(string name, string key0, object value0,
+            string key1, object value1, string key2, object value2, Exception exception = null)
+        {
+            WriteEventPair(name, new[]
+            {
+                GetPair(key0, value0),
+                GetPair(key1, value1),
+                GetPair(key2, value2),
+            }, exception);
+        }
+
+        public static void WriteEventPair(string name, string key0, object value0, string key1, object value1,
+            string key2, object value2, string key3, object value3, Exception exception = null)
+        {
+            WriteEventPair(name, new[]
+            {
+                GetPair(key0, value0),
+                GetPair(key1, value1),
+                GetPair(key2, value2),
+                GetPair(key3, value3),
+            }, exception);
+        }
+
+        public static void WriteEventPair(string name, string key0, object value0,
+            string key1, object value1, string key2, object value2, string key3,
+            object value3, string key4, object value4, Exception exception = null)
+        {
+            WriteEventPair(name, new[]
+            {
+                GetPair(key0, value0),
+                GetPair(key1, value1),
+                GetPair(key2, value2),
+                GetPair(key3, value3),
+                GetPair(key4, value4),
+            }, exception);
+        }
+
+        public static void WriteEventPair(string name, string key0, object value0, string key1,
+            object value1, string key2, object value2, string key3, object value3, string key4,
+            object value4, string key5, object value5, Exception exception = null)
+        {
+            WriteEventPair(name, new[]
+            {
+                GetPair(key0, value0),
+                GetPair(key1, value1),
+                GetPair(key2, value2),
+                GetPair(key3, value3),
+                GetPair(key4, value4),
+                GetPair(key5, value5),
+            }, exception);
+        }
+
+        public static void WriteEventPair(string name, string key0, object value0, string key1,
+            object value1, string key2, object value2, string key3, object value3, string key4,
+            object value4, string key5, object value5, string key6, object value6, Exception exception = null)
+        {
+            WriteEventPair(name, new[]
+            {
+                GetPair(key0, value0),
+                GetPair(key1, value1),
+                GetPair(key2, value2),
+                GetPair(key3, value3),
+                GetPair(key4, value4),
+                GetPair(key5, value5),
+                GetPair(key6, value6),
+            }, exception);
+        }
+
+        public static void WriteEventPair(string name, string key0, object value0, string key1, object value1,
+            string key2, object value2, string key3, object value3, string key4, object value4, string key5,
+            object value5, string key6, object value6, string key7, object value7, Exception exception = null)
+        {
+            WriteEventPair(name, new[]
+            {
+                GetPair(key0, value0),
+                GetPair(key1, value1),
+                GetPair(key2, value2),
+                GetPair(key3, value3),
+                GetPair(key4, value4),
+                GetPair(key5, value5),
+                GetPair(key6, value6),
+                GetPair(key7, value7),
+            }, exception);
+        }
+
+        public static void WriteEventPair(string name, string key0, object value0, string key1,
+            object value1, string key2, object value2, string key3, object value3, string key4,
+            object value4, string key5, object value5, string key6, object value6, string key7,
+            object value7, string key8, object value8, Exception exception = null)
+        {
+            WriteEventPair(name, new[]
+            {
+                GetPair(key0, value0),
+                GetPair(key1, value1),
+                GetPair(key2, value2),
+                GetPair(key3, value3),
+                GetPair(key4, value4),
+                GetPair(key5, value5),
+                GetPair(key6, value6),
+                GetPair(key7, value7),
+                GetPair(key8, value8),
+            }, exception);
+        }
+
+        public static void WriteEventPair(string name, string key0, object value0, string key1, object value1,
+            string key2, object value2, string key3, object value3, string key4, object value4, string key5,
+            object value5, string key6, object value6, string key7, object value7, string key8,
+            object value8, string key9, object value9, Exception exception = null)
+        {
+            WriteEventPair(name, new[]
+            {
+                GetPair(key0, value0),
+                GetPair(key1, value1),
+                GetPair(key2, value2),
+                GetPair(key3, value3),
+                GetPair(key4, value4),
+                GetPair(key5, value5),
+                GetPair(key6, value6),
+                GetPair(key7, value7),
+                GetPair(key8, value8),
+                GetPair(key9, value9),
+            }, exception);
+        }
+
+        public static void WriteEventPair(string name, string key0, object value0, string key1, object value1,
+            string key2, object value2, string key3, object value3, string key4, object value4, string key5,
+            object value5, string key6, object value6, string key7, object value7, string key8,
+            object value8, string key9, object value9, Exception exception = null, params object[] data)
+        {
+            WriteEventPair(name, new[]
+            {
+                GetPair(key0, value1),
+                GetPair(key1, value1),
+                GetPair(key2, value2),
+                GetPair(key3, value3),
+                GetPair(key4, value4),
+                GetPair(key5, value5),
+                GetPair(key6, value6),
+                GetPair(key7, value7),
+                GetPair(key8, value8),
+                GetPair(key9, value9),
+            }.Concat(ToEnumerable(data)), exception);
+        }
+
+        private static string GetPair(string key, object value)
+        {
+            return string.Format("{0}: {1}", key, ToStringAndTrim(value));
+        }
+
+        public static void WriteEventPair(string name, IEnumerable<string> data, Exception exception)
         {
             //System.Diagnostics.Debug.WriteLine(name);
-            WriteEvent(name, ConcatPair(ToEnumerable(data)));
-        }
-
-        public static void WriteEventPair(string name, params object[] data)
-        {
-            WriteEventPair(name, data.AsEnumerable());
-        }
-
-        public static void WriteEventPair(string name, Exception exc, params object[] data)
-        {
-            WriteEvent(name, ConcatPair(ToEnumerable(data)), GetMessages(exc));
-        }
-
-        private static IEnumerable<string> GetMessages(Exception e)
-        {
-            string stackTrace = e.StackTrace;
-
-            while (e != null)
-            {
-                yield return "Typ: " + e.GetType().Name;
-                yield return "Mes: " + e.Message;
-
-                e = e.InnerException;
-            }
-
-            yield return "Stack: " + stackTrace;
+            if (exception != null) data = data.Concat(ToEnumerable(exception.ToString()));
+            WriteEvent(name, data);
         }
 
         private static IEnumerable<string> ToEnumerable(string text)
@@ -106,7 +245,7 @@ namespace MobileDebug
         {
             foreach (object obj in data)
             {
-                if (!(obj is IEnumerable) || obj is string) yield return ToString(obj);
+                if (!(obj is IEnumerable) || obj is string) yield return ToStringAndTrim(obj);
                 else
                 {
                     foreach (string text in ToEnumerable((IEnumerable)obj)) yield return text;
@@ -114,29 +253,16 @@ namespace MobileDebug
             }
         }
 
-        private static IEnumerable<string> ConcatPair(IEnumerable<string> data)
-        {
-            bool isFirst = true;
-            string last = string.Empty;
-
-            foreach (string text in data)
-            {
-                if (isFirst) last = text;
-                else yield return last + text;
-
-                isFirst = !isFirst;
-            }
-
-            if (!isFirst) yield return last;
-        }
-
-        private static string ToString(object obj)
+        private static string ToStringAndTrim(object obj)
         {
             if (ReferenceEquals(obj, null)) return NullReferenceValue;
-            long value;
             string text = obj.ToString();
 
-            if (text.Length > maxLengthOfOneData) return text.Remove(maxLengthOfOneData) + "[...]";
+            if (text.Length > maxLengthOfOneData)
+            {
+                int restLength = text.Length - maxLengthOfOneData;
+                return string.Format("{0} [{1}]", text.Remove(maxLengthOfOneData), restLength);
+            }
 
             return text;
         }
@@ -151,7 +277,7 @@ namespace MobileDebug
             }
         }
 
-        private async static void Append()
+        private static async Task Append()
         {
             while (true)
             {
@@ -238,7 +364,7 @@ namespace MobileDebug
             }
         }
 
-        internal static string GetUntil(ref StringBuilder text, char seperator)
+        internal static string GetUntil(ref StringBuilder text, char separator)
         {
             int length;
             StringBuilder part = new StringBuilder(text.Length);
@@ -247,7 +373,7 @@ namespace MobileDebug
             {
                 char c = text[length];
 
-                if (text[length] == seperator)
+                if (text[length] == separator)
                 {
                     length++;
 

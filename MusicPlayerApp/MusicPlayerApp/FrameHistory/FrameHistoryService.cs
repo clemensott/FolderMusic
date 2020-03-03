@@ -20,7 +20,7 @@ namespace FolderMusic.FrameHistory
         public FrameHistoryService(IEnumerable<HistoricFrame> history, Frame rootFrame, ILibrary library)
         {
             restoreHistory = new Queue<HistoricFrame>(history);
-            MobileDebug.Service.WriteEventPair("FrameHistoricSerivce Constructer", "RestoreFrames: ", restoreHistory.Count);
+            MobileDebug.Service.WriteEventPair("FrameHistoricSerivce Constructer", "RestoreFrames", restoreHistory.Count);
 
             this.history = new Stack<HistoricFrame>();
             this.rootFrame = rootFrame;
@@ -32,8 +32,8 @@ namespace FolderMusic.FrameHistory
 
         private void RootFrame_Navigating(object sender, NavigatingCancelEventArgs e)
         {
-            MobileDebug.Service.WriteEventPair("Navigating1", "Page: ", e.SourcePageType, "Mode: ", e.NavigationMode,
-                "Parameter: ", e.Parameter ?? "null", "TransInfo: ", e.NavigationTransitionInfo);
+            MobileDebug.Service.WriteEventPair("Navigating1", "Page", e.SourcePageType, "Mode", e.NavigationMode,
+                "Parameter", e.Parameter ?? "null", "TransInfo", e.NavigationTransitionInfo);
 
             HistoricFrameHandler handler;
             HistoricParameter parameter;
@@ -62,7 +62,7 @@ namespace FolderMusic.FrameHistory
                     history.Pop();
                     break;
             }
-MobileDebug.Service.WriteEventPair("Navigating2");
+            MobileDebug.Service.WriteEvent("Navigating2");
         }
 
         private void RootFrame_Navigated(object sender, NavigationEventArgs e)
@@ -106,7 +106,7 @@ MobileDebug.Service.WriteEventPair("Navigating2");
 
             try
             {
-                MobileDebug.Service.WriteEventPair("Restore2", "Page: ", frame.PageTypeName, "Parameter: ", parameter?.Value);
+                MobileDebug.Service.WriteEventPair("Restore2", "Page", frame.PageTypeName, "Parameter", parameter?.Value);
                 //rootFrame.Navigate(typeof(MobileDebug.DebugPage), null);
                 return rootFrame.Navigate(frame.Page, parameter.Value);
             }

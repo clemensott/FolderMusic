@@ -19,9 +19,9 @@ namespace BackgroundTask
         private bool isOn, isDisposed;
         private int periodSpanMillis;
         private string ringFilePath;
-        private Timer timer;
-        private BackgroundAudioTask task;
-        private ILibrary library;
+        private readonly Timer timer;
+        private readonly BackgroundAudioTask task;
+        private readonly ILibrary library;
 
         public RingerState State { get; private set; }
 
@@ -34,7 +34,7 @@ namespace BackgroundTask
             ReloadTimes();
         }
 
-        public void Play()
+        public async Task Play()
         {
             library.IsPlaying = true;
         }
@@ -54,7 +54,7 @@ namespace BackgroundTask
 
         }
 
-        public void SetCurrent()
+        public async Task SetCurrent()
         {
             if (!library.IsPlaying || State == RingerState.Ringing) return;
             task.PlayerType = BackgroundPlayerType.Ringer;
@@ -64,7 +64,7 @@ namespace BackgroundTask
                 MobileDebug.Service.WriteEvent("RingFileGet");
 
                 Uri uri = new Uri("ms-appx:///Assets/Glockenschlag.mp3");
-                StorageFile file = GetRingerFile(uri);
+                StorageFile file = await GetRingerFile(uri);
 
                 try
                 {
@@ -78,7 +78,7 @@ namespace BackgroundTask
                 {
                     MobileDebug.Service.WriteEvent("RingFileFail1", e);
                     task.PlayerType = BackgroundPlayerType.Music;
-                    task.BackgroundPlayer.SetCurrent();
+                    await task.BackgroundPlayer.SetCurrent();
                 }
             }
             catch (Exception e)
@@ -87,12 +87,9 @@ namespace BackgroundTask
             }
         }
 
-        private StorageFile GetRingerFile(Uri uri)
+        private async Task<StorageFile> GetRingerFile(Uri uri)
         {
-            Task<StorageFile> task = StorageFile.GetFileFromApplicationUriAsync(uri).AsTask();
-            task.Wait();
-
-            return task.Result;
+            return await StorageFile.GetFileFromApplicationUriAsync(uri);
         }
 
         public void MediaOpened(MediaPlayer sender, object args)
@@ -111,23 +108,23 @@ namespace BackgroundTask
             //while (sender.CurrentState != MediaPlayerState.Playing);
         }
 
-        public void MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
+        public async Task MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
         {
             State = RingerState.Idle;
 
             task.PlayerType = BackgroundPlayerType.Music;
-            task.BackgroundPlayer.SetCurrent();
+            await task.BackgroundPlayer.SetCurrent();
         }
 
-        public void MediaEnded(MediaPlayer sender, object args)
+        public async Task MediaEnded(MediaPlayer sender, object args)
         {
-            MobileDebug.Service.WriteEventPair("RingerEnded", "RingerState: ", State);
+            MobileDebug.Service.WriteEventPair("RingerEnded", "RingerState", State);
 
-            if (State == RingerState.Waiting) SetCurrent();
+            if (State == RingerState.Waiting) await SetCurrent();
             else if (State == RingerState.Ringing)
             {
                 task.PlayerType = BackgroundPlayerType.Music;
-                task.BackgroundPlayer.SetCurrent();
+                await task.BackgroundPlayer.SetCurrent();
             }
         }
 
@@ -186,7 +183,7 @@ namespace BackgroundTask
 
             if (millisUntilCurrentSongEnds < millisAroundRing) return;
 
-            SetCurrent();
+            await SetCurrent();
         }
 
         public void SetTimesIfIsDisposed()

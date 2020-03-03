@@ -51,7 +51,8 @@
             </HubSection>
         </Hub>
 
-        <Grid Grid.Row="1" Tapped="CurrentSong_Tapped" HorizontalAlignment="Stretch" DataContext="{Binding CurrentPlaylist}">
+        <Grid Grid.Row="1" HorizontalAlignment="Stretch" DataContext="{Binding CurrentPlaylist}"
+              Tapped="CurrentSong_Tapped">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -66,7 +67,7 @@
                        Foreground="{ThemeResource ApplicationPointerOverForegroundThemeBrush}"/>
         </Grid>
 
-        <Grid Grid.Row="2" x:Name="dg">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="4*"/>
@@ -75,16 +76,16 @@
 
             <Grid Grid.Column="0" DataContext="{Binding CurrentPlaylist}">
                 <Grid.Resources>
-                    <Storyboard x:Name="ShuffleImageTap">
+                    <Storyboard x:Name="sbdShuffleImageTap">
                         <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateY)"
-                                                       Storyboard.TargetName="ShuffleImage" AutoReverse="True">
+                                                       Storyboard.TargetName="imgShuffle" AutoReverse="True">
                             <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
                             <EasingDoubleKeyFrame KeyTime="0:0:0.1" Value="-10"/>
                         </DoubleAnimationUsingKeyFrames>
                     </Storyboard>
                 </Grid.Resources>
 
-                <Image Grid.Column="0" x:Name="ShuffleImage" Margin="13"
+                <Image x:Name="imgShuffle" Margin="13,5" VerticalAlignment="Center"
                        Source="{Binding Songs.Shuffle.Type,Converter={StaticResource shuffleConverter}}"
                        Tapped="Shuffle_Tapped" PointerEntered="ShuffleImage_PointerEntered" 
                        PointerExited="ShuffleImage_PointerExited">
@@ -94,7 +95,7 @@
                 </Image>
             </Grid>
 
-            <local:Slider Grid.Column="1" Height="60"
+            <local:Slider Grid.Column="1" VerticalAlignment="Bottom"
                           IsIndeterminate="{Binding PlayerState,Mode=OneWay,Converter={StaticResource playerStateCon}}"
                           PositionRatio="{Binding CurrentPlaylist.CurrentSongPosition,Mode=TwoWay}" 
                           Duration="{Binding CurrentPlaylist.CurrentSong.DurationMilliseconds,
@@ -102,16 +103,16 @@
 
             <Grid Grid.Column="2" DataContext="{Binding CurrentPlaylist}">
                 <Grid.Resources>
-                    <Storyboard x:Name="LoopImageTap">
+                    <Storyboard x:Name="sbdLoopImageTap">
                         <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateY)" 
-                                                       Storyboard.TargetName="LoopImage" AutoReverse="True">
+                                                       Storyboard.TargetName="imgLoop" AutoReverse="True">
                             <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
                             <EasingDoubleKeyFrame KeyTime="0:0:0.1" Value="-10"/>
                         </DoubleAnimationUsingKeyFrames>
                     </Storyboard>
                 </Grid.Resources>
 
-                <Image Grid.Column="2" x:Name="LoopImage" Margin="15"
+                <Image x:Name="imgLoop" Margin="15,5" VerticalAlignment="Center"
                        Source="{Binding Loop,Converter={StaticResource loopConverter}}"
                        Tapped="Loop_Tapped" PointerEntered="LoopImage_PointerEntered" 
                        PointerExited="LoopImage_PointerExited">

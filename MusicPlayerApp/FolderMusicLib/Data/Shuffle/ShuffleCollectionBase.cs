@@ -77,14 +77,10 @@ namespace MusicPlayer.Data.Shuffle
 
         public void Change(IEnumerable<Song> removes, IEnumerable<ChangeCollectionItem<Song>> adds)
         {
-            MobileDebug.Service.WriteEvent("ShuffleCollectionChange1", removes != null, adds != null, list?.Count ?? -1);
             Song[] oldShuffle = this.ToArray();
-            MobileDebug.Service.WriteEvent("ShuffleCollectionChange1.1", oldShuffle.Length);
 
             Song[] removeArray = removes?.ToArray() ?? new Song[0];
-            MobileDebug.Service.WriteEvent("ShuffleCollectionChange1.2");
             ChangeCollectionItem<Song>[] addArray = adds?.ToArray() ?? new ChangeCollectionItem<Song>[0];
-            MobileDebug.Service.WriteEvent("ShuffleCollectionChange2", removeArray.Length, addArray.Length);
 
             List<ChangeCollectionItem<Song>> removeChanges = new List<ChangeCollectionItem<Song>>();
 
