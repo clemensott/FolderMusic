@@ -1,5 +1,4 @@
 ﻿using System;
-using Windows.Foundation;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
 using Windows.UI.Popups;
@@ -37,37 +36,15 @@ namespace FolderMusic
 
             tblPath.Text = song.Path;
 
-            StorageFile file = await StorageFile.GetFileFromPathAsync(song.Path);
-
-            file.Properties.GetMusicPropertiesAsync().Completed = LoadedMusicProperties;
-        }
-
-        private async void LoadedMusicProperties(IAsyncOperation<MusicProperties> asyncInfo, AsyncStatus asyncStatus)
-        {
-            string message;
-            MessageDialog dialog;
-
-            switch (asyncStatus)
+            try
             {
-                case AsyncStatus.Completed:
-                    MusicProperties props = asyncInfo.GetResults();
+                StorageFile file = await StorageFile.GetFileFromPathAsync(song.Path);
 
-                    Utils.DoSafe(() => DataContext = props);
-                    break;
-
-                case AsyncStatus.Error:
-                    message = "Loading Properties failed.\n" + asyncInfo.ErrorCode.Message;
-                    dialog = new MessageDialog(message);
-
-                    await dialog.ShowAsync();
-                    break;
-
-                case AsyncStatus.Canceled:
-                    message = "Loading Properties has been canceled.";
-                    dialog = new MessageDialog(message);
-
-                    await dialog.ShowAsync();
-                    break;
+                DataContext = await file.Properties.GetMusicPropertiesAsync();
+            }
+            catch (Exception exc)
+            {
+                await new MessageDialog(exc.Message, "Load song data error").ShowAsync();
             }
         }
 
