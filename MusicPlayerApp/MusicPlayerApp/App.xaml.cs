@@ -76,16 +76,16 @@ namespace FolderMusic
                 rootFrame.Language = Windows.Globalization.ApplicationLanguages.Languages[0];
 
                 MobileDebug.Service.WriteEventPair("OnLaunched1", "PreviousExecutionState", e.PreviousExecutionState);
-                //if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
+                if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
-                    // TODO: Zustand von zuvor angehaltener Anwendung laden
-                    //IEnumerable<HistoricFrame> frameHistory = await ReadHistoricFrames();
+                    // Zustand von zuvor angehaltener Anwendung laden
+                    IEnumerable<HistoricFrame> frameHistory = await ReadHistoricFrames();
 
-                    //frameHistoryService = new FrameHistoryService(frameHistory, rootFrame, library);
+                    frameHistoryService = new FrameHistoryService(frameHistory, rootFrame, library);
                 }
-                //else
+                else
                 {
-                    //frameHistoryService = new FrameHistoryService(Enumerable.Empty<HistoricFrame>(), rootFrame, library);
+                    frameHistoryService = new FrameHistoryService(Enumerable.Empty<HistoricFrame>(), rootFrame, library);
                 }
 
                 Window.Current.Content = rootFrame;
@@ -105,11 +105,7 @@ namespace FolderMusic
                 rootFrame.ContentTransitions = null;
                 rootFrame.Navigated += this.RootFrame_FirstNavigated;
 
-                //if (!frameHistoryService.Restore() && !rootFrame.Navigate(typeof(MainPage), library))
-                //{
-                //    throw new Exception("Failed to create initial page");
-                //}
-                if (!rootFrame.Navigate(typeof(MainPage), library))
+                if (!frameHistoryService.Restore() && !rootFrame.Navigate(typeof(MainPage), library))
                 {
                     throw new Exception("Failed to create initial page");
                 }
@@ -121,7 +117,6 @@ namespace FolderMusic
 
         private void RootFrame_FirstNavigated(object sender, NavigationEventArgs e)
         {
-            Frame rootFrame = sender as Frame;
             rootFrame.ContentTransitions = this.transitions ?? new TransitionCollection() { new NavigationThemeTransition() };
             rootFrame.Navigated -= this.RootFrame_FirstNavigated;
         }
@@ -130,10 +125,10 @@ namespace FolderMusic
         {
             if (e.WindowActivationState != CoreWindowActivationState.Deactivated) return;
 
-            //await WriteHistoricFrames(frameHistoryService.GetFrames().Reverse().ToArray());
+            await WriteHistoricFrames(frameHistoryService.GetFrames().Reverse().ToArray());
         }
 
-        private async Task<IEnumerable<HistoricFrame>> ReadHistoricFrames()
+        private static async Task<IEnumerable<HistoricFrame>> ReadHistoricFrames()
         {
             try
             {
@@ -150,11 +145,11 @@ namespace FolderMusic
             }
         }
 
-        private async Task WriteHistoricFrames(HistoricFrame[] frames)
+        private static async Task WriteHistoricFrames(HistoricFrame[] frames)
         {
             string frameHistoryXml;
 
-            MobileDebug.Service.WriteEvent("WriteHistoricFrames", frames?.Select(f => f?.PageTypeName));
+            MobileDebug.Service.WriteEvent("WriteHistoricFrames", frames.Select(f => f?.PageTypeName));
 
             try
             {
@@ -164,30 +159,19 @@ namespace FolderMusic
             }
             catch (Exception e)
             {
-                MobileDebug.Service.WriteEvent("SerializeHistoricFarmes", e, frames.Count());
+                MobileDebug.Service.WriteEvent("SerializeHistoricFrames", e, frames.Length);
                 return;
             }
 
             try
             {
-                StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(frameHistoryFileName);
+                StorageFile file = await ApplicationData.Current.LocalFolder
+                    .CreateFileAsync(frameHistoryFileName, CreationCollisionOption.OpenIfExists);
                 await FileIO.WriteTextAsync(file, frameHistoryXml);
-            }
-            catch (FileNotFoundException e1)
-            {
-                try
-                {
-                    StorageFile file = await ApplicationData.Current.LocalFolder.CreateFileAsync(frameHistoryFileName);
-                    await FileIO.WriteTextAsync(file, frameHistoryXml);
-                }
-                catch (Exception e2)
-                {
-                    MobileDebug.Service.WriteEvent("CreateHistoricFramesFile", e2, frames.Count());
-                }
             }
             catch (Exception e)
             {
-                MobileDebug.Service.WriteEvent("WriteHistoricFarmes", e, frames.Count());
+                MobileDebug.Service.WriteEvent("WriteHistoricFrames", e, frames.Length);
             }
         }
 

@@ -62,7 +62,7 @@ namespace MusicPlayer.Models
             }
             catch (Exception e)
             {
-                MobileDebug.Service.WriteEvent("GetCurrentPlaySongContainerFail");
+                MobileDebug.Service.WriteEvent("GetCurrentPlaySongContainerFail", e);
                 throw;
             }
         }
@@ -106,7 +106,11 @@ namespace MusicPlayer.Models
 
                 OnPropertyChanged(propertyName);
             }
-            catch { }
+            catch (Exception e)
+            {
+                MobileDebug.Service.WriteEventPair("CurrentPlaySong.SetValueFail", 
+                    "prop", propertyName, "valueType", value?.GetType().FullName, e);
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

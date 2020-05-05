@@ -14,7 +14,9 @@ namespace FolderMusic.FrameHistory
             {
                 pageTypeName = value;
                 Page = Type.GetType(value);
+
                 if (PageTypeName == "MobileDebug.DebugPage") Page = typeof(MobileDebug.DebugPage);
+                if (PageTypeName == "MobileDebug.DebugFilterPage") Page = typeof(MobileDebug.DebugFilterPage);
             }
         }
 

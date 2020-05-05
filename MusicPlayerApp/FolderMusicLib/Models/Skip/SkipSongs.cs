@@ -22,7 +22,7 @@ namespace MusicPlayer.Models.Skip
 
         public async Task<bool> HasSongs()
         {
-            return (await GetSongs()).Count() > 0;
+            return (await GetSongs()).Any();
         }
 
         public async Task Add(Song song)
