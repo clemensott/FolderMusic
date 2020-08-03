@@ -296,7 +296,7 @@ namespace MusicPlayer
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Service.WriteEvent("Coundn't load data", e);
+                    MobileDebug.Service.WriteEvent("Couldn't load data", e);
                 }
             }
 
@@ -310,11 +310,11 @@ namespace MusicPlayer
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Service.WriteEvent("Coundn't load backupFileName", e);
+                    MobileDebug.Service.WriteEvent("Couldn't load backupFileName", e);
                 }
             }
 
-            MobileDebug.Service.WriteEvent("Coundn't load any data");
+            MobileDebug.Service.WriteEvent("Couldn't load any data");
             IO.CopyAsync(CompleteFileName, KnownFolders.VideosLibrary, CompleteFileName);
             IO.CopyAsync(BackupFileName, KnownFolders.VideosLibrary, BackupFileName);
 

@@ -37,7 +37,7 @@ namespace MobileDebug
             private set
             {
                 if (value == isLoading) return;
-                
+
                 isLoading = value;
                 NotifyPropertyChanged("IsLoading");
                 NotifyPropertyChanged("ShowLog");
@@ -359,7 +359,7 @@ namespace MobileDebug
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public void NotifyPropertyChanged(string propertyName)
+        public async void NotifyPropertyChanged(string propertyName)
         {
             try
             {
@@ -371,8 +371,8 @@ namespace MobileDebug
                 }
                 else
                 {
-                    CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                        () => { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); });
+                    await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                        () => { PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName)); });
                 }
             }
             catch { }
