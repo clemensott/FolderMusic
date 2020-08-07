@@ -12,6 +12,7 @@ namespace MobileDebug
 {
     public static class Service
     {
+        private const bool debugForeground = false, debugBackground = true;
         private const int maxLengthOfOneData = 1000;
         private const char addChar = '&';
         public const string ForegroundId = "Foreground";
@@ -26,6 +27,8 @@ namespace MobileDebug
         private static StorageFile foreDebugDataFile, backDebugDataFile;
         private static readonly Queue<Event> eventsBuffer = new Queue<Event>();
         private static Task writeTask = Task.Run(Append);
+
+        private static bool Debug => Id == ForegroundId ? debugForeground : debugBackground;
 
         public static string Id { get; private set; } = "None";
 
@@ -295,11 +298,12 @@ namespace MobileDebug
 
         private static void Append(Event debugEvent)
         {
+            System.Diagnostics.Debug.WriteLineIf(Debug, "Enqueue: " + debugEvent.Name);
             lock (eventsBuffer)
             {
                 eventsBuffer.Enqueue(debugEvent);
 
-                if (eventsBuffer.Count == 1) Monitor.Pulse(eventsBuffer);
+                Monitor.Pulse(eventsBuffer);
             }
         }
 
@@ -310,22 +314,34 @@ namespace MobileDebug
                 Event e;
                 string text = string.Empty;
 
-                lock (eventsBuffer)
+                try
                 {
-                    while (eventsBuffer.Count == 0) Monitor.Wait(eventsBuffer);
-
-                    do
+                    lock (eventsBuffer)
                     {
-                        e = eventsBuffer.Dequeue();
-                        text += e.ToDataString();
+                        while (eventsBuffer.Count == 0) Monitor.Wait(eventsBuffer);
+
+                        do
+                        {
+                            e = eventsBuffer.Dequeue();
+                            text += e.ToDataString();
+                        }
+                        while (eventsBuffer.Count > 0);
                     }
-                    while (eventsBuffer.Count > 0);
+
+                    System.Diagnostics.Debug.WriteLineIf(Debug, "Append dequeued: " + text);
                 }
-                
+                catch (Exception exc)
+                {
+                    System.Diagnostics.Debug.WriteLineIf(Debug, "Append dequeue error: " + exc);
+                    continue;
+                }
+
                 try
                 {
                     StorageFile file = Id == ForegroundId ? await GetForeDebugDataFile() : await GetBackDebugDataFile();
+                    System.Diagnostics.Debug.WriteLineIf(Debug, "Append got file: " + e.Name);
                     await FileIO.AppendTextAsync(file, text);
+                    System.Diagnostics.Debug.WriteLineIf(Debug, "Append appended: " + e.Name);
 
                     if (eventsBuffer.Count > 0) continue;
 
@@ -343,7 +359,10 @@ namespace MobileDebug
                         }
                     }
                 }
-                catch { }
+                catch (Exception exc)
+                {
+                    System.Diagnostics.Debug.WriteLineIf(Debug, "Append write error: " + exc);
+                }
             }
         }
 

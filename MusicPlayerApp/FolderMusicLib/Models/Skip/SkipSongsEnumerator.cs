@@ -29,14 +29,14 @@ namespace MusicPlayer.Models.Skip
             MobileDebug.Service.WriteEvent("MoveNext1", songsPaths.Count);
 
             int index = HandleCurrent(songsPaths);
-            Song song = GetNextSong(songsPaths, index);
+            Song? song = GetNextSong(songsPaths, index);
 
             Await(SkipSongs.SaveSkipSongsPaths, songsPaths);
 
             MobileDebug.Service.WriteEvent("MoveNext2", song);
             if (song == null) return false;
 
-            currentSkip = new SkipSong(song);
+            currentSkip = new SkipSong(song.Value);
             return true;
         }
 
@@ -65,25 +65,27 @@ namespace MusicPlayer.Models.Skip
             Song song;
             IEnumerable<IPlaylist> playlists = library.Playlists;
 
-            int index = songsPaths.IndexOf(Current.Song.Path);
+            int index = songsPaths.IndexOf(Current.Song.FullPath);
 
             switch (Current.Handle)
             {
                 case HandleType.Remove:
                     foreach (IPlaylist playlist in playlists)
                     {
-                        song = playlist.Songs.FirstOrDefault(s => s.Path == Current.Song.Path);
-                        if (song == null) continue;
+                        if (!playlist.Songs.TryFirst(s => s.FullPath == Current.Song.FullPath, out song))
+                        {
+                            continue;
+                        }
 
                         playlist.Songs.Remove(song);
                         break;
                     }
 
-                    songsPaths.Remove(Current.Song.Path);
+                    songsPaths.Remove(Current.Song.FullPath);
                     break;
 
                 case HandleType.Keep:
-                    songsPaths.Remove(Current.Song.Path);
+                    songsPaths.Remove(Current.Song.FullPath);
                     break;
 
                 case HandleType.Skip:
@@ -94,12 +96,16 @@ namespace MusicPlayer.Models.Skip
             return index;
         }
 
-        private Song GetNextSong(List<string> songsPaths, int index)
+        private Song? GetNextSong(List<string> songsPaths, int index)
         {
             while (index < songsPaths.Count)
             {
-                Song song = library.Playlists.SelectMany(p => p.Songs).FirstOrDefault(s => s.Path == songsPaths[index]);
-                if (song != null) return song;
+                Song song;
+                if (library.Playlists.SelectMany(p => p.Songs)
+                    .TryFirst(s => s.FullPath == songsPaths[index], out song))
+                {
+                    return song;
+                }
 
                 songsPaths.RemoveAt(index);
             }

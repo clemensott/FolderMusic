@@ -3,9 +3,9 @@ using MusicPlayer.Models.Interfaces;
 
 namespace FolderMusic
 {
-    public class PlaylistActionEventArgs : EventArgs
+    public class PlaylistActionEventArgs : System.EventArgs
     {
-        public IPlaylist Playlist { get; private set; }
+        public IPlaylist Playlist { get; }
 
         public PlaylistActionEventArgs(IPlaylist playlist)
         {

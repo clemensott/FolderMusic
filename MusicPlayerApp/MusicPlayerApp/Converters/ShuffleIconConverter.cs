@@ -1,6 +1,7 @@
 ﻿using PlayerIcons;
 using System;
 using Windows.UI.Xaml.Data;
+using MusicPlayer.Models.Enums;
 using MusicPlayer.Models.Shuffle;
 
 namespace FolderMusic.Converters
@@ -11,9 +12,6 @@ namespace FolderMusic.Converters
         {
             switch ((ShuffleType)value)
             {
-                case ShuffleType.Complete:
-                    return Icons.Current.ShuffleComplete;
-
                 case ShuffleType.OneTime:
                     return Icons.Current.ShuffleOneTime;
 
@@ -27,7 +25,6 @@ namespace FolderMusic.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
-            if (ReferenceEquals(value, Icons.Current.ShuffleComplete)) return ShuffleType.Complete;
             if (ReferenceEquals(value, Icons.Current.ShuffleOneTime)) return ShuffleType.OneTime;
             if (ReferenceEquals(value, Icons.Current.ShufflePath)) return ShuffleType.Path;
 

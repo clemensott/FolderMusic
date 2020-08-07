@@ -1,4 +1,5 @@
-﻿using MusicPlayer.Models.Shuffle;
+﻿using MusicPlayer.Models.Enums;
+using MusicPlayer.Models.Shuffle;
 
 namespace MusicPlayer.Models.EventArgs
 {

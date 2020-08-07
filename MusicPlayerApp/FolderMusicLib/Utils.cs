@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MusicPlayer.Models;
+using MusicPlayer.Models.Enums;
 using MusicPlayer.Models.Interfaces;
 using MusicPlayer.Models.Shuffle;
 
@@ -14,30 +15,9 @@ namespace MusicPlayer
             return new ShuffleOffCollection(songs);
         }
 
-        public static TimeSpan GetCurrentSongPosition(this IPlaylist playlist)
+        public static TimeSpan Multiply(this TimeSpan ts, double factor)
         {
-            double percent = playlist?.CurrentSongPosition ?? 0;
-            double duration = playlist?.CurrentSong?.DurationMilliseconds ?? Song.DefaultDuration;
-
-            return TimeSpan.FromMilliseconds(percent * duration);
-        }
-
-        public static void ChangeCurrentSong(this IPlaylist playlist, int offset)
-        {
-            int count = playlist.Songs.Shuffle.Count;
-
-            if (count == 0) return;
-
-            int shuffleSongsIndex = playlist.Songs.Shuffle.IndexOf(playlist.CurrentSong);
-            shuffleSongsIndex = (shuffleSongsIndex + offset + count) % count;
-            playlist.CurrentSong = playlist.Songs.Shuffle.ElementAt(shuffleSongsIndex);
-
-            if (playlist.CurrentSong.Failed)
-            {
-                if (playlist.Songs.All(x => x.Failed)) return;
-
-                ChangeCurrentSong(playlist, offset);
-            }
+            return TimeSpan.FromDays(ts.TotalDays * factor);
         }
 
         public static void SetNextLoop(this IPlaylist playlist)
@@ -58,24 +38,20 @@ namespace MusicPlayer
             }
         }
 
-        public static void SetNextShuffle(this ISongCollection songs)
+        public static void SetNextShuffle(this ISongCollection songs, Song? currentSong)
         {
             switch (songs.Shuffle.Type)
             {
                 case ShuffleType.Off:
-                    songs.SetShuffleType(ShuffleType.Path);
+                    songs.SetShuffleType(ShuffleType.Path, currentSong);
                     break;
 
                 case ShuffleType.Path:
-                    songs.SetShuffleType(ShuffleType.OneTime);
+                    songs.SetShuffleType(ShuffleType.OneTime, currentSong);
                     break;
 
                 case ShuffleType.OneTime:
-                    songs.SetShuffleType(ShuffleType.Complete);
-                    break;
-
-                case ShuffleType.Complete:
-                    songs.SetShuffleType(ShuffleType.Off);
+                    songs.SetShuffleType(ShuffleType.Off, currentSong);
                     break;
             }
         }
@@ -100,6 +76,55 @@ namespace MusicPlayer
             }
 
             return -1;
+        }
+
+        public static string XmlSerialize(Song? song)
+        {
+            return song.HasValue ? XmlConverter.Serialize(song) : string.Empty;
+        }
+
+        public static Song? XmlDeserializeSong(string xml)
+        {
+            if (string.IsNullOrWhiteSpace(xml)) return null;
+
+            return XmlConverter.Deserialize<Song>(xml);
+        }
+
+        public static string Serialize(TimeSpan ts)
+        {
+            return ts.Ticks.ToString();
+        }
+
+        public static TimeSpan DeserializeTimeSpan(string text)
+        {
+            return TimeSpan.FromTicks(long.Parse(text));
+        }
+
+        public static T ParseEnum<T>(string text)
+        {
+            return (T)Enum.Parse(typeof(T), text);
+        }
+
+        public static bool BothNullOrSequenceEqual<T>(this IEnumerable<T> enum1, IEnumerable<T> enum2)
+        {
+            if (ReferenceEquals(enum1, enum2)) return true;
+            if (enum1 == null || enum2 == null) return false;
+
+            return enum1.SequenceEqual(enum2);
+        }
+
+        public static bool TryFirst<TSource>(this IEnumerable<TSource> src, Func<TSource, bool> predicate, out TSource first)
+        {
+            foreach (TSource item in src)
+            {
+                if (!predicate(item)) continue;
+
+                first = item;
+                return true;
+            }
+
+            first = default(TSource);
+            return false;
         }
     }
 }

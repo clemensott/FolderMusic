@@ -38,11 +38,8 @@ namespace FolderMusic
 
         private bool isPointerOnDetailIcon;
 
-        public event EventHandler<PlaylistActionEventArgs> UpdateClick;
-        public event EventHandler<PlaylistActionEventArgs> ResetClick;
-        public event EventHandler<PlaylistActionEventArgs> ResetSongsClick;
-        public event EventHandler<PlaylistActionEventArgs> AddNewClick;
-        public event EventHandler<PlaylistActionEventArgs> RemoveClick;
+        public event EventHandler<PlaylistActionEventArgs> UpdateSongsClick;
+        public event EventHandler<PlaylistActionEventArgs> UpdateFilesClick;
         public event EventHandler<PlaylistActionEventArgs> PlayClick;
         public event EventHandler<PlaylistActionEventArgs> DetailsClick;
 
@@ -91,38 +88,23 @@ namespace FolderMusic
             FlyoutBase.ShowAttachedFlyout(sender as FrameworkElement);
         }
 
-        private void ResetPlaylist_Click(object sender, RoutedEventArgs e)
+        private void MfiUpdateSongs_Click(object sender, RoutedEventArgs e)
         {
             IPlaylist playlist = (IPlaylist)((FrameworkElement)sender).DataContext;
 
-            ResetClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
+            UpdateSongsClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
         }
 
-        private void UpdatePlaylist_Click(object sender, RoutedEventArgs e)
+        private void MfiUpdateFiles_Click(object sender, RoutedEventArgs e)
         {
             IPlaylist playlist = (IPlaylist)((FrameworkElement)sender).DataContext;
 
-            UpdateClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
-        }
-
-        private void ResetSongsPlaylist_Click(object sender, RoutedEventArgs e)
-        {
-            IPlaylist playlist = (IPlaylist)((FrameworkElement)sender).DataContext;
-
-            ResetSongsClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
-        }
-
-        private void SearchForNewSongsPlaylist_Click(object sender, RoutedEventArgs e)
-        {
-            IPlaylist playlist = (IPlaylist)((FrameworkElement)sender).DataContext;
-
-            AddNewClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
+            UpdateFilesClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
         }
 
         private void PlayPlaylist_Tapped(object sender, TappedRoutedEventArgs e)
         {
             IPlaylist playlist = (IPlaylist)((FrameworkElement)sender).DataContext;
-            MobileDebug.Service.WriteEvent("ImgPlayTapped1", playlist?.AbsolutePath);
 
             PlayClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
         }
@@ -130,7 +112,6 @@ namespace FolderMusic
         private void DetailPlaylist_Tapped(object sender, TappedRoutedEventArgs e)
         {
             IPlaylist playlist = (IPlaylist)((FrameworkElement)sender).DataContext;
-            MobileDebug.Service.WriteEvent("ImgDetailTapped1", playlist?.AbsolutePath);
 
             DetailsClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
         }
@@ -143,18 +124,6 @@ namespace FolderMusic
         private void DetailPlaylist_PointerExited(object sender, PointerRoutedEventArgs e)
         {
             isPointerOnDetailIcon = false;
-        }
-
-        private Frame GetFrame()
-        {
-            return Window.Current.Content as Frame;
-        }
-
-        private void DeletePlaylist_Click(object sender, RoutedEventArgs e)
-        {
-            IPlaylist playlist = (IPlaylist)((FrameworkElement)sender).DataContext;
-
-            RemoveClick?.Invoke(this, new PlaylistActionEventArgs(playlist));
         }
 
         private void Playlist_Tapped(object sender, TappedRoutedEventArgs e)

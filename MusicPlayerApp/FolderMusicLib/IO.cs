@@ -5,12 +5,11 @@ using Windows.Storage;
 
 namespace MusicPlayer
 {
-    static class IO
+    public static class IO
     {
         public static async Task<T> LoadObjectAsync<T>(string filenameWithExtension)
         {
             string xmlText = await LoadTextAsync(filenameWithExtension);
-
             return XmlConverter.Deserialize<T>(xmlText);
         }
 

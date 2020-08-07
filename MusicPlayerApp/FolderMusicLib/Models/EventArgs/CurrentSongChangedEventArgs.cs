@@ -1,15 +1,14 @@
-﻿namespace MusicPlayer.Models.EventArgs
+﻿using System;
+
+namespace MusicPlayer.Models.EventArgs
 {
     public class CurrentSongChangedEventArgs : System.EventArgs
     {
-        public Song OldCurrentSong { get; private set; }
+        public Song? NewSong { get; }
 
-        public Song NewCurrentSong { get; private set; }
-
-        internal CurrentSongChangedEventArgs(Song oldCurrentSong, Song newCurrentSong)
+        public CurrentSongChangedEventArgs(Song? newSong)
         {
-            OldCurrentSong = oldCurrentSong;
-            NewCurrentSong = newCurrentSong;
+            NewSong = newSong;
         }
     }
 }

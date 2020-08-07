@@ -15,15 +15,18 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 using MusicPlayer;
+using MusicPlayer.Handler;
+using MusicPlayer.Models;
 using MusicPlayer.Models.Interfaces;
 
 namespace FolderMusic
 {
     public sealed partial class App : Application
     {
-        private const string simpleFileName = "SimpleData.xml", frameHistoryFileName = "FrameHistory.xml";
+        private const string libraryDataFileName = "data.xml", frameHistoryFileName = "FrameHistory.xml";
         private static readonly XmlSerializer frameHistorySerializer = new XmlSerializer(typeof(HistoricFrame[]));
 
+        private ForegroundPlayerHandler handler;
         private Frame rootFrame;
         private TransitionCollection transitions;
         private FrameHistoryService frameHistoryService;
@@ -37,6 +40,11 @@ namespace FolderMusic
 
             HardwareButtons.BackPressed += HardwareButtons_BackPressed;
             UnhandledException += App_UnhandledException;
+
+            DebugSettings.BindingFailed += (sender, args) =>
+            {
+                MobileDebug.Service.WriteEvent("Binding error", args.Message);
+            };
         }
 
         private void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
@@ -46,11 +54,11 @@ namespace FolderMusic
             e.Handled = true;
 
             if (rootFrame.CurrentSourcePageType == typeof(LockPage)) return;
-            if (!rootFrame.CanGoBack) Application.Current.Exit();
+            if (!rootFrame.CanGoBack) Current.Exit();
             else rootFrame.GoBack();
         }
 
-        private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private static void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             MobileDebug.Service.WriteEvent("UnhandledException", e.Exception, e.Exception.StackTrace);
         }
@@ -64,8 +72,12 @@ namespace FolderMusic
             }
 #endif
 
-            AutoSaveLoad asl = new AutoSaveLoad(null, null, simpleFileName);
-            ILibrary library = await asl.LoadSimple(true);
+            if (handler == null)
+            {
+                ILibrary library = await Library.Load(libraryDataFileName);
+                handler = new ForegroundPlayerHandler(library);
+                handler.Start();
+            }
 
             rootFrame = Window.Current.Content as Frame;
 
@@ -80,12 +92,12 @@ namespace FolderMusic
                 {
                     // Zustand von zuvor angehaltener Anwendung laden
                     IEnumerable<HistoricFrame> frameHistory = await ReadHistoricFrames();
-
-                    frameHistoryService = new FrameHistoryService(frameHistory, rootFrame, library);
+                    frameHistoryService = new FrameHistoryService(frameHistory, rootFrame, handler);
                 }
                 else
                 {
-                    frameHistoryService = new FrameHistoryService(Enumerable.Empty<HistoricFrame>(), rootFrame, library);
+                    frameHistoryService =
+                        new FrameHistoryService(Enumerable.Empty<HistoricFrame>(), rootFrame, handler);
                 }
 
                 Window.Current.Content = rootFrame;
@@ -105,7 +117,7 @@ namespace FolderMusic
                 rootFrame.ContentTransitions = null;
                 rootFrame.Navigated += this.RootFrame_FirstNavigated;
 
-                if (!frameHistoryService.Restore() && !rootFrame.Navigate(typeof(MainPage), library))
+                if (!frameHistoryService.Restore() && !rootFrame.Navigate(typeof(MainPage), handler))
                 {
                     throw new Exception("Failed to create initial page");
                 }
@@ -117,14 +129,18 @@ namespace FolderMusic
 
         private void RootFrame_FirstNavigated(object sender, NavigationEventArgs e)
         {
-            rootFrame.ContentTransitions = this.transitions ?? new TransitionCollection() { new NavigationThemeTransition() };
+            rootFrame.ContentTransitions =
+                this.transitions ?? new TransitionCollection() {new NavigationThemeTransition()};
             rootFrame.Navigated -= this.RootFrame_FirstNavigated;
         }
 
         private async void Window_Activated(object sender, WindowActivatedEventArgs e)
         {
+            MobileDebug.Service.WriteEvent("Window_Activated", e.WindowActivationState);
             if (e.WindowActivationState != CoreWindowActivationState.Deactivated) return;
 
+            //handler.Stop();
+            await Library.Save(libraryDataFileName, handler.Library);
             await WriteHistoricFrames(frameHistoryService.GetFrames().Reverse().ToArray());
         }
 
@@ -135,7 +151,8 @@ namespace FolderMusic
                 StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(frameHistoryFileName);
                 string frameHistoryXml = await FileIO.ReadTextAsync(file);
 
-                return (IEnumerable<HistoricFrame>)frameHistorySerializer.Deserialize(new StringReader(frameHistoryXml));
+                return (IEnumerable<HistoricFrame>)frameHistorySerializer.Deserialize(
+                    new StringReader(frameHistoryXml));
             }
             catch (Exception e)
             {
@@ -148,9 +165,6 @@ namespace FolderMusic
         private static async Task WriteHistoricFrames(HistoricFrame[] frames)
         {
             string frameHistoryXml;
-
-            MobileDebug.Service.WriteEvent("WriteHistoricFrames", frames.Select(f => f?.PageTypeName));
-
             try
             {
                 StringWriter writer = new StringWriter();
@@ -171,7 +185,7 @@ namespace FolderMusic
             }
             catch (Exception e)
             {
-                MobileDebug.Service.WriteEvent("WriteHistoricFrames", e, frames.Length);
+                MobileDebug.Service.WriteEvent("WriteHistoricFramesError", e, frames.Length);
             }
         }
 

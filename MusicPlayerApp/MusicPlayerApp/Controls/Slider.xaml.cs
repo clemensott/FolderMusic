@@ -16,14 +16,15 @@ namespace FolderMusic
 
         public static readonly DependencyProperty ViewPositionRatioProperty =
             DependencyProperty.Register("ViewPositionRatio", typeof(double), typeof(Slider),
-                new PropertyMetadata(TimeSpan.Zero, OnViewPositionRatioPropertyChanged));
+                new PropertyMetadata(0.0, OnViewPositionRatioPropertyChanged));
 
         private static void OnViewPositionRatioPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             Slider s = (Slider)sender;
             double value = (double)e.NewValue;
 
-            s.ViewPosition = s.Duration.Multiply(value);
+            if (s.Duration > TimeSpan.Zero) s.ViewPosition = s.Duration.Multiply(value);
+            if (s.playerPositionEnabled) s.PositionRatio = value;
         }
 
         public static readonly DependencyProperty ViewPositionProperty =
@@ -40,34 +41,15 @@ namespace FolderMusic
 
         public static readonly DependencyProperty PositionRatioProperty =
             DependencyProperty.Register("PositionRatio", typeof(double), typeof(Slider),
-                new PropertyMetadata(TimeSpan.Zero, OnPositionRatioPropertyChanged));
+                new PropertyMetadata(0.0, OnPositionRatioPropertyChanged));
 
         private static void OnPositionRatioPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             Slider s = (Slider)sender;
             double value = (double)e.NewValue;
 
-            s.ViewPositionRatio = value;
-            s.Position = s.Duration.Multiply(value);
+            if (s.playerPositionEnabled) s.ViewPositionRatio = value;
         }
-
-        public static readonly DependencyProperty PositionProperty =
-            DependencyProperty.Register("Position", typeof(TimeSpan), typeof(Slider),
-                new PropertyMetadata(TimeSpan.Zero, OnPositionPropertyChanged));
-
-        private static void OnPositionPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
-        {
-            Slider s = (Slider)sender;
-            TimeSpan value = (TimeSpan)e.NewValue;
-
-            s.ViewPosition = value;
-
-            if (s.Duration > TimeSpan.Zero) s.PositionRatio = value.TotalDays / s.Duration.TotalDays;
-        }
-
-        public static readonly DependencyProperty ViewDurationProperty =
-            DependencyProperty.Register("ViewDuration", typeof(TimeSpan),
-                typeof(Slider), new PropertyMetadata(TimeSpan.Zero));
 
 
         public static readonly DependencyProperty DurationProperty =
@@ -79,9 +61,10 @@ namespace FolderMusic
             Slider s = (Slider)sender;
             TimeSpan value = (TimeSpan)e.NewValue;
 
-            s.Position = value.Multiply(s.PositionRatio);
-
-            if (s.playerPositionEnabled) s.ViewDuration = value;
+            if (value > TimeSpan.Zero && s.playerPositionEnabled)
+            {
+                s.ViewPosition = value.Multiply(s.PositionRatio);
+            }
         }
 
         private bool playerPositionEnabled = true;
@@ -108,18 +91,6 @@ namespace FolderMusic
         {
             get { return (double)GetValue(PositionRatioProperty); }
             set { SetValue(PositionRatioProperty, value); }
-        }
-
-        public TimeSpan Position
-        {
-            get { return (TimeSpan)GetValue(PositionProperty); }
-            set { SetValue(PositionProperty, value); }
-        }
-
-        public TimeSpan ViewDuration
-        {
-            get { return (TimeSpan)GetValue(ViewDurationProperty); }
-            set { SetValue(ViewDurationProperty, value); }
         }
 
         public TimeSpan Duration
@@ -150,15 +121,12 @@ namespace FolderMusic
         private void HighestParent_PointerExited(object sender, PointerRoutedEventArgs e)
         {
             if (playerPositionEnabled) return;
-
             playerPositionEnabled = true;
 
-            Position = ViewPosition;
+            PositionRatio = ViewPositionRatio;
 
             sld.Minimum = 0;
             sld.Maximum = 1;
-            ViewDuration = Duration;
-
             tblBegin.Visibility = tblEnd.Visibility = Visibility.Collapsed;
         }
 

@@ -5,18 +5,24 @@ using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
+using FolderMusic.NavigationParameter;
+using MusicPlayer;
 using MusicPlayer.Models;
+using MusicPlayer.Models.Interfaces;
+using MusicPlayer.UpdateLibrary;
 
 // Die Elementvorlage "Leere Seite" ist unter http://go.microsoft.com/fwlink/?LinkID=390556 dokumentiert.
 
 namespace FolderMusic
 {
     /// <summary>
-    /// Eine leere Seite, die eigenständig verwendet werden kann oder auf die innerhalb eines Rahmens navigiert werden kann.
+    /// Eine leere Seite, die eigenständig verwendet werden kann oder auf die innerhalb Page_Loadedigiert werden kann.
     /// </summary>
     public sealed partial class SongPage : Page
     {
         private Song song;
+        private ISongCollection songs;
+        private StorageFile file;
 
         public SongPage()
         {
@@ -28,23 +34,26 @@ namespace FolderMusic
         /// </summary>
         /// <param name="e">Ereignisdaten, die beschreiben, wie diese Seite erreicht wurde.
         /// Dieser Parameter wird normalerweise zum Konfigurieren der Seite verwendet.</param>
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            song = e.Parameter as Song;
+            SongPageParameter parameter = (SongPageParameter)e.Parameter;
+            song = parameter.Song;
+            songs = parameter.Songs;
 
-            if (song == null) return;
+            tblPath.Text = song.FullPath;
+        }
 
-            tblPath.Text = song.Path;
-
+        private async void Page_Loaded(object sender, RoutedEventArgs e)
+        {
             try
             {
-                StorageFile file = await StorageFile.GetFileFromPathAsync(song.Path);
-
+                file = await StorageFile.GetFileFromPathAsync(song.FullPath);
                 DataContext = await file.Properties.GetMusicPropertiesAsync();
             }
             catch (Exception exc)
             {
                 await new MessageDialog(exc.Message, "Load song data error").ShowAsync();
+                Frame.GoBack();
             }
         }
 
@@ -56,7 +65,20 @@ namespace FolderMusic
 
                 await props.SavePropertiesAsync();
 
-                if (song != null) await song.Reset();
+                Song? newSong = await UpdateLibraryUtils.LoadSong(file);
+                if (newSong.HasValue)
+                {
+                    Song oldSong;
+                    if (songs.TryFirst(s => s.FullPath == newSong.Value.FullPath, out oldSong))
+                    {
+                        if (!Equals(newSong.Value, oldSong))
+                        {
+                            songs.Change(new Song[] {oldSong}, new Song[] {newSong.Value});
+                        }
+                    }
+                    else await new MessageDialog("Song not found in playlist").ShowAsync();
+                }
+                else await new MessageDialog("Reloading song failed").ShowAsync();
             }
             catch (Exception exc)
             {

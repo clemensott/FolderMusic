@@ -39,7 +39,7 @@ namespace FolderMusic
             base.OnNavigatedFrom(e);
         }
 
-        private void List_SkippedSong(object sender, EventArgs e)
+        private void List_SkippedSong(object sender, System.EventArgs e)
         {
             IList<object> selectedItems = lbxSongs.SelectedItems;
 

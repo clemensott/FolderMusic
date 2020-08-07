@@ -8,20 +8,28 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
+using FolderMusic.EventArgs;
+using MusicPlayer;
 using MusicPlayer.Models;
 using MusicPlayer.Models.EventArgs;
 using MusicPlayer.Models.Interfaces;
 using MusicPlayer.Models.Shuffle;
+using FolderMusic.NavigationParameter;
+using MusicPlayer.UpdateLibrary;
 
 namespace FolderMusic
 {
     public partial class SongsView : UserControl
     {
-        enum ScrollToType { No, Last, Current }
+        enum ScrollToType
+        {
+            No,
+            Last,
+            Current
+        }
 
-        public static readonly DependencyProperty CurrentSongProperty =
-            DependencyProperty.Register("CurrentSong", typeof(Song), typeof(SongsView),
-                new PropertyMetadata(null, OnCurrentSongPropertyChanged));
+        public static readonly DependencyProperty CurrentSongProperty = DependencyProperty.Register("CurrentSong",
+            typeof(Song?), typeof(SongsView), new PropertyMetadata(null, OnCurrentSongPropertyChanged));
 
         private static void OnCurrentSongPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
@@ -48,9 +56,9 @@ namespace FolderMusic
 
         public event EventHandler<SelectedSongChangedManuallyEventArgs> SelectedSongChangedManually;
 
-        public Song CurrentSong
+        public Song? CurrentSong
         {
-            get { return (Song)GetValue(CurrentSongProperty); }
+            get { return (Song?)GetValue(CurrentSongProperty); }
             set { SetValue(CurrentSongProperty, value); }
         }
 
@@ -125,7 +133,7 @@ namespace FolderMusic
 
         protected void SetItemsSource(IEnumerable<Song> songs)
         {
-            lbxSongs.ItemsSource = songs as IList<Song>?? songs?.ToArray();
+            lbxSongs.ItemsSource = songs as IList<Song> ?? songs?.ToArray();
             SetSelectedItem();
             ScrollToCurrentSongDirect();
         }
@@ -144,9 +152,9 @@ namespace FolderMusic
         {
             if (Source == null || Source.Count == 0) return;
 
-            Song selectedSong = lbxSongs.SelectedItem as Song;
+            Song? selectedSong = lbxSongs.SelectedItem as Song?;
 
-            if (selectedSong != null && CurrentSong != selectedSong)
+            if (selectedSong != null && !Equals(CurrentSong, selectedSong))
             {
                 SelectedSongChangedManuallyEventArgs args =
                     new SelectedSongChangedManuallyEventArgs(CurrentSong, selectedSong);
@@ -154,7 +162,7 @@ namespace FolderMusic
                 CurrentSong = selectedSong;
                 SelectedSongChangedManually?.Invoke(this, args);
             }
-            else if (selectedSong != CurrentSong && lbxSongs.Items.Contains(CurrentSong))
+            else if (!Equals(selectedSong, CurrentSong) && lbxSongs.Items.Contains(CurrentSong))
             {
                 lbxSongs.SelectedItem = CurrentSong;
             }
@@ -214,8 +222,7 @@ namespace FolderMusic
 
         private void Song_Holding(object sender, HoldingRoutedEventArgs e)
         {
-            MobileDebug.Service.WriteEvent("Song_Holding", ActualWidth);
-            if (((Song)((FrameworkElement)sender).DataContext).IsEmpty) return;
+            if (!((Song?)((FrameworkElement)sender).DataContext).HasValue) return;
 
             FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
         }
@@ -224,14 +231,28 @@ namespace FolderMusic
         {
             Song song = (Song)((MenuFlyoutItem)sender).DataContext;
 
-            await song.Reset();
-        }
-
-        private void RemoveSong_Click(object sender, RoutedEventArgs e)
-        {
-            Song song = (Song)((MenuFlyoutItem)sender).DataContext;
-
-            Source.Remove(song);
+            try
+            {
+                StorageFile file = await StorageFile.GetFileFromPathAsync(song.FullPath);
+                Song? newSong = await UpdateLibraryUtils.LoadSong(file);
+                if (newSong.HasValue)
+                {
+                    Song oldSong;
+                    if (Source.TryFirst(s => s.FullPath == newSong.Value.FullPath, out oldSong))
+                    {
+                        if (!Equals(newSong.Value, oldSong))
+                        {
+                            Source.Change(new Song[] { oldSong }, new Song[] { newSong.Value });
+                        }
+                    }
+                    else await new MessageDialog("Song not found in playlist").ShowAsync();
+                }
+                else await new MessageDialog("Reloading song failed").ShowAsync();
+            }
+            catch (Exception exc)
+            {
+                await new MessageDialog(exc.Message, exc.GetType().Name).ShowAsync();
+            }
         }
 
         private async void DeleteSong_Click(object sender, RoutedEventArgs e)
@@ -240,7 +261,7 @@ namespace FolderMusic
 
             try
             {
-                StorageFile file = await StorageFile.GetFileFromPathAsync(song.Path);
+                StorageFile file = await StorageFile.GetFileFromPathAsync(song.FullPath);
 
                 await file.DeleteAsync();
                 Source.Remove(song);
@@ -258,9 +279,12 @@ namespace FolderMusic
         private void EditSong_Click(object sender, RoutedEventArgs e)
         {
             Frame frame = Window.Current.Content as Frame;
-            Song song = (sender as FrameworkElement)?.DataContext as Song;
+            Song? song = (sender as FrameworkElement)?.DataContext as Song?;
 
-            frame?.Navigate(typeof(SongPage), song);
+            if (!song.HasValue) return;
+
+            SongPageParameter parameter = new SongPageParameter(song.Value, Source);
+            frame?.Navigate(typeof(SongPage), parameter);
         }
     }
 }

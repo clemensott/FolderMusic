@@ -85,7 +85,10 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Converters\MillisToTimeSpanConverter.cs" />
+    <Compile Include="Controls\UpdateProgressControl.xaml.cs">
+      <DependentUpon>UpdateProgressControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converters\ValueConverter.cs" />
     <Compile Include="EventArgs\SelectedSongChangedManuellEventArgs.cs" />
     <Compile Include="Converters\DetailIconConverter.cs" />
     <Compile Include="Converters\IsIndeterminateToHideConverter.cs" />
@@ -103,7 +106,6 @@
       <DependentUpon>PlaylistsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\SongsCountConverter.cs" />
-    <Compile Include="Converters\SubstractConverter.cs" />
     <Compile Include="Converters\TimeSpanConverter.cs" />
     <Compile Include="Converters\UIntConverter.cs" />
     <Compile Include="Controls\IListStringControl.xaml.cs">
@@ -111,6 +113,7 @@
     </Compile>
     <Compile Include="EventArgs\PlaylistActionEventArgs.cs" />
     <Compile Include="FrameHistory\FrameHistoryService.cs" />
+    <Compile Include="FrameHistory\Handlers\DontSaveHandler.cs" />
     <Compile Include="FrameHistory\Handlers\PlaylistPageHandler.cs" />
     <Compile Include="FrameHistory\Handlers\MainPageHandler.cs" />
     <Compile Include="FrameHistory\Handlers\SongPageHandler.cs" />
@@ -121,15 +124,14 @@
     <Compile Include="FrameHistory\HistoricParameter.cs" />
     <Compile Include="FrameHistory\RestoreMusicProperties.cs" />
     <Compile Include="FrameHistory\Parameter.cs" />
-    <Compile Include="LoadingPage.xaml.cs">
-      <DependentUpon>LoadingPage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="LockPage.xaml.cs">
       <DependentUpon>LockPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="NavigationParameter\PlaylistPageParameter.cs" />
+    <Compile Include="NavigationParameter\SongPageParameter.cs" />
     <Compile Include="PlaylistPage.xaml.cs">
       <DependentUpon>PlaylistPage.xaml</DependentUpon>
     </Compile>
@@ -150,6 +152,9 @@
     <Compile Include="SongPage.xaml.cs">
       <DependentUpon>SongPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UpdateProgressPage.xaml.cs">
+      <DependentUpon>UpdateProgressPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -166,9 +171,8 @@
     <Content Include="Assets\Dark\PauseButton.png" />
     <Content Include="Assets\Dark\PlayButton.png" />
     <Content Include="Assets\Dark\PreviousButton.png" />
-    <Content Include="Assets\Dark\ShuffleComplete.png" />
-    <Content Include="Assets\Dark\ShuffleOff.png" />
     <Content Include="Assets\Dark\ShuffleOneTime.png" />
+    <Content Include="Assets\Dark\ShuffleOff.png" />
     <Content Include="Assets\Dark\ShufflePath.png" />
     <Content Include="Assets\Glockenschlag.mp3" />
     <Content Include="Assets\Light\DetailButton.png" />
@@ -179,9 +183,8 @@
     <Content Include="Assets\Light\PauseButton.png" />
     <Content Include="Assets\Light\PlayButton.png" />
     <Content Include="Assets\Light\PreviousButton.png" />
-    <Content Include="Assets\Light\ShuffleComplete.png" />
-    <Content Include="Assets\Light\ShuffleOff.png" />
     <Content Include="Assets\Light\ShuffleOneTime.png" />
+    <Content Include="Assets\Light\ShuffleOff.png" />
     <Content Include="Assets\Light\ShufflePath.png" />
     <Content Include="Assets\Logo.scale-240.png" />
     <Content Include="Assets\SmallLogo.scale-240.png" />
@@ -199,7 +202,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="LoadingPage.xaml">
+    <Page Include="Controls\UpdateProgressControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -239,6 +242,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UpdateProgressPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -261,7 +268,6 @@
       <Name>PlayerIconsWP8_1</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>
   </PropertyGroup>

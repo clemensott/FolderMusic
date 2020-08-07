@@ -5,7 +5,7 @@ using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Handler;
 
 namespace FolderMusic.FrameHistory
 {
@@ -14,17 +14,17 @@ namespace FolderMusic.FrameHistory
         private readonly Queue<HistoricFrame> restoreHistory;
         private readonly Stack<HistoricFrame> history;
         private readonly Frame rootFrame;
-        private readonly ILibrary library;
+        private readonly ForegroundPlayerHandler handler;
         private Parameter parameter;
 
-        public FrameHistoryService(IEnumerable<HistoricFrame> history, Frame rootFrame, ILibrary library)
+        public FrameHistoryService(IEnumerable<HistoricFrame> history, Frame rootFrame, ForegroundPlayerHandler handler)
         {
             restoreHistory = new Queue<HistoricFrame>(history);
-            MobileDebug.Service.WriteEventPair("FrameHistoricService Constructor", "RestoreFrames", restoreHistory.Count);
+            MobileDebug.Service.WriteEventPair("FrameHistoricService Constructor", "RestoreFrames", restoreHistory.Select(f => f.PageTypeName));
 
             this.history = new Stack<HistoricFrame>();
             this.rootFrame = rootFrame;
-            this.library = library;
+            this.handler = handler;
 
             rootFrame.Navigating += RootFrame_Navigating;
             rootFrame.Navigated += RootFrame_Navigated;
@@ -32,44 +32,49 @@ namespace FolderMusic.FrameHistory
 
         private void RootFrame_Navigating(object sender, NavigatingCancelEventArgs e)
         {
-            MobileDebug.Service.WriteEventPair("Navigating1_0", "Page", e.SourcePageType, "Mode", e.NavigationMode,
-                "Parameter", e.Parameter ?? "null", "TransInfo", e.NavigationTransitionInfo,
-                "frames", history.Reverse().Select(f => f?.PageTypeName));
-
             HistoricFrameHandler handler;
             HistoricParameter parameter;
 
-            switch (e.NavigationMode)
+            try
             {
-                case NavigationMode.New:
-                case NavigationMode.Forward:
-                    SaveDataContext();
+                switch (e.NavigationMode)
+                {
+                    case NavigationMode.New:
+                    case NavigationMode.Forward:
+                        SaveDataContext();
 
-                    handler = HistoricFrameHandler.GetHandler(e.SourcePageType);
-                    parameter = handler.ToHistoricParameter(e.Parameter);
+                        handler = HistoricFrameHandler.GetHandler(e.SourcePageType);
+                        if (!handler.SaveFrame) return;
 
-                    history.Push(new HistoricFrame(e.SourcePageType, parameter));
-                    break;
+                        parameter = handler.ToHistoricParameter(e.Parameter);
 
-                case NavigationMode.Refresh:
-                    handler = HistoricFrameHandler.GetHandler(e.SourcePageType);
-                    parameter = handler.ToHistoricParameter(e.Parameter);
+                        history.Push(new HistoricFrame(e.SourcePageType, parameter));
+                        break;
 
-                    history.Pop();
-                    history.Push(new HistoricFrame(e.SourcePageType, parameter));
-                    break;
+                    case NavigationMode.Refresh:
+                        handler = HistoricFrameHandler.GetHandler(e.SourcePageType);
+                        if (!handler.SaveFrame) return;
 
-                case NavigationMode.Back:
-                    history.Pop();
-                    break;
+                        parameter = handler.ToHistoricParameter(e.Parameter);
+
+                        history.Pop();
+                        history.Push(new HistoricFrame(e.SourcePageType, parameter));
+                        break;
+
+                    case NavigationMode.Back:
+                        if (rootFrame.BackStackDepth < history.Count) history.Pop();
+                        break;
+                }
             }
-            MobileDebug.Service.WriteEvent("Navigating2", history.Reverse().Select(f => f?.PageTypeName));
+            catch (Exception exc)
+            {
+                MobileDebug.Service.WriteEvent("Navigating error", exc);
+                throw;
+            }
         }
 
         private void RootFrame_Navigated(object sender, NavigationEventArgs e)
         {
-            MobileDebug.Service.WriteEvent("RootFrame_Navigated", e.Content);
-
             Page page = (Page)e.Content;
 
             if ((parameter != null && parameter.UseDataContext) || restoreHistory.Count > 0)
@@ -80,8 +85,6 @@ namespace FolderMusic.FrameHistory
 
         private void OnPageLoaded(object sender, RoutedEventArgs e)
         {
-            MobileDebug.Service.WriteEvent("Page_Loaded", sender.GetType());
-
             FrameworkElement page = (FrameworkElement)sender;
 
             page.Loaded -= OnPageLoaded;
@@ -96,19 +99,14 @@ namespace FolderMusic.FrameHistory
 
         public bool Restore()
         {
-            MobileDebug.Service.WriteEvent("Restore1", restoreHistory.Select(f => f.PageTypeName));
-            //return false;
-
             if (restoreHistory.Count == 0) return false;
 
             HistoricFrame frame = restoreHistory.Dequeue();
             HistoricFrameHandler handler = HistoricFrameHandler.GetHandler(frame.Page);
-            parameter = handler.FromHistoricParameter(frame.Parameter, library);
+            parameter = handler.FromHistoricParameter(frame.Parameter, this.handler);
 
             try
             {
-                MobileDebug.Service.WriteEventPair("Restore2", "Page", frame.PageTypeName, "Parameter", parameter?.Value);
-                //rootFrame.Navigate(typeof(MobileDebug.DebugPage), null);
                 return rootFrame.Navigate(frame.Page, parameter.Value);
             }
             catch (Exception e)

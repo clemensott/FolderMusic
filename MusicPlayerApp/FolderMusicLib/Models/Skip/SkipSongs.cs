@@ -28,9 +28,9 @@ namespace MusicPlayer.Models.Skip
         public async Task Add(Song song)
         {
             List<string> songsPaths = await GetSkipSongsPaths();
-            if (songsPaths.Contains(song.Path)) return;
+            if (songsPaths.Contains(song.FullPath)) return;
 
-            songsPaths.Add(song.Path);
+            songsPaths.Add(song.FullPath);
             await SaveSkipSongsPaths(songsPaths);
 
             SkippedSong?.Invoke(this, System.EventArgs.Empty);
@@ -62,8 +62,7 @@ namespace MusicPlayer.Models.Skip
         public async Task<IEnumerable<Song>> GetSongs()
         {
             List<string> ssps = await GetSkipSongsPaths();
-            IEnumerable<Song> selected = ssps.Select(ssp => Parent.Playlists.SelectMany(p => p.Songs).FirstOrDefault(s => s.Path == ssp));
-            return selected.Where(s => s != null);
+            return Parent.Playlists.SelectMany(p => p.Songs).Where(s => ssps.Contains(s.FullPath));
         }
 
         internal void Raise()

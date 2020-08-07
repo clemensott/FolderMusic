@@ -44,6 +44,6 @@
         <TextBlock Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" FontSize="20"
                    Text="{Binding ElementName=control,Path=ViewPosition,Converter={StaticResource timeCon}}"/>
         <TextBlock Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="20"
-                   Text="{Binding ElementName=control,Path=ViewDuration,Converter={StaticResource timeCon}}"/>
+                   Text="{Binding ElementName=control,Path=Duration,Converter={StaticResource timeCon}}"/>
     </Grid>
 </UserControl>

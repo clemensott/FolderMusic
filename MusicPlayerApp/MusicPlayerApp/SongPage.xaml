@@ -9,7 +9,8 @@
     xmlns:ui="using:Windows.UI.Xaml"
     mc:Ignorable="d"
     x:Name="page"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Loaded="Page_Loaded">
 
     <Page.Resources>
         <con:UIntConverter x:Key="yearCon"/>

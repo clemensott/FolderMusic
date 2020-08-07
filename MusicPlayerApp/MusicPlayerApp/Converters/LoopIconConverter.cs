@@ -1,6 +1,7 @@
 ﻿using PlayerIcons;
 using System;
 using Windows.UI.Xaml.Data;
+using MusicPlayer.Models.Enums;
 using MusicPlayer.Models.Interfaces;
 
 namespace FolderMusic.Converters
