@@ -22,7 +22,7 @@ namespace MusicPlayer.Handler
         private bool isStarted, isPlaying, isUpdatingUiPositionRatio, isSettingCurrentSong;
         private int backgroundPlayerStateChangedCount;
         private double positionRatio;
-        private TimeSpan duration;
+        private TimeSpan duration, oldDuration;
         private MediaPlayerState currentPlayerState;
         private Song? currentSong;
         private IPlaylist currentPlaylist;
@@ -105,10 +105,12 @@ namespace MusicPlayer.Handler
                 try
                 {
                     isSettingCurrentSong = true;
+
+                    SendCurrentSong(value, TimeSpan.Zero);
+
                     CurrentPlayerState = MediaPlayerState.Closed;
                     SetPositionAndDurationToView(TimeSpan.Zero, currentSong?.Duration ?? TimeSpan.Zero);
 
-                    communicator.SetSong(value, TimeSpan.Zero);
                     if (value.HasValue) CurrentPlaylist.CurrentSong = value.Value;
                 }
                 finally
@@ -273,7 +275,7 @@ namespace MusicPlayer.Handler
             if (isSettingCurrentSong) return;
 
             MobileDebug.Service.WriteEvent("ForeHandlerPlaylist_CurrentSongChanged", CurrentPlaylist.CurrentSong, CurrentPlaylist.Position);
-            communicator.SetSong(CurrentPlaylist.CurrentSong, TimeSpan.Zero);
+            SendCurrentSong(CurrentPlaylist.CurrentSong, TimeSpan.Zero);
         }
 
         private void Playlist_LoopChanged(object sender, ChangedEventArgs<LoopType> e)
@@ -298,7 +300,7 @@ namespace MusicPlayer.Handler
             {
                 TimeSpan position = BackgroundMediaPlayer.Current.Position;
                 TimeSpan duration = BackgroundMediaPlayer.Current.NaturalDuration;
-                if (duration <= TimeSpan.Zero) return;
+                if (duration == oldDuration || (duration <= TimeSpan.Zero && CurrentSong != null)) return;
 
                 SetPositionAndDurationToView(position, duration);
             }
@@ -371,6 +373,12 @@ namespace MusicPlayer.Handler
             if (!string.IsNullOrWhiteSpace(e) && CurrentPlaylist != null &&
                 CurrentPlaylist.Songs.TryGetSong(e, out newCurrentSong)) CurrentSong = newCurrentSong;
             else CurrentSong = null;
+        }
+
+        private void SendCurrentSong(Song? song, TimeSpan position)
+        {
+            oldDuration = CurrentSong?.Duration == Duration ? TimeSpan.Zero : Duration;
+            communicator.SendCurrentSong(song, TimeSpan.Zero);
         }
 
         public void Play()

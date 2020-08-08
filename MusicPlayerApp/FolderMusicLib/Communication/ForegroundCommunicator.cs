@@ -69,7 +69,7 @@ namespace MusicPlayer.Communication
             Send(ForegroundMessageType.SetPosition, position.Ticks.ToString());
         }
 
-        public void SetSong(Song? song, TimeSpan position)
+        public void SendCurrentSong(Song? song, TimeSpan position)
         {
             if (isUpdatingCurrentSong) return;
 
