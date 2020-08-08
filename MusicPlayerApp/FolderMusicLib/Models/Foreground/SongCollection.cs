@@ -7,10 +7,10 @@ using System.Xml;
 using System.Xml.Schema;
 using MusicPlayer.Models.Enums;
 using MusicPlayer.Models.EventArgs;
-using MusicPlayer.Models.Interfaces;
-using MusicPlayer.Models.Shuffle;
+using MusicPlayer.Models.Foreground.Interfaces;
+using MusicPlayer.Models.Foreground.Shuffle;
 
-namespace MusicPlayer.Models
+namespace MusicPlayer.Models.Foreground
 {
     public class SongCollection : ISongCollection
     {
@@ -26,7 +26,7 @@ namespace MusicPlayer.Models
         public IShuffleCollection Shuffle
         {
             get { return shuffle; }
-            set
+            private set
             {
                 if (value == shuffle) return;
 

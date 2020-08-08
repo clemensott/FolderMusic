@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
 using MusicPlayer.Models;
-using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Models.Foreground;
+using MusicPlayer.Models.Foreground.Interfaces;
 
 namespace MusicPlayer.UpdateLibrary
 {

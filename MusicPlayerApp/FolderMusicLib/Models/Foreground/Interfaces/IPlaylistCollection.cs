@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Xml.Serialization;
 using MusicPlayer.Models.EventArgs;
 
-namespace MusicPlayer.Models.Interfaces
+namespace MusicPlayer.Models.Foreground.Interfaces
 {
     public interface IPlaylistCollection : IEnumerable<IPlaylist>, INotifyPropertyChanged, IXmlSerializable
     {

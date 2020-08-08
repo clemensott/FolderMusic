@@ -5,7 +5,7 @@ using FolderMusic.NavigationParameter;
 using MusicPlayer;
 using MusicPlayer.Handler;
 using MusicPlayer.Models;
-using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Models.Foreground.Interfaces;
 
 namespace FolderMusic.FrameHistory.Handlers
 {
@@ -30,7 +30,7 @@ namespace FolderMusic.FrameHistory.Handlers
             {
                 Song song;
 
-                if (!playlist.Songs.TryFirst(s => s.FullPath == songPath, out song)) continue;
+                if (!playlist.Songs.TryGetSong(songPath, out song)) continue;
 
                 RestoreMusicProperties rmp = (RestoreMusicProperties)parameter.DataContext;
                 Task<MusicProperties> task = rmp.ToMusicProperties(songPath);

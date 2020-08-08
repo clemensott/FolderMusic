@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using Windows.Media;
 using Windows.Media.Playback;
 using Windows.Storage;
+using MusicPlayer.Communication;
 using MusicPlayer.Models;
-using MusicPlayer.Models.Background;
 using MusicPlayer.Models.Enums;
 using MusicPlayer.Models.EventArgs;
 
@@ -16,14 +16,18 @@ namespace MusicPlayer.Handler
 
         private bool isPlaying, playNext = true, mediaEndedHappened;
         private int failedCount, setSongCount;
+        private LoopType loop;
         private Song openSong;
         private Song? currentSong;
+        private Song[] songs;
         private DateTime setPositionTime;
         private TimeSpan setPositionPosition;
+        private readonly BackgroundCommunicator communicator;
         private readonly SystemMediaTransportControls smtc;
 
-        public event EventHandler<ChangedEventArgs<bool>> IsPlayingChanged;
         public event EventHandler<ChangedEventArgs<Song?>> CurrentSongChanged;
+        public event EventHandler<ChangedEventArgs<Song[]>> SongsChanged;
+        public event EventHandler<ChangedEventArgs<LoopType>> LoopChanged;
 
         public bool IsPlaying
         {
@@ -33,9 +37,11 @@ namespace MusicPlayer.Handler
                 if (value == isPlaying) return;
 
                 isPlaying = value;
-                IsPlayingChanged?.Invoke(this, new ChangedEventArgs<bool>(!value, value));
+                communicator.SendIsPlaying(isPlaying);
             }
         }
+
+        public TimeSpan Position { get; private set; }
 
         public Song? CurrentSong
         {
@@ -47,41 +53,75 @@ namespace MusicPlayer.Handler
                 ChangedEventArgs<Song?> args = new ChangedEventArgs<Song?>(currentSong, value);
                 currentSong = value;
                 CurrentSongChanged?.Invoke(this, args);
+
+                communicator.SendCurrentSong(currentSong);
             }
         }
 
-        private TimeSpan Position { get; set; }
-
-        public BackgroundPlaylist Playlist { get; }
-
-        private BackgroundPlayerHandler(BackgroundPlaylist playlist)
+        public Song[] Songs
         {
-            this.Playlist = playlist;
+            get { return songs; }
+            private set
+            {
+                if (value == null || value.BothNullOrSequenceEqual(songs)) return;
+
+                ChangedEventArgs<Song[]> args = new ChangedEventArgs<Song[]>(songs, value);
+                songs = value;
+                SongsChanged?.Invoke(this, args);
+            }
+        }
+
+        public LoopType Loop
+        {
+            get { return loop; }
+            set
+            {
+                if (value == loop) return;
+
+                ChangedEventArgs<LoopType> args = new ChangedEventArgs<LoopType>(loop, value);
+                loop = value;
+                LoopChanged?.Invoke(this, args);
+
+                BackgroundMediaPlayer.Current.IsLoopingEnabled = Loop == LoopType.Current;
+            }
+        }
+
+        public BackgroundPlayerHandler(Song? currentSong,
+            TimeSpan position, LoopType loop, Song[] songs)
+        {
+            communicator = new BackgroundCommunicator();
 
             smtc = SystemMediaTransportControls.GetForCurrentView();
             smtc.ButtonPressed += MediaTransportControlButtonPressed;
+
+            CurrentSong = currentSong;
+            Position = position;
+            Loop = loop;
+            Songs = songs ?? new Song[0];
         }
 
-        public static async Task<BackgroundPlayerHandler> Start(BackgroundPlaylist playlist, Song? currentSong,
-            TimeSpan position)
-        {
-            BackgroundPlayerHandler playerHandler = new BackgroundPlayerHandler(playlist);
-            await playerHandler.Start(currentSong, position);
-            return playerHandler;
-        }
-
-        private async Task Start(Song? song, TimeSpan position)
+        public async Task Start()
         {
             ActivateSystemMediaTransportControl();
             SetNextSongIfMediaEndedNotHappens();
 
-            Playlist.LoopChanged += Playlist_LoopChanged;
+            communicator.CurrentSongReceived += Communicator_CurrentSongReceived;
+            communicator.PositionReceived += Communicator_PositionReceived;
+            communicator.PlaylistReceived += Communicator_PlaylistReceived;
+            communicator.SongsReceived += Communicator_SongsReceived;
+            communicator.LoopReceived += Communicator_LoopReceived;
+            communicator.PlayReceived += Communicator_PlayReceived;
+            communicator.PauseReceived += Communicator_PauseReceived;
+            communicator.NextReceived += Communicator_NextReceived;
+            communicator.PreviousReceived += Communicator_PreviousReceived;
 
             BackgroundMediaPlayer.Current.MediaEnded += BackgroundMediaPlayer_MediaEnded;
             BackgroundMediaPlayer.Current.MediaOpened += BackgroundMediaPlayer_MediaOpened;
             BackgroundMediaPlayer.Current.MediaFailed += BackgroundMediaPlayer_MediaFailed;
+            
+            communicator.Start();
 
-            await SetSong(song, position);
+            await SetSong(CurrentSong, Position);
         }
 
         public void Stop()
@@ -90,11 +130,21 @@ namespace MusicPlayer.Handler
 
             mediaEndedHappened = true;
 
-            Playlist.LoopChanged -= Playlist_LoopChanged;
+            communicator.CurrentSongReceived -= Communicator_CurrentSongReceived;
+            communicator.PositionReceived -= Communicator_PositionReceived;
+            communicator.PlaylistReceived -= Communicator_PlaylistReceived;
+            communicator.SongsReceived -= Communicator_SongsReceived;
+            communicator.LoopReceived -= Communicator_LoopReceived;
+            communicator.PlayReceived -= Communicator_PlayReceived;
+            communicator.PauseReceived -= Communicator_PauseReceived;
+            communicator.NextReceived -= Communicator_NextReceived;
+            communicator.PreviousReceived -= Communicator_PreviousReceived;
 
             BackgroundMediaPlayer.Current.MediaEnded -= BackgroundMediaPlayer_MediaEnded;
             BackgroundMediaPlayer.Current.MediaOpened -= BackgroundMediaPlayer_MediaOpened;
             BackgroundMediaPlayer.Current.MediaFailed -= BackgroundMediaPlayer_MediaFailed;
+            
+            communicator.Stop();
         }
 
         private void ActivateSystemMediaTransportControl()
@@ -106,7 +156,6 @@ namespace MusicPlayer.Handler
         // A workaround because sometimes Media_Ended does not get triggered the first time
         private async void SetNextSongIfMediaEndedNotHappens()
         {
-
             while (!mediaEndedHappened)
             {
                 TimeSpan position = BackgroundMediaPlayer.Current.Position;
@@ -126,14 +175,58 @@ namespace MusicPlayer.Handler
             }
         }
 
-        private void SetLoopToBackgroundPlayer()
+        private async void Communicator_CurrentSongReceived(object sender, CurrentSongReceivedEventArgs e)
         {
-            BackgroundMediaPlayer.Current.IsLoopingEnabled = Playlist.Loop == LoopType.Current;
+            await SetSong(e.NewSong, e.Position);
         }
 
-        private void Playlist_LoopChanged(object sender, ChangedEventArgs<LoopType> e)
+        private void Communicator_PositionReceived(object sender, TimeSpan e)
         {
-            SetLoopToBackgroundPlayer();
+            SeekToPosition(e);
+        }
+
+        private async void Communicator_PlaylistReceived(object sender, PlaylistReceivedEventArgs e)
+        {
+            Loop = e.Loop;
+            Songs = e.Songs;
+            await SetSong(e.CurrentSong, e.Position);
+        }
+
+        private void Communicator_SongsReceived(object sender, Song[] e)
+        {
+            Songs = e;
+            
+            Song newCurrentSong;
+            string currentSongPath = CurrentSong?.FullPath;
+            if (!Songs.TryGetSong(currentSongPath, out newCurrentSong)) return;
+            
+            currentSong = newCurrentSong;
+            UpdateSystemMediaTransportControl();
+        }
+
+        private void Communicator_LoopReceived(object sender, LoopType e)
+        {
+            Loop = e;
+        }
+
+        private async void Communicator_PlayReceived(object sender, EventArgs e)
+        {
+            await Play();
+        }
+
+        private void Communicator_PauseReceived(object sender, EventArgs e)
+        {
+            Pause();
+        }
+
+        private async void Communicator_NextReceived(object sender, EventArgs e)
+        {
+            await Next(false);
+        }
+
+        private async void Communicator_PreviousReceived(object sender, EventArgs e)
+        {
+            await Previous();
         }
 
         private async void MediaTransportControlButtonPressed(SystemMediaTransportControls sender,
@@ -335,15 +428,35 @@ namespace MusicPlayer.Handler
         {
             playNext = true;
             Song? newCurrentSong;
-            if (!Playlist.TryNext(CurrentSong, out newCurrentSong) && fromEnded) Pause();
+            if (!TryNext(CurrentSong, out newCurrentSong) && fromEnded) Pause();
             MobileDebug.Service.WriteEvent("BackHandler_Next", CurrentSong, newCurrentSong);
             return SetSong(newCurrentSong);
+        }
+
+        private bool TryNext(Song? song, out Song? newCurrentSong)
+        {
+            int index = song.HasValue ? Songs.IndexOf(song.Value) + 1 : 0;
+            if (index >= Songs.Length) index = 0;
+
+            newCurrentSong = Songs.Length > 0 ? (Song?)Songs[index] : null;
+            return index > 0;
         }
 
         public Task Previous()
         {
             playNext = false;
-            return SetSong(Playlist.Previous(CurrentSong));
+            return SetSong(Previous(CurrentSong));
+        }
+
+        private Song? Previous(Song? song)
+        {
+            if (Songs.Length == 0) return null;
+
+            int index = song.HasValue ? Songs.IndexOf(song.Value) : -1;
+            if (index == -1) return Songs[0];
+            if (index == 0) return Songs[Songs.Length - 1];
+
+            return Songs[index - 1];
         }
 
         public void SeekToPosition(TimeSpan position)
@@ -362,6 +475,7 @@ namespace MusicPlayer.Handler
 
         private DateTime lastSetSong;
         private int shortTimeBetweenSetSongCount = 0;
+
         public async Task SetSong(Song? song, TimeSpan position)
         {
             if (DateTime.Now - lastSetSong < TimeSpan.FromMilliseconds(300)) shortTimeBetweenSetSongCount++;

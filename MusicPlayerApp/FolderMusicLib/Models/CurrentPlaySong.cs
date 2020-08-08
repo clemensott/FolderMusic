@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Windows.Storage;
+using MusicPlayer.Models.Enums;
 
-namespace MusicPlayer.Models.Background
+namespace MusicPlayer.Models
 {
     public class CurrentPlaySong
     {
@@ -30,6 +31,12 @@ namespace MusicPlayer.Models.Background
         {
             get { return Utils.XmlDeserializeSong(GetValue<string>(nameof(Song))); }
             set { SetValue(nameof(Song), Utils.XmlSerialize(value)); }
+        }
+
+        public LoopType Loop
+        {
+            get { return (LoopType)GetValue<byte>(nameof(Loop)); }
+            set { SetValue(nameof(Loop), (byte)value); }
         }
 
         private CurrentPlaySong()

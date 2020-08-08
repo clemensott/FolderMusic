@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 using MusicPlayer.Models.EventArgs;
 using MusicPlayer.Models.Skip;
 
-namespace MusicPlayer.Models.Interfaces
+namespace MusicPlayer.Models.Foreground.Interfaces
 {
     public interface ILibrary : INotifyPropertyChanged, IXmlSerializable
     {

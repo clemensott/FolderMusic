@@ -14,10 +14,9 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
-using MusicPlayer;
 using MusicPlayer.Handler;
-using MusicPlayer.Models;
-using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Models.Foreground;
+using MusicPlayer.Models.Foreground.Interfaces;
 
 namespace FolderMusic
 {
@@ -76,7 +75,6 @@ namespace FolderMusic
             {
                 ILibrary library = await Library.Load(libraryDataFileName);
                 handler = new ForegroundPlayerHandler(library);
-                handler.Start();
             }
 
             rootFrame = Window.Current.Content as Frame;
@@ -137,11 +135,19 @@ namespace FolderMusic
         private async void Window_Activated(object sender, WindowActivatedEventArgs e)
         {
             MobileDebug.Service.WriteEvent("Window_Activated", e.WindowActivationState);
-            if (e.WindowActivationState != CoreWindowActivationState.Deactivated) return;
+            switch (e.WindowActivationState)
+            {
+                case CoreWindowActivationState.Deactivated:
+                    handler.Stop();
+                    await Library.Save(libraryDataFileName, handler.Library);
+                    await WriteHistoricFrames(frameHistoryService.GetFrames().Reverse().ToArray());
+                    break;
 
-            //handler.Stop();
-            await Library.Save(libraryDataFileName, handler.Library);
-            await WriteHistoricFrames(frameHistoryService.GetFrames().Reverse().ToArray());
+                case CoreWindowActivationState.CodeActivated:
+                case CoreWindowActivationState.PointerActivated:
+                    handler.Start();
+                    break;
+            }
         }
 
         private static async Task<IEnumerable<HistoricFrame>> ReadHistoricFrames()

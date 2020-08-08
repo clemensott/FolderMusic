@@ -5,15 +5,15 @@ namespace MusicPlayer.Communication.Messages
 {
     public class CurrentSongMessage
     {
-        public TimeSpan Position { get; set; }
+        public long PositionTicks { get; set; }
 
         public Song? Song { get; set; }
 
         public CurrentSongMessage() { }
 
-        public CurrentSongMessage(Song? song, TimeSpan position)
+        public CurrentSongMessage(Song? song, long positionTicks)
         {
-            Position = position;
+            PositionTicks = positionTicks;
             Song = song;
         }
     }

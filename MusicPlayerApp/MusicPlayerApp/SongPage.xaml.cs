@@ -8,7 +8,7 @@ using Windows.UI.Xaml.Navigation;
 using FolderMusic.NavigationParameter;
 using MusicPlayer;
 using MusicPlayer.Models;
-using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Models.Foreground.Interfaces;
 using MusicPlayer.UpdateLibrary;
 
 // Die Elementvorlage "Leere Seite" ist unter http://go.microsoft.com/fwlink/?LinkID=390556 dokumentiert.
@@ -69,7 +69,7 @@ namespace FolderMusic
                 if (newSong.HasValue)
                 {
                     Song oldSong;
-                    if (songs.TryFirst(s => s.FullPath == newSong.Value.FullPath, out oldSong))
+                    if (songs.TryGetSong(newSong.Value.FullPath, out oldSong))
                     {
                         if (!Equals(newSong.Value, oldSong))
                         {

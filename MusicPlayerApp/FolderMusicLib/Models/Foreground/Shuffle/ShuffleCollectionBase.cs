@@ -7,9 +7,9 @@ using System.Xml;
 using System.Xml.Schema;
 using MusicPlayer.Models.Enums;
 using MusicPlayer.Models.EventArgs;
-using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Models.Foreground.Interfaces;
 
-namespace MusicPlayer.Models.Shuffle
+namespace MusicPlayer.Models.Foreground.Shuffle
 {
     abstract class ShuffleCollectionBase : IShuffleCollection
     {
@@ -156,7 +156,7 @@ namespace MusicPlayer.Models.Shuffle
                 {
                     Song song;
                     string path = reader.ReadElementContentAsString();
-                    if (parent.TryFirst(s => s.FullPath == path, out song)) list.Add(song);
+                    if (parent.TryGetSong(path, out song)) list.Add(song);
                 }
                 catch (Exception e)
                 {

@@ -1,8 +1,6 @@
-﻿using System.Linq;
-using Windows.Foundation.Collections;
+﻿using Windows.Foundation.Collections;
 using Windows.Media.Playback;
 using MusicPlayer.Communication.Messages;
-using MusicPlayer.Handler;
 using MusicPlayer.Models;
 using MusicPlayer.Models.Enums;
 using MusicPlayer.Models.EventArgs;
@@ -10,39 +8,45 @@ using System;
 
 namespace MusicPlayer.Communication
 {
-    public static class BackgroundCommunicator
+    class BackgroundCommunicator
     {
-        private static BackgroundPlayerHandler handler;
+        private bool isRunning;
 
-        public static void Start(BackgroundPlayerHandler srcHandler)
+        public event EventHandler<CurrentSongReceivedEventArgs> CurrentSongReceived;
+        public event EventHandler<TimeSpan> PositionReceived;
+        public event EventHandler<PlaylistReceivedEventArgs> PlaylistReceived;
+        public event EventHandler<Song[]> SongsReceived;
+        public event EventHandler<LoopType> LoopReceived;
+        public event EventHandler PlayReceived;
+        public event EventHandler PauseReceived;
+        public event EventHandler NextReceived;
+        public event EventHandler PreviousReceived;
+
+        public void Start()
         {
-            handler = srcHandler;
-            handler.IsPlayingChanged += Handler_IsPlayingChanged;
-            handler.CurrentSongChanged += Handler_CurrentSongChanged;
-
             BackgroundMediaPlayer.MessageReceivedFromForeground += OnMessageReceived;
+            isRunning = true;
         }
 
-        public static void Stop()
+        public void Stop()
         {
-            handler.IsPlayingChanged -= Handler_IsPlayingChanged;
-            handler.CurrentSongChanged -= Handler_CurrentSongChanged;
-
             BackgroundMediaPlayer.MessageReceivedFromForeground -= OnMessageReceived;
+            isRunning = false;
         }
 
-        private static void Handler_IsPlayingChanged(object sender, ChangedEventArgs<bool> e)
+        public void SendIsPlaying(bool isPlaying)
         {
-            Send(BackgroundMessageType.SetIsPlaying, e.NewValue.ToString());
+            Send(BackgroundMessageType.SetIsPlaying, isPlaying.ToString());
         }
 
-        private static void Handler_CurrentSongChanged(object sender, ChangedEventArgs<Song?> e)
+        public void SendCurrentSong(Song? song)
         {
-            Send(BackgroundMessageType.SetCurrentSong, e.NewValue?.FullPath ?? string.Empty);
+            Send(BackgroundMessageType.SetCurrentSong, song?.FullPath ?? string.Empty);
         }
 
-        private static void Send(BackgroundMessageType type, string value)
+        private void Send(BackgroundMessageType type, string value)
         {
+            if (!isRunning) return;
             ValueSet vs = new ValueSet()
             {
                 {Constants.TypeKey, type.ToString()},
@@ -52,51 +56,56 @@ namespace MusicPlayer.Communication
             BackgroundMediaPlayer.SendMessageToForeground(vs);
         }
 
-        private static async void OnMessageReceived(object sender, MediaPlayerDataReceivedEventArgs e)
+        private void OnMessageReceived(object sender, MediaPlayerDataReceivedEventArgs e)
         {
             string value = e.Data[Constants.ValueKey].ToString();
-            MobileDebug.Service.WriteEvent("BackCom_Receive", GetType(e.Data), value);
+            MobileDebug.Service.WriteEvent("BackCom_Receive", GetType(e.Data), value.Length);
             switch (GetType(e.Data))
             {
                 case ForegroundMessageType.SetCurrentSong:
                     CurrentSongMessage currentSongMessage = XmlConverter.Deserialize<CurrentSongMessage>(value);
-                    await handler.SetSong(currentSongMessage.Song, currentSongMessage.Position);
+                    CurrentSongReceived?.Invoke(this, new CurrentSongReceivedEventArgs(
+                        currentSongMessage.Song,
+                        TimeSpan.FromTicks(currentSongMessage.PositionTicks)
+                    ));
                     break;
 
                 case ForegroundMessageType.SetPosition:
-                    TimeSpan position = TimeSpan.FromTicks(long.Parse(value));
-                    handler.SeekToPosition(position);
+                    PositionReceived?.Invoke(this, TimeSpan.FromTicks(long.Parse(value)));
                     break;
 
                 case ForegroundMessageType.SetPlaylist:
                     PlaylistMessage playlistMessage = XmlConverter.Deserialize<PlaylistMessage>(value);
-                    handler.Playlist.Loop = playlistMessage.Loop;
-                    handler.Playlist.Songs = playlistMessage.Songs;
-                    await handler.SetSong(playlistMessage.CurrentSong, TimeSpan.FromTicks(playlistMessage.PositionTicks));
+                    PlaylistReceived?.Invoke(this, new PlaylistReceivedEventArgs(
+                        playlistMessage.CurrentSong,
+                        TimeSpan.FromTicks(playlistMessage.PositionTicks),
+                        playlistMessage.Loop,
+                        playlistMessage.Songs
+                    ));
                     break;
 
                 case ForegroundMessageType.SetSongs:
-                    handler.Playlist.Songs = XmlConverter.Deserialize<Song[]>(value);
+                    SongsReceived?.Invoke(this, XmlConverter.Deserialize<Song[]>(value));
                     break;
 
                 case ForegroundMessageType.SetLoop:
-                    handler.Playlist.Loop = Utils.ParseEnum<LoopType>(value);
+                    LoopReceived?.Invoke(this, Utils.ParseEnum<LoopType>(value));
                     break;
 
                 case ForegroundMessageType.Play:
-                    await handler.Play();
+                    PlayReceived?.Invoke(this, EventArgs.Empty);
                     break;
 
                 case ForegroundMessageType.Pause:
-                    handler.Pause();
+                    PauseReceived?.Invoke(this, EventArgs.Empty);
                     break;
 
                 case ForegroundMessageType.Next:
-                    await handler.Next(false);
+                    NextReceived?.Invoke(this, EventArgs.Empty);
                     break;
 
                 case ForegroundMessageType.Previous:
-                    await handler.Previous();
+                    PreviousReceived?.Invoke(this, EventArgs.Empty);
                     break;
             }
         }

@@ -12,9 +12,9 @@ using FolderMusic.EventArgs;
 using MusicPlayer;
 using MusicPlayer.Models;
 using MusicPlayer.Models.EventArgs;
-using MusicPlayer.Models.Interfaces;
-using MusicPlayer.Models.Shuffle;
 using FolderMusic.NavigationParameter;
+using MusicPlayer.Models.Foreground.Interfaces;
+using MusicPlayer.Models.Foreground.Shuffle;
 using MusicPlayer.UpdateLibrary;
 
 namespace FolderMusic
@@ -238,7 +238,7 @@ namespace FolderMusic
                 if (newSong.HasValue)
                 {
                     Song oldSong;
-                    if (Source.TryFirst(s => s.FullPath == newSong.Value.FullPath, out oldSong))
+                    if (Source.TryGetSong(newSong.Value.FullPath, out oldSong))
                     {
                         if (!Equals(newSong.Value, oldSong))
                         {

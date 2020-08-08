@@ -86,34 +86,34 @@
     <Compile Include="Communication\Messages\PlaylistMessage.cs" />
     <Compile Include="Handler\BackgroundPlayerHandler.cs" />
     <Compile Include="Handler\ForegroundPlayerHandler.cs" />
+    <Compile Include="Models\EventArgs\PlaylistReceivedEventArgs.cs" />
     <Compile Include="UpdateLibrary\CancelTokenResult.cs" />
     <Compile Include="UpdateLibrary\ChildUpdateProgress.cs" />
     <Compile Include="UpdateLibrary\ParentUpdateProgress.cs" />
     <Compile Include="UpdateLibrary\UpdateLibraryUtils.cs" />
-    <Compile Include="Models\Background\BackgroundPlaylist.cs" />
     <Compile Include="Models\Enums\LoopType.cs" />
     <Compile Include="Models\Enums\ShuffleType.cs" />
     <Compile Include="Models\EventArgs\ChangedEventArgs.cs" />
-    <Compile Include="Models\Foregound\Shuffle\ShufflePathCollection.cs" />
+    <Compile Include="Models\Foreground\Shuffle\ShufflePathCollection.cs" />
     <Compile Include="UpdateLibrary\CancelOperationToken.cs" />
     <Compile Include="Models\EventArgs\ChangeCollectionItem.cs" />
-    <Compile Include="Models\EventArgs\CurrentSongChangedEventArgs.cs" />
-    <Compile Include="Models\Foregound\Interfaces\ILibrary.cs" />
-    <Compile Include="Models\Foregound\Interfaces\IPlaylist.cs" />
-    <Compile Include="Models\Foregound\Interfaces\IPlaylistCollection.cs" />
-    <Compile Include="Models\Foregound\Interfaces\ISongCollection.cs" />
+    <Compile Include="Models\EventArgs\CurrentSongReceivedEventArgs.cs" />
+    <Compile Include="Models\Foreground\Interfaces\ILibrary.cs" />
+    <Compile Include="Models\Foreground\Interfaces\IPlaylist.cs" />
+    <Compile Include="Models\Foreground\Interfaces\IPlaylistCollection.cs" />
+    <Compile Include="Models\Foreground\Interfaces\ISongCollection.cs" />
     <Compile Include="Models\EventArgs\SongsChangedEventArgs.cs" />
-    <Compile Include="Models\Foregound\PlaylistCollection.cs" />
+    <Compile Include="Models\Foreground\PlaylistCollection.cs" />
     <Compile Include="Models\EventArgs\PlaylistCollectionChangedEventArgs.cs" />
     <Compile Include="Models\EventArgs\ShuffleChangedEventArgs.cs" />
-    <Compile Include="Models\Foregound\Shuffle\IShuffleCollection.cs" />
-    <Compile Include="Models\Foregound\Shuffle\ShuffleCollectionBase.cs" />
-    <Compile Include="Models\Background\CurrentPlaySong.cs" />
-    <Compile Include="Models\Foregound\Library.cs" />
-    <Compile Include="Models\Foregound\Playlist.cs" />
+    <Compile Include="Models\Foreground\Shuffle\IShuffleCollection.cs" />
+    <Compile Include="Models\Foreground\Shuffle\ShuffleCollectionBase.cs" />
+    <Compile Include="Models\CurrentPlaySong.cs" />
+    <Compile Include="Models\Foreground\Library.cs" />
+    <Compile Include="Models\Foreground\Playlist.cs" />
     <Compile Include="Models\EventArgs\ShuffleCollectionChangedEventArgs.cs" />
-    <Compile Include="Models\Foregound\Shuffle\ShuffleOffCollection.cs" />
-    <Compile Include="Models\Foregound\Shuffle\ShuffleOneTimeCollection.cs" />
+    <Compile Include="Models\Foreground\Shuffle\ShuffleOffCollection.cs" />
+    <Compile Include="Models\Foreground\Shuffle\ShuffleOneTimeCollection.cs" />
     <Compile Include="Models\Skip\SkipSong.cs" />
     <Compile Include="Models\Skip\SkipSongs.cs" />
     <Compile Include="Models\Skip\SkipSongsEnumerator.cs" />
@@ -121,7 +121,7 @@
     <Compile Include="UpdateLibrary\BaseUpdateProgress.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="IO.cs" />
-    <Compile Include="Models\Foregound\SongCollection.cs" />
+    <Compile Include="Models\Foreground\SongCollection.cs" />
     <Compile Include="Models\EventArgs\SongCollectionChangedEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="XmlConverter.cs" />
@@ -136,7 +136,9 @@
       <Name>PlayerIconsWP8_1</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Models\Background\" />
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>
   </PropertyGroup>

@@ -5,161 +5,91 @@ using Windows.Media.Playback;
 using MusicPlayer.Communication.Messages;
 using MusicPlayer.Models;
 using MusicPlayer.Models.Enums;
-using MusicPlayer.Models.EventArgs;
-using MusicPlayer.Models.Interfaces;
-using MusicPlayer.Models.Shuffle;
 using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
+using MusicPlayer.Models.Foreground.Interfaces;
 
 namespace MusicPlayer.Communication
 {
-    delegate void IsPlayingChangedEventHandler(ChangedEventArgs<bool> e);
-    delegate void CurrentSongChangedEventHandler(CurrentSongChangedEventArgs e);
-
-    static class ForegroundCommunicator
+    class ForegroundCommunicator
     {
-        private static bool isUpdatingCurrentSong;
-        private static ILibrary library;
+        private bool isRunning, isUpdatingCurrentSong;
 
-        public static event IsPlayingChangedEventHandler IsPlayingChanged;
-        public static event CurrentSongChangedEventHandler CurrentSongChanged;
+        public event EventHandler<bool> IsPlayingReceived;
+        public event EventHandler<string> CurrentSongReceived;
 
-        public static void Start(ILibrary srcLibrary)
+        public void Start()
         {
-            library = srcLibrary;
-            library.CurrentPlaylistChanged += Library_CurrentPlaylistChanged;
-            Subscribe(library.CurrentPlaylist);
-
             BackgroundMediaPlayer.MessageReceivedFromBackground += OnMessageReceived;
+            isRunning = true;
         }
 
-        public static void Stop()
+        public void Stop()
         {
-            library.CurrentPlaylistChanged -= Library_CurrentPlaylistChanged;
-            Unsubscribe(library.CurrentPlaylist);
-
             BackgroundMediaPlayer.MessageReceivedFromForeground -= OnMessageReceived;
+            isRunning = false;
         }
 
-        private static void Subscribe(IPlaylist playlist)
-        {
-            if (playlist == null) return;
-
-            playlist.LoopChanged += Playlist_LoopChanged;
-            playlist.SongsChanged += Playlist_SongsChanged;
-
-            Subscribe(playlist.Songs);
-        }
-
-        private static void Unsubscribe(IPlaylist playlist)
-        {
-            if (playlist == null) return;
-
-            playlist.LoopChanged -= Playlist_LoopChanged;
-            playlist.SongsChanged -= Playlist_SongsChanged;
-
-            Unsubscribe(playlist.Songs);
-        }
-
-        private static void Subscribe(ISongCollection songs)
-        {
-            if (songs == null) return;
-
-            songs.ShuffleChanged += Songs_ShuffleChanged;
-            Subscribe(songs.Shuffle);
-        }
-
-        private static void Unsubscribe(ISongCollection songs)
-        {
-            if (songs == null) return;
-
-            songs.ShuffleChanged += Songs_ShuffleChanged;
-            Unsubscribe(songs.Shuffle);
-        }
-
-        private static void Subscribe(IShuffleCollection shuffle)
-        {
-            if (shuffle != null) shuffle.Changed += Shuffle_Changed;
-        }
-
-        private static void Unsubscribe(IShuffleCollection shuffle)
-        {
-            if (shuffle != null) shuffle.Changed += Shuffle_Changed;
-        }
-
-        private static void Library_CurrentPlaylistChanged(object sender, ChangedEventArgs<IPlaylist> e)
+        public void SendPlaylist(IPlaylist playlist)
         {
             PlaylistMessage message = new PlaylistMessage()
             {
-                PositionTicks = e.NewValue?.Position.Ticks ?? 0,
-                CurrentSong = e.NewValue?.CurrentSong,
-                Loop = e.NewValue?.Loop ?? LoopType.Off,
-                Songs = e.NewValue?.Songs.Shuffle.ToArray() ?? new Song[0],
+                PositionTicks = playlist?.Position.Ticks ?? 0,
+                CurrentSong = playlist?.CurrentSong,
+                Loop = playlist?.Loop ?? LoopType.Off,
+                Songs = playlist?.Songs.Shuffle.ToArray() ?? new Song[0],
             };
             Send(ForegroundMessageType.SetPlaylist, XmlConverter.Serialize(message));
         }
 
-        private static void Playlist_LoopChanged(object sender, ChangedEventArgs<LoopType> e)
+        public void SendLoop(LoopType loop)
         {
-            Send(ForegroundMessageType.SetLoop, e.NewValue.ToString());
+            Send(ForegroundMessageType.SetLoop, loop.ToString());
         }
 
-        private static void Playlist_SongsChanged(object sender, SongsChangedEventArgs e)
+        public void SendSongs(Song[] songs)
         {
-            IPlaylist playlist = (IPlaylist)sender;
-            string value = XmlConverter.Serialize(playlist.Songs.Shuffle.ToArray());
+            string value = XmlConverter.Serialize(songs);
             Send(ForegroundMessageType.SetSongs, value);
         }
 
-        private static void Songs_ShuffleChanged(object sender, ShuffleChangedEventArgs e)
-        {
-            ISongCollection songs = (ISongCollection)sender;
-            string value = XmlConverter.Serialize(songs.Shuffle.ToArray());
-            Send(ForegroundMessageType.SetSongs, value);
-        }
-
-        private static void Shuffle_Changed(object sender, ShuffleCollectionChangedEventArgs e)
-        {
-            IShuffleCollection shuffle = (IShuffleCollection)sender;
-            string value = XmlConverter.Serialize(shuffle.ToArray());
-            Send(ForegroundMessageType.SetSongs, value);
-        }
-
-        public static void SeekPosition(TimeSpan position)
+        public void SeekPosition(TimeSpan position)
         {
             Send(ForegroundMessageType.SetPosition, position.Ticks.ToString());
         }
 
-        public static void SetSong(Song? song, TimeSpan position)
+        public void SetSong(Song? song, TimeSpan position)
         {
             if (isUpdatingCurrentSong) return;
 
-            string value = XmlConverter.Serialize(new CurrentSongMessage(song, position));
+            string value = XmlConverter.Serialize(new CurrentSongMessage(song, position.Ticks));
             Send(ForegroundMessageType.SetCurrentSong, value);
         }
 
-        public static void Play()
+        public void Play()
         {
             Send(ForegroundMessageType.Play);
         }
 
-        public static void Pause()
+        public void Pause()
         {
             Send(ForegroundMessageType.Pause);
         }
 
-        public static void Next()
+        public void Next()
         {
             Send(ForegroundMessageType.Next);
         }
 
-        public static void Previous()
+        public void Previous()
         {
             Send(ForegroundMessageType.Previous);
         }
 
-        private static void Send(ForegroundMessageType type, string value = "")
+        private void Send(ForegroundMessageType type, string value = "")
         {
+            if (!isRunning) return;
+
             ValueSet vs = new ValueSet()
             {
                 {Constants.TypeKey, type.ToString()},
@@ -175,15 +105,15 @@ namespace MusicPlayer.Communication
             }
         }
 
-        private static async void OnMessageReceived(object sender, MediaPlayerDataReceivedEventArgs e)
+        private async void OnMessageReceived(object sender, MediaPlayerDataReceivedEventArgs e)
         {
             BackgroundMessageType type = GetType(e.Data);
             string value = e.Data[Constants.ValueKey].ToString();
-            MobileDebug.Service.WriteEvent("ForeCom_Receive", type, value);
+            MobileDebug.Service.WriteEvent("ForeCom_Receive", type, value.Length);
             try
             {
-                await CoreApplication.MainView.CoreWindow.Dispatcher.
-                    RunAsync(CoreDispatcherPriority.Normal, () => HandleReceivedMessage(type, value));
+                await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                    () => HandleReceivedMessage(type, value));
             }
             catch (Exception exc)
             {
@@ -191,31 +121,18 @@ namespace MusicPlayer.Communication
             }
         }
 
-        private static void HandleReceivedMessage(BackgroundMessageType type, string value)
+        private void HandleReceivedMessage(BackgroundMessageType type, string value)
         {
             switch (type)
             {
                 case BackgroundMessageType.SetCurrentSong:
                     isUpdatingCurrentSong = true;
-
-                    Song newCurrentSong;
-                    CurrentSongChangedEventArgs args;
-                    IPlaylist currentPlaylist = library.CurrentPlaylist;
-
-                    if (currentPlaylist != null &&
-                        currentPlaylist.Songs.TryFirst(s => s.FullPath == value, out newCurrentSong))
-                    {
-                        args = new CurrentSongChangedEventArgs(newCurrentSong);
-                    }
-                    else args = new CurrentSongChangedEventArgs(null);
-
-                    CurrentSongChanged?.Invoke(args);
+                    CurrentSongReceived?.Invoke(this,value);
                     isUpdatingCurrentSong = false;
                     break;
 
                 case BackgroundMessageType.SetIsPlaying:
-                    bool isPlaying = bool.Parse(value);
-                    IsPlayingChanged?.Invoke(new ChangedEventArgs<bool>(!isPlaying, isPlaying));
+                    IsPlayingReceived?.Invoke(this, bool.Parse(value));
                     break;
             }
         }

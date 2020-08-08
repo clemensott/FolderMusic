@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using FolderMusic.NavigationParameter;
 using MusicPlayer.Handler;
-using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Models.Foreground.Interfaces;
 
 namespace FolderMusic.FrameHistory.Handlers
 {

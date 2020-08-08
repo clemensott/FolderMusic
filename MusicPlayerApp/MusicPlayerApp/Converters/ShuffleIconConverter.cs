@@ -2,7 +2,6 @@
 using System;
 using Windows.UI.Xaml.Data;
 using MusicPlayer.Models.Enums;
-using MusicPlayer.Models.Shuffle;
 
 namespace FolderMusic.Converters
 {

@@ -6,9 +6,9 @@ using Windows.UI.Xaml.Navigation;
 using FolderMusic.EventArgs;
 using FolderMusic.NavigationParameter;
 using MusicPlayer.Handler;
-using MusicPlayer.Models.Interfaces;
 using MusicPlayer.UpdateLibrary;
 using System.Threading.Tasks;
+using MusicPlayer.Models.Foreground.Interfaces;
 
 namespace FolderMusic
 {

@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 using MusicPlayer.Models.Enums;
 using MusicPlayer.Models.EventArgs;
 
-namespace MusicPlayer.Models.Shuffle
+namespace MusicPlayer.Models.Foreground.Shuffle
 {
     public interface IShuffleCollection : IEnumerable<Song>, IXmlSerializable, IDisposable
     {

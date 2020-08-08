@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using MusicPlayer.Models.Enums;
 using MusicPlayer.Models.EventArgs;
-using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Models.Foreground.Interfaces;
 
-namespace MusicPlayer.Models.Shuffle
+namespace MusicPlayer.Models.Foreground.Shuffle
 {
     class ShuffleOneTimeCollection : ShuffleCollectionBase
     {

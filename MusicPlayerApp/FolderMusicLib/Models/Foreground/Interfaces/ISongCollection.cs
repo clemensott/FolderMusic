@@ -4,14 +4,14 @@ using System.ComponentModel;
 using System.Xml.Serialization;
 using MusicPlayer.Models.Enums;
 using MusicPlayer.Models.EventArgs;
-using MusicPlayer.Models.Shuffle;
+using MusicPlayer.Models.Foreground.Shuffle;
 
-namespace MusicPlayer.Models.Interfaces
+namespace MusicPlayer.Models.Foreground.Interfaces
 {
     public interface ISongCollection : IEnumerable<Song>, INotifyPropertyChanged, IXmlSerializable
     {
         int Count { get; }
-        IShuffleCollection Shuffle { get; set; }
+        IShuffleCollection Shuffle { get; }
 
         event EventHandler<SongCollectionChangedEventArgs> Changed;
         event EventHandler<ShuffleChangedEventArgs> ShuffleChanged;

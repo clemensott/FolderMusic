@@ -8,10 +8,10 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
 using MusicPlayer.Handler;
-using MusicPlayer.Models.Interfaces;
 using Windows.UI.Popups;
 using Windows.Media.Playback;
 using FolderMusic.NavigationParameter;
+using MusicPlayer.Models.Foreground.Interfaces;
 using MusicPlayer.UpdateLibrary;
 
 namespace FolderMusic

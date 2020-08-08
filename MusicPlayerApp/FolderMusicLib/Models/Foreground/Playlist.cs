@@ -5,35 +5,33 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
 using Windows.Storage;
-using MusicPlayer.Models.EventArgs;
-using MusicPlayer.Models.Interfaces;
 using MusicPlayer.Models.Enums;
+using MusicPlayer.Models.EventArgs;
+using MusicPlayer.Models.Foreground.Interfaces;
 
-namespace MusicPlayer.Models
+namespace MusicPlayer.Models.Foreground
 {
     class Playlist : IPlaylist
     {
         private const string emptyName = "None", emptyOrLoadingPath = "None";
 
-        private TimeSpan currentSongPosition;
+        private TimeSpan position;
         private Song currentSong;
-        private ISongCollection songs;
-        private LoopType loop = LoopType.Off;
+        private LoopType loop;
 
         public event EventHandler<ChangedEventArgs<Song>> CurrentSongChanged;
         public event EventHandler<ChangedEventArgs<TimeSpan>> PositionChanged;
         public event EventHandler<ChangedEventArgs<LoopType>> LoopChanged;
-        public event EventHandler<SongsChangedEventArgs> SongsChanged;
 
         public TimeSpan Position
         {
-            get { return currentSongPosition; }
+            get { return position; }
             set
             {
-                if (value == currentSongPosition) return;
+                if (value == position) return;
 
-                ChangedEventArgs<TimeSpan> args = new ChangedEventArgs<TimeSpan>(currentSongPosition, value);
-                currentSongPosition = value;
+                ChangedEventArgs<TimeSpan> args = new ChangedEventArgs<TimeSpan>(position, value);
+                position = value;
                 PositionChanged?.Invoke(this, args);
                 OnPropertyChanged(nameof(Position));
             }
@@ -57,23 +55,7 @@ namespace MusicPlayer.Models
             }
         }
 
-        public ISongCollection Songs
-        {
-            get { return songs; }
-            set
-            {
-                if (value == songs) return;
-
-                if (songs != null) songs.Changed += Songs_Changed;
-                SongsChangedEventArgs args = new SongsChangedEventArgs(songs, value);
-                songs?.Shuffle?.Dispose();
-                songs = value;
-                if (songs != null) songs.Changed += Songs_Changed;
-
-                SongsChanged?.Invoke(this, args);
-                OnPropertyChanged(nameof(Songs));
-            }
-        }
+        public ISongCollection Songs { get; }
 
         public LoopType Loop
         {
@@ -91,11 +73,11 @@ namespace MusicPlayer.Models
 
         public Playlist()
         {
-            Songs = new SongCollection();
-
             Name = emptyName;
             AbsolutePath = emptyOrLoadingPath;
 
+            Songs = new SongCollection();
+            Songs.Changed += Songs_Changed;
             Loop = LoopType.Off;
         }
 
@@ -111,13 +93,12 @@ namespace MusicPlayer.Models
 
             Song song;
             ChangeCollectionItem<Song> item;
-            string currentSongPath = CurrentSong.FullPath;
 
-            if (Songs.TryFirst(s => s.FullPath == currentSongPath, out song))
+            if (Songs.TryGetSong(CurrentSong.FullPath, out song))
             {
                 CurrentSong = song;
             }
-            else if (e.RemovedSongs.TryFirst(r => r.Item.FullPath == currentSongPath, out item))
+            else if (e.RemovedSongs.TryFirst(r => r.Item.FullPath == CurrentSong.FullPath, out item))
             {
                 CurrentSong = item.Index < Songs.Shuffle.Count
                     ? Songs.Shuffle.ElementAt(item.Index)
@@ -145,34 +126,36 @@ namespace MusicPlayer.Models
 
         public void ReadXml(XmlReader reader)
         {
-            string rawCurrentSongPosition = reader.GetAttribute("CurrentSongPosition") ?? "0";
-            TimeSpan currentSongPosition = TimeSpan.FromTicks(long.Parse(rawCurrentSongPosition));
+            string rawPosition = reader.GetAttribute(nameof(Position));
+            TimeSpan position = string.IsNullOrWhiteSpace(rawPosition)
+                ? TimeSpan.Zero
+                : TimeSpan.FromTicks(long.Parse(rawPosition));
 
-            AbsolutePath = reader.GetAttribute("AbsolutePath") ?? emptyOrLoadingPath;
-            Name = reader.GetAttribute("Name") ?? emptyName;
-            Loop = (LoopType)Enum.Parse(typeof(LoopType), reader.GetAttribute("Loop") ?? LoopType.Off.ToString());
+            AbsolutePath = reader.GetAttribute(nameof(AbsolutePath)) ?? emptyOrLoadingPath;
+            Name = reader.GetAttribute(nameof(Name)) ?? emptyName;
+            Loop = (LoopType)Enum.Parse(typeof(LoopType), reader.GetAttribute(nameof(Loop)) ?? LoopType.Off.ToString());
 
-            string currentSongPath = reader.GetAttribute("CurrentSongPath") ?? string.Empty;
+            string currentSongPath = reader.GetAttribute(nameof(CurrentSong)) ?? string.Empty;
 
             ShuffleType shuffle = (ShuffleType)Enum.Parse(typeof(ShuffleType),
-                reader.GetAttribute("Shuffle") ?? ShuffleType.Off.ToString());
+                reader.GetAttribute(nameof(Shuffle)) ?? ShuffleType.Off.ToString());
 
             reader.ReadStartElement();
 
-            Songs = XmlConverter.Deserialize(new SongCollection(), reader.ReadOuterXml());
+            XmlConverter.Deserialize(Songs, reader.ReadOuterXml());
 
             Song song;
-            CurrentSong = Songs.TryFirst(s => s.FullPath == currentSongPath, out song) ? song : songs.FirstOrDefault();
-            Position = currentSongPosition;
+            CurrentSong = Songs.TryGetSong(currentSongPath, out song) ? song : Songs.Shuffle.FirstOrDefault();
+            Position = position;
         }
 
         public void WriteXml(XmlWriter writer)
         {
-            writer.WriteAttributeString("AbsolutePath", AbsolutePath);
-            writer.WriteAttributeString("CurrentSongPath", CurrentSong.FullPath);
-            writer.WriteAttributeString("CurrentSongPosition", currentSongPosition.Ticks.ToString());
-            writer.WriteAttributeString("Loop", Loop.ToString());
-            writer.WriteAttributeString("Name", Name);
+            writer.WriteAttributeString(nameof(AbsolutePath), AbsolutePath);
+            writer.WriteAttributeString(nameof(CurrentSong), CurrentSong.FullPath);
+            writer.WriteAttributeString(nameof(Position), position.Ticks.ToString());
+            writer.WriteAttributeString(nameof(Loop), Loop.ToString());
+            writer.WriteAttributeString(nameof(Name), Name);
 
             writer.WriteStartElement(Songs.GetType().Name);
             Songs.WriteXml(writer);

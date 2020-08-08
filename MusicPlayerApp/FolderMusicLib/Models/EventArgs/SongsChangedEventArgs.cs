@@ -1,4 +1,4 @@
-﻿using MusicPlayer.Models.Interfaces;
+﻿using MusicPlayer.Models.Foreground.Interfaces;
 
 namespace MusicPlayer.Models.EventArgs
 {

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Models.Foreground.Interfaces;
 
 namespace MusicPlayer.Models.Skip
 {
@@ -72,10 +72,7 @@ namespace MusicPlayer.Models.Skip
                 case HandleType.Remove:
                     foreach (IPlaylist playlist in playlists)
                     {
-                        if (!playlist.Songs.TryFirst(s => s.FullPath == Current.Song.FullPath, out song))
-                        {
-                            continue;
-                        }
+                        if (!playlist.Songs.TryGetSong(Current.Song.FullPath, out song)) continue;
 
                         playlist.Songs.Remove(song);
                         break;
@@ -96,13 +93,12 @@ namespace MusicPlayer.Models.Skip
             return index;
         }
 
-        private Song? GetNextSong(List<string> songsPaths, int index)
+        private Song? GetNextSong(IList<string> songsPaths, int index)
         {
             while (index < songsPaths.Count)
             {
                 Song song;
-                if (library.Playlists.SelectMany(p => p.Songs)
-                    .TryFirst(s => s.FullPath == songsPaths[index], out song))
+                if (library.Playlists.SelectMany(p => p.Songs).TryGetSong(songsPaths[index], out song))
                 {
                     return song;
                 }

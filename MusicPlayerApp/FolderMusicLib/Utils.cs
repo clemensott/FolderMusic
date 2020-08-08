@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Windows.Security.Cryptography;
+using Windows.Security.Cryptography.Core;
+using Windows.Storage.Streams;
 using MusicPlayer.Models;
 using MusicPlayer.Models.Enums;
-using MusicPlayer.Models.Interfaces;
-using MusicPlayer.Models.Shuffle;
+using MusicPlayer.Models.Foreground.Interfaces;
+using MusicPlayer.Models.Foreground.Shuffle;
 
 namespace MusicPlayer
 {
@@ -113,7 +116,8 @@ namespace MusicPlayer
             return enum1.SequenceEqual(enum2);
         }
 
-        public static bool TryFirst<TSource>(this IEnumerable<TSource> src, Func<TSource, bool> predicate, out TSource first)
+        public static bool TryFirst<TSource>(this IEnumerable<TSource> src, Func<TSource, bool> predicate,
+            out TSource first)
         {
             foreach (TSource item in src)
             {
@@ -125,6 +129,11 @@ namespace MusicPlayer
 
             first = default(TSource);
             return false;
+        }
+
+        public static bool TryGetSong(this IEnumerable<Song> src, string path, out Song song)
+        {
+            return TryFirst(src, s => s.FullPath == path, out song);
         }
     }
 }

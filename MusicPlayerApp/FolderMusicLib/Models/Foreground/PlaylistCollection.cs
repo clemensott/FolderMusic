@@ -6,9 +6,9 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
 using MusicPlayer.Models.EventArgs;
-using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Models.Foreground.Interfaces;
 
-namespace MusicPlayer.Models
+namespace MusicPlayer.Models.Foreground
 {
     class PlaylistCollection : IPlaylistCollection
     {
@@ -17,7 +17,7 @@ namespace MusicPlayer.Models
         public event EventHandler<PlaylistCollectionChangedEventArgs> Changed;
 
         public int Count => list.Count;
-        
+
         public PlaylistCollection()
         {
             list = new List<IPlaylist>();
@@ -54,7 +54,7 @@ namespace MusicPlayer.Models
 
                 removeChanges.Add(new ChangeCollectionItem<IPlaylist>(index, playlist));
                 list.RemoveAt(index);
-                playlist.SongsChanged += Playlist_SongsChanged;
+                playlist.Songs.Changed += Songs_Changed;
             }
 
             foreach (IPlaylist playlist in addArray.OrderBy(p => p.AbsolutePath))
@@ -65,7 +65,7 @@ namespace MusicPlayer.Models
 
                 addChanges.Add(new ChangeCollectionItem<IPlaylist>(index, playlist));
                 list.Insert(index, playlist);
-                playlist.SongsChanged -= Playlist_SongsChanged;
+                playlist.Songs.Changed -= Songs_Changed;
             }
 
             if (removeChanges.Count == 0 && addChanges.Count == 0) return;
@@ -76,10 +76,13 @@ namespace MusicPlayer.Models
             OnPropertyChanged(nameof(Count));
         }
 
-        private void Playlist_SongsChanged(object sender, SongsChangedEventArgs e)
+        private void Songs_Changed(object sender, SongCollectionChangedEventArgs e)
         {
-            IPlaylist playlist = (IPlaylist)sender;
-            if (playlist.Songs.Count == 0) Remove(playlist);
+            ISongCollection songs = (ISongCollection)sender;
+            if (songs.Count > 0) return;
+
+            IPlaylist playlist;
+            if (list.TryFirst(p => p.Songs == songs, out playlist)) Remove(playlist);
         }
 
         private static int WouldIndexOf(IEnumerable<string> paths, string path)

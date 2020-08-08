@@ -3,10 +3,8 @@ using System.Threading;
 using Windows.ApplicationModel.Background;
 using Windows.Media.Playback;
 using MusicPlayer;
-using MusicPlayer.Communication;
 using MusicPlayer.Handler;
 using MusicPlayer.Models;
-using MusicPlayer.Models.Background;
 using MusicPlayer.Models.EventArgs;
 using MusicPlayer.Models.Enums;
 using System.Threading.Tasks;
@@ -39,27 +37,26 @@ namespace BackgroundTask
                 lastTask?.musicPlayer?.Dispose();
                 lastTask = this;
 
-                BackgroundPlaylist playlist;
+                Song[] songs;
 
                 try
                 {
-                    playlist = await IO.LoadObjectAsync<BackgroundPlaylist>(dataFileName);
+                    songs = await IO.LoadObjectAsync<Song[]>(dataFileName);
                 }
                 catch (Exception e)
                 {
                     MobileDebug.Service.WriteEvent("Load background playlist error1", e);
-                    playlist = new BackgroundPlaylist();
+                    songs = new Song[0];
                 }
-
-                playlist.LoopChanged += Playlist_LoopChanged;
-                playlist.SongsChanged += Playlist_SongsChanged;
 
                 Song? song = CurrentPlaySong.Current.Song;
                 TimeSpan position = TimeSpan.FromTicks(CurrentPlaySong.Current.PositionTicks);
-                musicPlayer = await BackgroundPlayerHandler.Start(playlist, song, position);
+                LoopType loop = CurrentPlaySong.Current.Loop;
+                musicPlayer = new BackgroundPlayerHandler(song, position, loop, songs);
                 musicPlayer.CurrentSongChanged += MusicPlayer_CurrentSongChanged;
-
-                BackgroundCommunicator.Start(musicPlayer);
+                musicPlayer.LoopChanged += MusicPlayer_LoopChanged;
+                musicPlayer.SongsChanged += MusicPlayer_SongsChanged;
+                await musicPlayer.Start();
 
                 timer = new Timer(Timer_Tick, null, Timeout.Infinite, Timeout.Infinite);
                 BackgroundMediaPlayer.Current.CurrentStateChanged += OnStateChanged;
@@ -68,6 +65,7 @@ namespace BackgroundTask
             {
                 MobileDebug.Service.WriteEvent("Run error", e);
             }
+
             MobileDebug.Service.WriteEventPair("RunFinish",
                 "This", GetHashCode(), "mp", musicPlayer.GetHashCode());
         }
@@ -83,21 +81,21 @@ namespace BackgroundTask
             CurrentPlaySong.Current.PositionTicks = BackgroundMediaPlayer.Current.Position.Ticks;
         }
 
-        private async void Playlist_LoopChanged(object sender, ChangedEventArgs<LoopType> e)
+        private static void MusicPlayer_LoopChanged(object sender, ChangedEventArgs<LoopType> e)
         {
-            await SavePlaylist();
+            CurrentPlaySong.Current.Loop = e.NewValue;
         }
 
-        private async void Playlist_SongsChanged(object sender, ChangedEventArgs<Song[]> e)
+        private static async void MusicPlayer_SongsChanged(object sender, ChangedEventArgs<Song[]> e)
         {
-            await SavePlaylist();
+            await SavePlaylist(e.NewValue);
         }
 
-        private async Task SavePlaylist()
+        private static async Task SavePlaylist(Song[] songs)
         {
             try
             {
-                await IO.SaveObjectAsync(dataFileName, musicPlayer.Playlist);
+                await IO.SaveObjectAsync(dataFileName, songs);
             }
             catch (Exception e)
             {
@@ -105,7 +103,7 @@ namespace BackgroundTask
             }
         }
 
-        private void MusicPlayer_CurrentSongChanged(object sender, ChangedEventArgs<Song?> e)
+        private static void MusicPlayer_CurrentSongChanged(object sender, ChangedEventArgs<Song?> e)
         {
             CurrentPlaySong.Current.Song = e.NewValue;
         }
@@ -126,7 +124,6 @@ namespace BackgroundTask
         {
             musicPlayer?.Stop();
             timer.Dispose();
-            BackgroundCommunicator.Stop();
 
             BackgroundMediaPlayer.Shutdown();
             deferral.Complete();
