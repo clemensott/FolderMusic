@@ -135,5 +135,17 @@ namespace MusicPlayer
         {
             return TryFirst(src, s => s.FullPath == path, out song);
         }
+
+        public static string GetSha256Hash(IEnumerable<Song> src)
+        {
+            if (src == null) throw new ArgumentNullException(nameof(src));
+
+            string text = string.Join("\n", src.Select(s => s.FullPath));
+            IBuffer input = CryptographicBuffer.ConvertStringToBinary(text, BinaryStringEncoding.Utf8);
+            HashAlgorithmProvider hasher = HashAlgorithmProvider.OpenAlgorithm(HashAlgorithmNames.Sha256);
+            IBuffer hashed = hasher.HashData(input);
+
+            return CryptographicBuffer.EncodeToBase64String(hashed);
+        }
     }
 }

@@ -128,7 +128,7 @@ namespace FolderMusic
         private void RootFrame_FirstNavigated(object sender, NavigationEventArgs e)
         {
             rootFrame.ContentTransitions =
-                this.transitions ?? new TransitionCollection() {new NavigationThemeTransition()};
+                this.transitions ?? new TransitionCollection() { new NavigationThemeTransition() };
             rootFrame.Navigated -= this.RootFrame_FirstNavigated;
         }
 
@@ -145,7 +145,7 @@ namespace FolderMusic
 
                 case CoreWindowActivationState.CodeActivated:
                 case CoreWindowActivationState.PointerActivated:
-                    handler.Start();
+                    await handler.Start();
                     break;
             }
         }

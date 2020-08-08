@@ -7,7 +7,6 @@ using MusicPlayer.Handler;
 using MusicPlayer.Models;
 using MusicPlayer.Models.EventArgs;
 using MusicPlayer.Models.Enums;
-using System.Threading.Tasks;
 
 namespace BackgroundTask
 {
@@ -42,16 +41,17 @@ namespace BackgroundTask
                 try
                 {
                     songs = await IO.LoadObjectAsync<Song[]>(dataFileName);
+                    CurrentPlaylistStore.Current.SongsHash = Utils.GetSha256Hash(songs);
                 }
                 catch (Exception e)
                 {
-                    MobileDebug.Service.WriteEvent("Load background playlist error1", e);
+                    MobileDebug.Service.WriteEvent("Load background songs error", e);
                     songs = new Song[0];
                 }
 
-                Song? song = CurrentPlaySong.Current.Song;
-                TimeSpan position = TimeSpan.FromTicks(CurrentPlaySong.Current.PositionTicks);
-                LoopType loop = CurrentPlaySong.Current.Loop;
+                Song? song = CurrentPlaylistStore.Current.CurrentSong;
+                TimeSpan position = TimeSpan.FromTicks(CurrentPlaylistStore.Current.PositionTicks);
+                LoopType loop = CurrentPlaylistStore.Current.Loop;
                 musicPlayer = new BackgroundPlayerHandler(song, position, loop, songs);
                 musicPlayer.CurrentSongChanged += MusicPlayer_CurrentSongChanged;
                 musicPlayer.LoopChanged += MusicPlayer_LoopChanged;
@@ -78,34 +78,30 @@ namespace BackgroundTask
 
         private static void Timer_Tick(object state)
         {
-            CurrentPlaySong.Current.PositionTicks = BackgroundMediaPlayer.Current.Position.Ticks;
+            CurrentPlaylistStore.Current.PositionTicks = BackgroundMediaPlayer.Current.Position.Ticks;
         }
 
         private static void MusicPlayer_LoopChanged(object sender, ChangedEventArgs<LoopType> e)
         {
-            CurrentPlaySong.Current.Loop = e.NewValue;
+            CurrentPlaylistStore.Current.Loop = e.NewValue;
         }
 
         private static async void MusicPlayer_SongsChanged(object sender, ChangedEventArgs<Song[]> e)
         {
-            await SavePlaylist(e.NewValue);
-        }
-
-        private static async Task SavePlaylist(Song[] songs)
-        {
             try
             {
-                await IO.SaveObjectAsync(dataFileName, songs);
+                await IO.SaveObjectAsync(dataFileName, e.NewValue);
+                CurrentPlaylistStore.Current.SongsHash = Utils.GetSha256Hash(e.NewValue);
             }
-            catch (Exception e)
+            catch (Exception exc)
             {
-                MobileDebug.Service.WriteEvent("Save playlist error", e);
+                MobileDebug.Service.WriteEvent("Save playlist error", exc);
             }
         }
 
         private static void MusicPlayer_CurrentSongChanged(object sender, ChangedEventArgs<Song?> e)
         {
-            CurrentPlaySong.Current.Song = e.NewValue;
+            CurrentPlaylistStore.Current.CurrentSong = e.NewValue;
         }
 
         private void TaskCompleted(BackgroundTaskRegistration sender, BackgroundTaskCompletedEventArgs args)

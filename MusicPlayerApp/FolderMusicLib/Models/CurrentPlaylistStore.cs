@@ -5,15 +5,15 @@ using MusicPlayer.Models.Enums;
 
 namespace MusicPlayer.Models
 {
-    public class CurrentPlaySong
+    public class CurrentPlaylistStore
     {
-        private static CurrentPlaySong instance;
+        private static CurrentPlaylistStore instance;
 
-        public static CurrentPlaySong Current
+        public static CurrentPlaylistStore Current
         {
             get
             {
-                if (instance == null) instance = new CurrentPlaySong();
+                if (instance == null) instance = new CurrentPlaylistStore();
 
                 return instance;
             }
@@ -27,10 +27,10 @@ namespace MusicPlayer.Models
             set { SetValue(nameof(PositionTicks), value); }
         }
 
-        public Song? Song
+        public Song? CurrentSong
         {
-            get { return Utils.XmlDeserializeSong(GetValue<string>(nameof(Song))); }
-            set { SetValue(nameof(Song), Utils.XmlSerialize(value)); }
+            get { return Utils.XmlDeserializeSong(GetValue<string>(nameof(CurrentSong))); }
+            set { SetValue(nameof(CurrentSong), Utils.XmlSerialize(value)); }
         }
 
         public LoopType Loop
@@ -39,7 +39,13 @@ namespace MusicPlayer.Models
             set { SetValue(nameof(Loop), (byte)value); }
         }
 
-        private CurrentPlaySong()
+        public string SongsHash
+        {
+            get { return GetValue<string>(nameof(SongsHash)); }
+            set { SetValue(nameof(SongsHash), value); }
+        }
+
+        private CurrentPlaylistStore()
         {
             container = GetOrCreateContainer("CurrentPlaySong");
         }

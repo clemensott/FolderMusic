@@ -13,8 +13,8 @@
     Loaded="UserControl_Loaded">
 
     <UserControl.Resources>
-        <con:IsIndeterminateToHideConverter x:Key="toHideConverter"/>
-        <con:IsIndeterminateToShowConverter x:Key="toShowConverter"/>
+        <con:IsTrueToCollapsedConverter x:Key="toHideConverter"/>
+        <con:IsTrueToVisibleConverter x:Key="toShowConverter"/>
         <con:TimeSpanConverter x:Key="timeCon"/>
     </UserControl.Resources>
 

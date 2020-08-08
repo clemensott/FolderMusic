@@ -63,7 +63,7 @@ namespace MusicPlayer.Handler
             get { return songs; }
             private set
             {
-                if (value == null || value.BothNullOrSequenceEqual(songs)) return;
+                if (value == null || value == songs) return;
 
                 ChangedEventArgs<Song[]> args = new ChangedEventArgs<Song[]>(songs, value);
                 songs = value;
@@ -118,7 +118,7 @@ namespace MusicPlayer.Handler
             BackgroundMediaPlayer.Current.MediaEnded += BackgroundMediaPlayer_MediaEnded;
             BackgroundMediaPlayer.Current.MediaOpened += BackgroundMediaPlayer_MediaOpened;
             BackgroundMediaPlayer.Current.MediaFailed += BackgroundMediaPlayer_MediaFailed;
-            
+
             communicator.Start();
 
             await SetSong(CurrentSong, Position);
@@ -143,7 +143,7 @@ namespace MusicPlayer.Handler
             BackgroundMediaPlayer.Current.MediaEnded -= BackgroundMediaPlayer_MediaEnded;
             BackgroundMediaPlayer.Current.MediaOpened -= BackgroundMediaPlayer_MediaOpened;
             BackgroundMediaPlayer.Current.MediaFailed -= BackgroundMediaPlayer_MediaFailed;
-            
+
             communicator.Stop();
         }
 
@@ -195,11 +195,11 @@ namespace MusicPlayer.Handler
         private void Communicator_SongsReceived(object sender, Song[] e)
         {
             Songs = e;
-            
+
             Song newCurrentSong;
             string currentSongPath = CurrentSong?.FullPath;
             if (!Songs.TryGetSong(currentSongPath, out newCurrentSong)) return;
-            
+
             currentSong = newCurrentSong;
             UpdateSystemMediaTransportControl();
         }
@@ -338,7 +338,7 @@ namespace MusicPlayer.Handler
 
             if (DateTime.Now - setPositionTime < TimeSpan.FromSeconds(2))
             {
-                MobileDebug.Service.WriteEvent("Skipped Song bug", "CurrentSongFileName", CurrentSong,
+                MobileDebug.Service.WriteEventPair("Skipped Song bug", "CurrentSongFileName", CurrentSong,
                     "setPositionTime", setPositionTime, "setPositionPosition", setPositionPosition,
                     "passedTime", passedEnoughTime);
             }
@@ -360,21 +360,20 @@ namespace MusicPlayer.Handler
                 BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Opening) return;
             if (setSongCount >= maxFailOrSetCount)
             {
+                MobileDebug.Service.WriteEvent("PlayBecauseOfSetSongCount", BackgroundMediaPlayer.Current.CurrentState, setSongCount);
+
                 setSongCount = 0;
-
                 Volume0To1();
-
-                //MobileDebug.Service.WriteEvent("PlayBecauseOfSetSongCount", BackgroundMediaPlayer.Current.CurrentState);
             }
             else if (BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Closed ||
                      BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Stopped)
             {
-                //MobileDebug.Service.WriteEvent("PlayClosedOrStopped", BackgroundMediaPlayer.Current.CurrentState);
+                MobileDebug.Service.WriteEvent("PlayClosedOrStopped", BackgroundMediaPlayer.Current.CurrentState);
                 await SetSong(CurrentSong, Position);
             }
             else if (BackgroundMediaPlayer.Current.NaturalDuration == TimeSpan.Zero)
             {
-                //MobileDebug.Service.WriteEvent("SetOnPlayDurationZero", CurrentSong);
+                MobileDebug.Service.WriteEvent("SetOnPlayDurationZero", CurrentSong);
                 await SetSong(CurrentSong, Position);
             }
             else
@@ -473,19 +472,11 @@ namespace MusicPlayer.Handler
             return SetSong(song, TimeSpan.Zero);
         }
 
-        private DateTime lastSetSong;
-        private int shortTimeBetweenSetSongCount = 0;
-
         public async Task SetSong(Song? song, TimeSpan position)
         {
-            if (DateTime.Now - lastSetSong < TimeSpan.FromMilliseconds(300)) shortTimeBetweenSetSongCount++;
-            else if (DateTime.Now - lastSetSong > TimeSpan.FromSeconds(5)) shortTimeBetweenSetSongCount = 0;
-            lastSetSong = DateTime.Now;
-            if (shortTimeBetweenSetSongCount > 20) return;
-
             MobileDebug.Service.WriteEventPair("TrySet", "OpenPath", openSong.FullPath,
-                "CurrentSongFileName", song?.FullPath ?? "<null>",
-                "Position", position, "IsOpen", Equals(song, openSong));
+                "CurrentSongFileName", song?.FullPath ?? "<null>", "Position", position,
+                "IsOpen", Equals(song, openSong), "IsPlaying", IsPlaying);
 
             CurrentSong = song;
             Position = position;
@@ -493,6 +484,12 @@ namespace MusicPlayer.Handler
             if (!song.HasValue)
             {
                 Pause();
+                return;
+            }
+
+            if (openSong.FullPath == song.Value.FullPath)
+            {
+                SeekToPosition(position);
                 return;
             }
 

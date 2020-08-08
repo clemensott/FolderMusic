@@ -108,7 +108,7 @@
     <Compile Include="Models\EventArgs\ShuffleChangedEventArgs.cs" />
     <Compile Include="Models\Foreground\Shuffle\IShuffleCollection.cs" />
     <Compile Include="Models\Foreground\Shuffle\ShuffleCollectionBase.cs" />
-    <Compile Include="Models\CurrentPlaySong.cs" />
+    <Compile Include="Models\CurrentPlaylistStore.cs" />
     <Compile Include="Models\Foreground\Library.cs" />
     <Compile Include="Models\Foreground\Playlist.cs" />
     <Compile Include="Models\EventArgs\ShuffleCollectionChangedEventArgs.cs" />

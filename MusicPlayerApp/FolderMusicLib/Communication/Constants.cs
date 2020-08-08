@@ -11,12 +11,14 @@
         Pause,
         Next,
         Previous,
+        Ping,
     }
 
     enum BackgroundMessageType
     {
         SetCurrentSong,
         SetIsPlaying,
+        Ping,
     }
 
     static class Constants

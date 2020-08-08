@@ -8,19 +8,30 @@ using MusicPlayer.Models.Enums;
 using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
 using MusicPlayer.Models.Foreground.Interfaces;
+using System.Threading.Tasks;
 
 namespace MusicPlayer.Communication
 {
     class ForegroundCommunicator
     {
-        private bool isRunning, isUpdatingCurrentSong;
+        private bool isRunning, gotAnyMessage, isUpdatingCurrentSong;
 
         public event EventHandler<bool> IsPlayingReceived;
         public event EventHandler<string> CurrentSongReceived;
 
-        public void Start()
+        public async Task Start()
         {
+            gotAnyMessage = false;
             BackgroundMediaPlayer.MessageReceivedFromBackground += OnMessageReceived;
+
+            MobileDebug.Service.WriteEvent("ForeComStart1");
+            while (!gotAnyMessage)
+            {
+                Send(ForegroundMessageType.Ping, force: true);
+                await Task.Delay(100);
+            }
+            MobileDebug.Service.WriteEvent("ForeComStart2");
+
             isRunning = true;
         }
 
@@ -86,9 +97,13 @@ namespace MusicPlayer.Communication
             Send(ForegroundMessageType.Previous);
         }
 
-        private void Send(ForegroundMessageType type, string value = "")
+        private void Send(ForegroundMessageType type, string value = "", bool force = false)
         {
-            if (!isRunning) return;
+            if (!isRunning && !force)
+            {
+                MobileDebug.Service.WriteEvent("ForeComDontSend", type);
+                return;
+            }
 
             ValueSet vs = new ValueSet()
             {
@@ -107,6 +122,8 @@ namespace MusicPlayer.Communication
 
         private async void OnMessageReceived(object sender, MediaPlayerDataReceivedEventArgs e)
         {
+            gotAnyMessage = true;
+
             BackgroundMessageType type = GetType(e.Data);
             string value = e.Data[Constants.ValueKey].ToString();
             MobileDebug.Service.WriteEvent("ForeCom_Receive", type, value.Length);
@@ -127,12 +144,15 @@ namespace MusicPlayer.Communication
             {
                 case BackgroundMessageType.SetCurrentSong:
                     isUpdatingCurrentSong = true;
-                    CurrentSongReceived?.Invoke(this,value);
+                    CurrentSongReceived?.Invoke(this, value);
                     isUpdatingCurrentSong = false;
                     break;
 
                 case BackgroundMessageType.SetIsPlaying:
                     IsPlayingReceived?.Invoke(this, bool.Parse(value));
+                    break;
+
+                case BackgroundMessageType.Ping:
                     break;
             }
         }

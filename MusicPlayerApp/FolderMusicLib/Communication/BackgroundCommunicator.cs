@@ -26,6 +26,10 @@ namespace MusicPlayer.Communication
         {
             BackgroundMediaPlayer.MessageReceivedFromForeground += OnMessageReceived;
             isRunning = true;
+
+            Send(BackgroundMessageType.Ping);
+
+            MobileDebug.Service.WriteEvent("BackComStarted");
         }
 
         public void Stop()
@@ -44,9 +48,14 @@ namespace MusicPlayer.Communication
             Send(BackgroundMessageType.SetCurrentSong, song?.FullPath ?? string.Empty);
         }
 
-        private void Send(BackgroundMessageType type, string value)
+        private void Send(BackgroundMessageType type, string value = "")
         {
-            if (!isRunning) return;
+            if (!isRunning)
+            {
+                MobileDebug.Service.WriteEvent("BackComDontSend", type);
+                return;
+            }
+
             ValueSet vs = new ValueSet()
             {
                 {Constants.TypeKey, type.ToString()},
@@ -106,6 +115,10 @@ namespace MusicPlayer.Communication
 
                 case ForegroundMessageType.Previous:
                     PreviousReceived?.Invoke(this, EventArgs.Empty);
+                    break;
+
+                case ForegroundMessageType.Ping:
+                    Send(BackgroundMessageType.Ping);
                     break;
             }
         }

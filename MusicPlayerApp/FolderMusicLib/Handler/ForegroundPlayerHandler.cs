@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Windows.Media.Playback;
@@ -18,7 +19,7 @@ namespace MusicPlayer.Handler
 {
     public class ForegroundPlayerHandler : INotifyPropertyChanged
     {
-        private bool isPlaying, isUpdatingUiPositionRatio;
+        private bool isStarted, isPlaying, isUpdatingUiPositionRatio, isSettingCurrentSong;
         private int backgroundPlayerStateChangedCount;
         private double positionRatio;
         private TimeSpan duration;
@@ -27,6 +28,18 @@ namespace MusicPlayer.Handler
         private IPlaylist currentPlaylist;
         private readonly DispatcherTimer timer;
         private ForegroundCommunicator communicator;
+
+        public bool IsStarted
+        {
+            get { return isStarted; }
+            private set
+            {
+                if (value == isStarted) return;
+
+                isStarted = value;
+                OnPropertyChanged(nameof(IsStarted));
+            }
+        }
 
         public bool IsPlaying
         {
@@ -89,11 +102,19 @@ namespace MusicPlayer.Handler
                 currentSong = value;
                 OnPropertyChanged(nameof(CurrentSong));
 
-                CurrentPlayerState = MediaPlayerState.Closed;
-                SetPositionAndDurationToView(TimeSpan.Zero, currentSong?.Duration ?? TimeSpan.Zero);
+                try
+                {
+                    isSettingCurrentSong = true;
+                    CurrentPlayerState = MediaPlayerState.Closed;
+                    SetPositionAndDurationToView(TimeSpan.Zero, currentSong?.Duration ?? TimeSpan.Zero);
 
-                communicator.SetSong(value, TimeSpan.Zero);
-                if (value.HasValue) CurrentPlaylist.CurrentSong = value.Value;
+                    communicator.SetSong(value, TimeSpan.Zero);
+                    if (value.HasValue) CurrentPlaylist.CurrentSong = value.Value;
+                }
+                finally
+                {
+                    isSettingCurrentSong = false;
+                }
             }
         }
 
@@ -117,31 +138,59 @@ namespace MusicPlayer.Handler
 
         public ForegroundPlayerHandler(ILibrary library)
         {
-            Library = library;
+            IsStarted = false;
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(300);
             timer.Tick += Timer_Tick;
             communicator = new ForegroundCommunicator();
+            Library = library;
+            CurrentPlaylist = Library.CurrentPlaylist;
         }
 
-        public void Start()
+        public async Task Start()
         {
-            CurrentPlaylist = Library.CurrentPlaylist;
-            CurrentSong = CurrentPlaySong.Current.Song;
-            if (CurrentPlaylist != null) CurrentPlaylist.Loop = CurrentPlaySong.Current.Loop;
+            bool isSynced = IsSynced(Library.CurrentPlaylist, CurrentPlaylistStore.Current.CurrentSong,
+                CurrentPlaylistStore.Current.SongsHash);
+
+            if (isSynced)
+            {
+                CurrentPlaylist = Library.CurrentPlaylist;
+                CurrentSong = CurrentPlaylistStore.Current.CurrentSong;
+
+                if (CurrentPlaylist != null) CurrentPlaylist.Loop = CurrentPlaylistStore.Current.Loop;
+            }
+            else
+            {
+                CurrentPlaylist = Library.CurrentPlaylist;
+                CurrentSong = CurrentPlaylist?.CurrentSong;
+            }
 
             Library.CurrentPlaylistChanged += Library_CurrentPlaylistChanged;
             Subscribe(Library.CurrentPlaylist);
 
             communicator.IsPlayingReceived += Communicator_IsPlayingReceived;
             communicator.CurrentSongReceived += Communicator_CurrentSongReceived;
-            communicator.Start();
+            await communicator.Start();
 
+            if (!isSynced) communicator.SendPlaylist(CurrentPlaylist);
+
+            MobileDebug.Service.WriteEvent("ForeHandler_Start", BackgroundMediaPlayer.Current.CurrentState, isSynced);
             BackgroundMediaPlayer.Current.CurrentStateChanged += BackgroundMediaPlayer_CurrentStateChanged;
             CurrentPlayerState = BackgroundMediaPlayer.Current.CurrentState;
             IsPlaying = BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing;
 
             timer.Start();
+            IsStarted = true;
+        }
+
+        private static bool IsSynced(IPlaylist currentPlaylist, Song? currentSong, string songsHash)
+        {
+            if (currentSong.HasValue ^ currentPlaylist != null) return false;
+
+            IEnumerable<Song> songs = (IEnumerable<Song>)currentPlaylist?.Songs.Shuffle ?? new Song[0];
+            if (songs.All(s => s.FullPath != currentSong?.FullPath)) return false;
+
+            return songsHash == Utils.GetSha256Hash(songs);
         }
 
         public void Stop()
@@ -156,6 +205,7 @@ namespace MusicPlayer.Handler
             Unsubscribe(Library.CurrentPlaylist);
 
             timer.Stop();
+            IsStarted = false;
         }
 
         private void Subscribe(IPlaylist playlist)
@@ -200,6 +250,30 @@ namespace MusicPlayer.Handler
         private void Unsubscribe(IShuffleCollection shuffle)
         {
             if (shuffle != null) shuffle.Changed += Shuffle_Changed;
+        }
+
+        private void Library_CurrentPlaylistChanged(object sender, ChangedEventArgs<IPlaylist> e)
+        {
+            if (e.OldValue != null && BackgroundMediaPlayer.Current.NaturalDuration > TimeSpan.Zero)
+            {
+                e.OldValue.Position = BackgroundMediaPlayer.Current.Position;
+            }
+
+            CurrentPlaylist = e.NewValue;
+
+            if (e.NewValue != null && e.NewValue.CurrentSong.Duration > TimeSpan.Zero)
+            {
+                CurrentPlayerState = MediaPlayerState.Closed;
+                SetPositionAndDurationToView(e.NewValue.Position, e.NewValue.CurrentSong.Duration);
+            }
+        }
+
+        private void Playlist_CurrentSongChanged(object sender, ChangedEventArgs<Song> e)
+        {
+            if (isSettingCurrentSong) return;
+
+            MobileDebug.Service.WriteEvent("ForeHandlerPlaylist_CurrentSongChanged", CurrentPlaylist.CurrentSong, CurrentPlaylist.Position);
+            communicator.SetSong(CurrentPlaylist.CurrentSong, TimeSpan.Zero);
         }
 
         private void Playlist_LoopChanged(object sender, ChangedEventArgs<LoopType> e)
@@ -284,27 +358,6 @@ namespace MusicPlayer.Handler
             {
                 MobileDebug.Service.WriteEvent("ForeHandler_StateChangedError", exc);
             }
-        }
-
-        private void Library_CurrentPlaylistChanged(object sender, ChangedEventArgs<IPlaylist> e)
-        {
-            if (e.OldValue != null && BackgroundMediaPlayer.Current.NaturalDuration > TimeSpan.Zero)
-            {
-                e.OldValue.Position = BackgroundMediaPlayer.Current.Position;
-            }
-
-            CurrentPlaylist = e.NewValue;
-
-            if (e.NewValue != null && e.NewValue.CurrentSong.Duration > TimeSpan.Zero)
-            {
-                CurrentPlayerState = MediaPlayerState.Closed;
-                SetPositionAndDurationToView(e.NewValue.Position, e.NewValue.CurrentSong.Duration);
-            }
-        }
-
-        private void Playlist_CurrentSongChanged(object sender, ChangedEventArgs<Song> e)
-        {
-            communicator.SetSong(CurrentPlaylist.CurrentSong, CurrentPlaylist.Position);
         }
 
         private void Communicator_IsPlayingReceived(object sender, bool e)

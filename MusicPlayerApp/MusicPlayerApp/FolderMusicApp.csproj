@@ -88,11 +88,12 @@
     <Compile Include="Controls\UpdateProgressControl.xaml.cs">
       <DependentUpon>UpdateProgressControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\InvertConverter.cs" />
     <Compile Include="Converters\ValueConverter.cs" />
     <Compile Include="EventArgs\SelectedSongChangedManuellEventArgs.cs" />
     <Compile Include="Converters\DetailIconConverter.cs" />
-    <Compile Include="Converters\IsIndeterminateToHideConverter.cs" />
-    <Compile Include="Converters\IsIndeterminateToShowConverter.cs" />
+    <Compile Include="Converters\IsTrueToCollapsedConverter.cs" />
+    <Compile Include="Converters\IsTrueToVisibleConverter.cs" />
     <Compile Include="Converters\IsNotNullConverter.cs" />
     <Compile Include="Converters\LoopIconConverter.cs" />
     <Compile Include="Converters\MusicPropertiesListConverter.cs" />
