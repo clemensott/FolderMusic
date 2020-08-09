@@ -19,7 +19,7 @@ namespace MusicPlayer.Handler
 {
     public class ForegroundPlayerHandler : INotifyPropertyChanged
     {
-        private bool isStarted, isPlaying, isUpdatingUiPositionRatio, isSettingCurrentSong;
+        private bool isStarting, isStarted, isPlaying, isUpdatingUiPositionRatio, isSettingCurrentSong;
         private int backgroundPlayerStateChangedCount;
         private double positionRatio;
         private TimeSpan duration, oldDuration;
@@ -151,6 +151,9 @@ namespace MusicPlayer.Handler
 
         public async Task Start()
         {
+            if (IsStarted || isStarting) return;
+            isStarting = true;
+
             bool isSynced = IsSynced(Library.CurrentPlaylist, CurrentPlaylistStore.Current.CurrentSong,
                 CurrentPlaylistStore.Current.SongsHash);
 
@@ -176,13 +179,13 @@ namespace MusicPlayer.Handler
 
             if (!isSynced) communicator.SendPlaylist(CurrentPlaylist);
 
-            MobileDebug.Service.WriteEvent("ForeHandler_Start", BackgroundMediaPlayer.Current.CurrentState, isSynced);
             BackgroundMediaPlayer.Current.CurrentStateChanged += BackgroundMediaPlayer_CurrentStateChanged;
             CurrentPlayerState = BackgroundMediaPlayer.Current.CurrentState;
             IsPlaying = BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing;
 
             timer.Start();
             IsStarted = true;
+            isStarting = false;
         }
 
         private static bool IsSynced(IPlaylist currentPlaylist, Song? currentSong, string songsHash)

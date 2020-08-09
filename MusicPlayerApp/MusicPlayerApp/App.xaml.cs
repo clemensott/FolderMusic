@@ -137,15 +137,15 @@ namespace FolderMusic
             MobileDebug.Service.WriteEvent("Window_Activated", e.WindowActivationState);
             switch (e.WindowActivationState)
             {
+                case CoreWindowActivationState.CodeActivated:
+                case CoreWindowActivationState.PointerActivated:
+                    await handler.Start();
+                    break;
+
                 case CoreWindowActivationState.Deactivated:
                     handler.Stop();
                     await Library.Save(libraryDataFileName, handler.Library);
                     await WriteHistoricFrames(frameHistoryService.GetFrames().Reverse().ToArray());
-                    break;
-
-                case CoreWindowActivationState.CodeActivated:
-                case CoreWindowActivationState.PointerActivated:
-                    await handler.Start();
                     break;
             }
         }
