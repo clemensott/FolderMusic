@@ -152,7 +152,7 @@ namespace FolderMusic
 
         private void CurrentSong_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            currentPlaylistSongListView?.ScrollToCurrentSongDirect();
+            currentPlaylistSongListView?.ScrollToCurrentSong();
         }
 
         private void SongListView_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
@@ -179,7 +179,7 @@ namespace FolderMusic
 
         private async void AbbTest1_Click(object sender, RoutedEventArgs e)
         {
-            await new MessageDialog($"{handler.CurrentPlayerState} | {BackgroundMediaPlayer.Current.CurrentState}").ShowAsync();
+            await new MessageDialog(library.Playlists.Count.ToString()).ShowAsync();
         }
     }
 }

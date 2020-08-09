@@ -117,6 +117,11 @@ namespace MusicPlayer.Models.Foreground
             reader.ReadStartElement();
 
             list = XmlConverter.DeserializeList<Playlist>(reader).Cast<IPlaylist>().ToList();
+
+            foreach (IPlaylist playlist in list)
+            {
+                playlist.Songs.Changed += Songs_Changed;
+            }
         }
 
         public void WriteXml(XmlWriter writer)

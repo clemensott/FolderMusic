@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
 using MusicPlayer.Models.Foreground.Interfaces;
+using MusicPlayer.Models.EventArgs;
+using System.Linq;
 
 // Die Elementvorlage "Benutzersteuerelement" ist unter http://go.microsoft.com/fwlink/?LinkId=234236 dokumentiert.
 
@@ -13,7 +14,7 @@ namespace FolderMusic
     public sealed partial class PlaylistsView : UserControl
     {
         public static readonly DependencyProperty CurrentPlaylistProperty =
-            DependencyProperty.Register("CurrentPlaylist", typeof(IPlaylist), typeof(PlaylistsView),
+            DependencyProperty.Register(nameof(CurrentPlaylist), typeof(IPlaylist), typeof(PlaylistsView),
                 new PropertyMetadata(null, OnCurrentPlaylistPropertyChanged));
 
         private static void OnCurrentPlaylistPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
@@ -24,16 +25,20 @@ namespace FolderMusic
         }
 
         public static readonly DependencyProperty PlaylistsProperty =
-            DependencyProperty.Register("Playlists", typeof(IEnumerable<IPlaylist>), typeof(PlaylistsView),
+            DependencyProperty.Register(nameof(Playlists), typeof(IPlaylistCollection), typeof(PlaylistsView),
                 new PropertyMetadata(null, new PropertyChangedCallback(OnPlaylistsPropertyChanged)));
 
         private static void OnPlaylistsPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             PlaylistsView s = (PlaylistsView)sender;
-            IEnumerable<IPlaylist> value = (IEnumerable<IPlaylist>)e.NewValue;
+            IPlaylistCollection oldValue = (IPlaylistCollection)e.OldValue;
+            IPlaylistCollection newValue = (IPlaylistCollection)e.NewValue;
 
-            s.lbxPlaylists.ItemsSource = value;
+            s.lbxPlaylists.ItemsSource = newValue;
             s.SetSelectedPlaylist();
+
+            if (oldValue != null) oldValue.Changed -= s.Playlists_Changed;
+            if (newValue != null) newValue.Changed += s.Playlists_Changed;
         }
 
         private bool isPointerOnDetailIcon;
@@ -49,9 +54,9 @@ namespace FolderMusic
             set { SetValue(CurrentPlaylistProperty, value); }
         }
 
-        public IEnumerable<IPlaylist> Playlists
+        public IPlaylistCollection Playlists
         {
-            get { return (IEnumerable<IPlaylist>)GetValue(PlaylistsProperty); }
+            get { return (IPlaylistCollection)GetValue(PlaylistsProperty); }
             set { SetValue(PlaylistsProperty, value); }
         }
 
@@ -62,9 +67,9 @@ namespace FolderMusic
             isPointerOnDetailIcon = false;
         }
 
-        private void SetSelectedPlaylistSafe()
+        private void Playlists_Changed(object sender, PlaylistCollectionChangedEventArgs e)
         {
-            Utils.DoSafe(SetSelectedPlaylist);
+            lbxPlaylists.ItemsSource = Playlists.ToArray();
         }
 
         private void SetSelectedPlaylist()

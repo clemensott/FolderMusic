@@ -133,17 +133,20 @@ namespace MusicPlayer.UpdateLibrary
 
         private static async Task UpdatePlaylistFast(IPlaylist playlist, IStorageFolder folder, ChildUpdateProgress progress)
         {
+            progress.CurrentStepName = "Fetch Files";
             IReadOnlyList<StorageFile> newFiles = await folder.GetFilesAsync();
             if (progress.CancelToken.IsCanceled) return;
 
+            progress.CurrentStepName = "Load Songs";
             IDictionary<string, Song> oldSongs = playlist.Songs.ToDictionary(s => s.FullPath);
-            IEnumerable<StorageFile> addFiles = newFiles.Where(f => oldSongs.ContainsKey(f.Path));
+            IEnumerable<StorageFile> addFiles = newFiles.Where(f => !oldSongs.ContainsKey(f.Path));
             IEnumerable<Song> addSongs = await GetSongsFromStorageFiles(addFiles.ToArray(), progress);
             if (progress.CancelToken.IsCanceled) return;
 
             IEnumerable<Song> removeSongs = oldSongs.Values
                 .Where(song => newFiles.All(f => f.Path != song.FullPath));
 
+            progress.CurrentStepName = "Update Songs of Playlist";
             playlist.Songs.Change(removeSongs, addSongs);
             progress.CancelToken.Complete();
         }

@@ -16,18 +16,13 @@ using FolderMusic.NavigationParameter;
 using MusicPlayer.Models.Foreground.Interfaces;
 using MusicPlayer.Models.Foreground.Shuffle;
 using MusicPlayer.UpdateLibrary;
+using Windows.UI.Xaml.Media;
+using System.Threading.Tasks;
 
 namespace FolderMusic
 {
     public partial class SongsView : UserControl
     {
-        enum ScrollToType
-        {
-            No,
-            Last,
-            Current
-        }
-
         public static readonly DependencyProperty CurrentSongProperty = DependencyProperty.Register("CurrentSong",
             typeof(Song?), typeof(SongsView), new PropertyMetadata(null, OnCurrentSongPropertyChanged));
 
@@ -49,10 +44,10 @@ namespace FolderMusic
             ISongCollection newSongs = e.NewValue as ISongCollection;
 
             s.OnSourceChanged(oldSongs, newSongs);
-            s.scrollTo = ScrollToType.Last;
         }
 
-        private ScrollToType scrollTo;
+        private bool needScrollToCurrentSong;
+        private ScrollViewer scrollViewer;
 
         public event EventHandler<SelectedSongChangedManuallyEventArgs> SelectedSongChangedManually;
 
@@ -71,11 +66,6 @@ namespace FolderMusic
         public SongsView()
         {
             this.InitializeComponent();
-        }
-
-        private void control_Loaded(object sender, RoutedEventArgs e)
-        {
-            scrollTo = ScrollToType.Last;
         }
 
         protected virtual void OnSourceChanged(ISongCollection oldSongs, ISongCollection newSongs)
@@ -135,20 +125,16 @@ namespace FolderMusic
         {
             lbxSongs.ItemsSource = songs as IList<Song> ?? songs?.ToArray();
             SetSelectedItem();
-            ScrollToCurrentSongDirect();
-        }
-
-        private void SetSelectedItemSafe()
-        {
-            Utils.DoSafe(SetSelectedItem);
+            ScrollToCurrentSong();
         }
 
         private void SetSelectedItem()
         {
             lbxSongs.SelectedItem = CurrentSong;
+            CheckNeedsScrolling();
         }
 
-        private void lbxSongs_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void LbxSongs_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (Source == null || Source.Count == 0) return;
 
@@ -168,25 +154,40 @@ namespace FolderMusic
             }
         }
 
-        public void ScrollToCurrentSongTop()
+        private void LbxSongs_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            try
-            {
-                scrollTo = ScrollToType.Last;
-                lbxSongs.ScrollIntoView(lbxSongs.Items.LastOrDefault());
-                scrollTo = ScrollToType.Current;
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Service.WriteEvent("ScrollToCurrentTopFail", e);
-            }
+            CheckNeedsScrolling();
         }
 
-        public void ScrollToCurrentSongDirect()
+        private void GidItemContainer_Loaded(object sender, RoutedEventArgs e)
+        {
+            CheckNeedsScrolling();
+        }
+
+        private void CheckNeedsScrolling()
+        {
+            if (needScrollToCurrentSong) ScrollToCurrentSong();
+        }
+
+        public async void ScrollToCurrentSong()
         {
             try
             {
-                lbxSongs.ScrollIntoView(CurrentSong);
+                needScrollToCurrentSong = true;
+
+                if (scrollViewer == null && !TryFindScrollView((DependencyObject)lbxSongs, out scrollViewer)) return;
+
+                int index = lbxSongs.Items.IndexOf(CurrentSong);
+                if (index == -1) return;
+
+                double scrollOffset = index;
+                if (scrollOffset > scrollViewer.ScrollableHeight) scrollOffset = scrollViewer.ScrollableHeight;
+                else if (scrollOffset < 0) scrollOffset = 0;
+
+                scrollViewer.ChangeView(null, scrollOffset, null);
+
+                await Task.Delay(100);
+                needScrollToCurrentSong = false;
             }
             catch (Exception e)
             {
@@ -194,30 +195,21 @@ namespace FolderMusic
             }
         }
 
-        private void lbxSongs_LayoutUpdated(object sender, object e)
+        private static bool TryFindScrollView(DependencyObject db, out ScrollViewer sv)
         {
-            if (scrollTo == ScrollToType.No || lbxSongs.Items.Count == 0) return;
-
-            ISongCollection songs = Source;
-
-            if (songs == null)
+            if (db is ScrollViewer)
             {
-                scrollTo = ScrollToType.No;
-                return;
+                sv = (ScrollViewer)db;
+                return true;
             }
 
-            if (lbxSongs.Items.Count < songs.Shuffle.Count) return;
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(db); i++)
+            {
+                if (TryFindScrollView(VisualTreeHelper.GetChild(db, i), out sv)) return true;
+            }
 
-            if (scrollTo == ScrollToType.Current)
-            {
-                lbxSongs.ScrollIntoView(CurrentSong);
-                scrollTo = ScrollToType.No;
-            }
-            else
-            {
-                lbxSongs.ScrollIntoView(lbxSongs.Items.Last());
-                scrollTo = ScrollToType.Current;
-            }
+            sv = null;
+            return false;
         }
 
         private void Song_Holding(object sender, HoldingRoutedEventArgs e)

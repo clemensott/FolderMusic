@@ -24,13 +24,11 @@ namespace MusicPlayer.Communication
             gotAnyMessage = false;
             BackgroundMediaPlayer.MessageReceivedFromBackground += OnMessageReceived;
 
-            MobileDebug.Service.WriteEvent("ForeComStart1");
             while (!gotAnyMessage)
             {
                 Send(ForegroundMessageType.Ping, force: true);
                 await Task.Delay(100);
             }
-            MobileDebug.Service.WriteEvent("ForeComStart2");
 
             isRunning = true;
         }
