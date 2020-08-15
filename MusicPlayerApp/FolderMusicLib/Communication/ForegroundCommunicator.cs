@@ -19,18 +19,32 @@ namespace MusicPlayer.Communication
         public event EventHandler<bool> IsPlayingReceived;
         public event EventHandler<string> CurrentSongReceived;
 
-        public async Task Start()
+        public async Task Start(CancelOperationToken cancelToken)
         {
-            gotAnyMessage = false;
-            BackgroundMediaPlayer.MessageReceivedFromBackground += OnMessageReceived;
-
-            while (!gotAnyMessage)
+            try
             {
-                Send(ForegroundMessageType.Ping, force: true);
-                await Task.Delay(100);
-            }
+                gotAnyMessage = false;
+                BackgroundMediaPlayer.MessageReceivedFromBackground += OnMessageReceived;
 
-            isRunning = true;
+                while (!gotAnyMessage)
+                {
+                    Send(ForegroundMessageType.Ping, force: true);
+                    await Task.Delay(100);
+
+                    if (cancelToken.IsCanceled)
+                    {
+                        Stop();
+                        return;
+                    }
+                }
+
+                isRunning = true;
+            }
+            catch
+            {
+                Stop();
+                throw;
+            }
         }
 
         public void Stop()

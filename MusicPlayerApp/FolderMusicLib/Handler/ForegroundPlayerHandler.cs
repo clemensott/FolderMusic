@@ -28,6 +28,7 @@ namespace MusicPlayer.Handler
         private IPlaylist currentPlaylist;
         private readonly DispatcherTimer timer;
         private ForegroundCommunicator communicator;
+        private CancelOperationToken startToken;
 
         public bool IsStarted
         {
@@ -107,8 +108,6 @@ namespace MusicPlayer.Handler
                     isSettingCurrentSong = true;
 
                     SendCurrentSong(value, TimeSpan.Zero);
-
-                    CurrentPlayerState = MediaPlayerState.Closed;
                     SetPositionAndDurationToView(TimeSpan.Zero, currentSong?.Duration ?? TimeSpan.Zero);
 
                     if (value.HasValue) CurrentPlaylist.CurrentSong = value.Value;
@@ -151,8 +150,8 @@ namespace MusicPlayer.Handler
 
         public async Task Start()
         {
-            if (IsStarted || isStarting) return;
-            isStarting = true;
+            if (startToken != null) return;
+            startToken = new CancelOperationToken();
 
             bool isSynced = IsSynced(Library.CurrentPlaylist, CurrentPlaylistStore.Current.CurrentSong,
                 CurrentPlaylistStore.Current.SongsHash);
@@ -175,7 +174,13 @@ namespace MusicPlayer.Handler
 
             communicator.IsPlayingReceived += Communicator_IsPlayingReceived;
             communicator.CurrentSongReceived += Communicator_CurrentSongReceived;
-            await communicator.Start();
+            await communicator.Start(startToken);
+
+            if (startToken.IsCanceled)
+            {
+                Stop();
+                return;
+            }
 
             if (!isSynced) communicator.SendPlaylist(CurrentPlaylist);
 
@@ -185,7 +190,7 @@ namespace MusicPlayer.Handler
 
             timer.Start();
             IsStarted = true;
-            isStarting = false;
+            startToken.Complete();
         }
 
         private static bool IsSynced(IPlaylist currentPlaylist, Song? currentSong, string songsHash)
@@ -210,6 +215,9 @@ namespace MusicPlayer.Handler
             Unsubscribe(Library.CurrentPlaylist);
 
             timer.Stop();
+
+            startToken?.Cancel();
+            startToken = null;
             IsStarted = false;
         }
 
@@ -268,7 +276,6 @@ namespace MusicPlayer.Handler
 
             if (e.NewValue != null && e.NewValue.CurrentSong.Duration > TimeSpan.Zero)
             {
-                CurrentPlayerState = MediaPlayerState.Closed;
                 SetPositionAndDurationToView(e.NewValue.Position, e.NewValue.CurrentSong.Duration);
             }
         }
