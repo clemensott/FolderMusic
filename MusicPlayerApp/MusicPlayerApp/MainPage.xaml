@@ -16,8 +16,7 @@
         <con:PlayPauseIconConverter x:Key="playPauseIconConverter"/>
         <con:PlayPauseTextConverter x:Key="playPauseTextConverter"/>
         <con:PlayerStateToIsIndeterminateConverter x:Key="playerStateCon"/>
-        <con:IsTrueToVisibleConverter x:Key="toShowConverter"/>
-        <con:InvertConverter x:Key="invertConverter"/>
+        <con:IsTrueToCollapsedConverter x:Key="toColConverter"/>
     </Page.Resources>
 
     <Grid HorizontalAlignment="Stretch">
@@ -36,11 +35,11 @@
                         <local:SongsView Margin="0,-30,0,0" HorizontalAlignment="Stretch" 
                                          CurrentSong="{Binding CurrentSong,Mode=TwoWay}"
                                          Source="{Binding CurrentPlaylist.Songs}" 
-                                         Visibility="{Binding IsStarted,Converter={StaticResource toShowConverter}}"
+                                         Visibility="{Binding IsStarting,Converter={StaticResource toColConverter}}"
                                          DataContextChanged="SongListView_DataContextChanged"/>
 
                         <ProgressRing VerticalAlignment="Center" HorizontalAlignment="Center" Width="200" Height="200"
-                                      IsActive="{Binding IsStarted,Converter={StaticResource invertConverter}}"/>
+                                      IsActive="{Binding IsStarting}"/>
                     </Grid>
                 </DataTemplate>
             </HubSection>

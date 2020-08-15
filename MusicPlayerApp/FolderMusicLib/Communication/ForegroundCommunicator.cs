@@ -9,12 +9,14 @@ using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
 using MusicPlayer.Models.Foreground.Interfaces;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace MusicPlayer.Communication
 {
     class ForegroundCommunicator
     {
-        private bool isRunning, gotAnyMessage, isUpdatingCurrentSong;
+        private bool isRunning, isUpdatingCurrentSong;
+        private SemaphoreSlim waitForMessageSem;
 
         public event EventHandler<bool> IsPlayingReceived;
         public event EventHandler<string> CurrentSongReceived;
@@ -23,19 +25,21 @@ namespace MusicPlayer.Communication
         {
             try
             {
-                gotAnyMessage = false;
+                waitForMessageSem = new SemaphoreSlim(0);
+                Task waitForMessageTask = waitForMessageSem.WaitAsync();
                 BackgroundMediaPlayer.MessageReceivedFromBackground += OnMessageReceived;
 
-                while (!gotAnyMessage)
+                while (true)
                 {
                     Send(ForegroundMessageType.Ping, force: true);
-                    await Task.Delay(100);
+                    await Task.WhenAny(waitForMessageTask, cancelToken.Task, Task.Delay(100));
 
                     if (cancelToken.IsCanceled)
                     {
                         Stop();
                         return;
                     }
+                    if (waitForMessageTask.IsCompleted) break;
                 }
 
                 isRunning = true;
@@ -50,6 +54,7 @@ namespace MusicPlayer.Communication
         public void Stop()
         {
             BackgroundMediaPlayer.MessageReceivedFromForeground -= OnMessageReceived;
+            waitForMessageSem = null;
             isRunning = false;
         }
 
@@ -134,7 +139,7 @@ namespace MusicPlayer.Communication
 
         private async void OnMessageReceived(object sender, MediaPlayerDataReceivedEventArgs e)
         {
-            gotAnyMessage = true;
+            waitForMessageSem?.Release();
 
             BackgroundMessageType type = GetType(e.Data);
             string value = e.Data[Constants.ValueKey].ToString();

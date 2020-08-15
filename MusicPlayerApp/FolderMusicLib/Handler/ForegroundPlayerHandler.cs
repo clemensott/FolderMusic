@@ -30,6 +30,18 @@ namespace MusicPlayer.Handler
         private ForegroundCommunicator communicator;
         private CancelOperationToken startToken;
 
+        public bool IsStarting
+        {
+            get { return isStarting; }
+            private set
+            {
+                if (value == isStarting) return;
+
+                isStarting = value;
+                OnPropertyChanged(nameof(IsStarting));
+            }
+        }
+
         public bool IsStarted
         {
             get { return isStarted; }
@@ -139,6 +151,7 @@ namespace MusicPlayer.Handler
 
         public ForegroundPlayerHandler(ILibrary library)
         {
+            IsStarting = true;
             IsStarted = false;
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(300);
@@ -151,46 +164,54 @@ namespace MusicPlayer.Handler
         public async Task Start()
         {
             if (startToken != null) return;
-            startToken = new CancelOperationToken();
-
-            bool isSynced = IsSynced(Library.CurrentPlaylist, CurrentPlaylistStore.Current.CurrentSong,
-                CurrentPlaylistStore.Current.SongsHash);
-
-            if (isSynced)
+            try
             {
-                CurrentPlaylist = Library.CurrentPlaylist;
-                CurrentSong = CurrentPlaylistStore.Current.CurrentSong;
+                startToken = new CancelOperationToken();
+                IsStarting = true;
 
-                if (CurrentPlaylist != null) CurrentPlaylist.Loop = CurrentPlaylistStore.Current.Loop;
+                bool isSynced = IsSynced(Library.CurrentPlaylist, CurrentPlaylistStore.Current.CurrentSong,
+                    CurrentPlaylistStore.Current.SongsHash);
+
+                if (isSynced)
+                {
+                    CurrentPlaylist = Library.CurrentPlaylist;
+                    CurrentSong = CurrentPlaylistStore.Current.CurrentSong;
+
+                    if (CurrentPlaylist != null) CurrentPlaylist.Loop = CurrentPlaylistStore.Current.Loop;
+                }
+                else
+                {
+                    CurrentPlaylist = Library.CurrentPlaylist;
+                    CurrentSong = CurrentPlaylist?.CurrentSong;
+                }
+
+                Library.CurrentPlaylistChanged += Library_CurrentPlaylistChanged;
+                Subscribe(Library.CurrentPlaylist);
+
+                communicator.IsPlayingReceived += Communicator_IsPlayingReceived;
+                communicator.CurrentSongReceived += Communicator_CurrentSongReceived;
+                await communicator.Start(startToken);
+
+                if (startToken.IsCanceled)
+                {
+                    Stop();
+                    return;
+                }
+
+                if (!isSynced) communicator.SendPlaylist(CurrentPlaylist);
+
+                BackgroundMediaPlayer.Current.CurrentStateChanged += BackgroundMediaPlayer_CurrentStateChanged;
+                CurrentPlayerState = BackgroundMediaPlayer.Current.CurrentState;
+                IsPlaying = BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing;
+
+                timer.Start();
+                IsStarted = true;
+                startToken.Complete();
             }
-            else
+            finally
             {
-                CurrentPlaylist = Library.CurrentPlaylist;
-                CurrentSong = CurrentPlaylist?.CurrentSong;
+                IsStarting = false;
             }
-
-            Library.CurrentPlaylistChanged += Library_CurrentPlaylistChanged;
-            Subscribe(Library.CurrentPlaylist);
-
-            communicator.IsPlayingReceived += Communicator_IsPlayingReceived;
-            communicator.CurrentSongReceived += Communicator_CurrentSongReceived;
-            await communicator.Start(startToken);
-
-            if (startToken.IsCanceled)
-            {
-                Stop();
-                return;
-            }
-
-            if (!isSynced) communicator.SendPlaylist(CurrentPlaylist);
-
-            BackgroundMediaPlayer.Current.CurrentStateChanged += BackgroundMediaPlayer_CurrentStateChanged;
-            CurrentPlayerState = BackgroundMediaPlayer.Current.CurrentState;
-            IsPlaying = BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing;
-
-            timer.Start();
-            IsStarted = true;
-            startToken.Complete();
         }
 
         private static bool IsSynced(IPlaylist currentPlaylist, Song? currentSong, string songsHash)

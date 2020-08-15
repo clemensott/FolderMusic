@@ -3,12 +3,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MusicPlayer
 {
     public class CancelOperationToken : INotifyPropertyChanged
     {
         private readonly ICollection<CancelOperationToken> children;
+        private readonly SemaphoreSlim taskSem;
 
         public event EventHandler<CancelTokenResult> Finished;
 
@@ -18,12 +21,17 @@ namespace MusicPlayer
 
         public CancelTokenResult? Result { get; private set; }
 
+        public Task<CancelTokenResult> Task { get; }
+
         public CancelOperationToken()
         {
             children = new List<CancelOperationToken>();
             IsCanceled = false;
             IsCompleted = false;
             Result = null;
+
+            taskSem = new SemaphoreSlim(0);
+            Task = taskSem.WaitAsync().ContinueWith(_ => Result.Value);
         }
 
         public CancelOperationToken CreateChild()
@@ -61,6 +69,8 @@ namespace MusicPlayer
             {
                 child.Finish(result);
             }
+
+            taskSem.Release();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
