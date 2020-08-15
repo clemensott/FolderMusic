@@ -120,8 +120,6 @@ namespace MusicPlayer.Models.Foreground.Shuffle
             OnPropertyChanged(nameof(Count));
         }
 
-        protected abstract IShuffleCollection GetNewThis(IEnumerable<Song> songs);
-
         public IEnumerator<Song> GetEnumerator()
         {
             return list.GetEnumerator();

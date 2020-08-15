@@ -33,6 +33,7 @@ namespace FolderMusic
         private void SetItemsSource()
         {
             SetItemsSource(Source.OrderBy(s => s.Title).ThenBy(s => s.Artist));
+            ScrollToCurrentSong();
         }
     }
 }

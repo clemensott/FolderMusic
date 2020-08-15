@@ -30,10 +30,5 @@ namespace MusicPlayer.Models.Foreground.Shuffle
         {
             return songs.OrderBy(s => s.FullPath);
         }
-
-        protected override IShuffleCollection GetNewThis(IEnumerable<Song> songs)
-        {
-            return new ShufflePathCollection(parent, songs);
-        }
     }
 }

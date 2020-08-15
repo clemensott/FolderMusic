@@ -9,7 +9,6 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
 using FolderMusic.EventArgs;
-using MusicPlayer;
 using MusicPlayer.Models;
 using MusicPlayer.Models.EventArgs;
 using FolderMusic.NavigationParameter;
@@ -74,6 +73,7 @@ namespace FolderMusic
             Subscribe(newSongs);
 
             SetItemsSource(Source.Shuffle.ToArray());
+            ScrollToCurrentSong();
         }
 
         private void Subscribe(ISongCollection songs)
@@ -114,6 +114,7 @@ namespace FolderMusic
             Subscribe(e.NewShuffleSongs);
 
             SetItemsSource(Source.Shuffle.ToArray());
+            ScrollToCurrentSong();
         }
 
         private void Shuffle_Changed(object sender, ShuffleCollectionChangedEventArgs e)
@@ -125,7 +126,6 @@ namespace FolderMusic
         {
             lbxSongs.ItemsSource = songs as IList<Song> ?? songs?.ToArray();
             SetSelectedItem();
-            ScrollToCurrentSong();
         }
 
         private void SetSelectedItem()
@@ -221,23 +221,18 @@ namespace FolderMusic
 
         private async void ResetSong_Click(object sender, RoutedEventArgs e)
         {
-            Song song = (Song)((MenuFlyoutItem)sender).DataContext;
+            Song oldSong = (Song)((MenuFlyoutItem)sender).DataContext;
 
             try
             {
-                StorageFile file = await StorageFile.GetFileFromPathAsync(song.FullPath);
+                StorageFile file = await StorageFile.GetFileFromPathAsync(oldSong.FullPath);
                 Song? newSong = await UpdateLibraryUtils.LoadSong(file);
                 if (newSong.HasValue)
                 {
-                    Song oldSong;
-                    if (Source.TryGetSong(newSong.Value.FullPath, out oldSong))
+                    if (!Equals(newSong.Value, oldSong))
                     {
-                        if (!Equals(newSong.Value, oldSong))
-                        {
-                            Source.Change(new Song[] { oldSong }, new Song[] { newSong.Value });
-                        }
+                        Source.Change(new Song[] { oldSong }, new Song[] { newSong.Value });
                     }
-                    else await new MessageDialog("Song not found in playlist").ShowAsync();
                 }
                 else await new MessageDialog("Reloading song failed").ShowAsync();
             }

@@ -116,6 +116,18 @@ namespace MusicPlayer
             return enum1.SequenceEqual(enum2);
         }
 
+        public static int IndexOf<TSource>(this IEnumerable<TSource> src, Func<TSource, bool> predicate)
+        {
+            int index = 0;
+            foreach (TSource item in src)
+            {
+                if (predicate(item)) return index;
+                index++;
+            }
+
+            return -1;
+        }
+
         public static bool TryFirst<TSource>(this IEnumerable<TSource> src, Func<TSource, bool> predicate,
             out TSource first)
         {

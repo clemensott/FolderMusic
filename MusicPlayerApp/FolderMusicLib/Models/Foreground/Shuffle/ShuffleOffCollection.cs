@@ -30,10 +30,5 @@ namespace MusicPlayer.Models.Foreground.Shuffle
         {
             return songs.OrderBy(s => s.Title).ThenBy(s => s.Artist);
         }
-
-        protected override IShuffleCollection GetNewThis(IEnumerable<Song> songs)
-        {
-            return new ShuffleOffCollection(parent, songs);
-        }
     }
 }
