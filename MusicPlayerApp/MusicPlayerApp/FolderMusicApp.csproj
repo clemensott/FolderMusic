@@ -85,6 +85,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\PlaybackRatesListControl.xaml.cs">
+      <DependentUpon>PlaybackRatesListControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\UpdateProgressControl.xaml.cs">
       <DependentUpon>UpdateProgressControl.xaml</DependentUpon>
     </Compile>
@@ -156,7 +159,8 @@
     <Compile Include="UpdateProgressPage.xaml.cs">
       <DependentUpon>UpdateProgressPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Utils.cs" />
+    <Compile Include="Utils\Util.cs" />
+    <Compile Include="Utils\PlaybackRateSelectionDialog.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -200,6 +204,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="Controls\IListStringControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\PlaybackRatesListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

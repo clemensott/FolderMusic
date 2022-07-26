@@ -247,6 +247,7 @@ namespace MusicPlayer.Handler
             if (playlist == null) return;
 
             playlist.CurrentSongChanged += Playlist_CurrentSongChanged;
+            playlist.PlaybackRateChanged += Playlist_PlaybackRateChanged;
             playlist.LoopChanged += Playlist_LoopChanged;
             Subscribe(playlist.Songs);
         }
@@ -307,6 +308,11 @@ namespace MusicPlayer.Handler
 
             MobileDebug.Service.WriteEvent("ForeHandlerPlaylist_CurrentSongChanged", CurrentPlaylist.CurrentSong, CurrentPlaylist.Position);
             SendCurrentSong(CurrentPlaylist.CurrentSong, TimeSpan.Zero);
+        }
+
+        private void Playlist_PlaybackRateChanged(object sender, ChangedEventArgs<double> e)
+        {
+            communicator.SendPlaybackRate(e.NewValue);
         }
 
         private void Playlist_LoopChanged(object sender, ChangedEventArgs<LoopType> e)

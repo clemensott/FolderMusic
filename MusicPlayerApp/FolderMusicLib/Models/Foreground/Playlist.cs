@@ -16,10 +16,12 @@ namespace MusicPlayer.Models.Foreground
         private const string emptyName = "None", emptyOrLoadingPath = "None";
 
         private TimeSpan position;
+        private double playbackRate;
         private Song currentSong;
         private LoopType loop;
 
         public event EventHandler<ChangedEventArgs<Song>> CurrentSongChanged;
+        public event EventHandler<ChangedEventArgs<double>> PlaybackRateChanged;
         public event EventHandler<ChangedEventArgs<TimeSpan>> PositionChanged;
         public event EventHandler<ChangedEventArgs<LoopType>> LoopChanged;
 
@@ -52,6 +54,20 @@ namespace MusicPlayer.Models.Foreground
                 currentSong = value;
                 CurrentSongChanged?.Invoke(this, args);
                 OnPropertyChanged(nameof(CurrentSong));
+            }
+        }
+
+        public double PlaybackRate
+        {
+            get { return playbackRate; }
+            set
+            {
+                if (value == playbackRate) return;
+
+                ChangedEventArgs<double> args = new ChangedEventArgs<double>(playbackRate, value);
+                playbackRate = value;
+                PlaybackRateChanged?.Invoke(this, args);
+                OnPropertyChanged(nameof(PlaybackRate));
             }
         }
 
@@ -131,8 +147,11 @@ namespace MusicPlayer.Models.Foreground
                 ? TimeSpan.Zero
                 : TimeSpan.FromTicks(long.Parse(rawPosition));
 
+            string rawPlaybackRate = reader.GetAttribute(nameof(PlaybackRate));
+
             AbsolutePath = reader.GetAttribute(nameof(AbsolutePath)) ?? emptyOrLoadingPath;
             Name = reader.GetAttribute(nameof(Name)) ?? emptyName;
+            PlaybackRate = string.IsNullOrWhiteSpace(rawPlaybackRate) ? 1 : double.Parse(rawPlaybackRate);
             Loop = (LoopType)Enum.Parse(typeof(LoopType), reader.GetAttribute(nameof(Loop)) ?? LoopType.Off.ToString());
 
             string currentSongPath = reader.GetAttribute(nameof(CurrentSong)) ?? string.Empty;
@@ -153,7 +172,8 @@ namespace MusicPlayer.Models.Foreground
         {
             writer.WriteAttributeString(nameof(AbsolutePath), AbsolutePath);
             writer.WriteAttributeString(nameof(CurrentSong), CurrentSong.FullPath);
-            writer.WriteAttributeString(nameof(Position), position.Ticks.ToString());
+            writer.WriteAttributeString(nameof(Position), Position.Ticks.ToString());
+            writer.WriteAttributeString(nameof(PlaybackRate), PlaybackRate.ToString());
             writer.WriteAttributeString(nameof(Loop), Loop.ToString());
             writer.WriteAttributeString(nameof(Name), Name);
 

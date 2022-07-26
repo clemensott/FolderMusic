@@ -3,12 +3,16 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using FolderMusic.Converters;
+using MusicPlayer;
+using System.Threading.Tasks;
+using FolderMusic.Utils;
 
 namespace FolderMusic
 {
     public sealed partial class Slider : UserControl
     {
         private const double zoomWidth = 0.1;
+        private static double[] playbackRates = new double[] { 0.5, 0.75, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2, 2.25, 2.5 };
 
         public static readonly DependencyProperty IsIndeterminateProperty =
             DependencyProperty.Register("IsIndeterminate", typeof(bool),
@@ -67,7 +71,11 @@ namespace FolderMusic
             }
         }
 
+        public static readonly DependencyProperty PlaybackRateProperty = DependencyProperty
+            .Register(nameof(PlaybackRate), typeof(double), typeof(Slider), new PropertyMetadata(default(double)));
+
         private bool playerPositionEnabled = true;
+        private int currentTblPlaybackRateTransitionId = 0;
 
         public bool IsIndeterminate
         {
@@ -99,6 +107,12 @@ namespace FolderMusic
             set { SetValue(DurationProperty, value); }
         }
 
+        public double PlaybackRate
+        {
+            get { return (double)GetValue(PlaybackRateProperty); }
+            set { SetValue(PlaybackRateProperty, value); }
+        }
+
         public Slider()
         {
             this.InitializeComponent();
@@ -111,6 +125,12 @@ namespace FolderMusic
             while (highestParent.Parent is FrameworkElement) highestParent = (FrameworkElement)highestParent.Parent;
 
             highestParent.PointerExited += HighestParent_PointerExited;
+        }
+
+        private object PlaybackRateConverter_ConvertEvent(object value, Type targetType, object parameter, string language)
+        {
+            double playbackRate = (double)value;
+            return string.Format("{0,2}x", playbackRate);
         }
 
         private void sld_PointerEntered(object sender, PointerRoutedEventArgs e)
@@ -145,6 +165,40 @@ namespace FolderMusic
             tblBegin.Text = TimeSpanConverter.Convert(beginTime);
             tblEnd.Text = TimeSpanConverter.Convert(endTime);
             tblBegin.Visibility = tblEnd.Visibility = Visibility.Visible;
+        }
+
+        private void TblViewPosition_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            int index = playbackRates.IndexOf(PlaybackRate);
+            if (index > 0)
+            {
+                PlaybackRate = playbackRates[index - 1];
+            }
+        }
+
+        private void TblViewDuration_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            int index = playbackRates.IndexOf(PlaybackRate);
+            if (index + 1 < playbackRates.Length)
+            {
+                PlaybackRate = playbackRates[index + 1];
+            }
+        }
+
+        private async void TblPlaybackRate_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            try
+            {
+                double? newPlaybackRate = await PlaybackRateSelectionDialog.Start(playbackRates, PlaybackRate);
+                if (newPlaybackRate.HasValue)
+                {
+                    PlaybackRate = newPlaybackRate.Value;
+                }
+            }
+            catch (Exception exc)
+            {
+                await new Windows.UI.Popups.MessageDialog(exc.ToString(), "select playback rate error").ShowAsync();
+            }
         }
     }
 }

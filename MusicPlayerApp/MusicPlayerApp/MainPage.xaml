@@ -104,7 +104,8 @@
             <local:Slider Grid.Column="1" VerticalAlignment="Bottom"
                           IsIndeterminate="{Binding CurrentPlayerState,Converter={StaticResource playerStateCon}}"
                           PositionRatio="{Binding PositionRatio,Mode=TwoWay}" 
-                          Duration="{Binding Duration}"/>
+                          Duration="{Binding Duration}"
+                          PlaybackRate="{Binding CurrentPlaylist.PlaybackRate,Mode=TwoWay}"/>
 
             <Grid Grid.Column="2" DataContext="{Binding CurrentPlaylist}">
                 <Grid.Resources>

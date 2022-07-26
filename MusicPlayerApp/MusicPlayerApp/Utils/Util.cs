@@ -4,7 +4,7 @@ using Windows.UI.Core;
 
 namespace FolderMusic
 {
-    static class Utils
+    static class Util
     {
         public static async void DoSafe(DispatchedHandler handler)
         {

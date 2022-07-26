@@ -16,6 +16,8 @@
         <con:IsTrueToCollapsedConverter x:Key="toHideConverter"/>
         <con:IsTrueToVisibleConverter x:Key="toShowConverter"/>
         <con:TimeSpanConverter x:Key="timeCon"/>
+        <con:ValueConverter x:Key="playbackRateCon"
+                            ConvertEvent="PlaybackRateConverter_ConvertEvent" />
     </UserControl.Resources>
 
     <Grid>
@@ -41,9 +43,27 @@
                      Visibility="{Binding ElementName=control,Path=IsIndeterminate,
                        Converter={StaticResource toShowConverter}}"/>
 
-        <TextBlock Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" FontSize="20"
-                   Text="{Binding ElementName=control,Path=ViewPosition,Converter={StaticResource timeCon}}"/>
-        <TextBlock Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="20"
-                   Text="{Binding ElementName=control,Path=Duration,Converter={StaticResource timeCon}}"/>
+        <Grid Grid.Row="2" Background="Transparent" Margin="0,3,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" VerticalAlignment="Stretch" FontSize="20"
+                       Text="{Binding ElementName=control,Path=ViewPosition,Converter={StaticResource timeCon}}"
+                       DoubleTapped="TblViewPosition_DoubleTapped"/>
+            <TextBlock Grid.Column="1" VerticalAlignment="Stretch" FontSize="20" Margin="3,0" Text="/"/>
+            <TextBlock Grid.Column="2" VerticalAlignment="Stretch" FontSize="20"
+                       Text="{Binding ElementName=control,Path=Duration,Converter={StaticResource timeCon}}"
+                       DoubleTapped="TblViewDuration_DoubleTapped"/>
+
+            <TextBlock Grid.Column="4" Name="tblPlaybackRate" VerticalAlignment="Stretch" FontSize="20"
+                       Text="{Binding ElementName=control,Path=PlaybackRate,Converter={StaticResource playbackRateCon}}"
+                       Tapped="TblPlaybackRate_Tapped"/>
+        </Grid>
     </Grid>
 </UserControl>

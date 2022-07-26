@@ -16,6 +16,7 @@ namespace MusicPlayer.Communication
         public event EventHandler<TimeSpan> PositionReceived;
         public event EventHandler<PlaylistReceivedEventArgs> PlaylistReceived;
         public event EventHandler<Song[]> SongsReceived;
+        public event EventHandler<double> PlaybackRateReceived;
         public event EventHandler<LoopType> LoopReceived;
         public event EventHandler PlayReceived;
         public event EventHandler PauseReceived;
@@ -88,6 +89,7 @@ namespace MusicPlayer.Communication
                     PlaylistReceived?.Invoke(this, new PlaylistReceivedEventArgs(
                         playlistMessage.CurrentSong,
                         TimeSpan.FromTicks(playlistMessage.PositionTicks),
+                        playlistMessage.PlaybackRate,
                         playlistMessage.Loop,
                         playlistMessage.Songs
                     ));
@@ -95,6 +97,10 @@ namespace MusicPlayer.Communication
 
                 case ForegroundMessageType.SetSongs:
                     SongsReceived?.Invoke(this, XmlConverter.Deserialize<Song[]>(value));
+                    break;
+
+                case ForegroundMessageType.SetPlaybackRate:
+                    PlaybackRateReceived?.Invoke(this, double.Parse(value));
                     break;
 
                 case ForegroundMessageType.SetLoop:

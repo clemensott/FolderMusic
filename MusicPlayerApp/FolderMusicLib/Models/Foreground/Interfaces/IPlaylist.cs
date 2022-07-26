@@ -10,12 +10,14 @@ namespace MusicPlayer.Models.Foreground.Interfaces
     public interface IPlaylist : INotifyPropertyChanged, IXmlSerializable
     {
         event EventHandler<ChangedEventArgs<Song>> CurrentSongChanged;
+        event EventHandler<ChangedEventArgs<double>> PlaybackRateChanged;
         event EventHandler<ChangedEventArgs<TimeSpan>> PositionChanged;
         event EventHandler<ChangedEventArgs<LoopType>> LoopChanged;
 
         string AbsolutePath { get; }
         Song CurrentSong { get; set; }
         TimeSpan Position { get; set; }
+        double PlaybackRate { get; set; }
         LoopType Loop { get; set; }
         string Name { get; }
         ISongCollection Songs { get; }

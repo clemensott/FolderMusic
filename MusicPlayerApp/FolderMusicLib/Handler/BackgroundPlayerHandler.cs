@@ -16,6 +16,7 @@ namespace MusicPlayer.Handler
 
         private bool isPlaying, playNext = true, mediaEndedHappened;
         private int failedCount, setSongCount;
+        private double playbackRate;
         private LoopType loop;
         private Song openSong;
         private Song? currentSong;
@@ -27,6 +28,7 @@ namespace MusicPlayer.Handler
 
         public event EventHandler<ChangedEventArgs<Song?>> CurrentSongChanged;
         public event EventHandler<ChangedEventArgs<Song[]>> SongsChanged;
+        public event EventHandler<ChangedEventArgs<double>> PlaybackRateChanged;
         public event EventHandler<ChangedEventArgs<LoopType>> LoopChanged;
 
         public bool IsPlaying
@@ -71,6 +73,21 @@ namespace MusicPlayer.Handler
             }
         }
 
+        public double PlaybackRate
+        {
+            get { return playbackRate; }
+            set
+            {
+                if (value == playbackRate) return;
+
+                ChangedEventArgs<double> args = new ChangedEventArgs<double>(playbackRate, value);
+                playbackRate = value;
+                PlaybackRateChanged?.Invoke(this, args);
+
+                BackgroundMediaPlayer.Current.PlaybackRate = playbackRate;
+            }
+        }
+
         public LoopType Loop
         {
             get { return loop; }
@@ -86,8 +103,8 @@ namespace MusicPlayer.Handler
             }
         }
 
-        public BackgroundPlayerHandler(Song? currentSong,
-            TimeSpan position, LoopType loop, Song[] songs)
+        public BackgroundPlayerHandler(Song? currentSong, TimeSpan position,
+            double playbackRate, LoopType loop, Song[] songs)
         {
             communicator = new BackgroundCommunicator();
 
@@ -96,6 +113,7 @@ namespace MusicPlayer.Handler
 
             CurrentSong = currentSong;
             Position = position;
+            PlaybackRate = playbackRate;
             Loop = loop;
             Songs = songs ?? new Song[0];
         }
@@ -109,6 +127,7 @@ namespace MusicPlayer.Handler
             communicator.PositionReceived += Communicator_PositionReceived;
             communicator.PlaylistReceived += Communicator_PlaylistReceived;
             communicator.SongsReceived += Communicator_SongsReceived;
+            communicator.PlaybackRateReceived += Communicator_PlaybackRateReceived;
             communicator.LoopReceived += Communicator_LoopReceived;
             communicator.PlayReceived += Communicator_PlayReceived;
             communicator.PauseReceived += Communicator_PauseReceived;
@@ -187,6 +206,7 @@ namespace MusicPlayer.Handler
 
         private async void Communicator_PlaylistReceived(object sender, PlaylistReceivedEventArgs e)
         {
+            PlaybackRate = e.PlaybackRate;
             Loop = e.Loop;
             Songs = e.Songs;
             await SetSong(e.CurrentSong, e.Position);
@@ -202,6 +222,11 @@ namespace MusicPlayer.Handler
 
             currentSong = newCurrentSong;
             UpdateSystemMediaTransportControl();
+        }
+
+        private void Communicator_PlaybackRateReceived(object sender, double e)
+        {
+            PlaybackRate = e;
         }
 
         private void Communicator_LoopReceived(object sender, LoopType e)
@@ -277,6 +302,8 @@ namespace MusicPlayer.Handler
             setPositionTime = DateTime.Now;
             setPositionPosition = Position;
             if (setPositionPosition > TimeSpan.Zero) sender.Position = setPositionPosition;
+
+            sender.PlaybackRate = PlaybackRate;
 
             if (IsPlaying)
             {

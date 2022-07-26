@@ -33,6 +33,12 @@ namespace MusicPlayer.Models
             set { SetValue(nameof(CurrentSong), Utils.XmlSerialize(value)); }
         }
 
+        public double PlaybackRate
+        {
+            get { return GetValue<double>(nameof(PlaybackRate), 1); }
+            set { SetValue(nameof(PlaybackRate), value); }
+        }
+
         public LoopType Loop
         {
             get { return (LoopType)GetValue<byte>(nameof(Loop)); }

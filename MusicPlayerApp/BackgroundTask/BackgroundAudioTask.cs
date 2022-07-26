@@ -51,9 +51,11 @@ namespace BackgroundTask
 
                 Song? song = CurrentPlaylistStore.Current.CurrentSong;
                 TimeSpan position = TimeSpan.FromTicks(CurrentPlaylistStore.Current.PositionTicks);
+                double playbackRate = CurrentPlaylistStore.Current.PlaybackRate;
                 LoopType loop = CurrentPlaylistStore.Current.Loop;
-                musicPlayer = new BackgroundPlayerHandler(song, position, loop, songs);
+                musicPlayer = new BackgroundPlayerHandler(song, position, playbackRate, loop, songs);
                 musicPlayer.CurrentSongChanged += MusicPlayer_CurrentSongChanged;
+                musicPlayer.PlaybackRateChanged += MusicPlayer_PlaybackRateChanged;
                 musicPlayer.LoopChanged += MusicPlayer_LoopChanged;
                 musicPlayer.SongsChanged += MusicPlayer_SongsChanged;
                 await musicPlayer.Start();
@@ -79,6 +81,11 @@ namespace BackgroundTask
         private static void Timer_Tick(object state)
         {
             CurrentPlaylistStore.Current.PositionTicks = BackgroundMediaPlayer.Current.Position.Ticks;
+        }
+
+        private void MusicPlayer_PlaybackRateChanged(object sender, ChangedEventArgs<double> e)
+        {
+            CurrentPlaylistStore.Current.PlaybackRate = e.NewValue;
         }
 
         private static void MusicPlayer_LoopChanged(object sender, ChangedEventArgs<LoopType> e)

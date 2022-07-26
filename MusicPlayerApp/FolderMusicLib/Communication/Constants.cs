@@ -6,6 +6,7 @@
         SetPosition,
         SetPlaylist,
         SetSongs,
+        SetPlaybackRate,
         SetLoop,
         Play,
         Pause,

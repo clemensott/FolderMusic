@@ -64,10 +64,16 @@ namespace MusicPlayer.Communication
             {
                 PositionTicks = playlist?.Position.Ticks ?? 0,
                 CurrentSong = playlist?.CurrentSong,
+                PlaybackRate = playlist?.PlaybackRate ?? 1,
                 Loop = playlist?.Loop ?? LoopType.Off,
                 Songs = playlist?.Songs.Shuffle.ToArray() ?? new Song[0],
             };
             Send(ForegroundMessageType.SetPlaylist, XmlConverter.Serialize(message));
+        }
+
+        public void SendPlaybackRate(double playbackRate)
+        {
+            Send(ForegroundMessageType.SetPlaybackRate, playbackRate.ToString());
         }
 
         public void SendLoop(LoopType loop)
