@@ -1,15 +1,12 @@
 ﻿using MusicPlayer;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
-using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
 using MusicPlayer.Handler;
 using Windows.UI.Popups;
-using Windows.Media.Playback;
 using FolderMusic.NavigationParameter;
 using MusicPlayer.Models.Foreground.Interfaces;
 using MusicPlayer.UpdateLibrary;
@@ -18,6 +15,8 @@ namespace FolderMusic
 {
     public sealed partial class MainPage : Page
     {
+        private const double timeOffsetFactor = 20;
+
         private bool loopImageEntered = false, shuffleImageEntered = false;
         private ForegroundPlayerHandler handler;
         private ILibrary library;
@@ -172,9 +171,47 @@ namespace FolderMusic
             }
         }
 
-        private void hub_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        private void Hub_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
             Frame.Navigate(typeof(LockPage));
+        }
+
+        private void CurrentSong_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
+        {
+            if (library.CurrentPlaylist == null)
+            {
+                return;
+            }
+
+            double cumX = e.Cumulative.Translation.X;
+            double cumY = e.Cumulative.Translation.Y;
+            int totalSeconds = (int)(cumX / timeOffsetFactor);
+            int seconds = totalSeconds % 60;
+            int minutes = (totalSeconds - seconds) / 60;
+
+            tblTimeOffset.Text = string.Format("{0}{1}:{2:00}",
+                cumX < 0 ? "-" : "", Math.Abs(minutes), Math.Abs(seconds));
+            gidTimeOffset.Visibility = Math.Abs(cumY) < Math.Abs(cumX) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void CurrentSong_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
+        {
+            if (library.CurrentPlaylist == null)
+            {
+                return;
+            }
+
+            double cumX = e.Cumulative.Translation.X;
+            double cumY = e.Cumulative.Translation.Y;
+            double totalSeconds = cumX / timeOffsetFactor;
+
+            if (Math.Abs(cumY) < Math.Abs(cumX))
+            {
+                double ratioDelta = totalSeconds / library.CurrentPlaylist.CurrentSong.Duration.TotalSeconds;
+                handler.PositionRatio += ratioDelta;
+            }
+
+            gidTimeOffset.Visibility = Visibility.Collapsed;
         }
 
         private async void AbbTest1_Click(object sender, RoutedEventArgs e)
