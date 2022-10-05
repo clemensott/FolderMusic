@@ -62,6 +62,10 @@ namespace MusicPlayer.Models.Foreground
             get { return playbackRate; }
             set
             {
+                if (value < 0.1 || value > 5)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(PlaybackRate), "PlaybackRate must be between 0.1 and 5.0");
+                }
                 if (value == playbackRate) return;
 
                 ChangedEventArgs<double> args = new ChangedEventArgs<double>(playbackRate, value);
@@ -95,6 +99,7 @@ namespace MusicPlayer.Models.Foreground
             Songs = new SongCollection();
             Songs.Changed += Songs_Changed;
             Loop = LoopType.Off;
+            PlaybackRate = 1;
         }
 
         public Playlist(string path) : this()
@@ -148,10 +153,11 @@ namespace MusicPlayer.Models.Foreground
                 : TimeSpan.FromTicks(long.Parse(rawPosition));
 
             string rawPlaybackRate = reader.GetAttribute(nameof(PlaybackRate));
+            double playbackRate = string.IsNullOrWhiteSpace(rawPlaybackRate) ? 1 : double.Parse(rawPlaybackRate);
 
             AbsolutePath = reader.GetAttribute(nameof(AbsolutePath)) ?? emptyOrLoadingPath;
             Name = reader.GetAttribute(nameof(Name)) ?? emptyName;
-            PlaybackRate = string.IsNullOrWhiteSpace(rawPlaybackRate) ? 1 : double.Parse(rawPlaybackRate);
+            PlaybackRate = playbackRate < 0.5 ? 1 : playbackRate;
             Loop = (LoopType)Enum.Parse(typeof(LoopType), reader.GetAttribute(nameof(Loop)) ?? LoopType.Off.ToString());
 
             string currentSongPath = reader.GetAttribute(nameof(CurrentSong)) ?? string.Empty;
