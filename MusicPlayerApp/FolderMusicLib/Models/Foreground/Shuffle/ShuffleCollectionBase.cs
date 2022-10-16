@@ -87,18 +87,14 @@ namespace MusicPlayer.Models.Foreground.Shuffle
             {
                 int index = list.IndexOf(song);
 
-                if (index == -1) continue;
-
-                removeChanges.Add(new ChangeCollectionItem<Song>(index, song));
+                if (index != -1) removeChanges.Add(new ChangeCollectionItem<Song>(index, song));
             }
 
             foreach (ChangeCollectionItem<Song> change in addArray)
             {
                 int index = list.IndexOf(change.Item);
 
-                if (index == -1) continue;
-
-                removeChanges.Add(new ChangeCollectionItem<Song>(index, change.Item));
+                if (index != -1) removeChanges.Add(new ChangeCollectionItem<Song>(index, change.Item));
             }
 
             foreach (ChangeCollectionItem<Song> change in removeChanges) list.Remove(change.Item);

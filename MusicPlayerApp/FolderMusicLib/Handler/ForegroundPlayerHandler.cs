@@ -284,7 +284,7 @@ namespace MusicPlayer.Handler
 
         private void Unsubscribe(IShuffleCollection shuffle)
         {
-            if (shuffle != null) shuffle.Changed += Shuffle_Changed;
+            if (shuffle != null) shuffle.Changed -= Shuffle_Changed;
         }
 
         private void Library_CurrentPlaylistChanged(object sender, ChangedEventArgs<IPlaylist> e)

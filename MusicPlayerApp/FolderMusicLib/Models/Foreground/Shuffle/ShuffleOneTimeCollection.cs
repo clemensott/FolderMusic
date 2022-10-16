@@ -32,7 +32,7 @@ namespace MusicPlayer.Models.Foreground.Shuffle
                 {
                     index = rnd.Next(Count - e.RemovedSongs.Length + adds.Count);
                 }
-                while (adds.All(a => a.Index != index));
+                while (adds.Any(a => a.Index == index));
 
                 adds.Add(new ChangeCollectionItem<Song>(index, addSong));
             }

@@ -135,6 +135,7 @@ namespace MusicPlayer.UpdateLibrary
         {
             progress.CurrentStepName = "Fetch Files";
             IReadOnlyList<StorageFile> newFiles = await folder.GetFilesAsync();
+            IDictionary<string, StorageFile> newFilesDict = newFiles.ToDictionary(file => file.Path);
             if (progress.CancelToken.IsCanceled) return;
 
             progress.CurrentStepName = "Load Songs";
@@ -144,7 +145,7 @@ namespace MusicPlayer.UpdateLibrary
             if (progress.CancelToken.IsCanceled) return;
 
             IEnumerable<Song> removeSongs = oldSongs.Values
-                .Where(song => newFiles.All(f => f.Path != song.FullPath));
+                .Where(song => !newFilesDict.ContainsKey(song.FullPath));
 
             progress.CurrentStepName = "Update Songs of Playlist";
             playlist.Songs.Change(removeSongs, addSongs);
