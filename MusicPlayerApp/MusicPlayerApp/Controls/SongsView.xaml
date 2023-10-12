@@ -9,11 +9,11 @@
     mc:Ignorable="d"
     d:DesignHeight="800"
     d:DesignWidth="400"
-    x:Name="control"
-    Loaded="control_Loaded">
+    x:Name="control">
 
-    <ListBox x:Name="lbxSongs" Background="Transparent" HorizontalAlignment="Stretch" SelectionMode="Single"
-             SelectionChanged="lbxSongs_SelectionChanged" LayoutUpdated="lbxSongs_LayoutUpdated">
+    <ListBox x:Name="lbxSongs" Background="Transparent" HorizontalAlignment="Stretch"
+             SelectionMode="Single" SelectionChanged="LbxSongs_SelectionChanged"
+             SizeChanged="LbxSongs_SizeChanged">
         <ListBox.ItemContainerStyle>
             <Style TargetType="ListBoxItem">
                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -21,11 +21,10 @@
         </ListBox.ItemContainerStyle>
         <ListBox.ItemTemplate>
             <DataTemplate>
-                <Grid x:Name="grid" Holding="Song_Holding">
+                <Grid x:Name="grid" Holding="Song_Holding" Loaded="GidItemContainer_Loaded">
                     <FlyoutBase.AttachedFlyout>
                         <MenuFlyout>
                             <MenuFlyoutItem Text="Reset" Click="ResetSong_Click"/>
-                            <MenuFlyoutItem Text="Remove" Click="RemoveSong_Click"/>
                             <MenuFlyoutItem Text="Delete" Click="DeleteSong_Click"/>
                             <MenuFlyoutItem Text="Edit" Click="EditSong_Click"/>
                         </MenuFlyout>

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using MusicPlayer.Models;
-using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Models.Foreground.Interfaces;
 
 namespace FolderMusic
 {
@@ -17,39 +17,15 @@ namespace FolderMusic
 
         private void Subscribe(ISongCollection songs)
         {
-            if (songs == null) return;
-
-            songs.Changed += OnSomethingChanged;
-
-            foreach (Song song in songs) Subscribe(song);
+            if (songs != null) songs.Changed += OnSomethingChanged;
         }
 
         private void Unsubscribe(ISongCollection songs)
         {
-            if (songs == null) return;
-
-            songs.Changed -= OnSomethingChanged;
-
-            foreach (Song song in songs) Unsubscribe(song);
+            if (songs != null) songs.Changed -= OnSomethingChanged;
         }
 
-        private void Subscribe(Song song)
-        {
-            if (song == null) return;
-
-            song.ArtistChanged += OnSomethingChanged;
-            song.TitleChanged += OnSomethingChanged;
-        }
-
-        private void Unsubscribe(Song song)
-        {
-            if (song == null) return;
-
-            song.ArtistChanged -= OnSomethingChanged;
-            song.TitleChanged -= OnSomethingChanged;
-        }
-
-        private void OnSomethingChanged(object sender, EventArgs e)
+        private void OnSomethingChanged(object sender, System.EventArgs e)
         {
             SetItemsSource();
         }
@@ -57,6 +33,7 @@ namespace FolderMusic
         private void SetItemsSource()
         {
             SetItemsSource(Source.OrderBy(s => s.Title).ThenBy(s => s.Artist));
+            ScrollToCurrentSong();
         }
     }
 }

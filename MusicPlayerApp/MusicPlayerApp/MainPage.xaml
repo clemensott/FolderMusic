@@ -11,12 +11,12 @@
     Loaded="Page_Loaded">
 
     <Page.Resources>
-        <con:MillisToTimeSpanConverter x:Key="millisCon"/>
         <con:ShuffleIconConverter x:Key="shuffleConverter"/>
         <con:LoopIconConverter x:Key="loopConverter"/>
         <con:PlayPauseIconConverter x:Key="playPauseIconConverter"/>
         <con:PlayPauseTextConverter x:Key="playPauseTextConverter"/>
         <con:PlayerStateToIsIndeterminateConverter x:Key="playerStateCon"/>
+        <con:IsTrueToCollapsedConverter x:Key="toColConverter"/>
     </Page.Resources>
 
     <Grid HorizontalAlignment="Stretch">
@@ -26,43 +26,58 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Hub Grid.Row="0" Name="hub" Header="FolderMusic" Style="{StaticResource HHeader}" 
-             Margin="0,5,0,0" HorizontalAlignment="Stretch" DoubleTapped="hub_DoubleTapped">
+        <Hub Grid.Row="0" Header="FolderMusic" Style="{StaticResource HHeader}" Margin="0,5,0,0"
+             HorizontalAlignment="Stretch" DoubleTapped="Hub_DoubleTapped">
             <HubSection Background="Transparent" Margin="0,-10,0,0" HorizontalAlignment="Stretch"
-                        DataContext="{Binding CurrentPlaylist}" Header="{Binding Name}" Style="{StaticResource HSHeader}">
+                        Header="{Binding CurrentPlaylist.Name,FallbackValue=Loading}" Style="{StaticResource HSHeader}">
                 <DataTemplate>
-                    <local:SongsView Margin="0,-30,0,0" HorizontalAlignment="Stretch" CurrentSong="{Binding CurrentSong,Mode=TwoWay}"
-                                     Source="{Binding Songs}" DataContextChanged="SongListView_DataContextChanged"/>
+                    <Grid>
+                        <local:SongsView Margin="0,-30,0,0" HorizontalAlignment="Stretch" 
+                                         CurrentSong="{Binding CurrentSong,Mode=TwoWay}"
+                                         Source="{Binding CurrentPlaylist.Songs}" 
+                                         Visibility="{Binding IsStarting,Converter={StaticResource toColConverter}}"
+                                         DataContextChanged="SongListView_DataContextChanged"/>
+
+                        <ProgressRing VerticalAlignment="Center" HorizontalAlignment="Center" Width="200" Height="200"
+                                      IsActive="{Binding IsStarting}"/>
+                    </Grid>
                 </DataTemplate>
             </HubSection>
 
-            <HubSection Header="Playlists" Style="{StaticResource HSHeader}" Margin="0,-10,0,0">
+            <HubSection Header="Playlists" Style="{StaticResource HSHeader}"
+                        Margin="0,-10,0,0" DataContext="{Binding Library}">
                 <DataTemplate>
                     <local:PlaylistsView Margin="0,-30,0,0" Playlists="{Binding Playlists}"
                                          CurrentPlaylist="{Binding CurrentPlaylist,Mode=TwoWay}"
-                                         UpdateClick="PlaylistsView_UpdateClick"
-                                         ResetClick="PlaylistsView_ResetClick"
-                                         ResetSongsClick="PlaylistsView_ResetSongsClick"
-                                         AddNewClick="PlaylistsView_AddNewClick"
-                                         RemoveClick="PlaylistsView_RemoveClick"
+                                         UpdateSongsClick="PlaylistsView_UpdateSongsClick"
+                                         UpdateFilesClick="PlaylistsView_UpdateFilesClick"
                                          PlayClick="PlaylistsView_PlayClick"
                                          DetailsClick="PlaylistsView_DetailsClick"/>
                 </DataTemplate>
             </HubSection>
         </Hub>
 
-        <Grid Grid.Row="1" HorizontalAlignment="Stretch" DataContext="{Binding CurrentPlaylist}"
-              Tapped="CurrentSong_Tapped">
+        <Grid Name="gidTimeOffset" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Opacity="0.5"
+                  Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"/>
+            <TextBlock Name="tblTimeOffset" Text="0:00" FontSize="40" Margin="20,0,20,7"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
+
+        <Grid Grid.Row="1" HorizontalAlignment="Stretch" DataContext="{Binding CurrentSong}"
+              Background="Transparent" ManipulationMode="TranslateX,TranslateInertia"
+              Tapped="CurrentSong_Tapped" ManipulationDelta="CurrentSong_ManipulationDelta"
+              ManipulationCompleted="CurrentSong_ManipulationCompleted" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="{Binding CurrentSong.Title}" FontSize="25" Margin="10,0" 
+            <TextBlock Grid.Row="0" Text="{Binding Title}" FontSize="25" Margin="10,0" 
                        TextWrapping="Wrap" HorizontalAlignment="Stretch"
                        Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"/>
 
-            <TextBlock Grid.Row="1" Text="{Binding CurrentSong.Artist}" FontSize="20" Margin="10,0"
+            <TextBlock Grid.Row="1" Text="{Binding Artist}" FontSize="20" Margin="10,0"
                        FontStyle="Italic" TextWrapping="Wrap" HorizontalAlignment="Stretch"
                        Foreground="{ThemeResource ApplicationPointerOverForegroundThemeBrush}"/>
         </Grid>
@@ -96,10 +111,10 @@
             </Grid>
 
             <local:Slider Grid.Column="1" VerticalAlignment="Bottom"
-                          IsIndeterminate="{Binding PlayerState,Mode=OneWay,Converter={StaticResource playerStateCon}}"
-                          PositionRatio="{Binding CurrentPlaylist.CurrentSongPosition,Mode=TwoWay}" 
-                          Duration="{Binding CurrentPlaylist.CurrentSong.DurationMilliseconds,
-                            Mode=OneWay,Converter={StaticResource millisCon}}"/>
+                          IsIndeterminate="{Binding CurrentPlayerState,Converter={StaticResource playerStateCon}}"
+                          PositionRatio="{Binding PositionRatio,Mode=TwoWay}" 
+                          Duration="{Binding Duration}"
+                          PlaybackRate="{Binding CurrentPlaylist.PlaybackRate,Mode=TwoWay}"/>
 
             <Grid Grid.Column="2" DataContext="{Binding CurrentPlaylist}">
                 <Grid.Resources>
@@ -135,14 +150,9 @@
             </CommandBar.PrimaryCommands>
 
             <CommandBar.SecondaryCommands>
-                <AppBarButton Label="Reset library" Click="ResetLibraryFromStorage_Click"/>
-                <AppBarButton Label="Update all playlists" Click="UpdateExistingPlaylists_Click"/>
-                <AppBarButton Label="Reset all songs" Click="ResetAllSongs_Click"/>
-                <AppBarButton Label="Add new playlists" Click="AddNotExistingPlaylists_Click"/>
-                <AppBarButton Label="Settings" Click="Settings_Click"/>
+                <AppBarButton Label="Update all" Click="AbbUpdateAll_Click"/>
+                <AppBarButton Label="Update folders" Click="AbbUpdateFolders_Click"/>
                 <AppBarButton Label="Debug Site" Click="AbbDebugSite_Click"/>
-                <AppBarButton Label="Ping" Click="AbbComPing_Click"/>
-                <AppBarButton Label="Reset Com" Click="AbbComReset_Click"/>
                 <AppBarButton Label="Test1" Click="AbbTest1_Click"/>
             </CommandBar.SecondaryCommands>
         </CommandBar>

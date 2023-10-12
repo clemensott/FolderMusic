@@ -5,9 +5,9 @@ namespace MusicPlayer.Models.EventArgs
 {
     public class SongCollectionChangedEventArgs : System.EventArgs
     {
-        public ChangeCollectionItem<Song>[] AddedSongs { get; private set; }
+        public ChangeCollectionItem<Song>[] AddedSongs { get; }
 
-        public ChangeCollectionItem<Song>[] RemovedSongs { get; private set; }
+        public ChangeCollectionItem<Song>[] RemovedSongs { get; }
 
         public SongCollectionChangedEventArgs(ChangeCollectionItem<Song>[] addSongs, ChangeCollectionItem<Song>[] removeSongs)
         {

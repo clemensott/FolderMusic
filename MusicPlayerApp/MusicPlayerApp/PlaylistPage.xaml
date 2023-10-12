@@ -7,8 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:con="using:FolderMusic.Converters"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-    Loaded="Page_Loaded">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Page.Resources>
         <con:ShuffleIconConverter x:Key="shuffleConverter"/>
@@ -62,10 +61,8 @@
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
-                <AppBarButton Label="Reset" Icon="Refresh" Click="ResetThisPlaylist_Click"/>
-                <AppBarButton Label="Update" Icon="Redo" Click="UpdateThisPlaylist_Click"/>
-                <AppBarButton Label="New Songs" Icon="Add" Click="SearchForNewSongs_Click"/>
-                <AppBarButton Label="Delete" Icon="Delete" Click="DeleteThisPlaylist_Click"/>
+                <AppBarButton Label="Update songs" Icon="Refresh" Click="ResetThisPlaylist_Click"/>
+                <AppBarButton Label="Update files" Icon="Add" Click="SearchForNewSongs_Click"/>
             </CommandBar.PrimaryCommands>
         </CommandBar>
     </Page.BottomAppBar>

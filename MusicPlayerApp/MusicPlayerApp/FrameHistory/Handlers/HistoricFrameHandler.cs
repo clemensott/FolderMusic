@@ -1,21 +1,23 @@
 ﻿using System;
-using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Handler;
 
 namespace FolderMusic.FrameHistory.Handlers
 {
     class HistoricFrameHandler
     {
+        public virtual bool SaveFrame => true;
+
         public virtual HistoricParameter ToHistoricParameter(object parameter)
         {
             return new HistoricParameter(parameter);
         }
 
-        public virtual object ToHistoricDataContext(object dataContext) 
+        public virtual object ToHistoricDataContext(object dataContext)
         {
             return null;
         }
 
-        public virtual Parameter FromHistoricParameter(HistoricParameter parameter, ILibrary library)
+        public virtual Parameter FromHistoricParameter(HistoricParameter parameter, ForegroundPlayerHandler handler)
         {
             return new Parameter(parameter.Value);
         }
@@ -27,6 +29,7 @@ namespace FolderMusic.FrameHistory.Handlers
             if (page == typeof(SettingsPage)) return new SettingsPageHandler();
             if (page == typeof(SkipSongsPage)) return new SkippedSongsPageHandler();
             if (page == typeof(SongPage)) return new SongPageHandler();
+            if (page == typeof(UpdateProgressPage)) return new DontSaveHandler();
 
             return new HistoricFrameHandler();
         }

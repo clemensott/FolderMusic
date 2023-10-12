@@ -1,15 +1,14 @@
-﻿using System;
-using MusicPlayer.Models;
+﻿using MusicPlayer.Models;
 
-namespace FolderMusic
+namespace FolderMusic.EventArgs
 {
-    public class SelectedSongChangedManuallyEventArgs:EventArgs
+    public class SelectedSongChangedManuallyEventArgs : System.EventArgs
     {
-        public Song OldCurrentSong { get; private set; }
+        public Song? OldCurrentSong { get; }
 
-        public Song NewCurrentSong { get; private set; }
+        public Song? NewCurrentSong { get; }
 
-        public SelectedSongChangedManuallyEventArgs(Song oldCurrentSong,Song newCurrentSong)
+        public SelectedSongChangedManuallyEventArgs(Song? oldCurrentSong, Song? newCurrentSong)
         {
             OldCurrentSong = oldCurrentSong;
             NewCurrentSong = newCurrentSong;

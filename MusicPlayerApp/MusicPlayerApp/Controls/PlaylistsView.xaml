@@ -28,11 +28,8 @@
 
                     <FlyoutBase.AttachedFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="Reset" Click="ResetPlaylist_Click"/>
-                            <MenuFlyoutItem Text="Update" Click="UpdatePlaylist_Click"/>
-                            <MenuFlyoutItem Text="Reset songs" Click="ResetSongsPlaylist_Click"/>
-                            <MenuFlyoutItem Text="Search for new songs" Click="SearchForNewSongsPlaylist_Click"/>
-                            <MenuFlyoutItem Text="Remove" Click="DeletePlaylist_Click"/>
+                            <MenuFlyoutItem Text="Update songs" Click="MfiUpdateSongs_Click"/>
+                            <MenuFlyoutItem Text="Update files" Click="MfiUpdateFiles_Click"/>
                         </MenuFlyout>
                     </FlyoutBase.AttachedFlyout>
 

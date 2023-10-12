@@ -1,4 +1,4 @@
-﻿using MusicPlayer.Models.Interfaces;
+﻿using MusicPlayer.Handler;
 
 namespace FolderMusic.FrameHistory.Handlers
 {
@@ -9,9 +9,9 @@ namespace FolderMusic.FrameHistory.Handlers
             return new HistoricParameter();
         }
 
-        public override Parameter FromHistoricParameter(HistoricParameter parameter, ILibrary library)
+        public override Parameter FromHistoricParameter(HistoricParameter parameter, ForegroundPlayerHandler handler)
         {
-            return new Parameter(library);
+            return new Parameter(handler);
         }
     }
 }

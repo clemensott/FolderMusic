@@ -8,20 +8,22 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
+using FolderMusic.EventArgs;
 using MusicPlayer.Models;
 using MusicPlayer.Models.EventArgs;
-using MusicPlayer.Models.Interfaces;
-using MusicPlayer.Models.Shuffle;
+using FolderMusic.NavigationParameter;
+using MusicPlayer.Models.Foreground.Interfaces;
+using MusicPlayer.Models.Foreground.Shuffle;
+using MusicPlayer.UpdateLibrary;
+using Windows.UI.Xaml.Media;
+using System.Threading.Tasks;
 
 namespace FolderMusic
 {
     public partial class SongsView : UserControl
     {
-        enum ScrollToType { No, Last, Current }
-
-        public static readonly DependencyProperty CurrentSongProperty =
-            DependencyProperty.Register("CurrentSong", typeof(Song), typeof(SongsView),
-                new PropertyMetadata(null, OnCurrentSongPropertyChanged));
+        public static readonly DependencyProperty CurrentSongProperty = DependencyProperty.Register("CurrentSong",
+            typeof(Song?), typeof(SongsView), new PropertyMetadata(null, OnCurrentSongPropertyChanged));
 
         private static void OnCurrentSongPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
@@ -41,16 +43,16 @@ namespace FolderMusic
             ISongCollection newSongs = e.NewValue as ISongCollection;
 
             s.OnSourceChanged(oldSongs, newSongs);
-            s.scrollTo = ScrollToType.Last;
         }
 
-        private ScrollToType scrollTo;
+        private bool needScrollToCurrentSong;
+        private ScrollViewer scrollViewer;
 
         public event EventHandler<SelectedSongChangedManuallyEventArgs> SelectedSongChangedManually;
 
-        public Song CurrentSong
+        public Song? CurrentSong
         {
-            get { return (Song)GetValue(CurrentSongProperty); }
+            get { return (Song?)GetValue(CurrentSongProperty); }
             set { SetValue(CurrentSongProperty, value); }
         }
 
@@ -65,17 +67,13 @@ namespace FolderMusic
             this.InitializeComponent();
         }
 
-        private void control_Loaded(object sender, RoutedEventArgs e)
-        {
-            scrollTo = ScrollToType.Last;
-        }
-
         protected virtual void OnSourceChanged(ISongCollection oldSongs, ISongCollection newSongs)
         {
             Unsubscribe(oldSongs);
             Subscribe(newSongs);
 
             SetItemsSource(Source.Shuffle.ToArray());
+            ScrollToCurrentSong();
         }
 
         private void Subscribe(ISongCollection songs)
@@ -116,6 +114,7 @@ namespace FolderMusic
             Subscribe(e.NewShuffleSongs);
 
             SetItemsSource(Source.Shuffle.ToArray());
+            ScrollToCurrentSong();
         }
 
         private void Shuffle_Changed(object sender, ShuffleCollectionChangedEventArgs e)
@@ -125,28 +124,23 @@ namespace FolderMusic
 
         protected void SetItemsSource(IEnumerable<Song> songs)
         {
-            lbxSongs.ItemsSource = songs as IList<Song>?? songs?.ToArray();
+            lbxSongs.ItemsSource = songs as IList<Song> ?? songs?.ToArray();
             SetSelectedItem();
-            ScrollToCurrentSongDirect();
-        }
-
-        private void SetSelectedItemSafe()
-        {
-            Utils.DoSafe(SetSelectedItem);
         }
 
         private void SetSelectedItem()
         {
             lbxSongs.SelectedItem = CurrentSong;
+            CheckNeedsScrolling();
         }
 
-        private void lbxSongs_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void LbxSongs_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (Source == null || Source.Count == 0) return;
 
-            Song selectedSong = lbxSongs.SelectedItem as Song;
+            Song? selectedSong = lbxSongs.SelectedItem as Song?;
 
-            if (selectedSong != null && CurrentSong != selectedSong)
+            if (selectedSong != null && !Equals(CurrentSong, selectedSong))
             {
                 SelectedSongChangedManuallyEventArgs args =
                     new SelectedSongChangedManuallyEventArgs(CurrentSong, selectedSong);
@@ -154,31 +148,46 @@ namespace FolderMusic
                 CurrentSong = selectedSong;
                 SelectedSongChangedManually?.Invoke(this, args);
             }
-            else if (selectedSong != CurrentSong && lbxSongs.Items.Contains(CurrentSong))
+            else if (!Equals(selectedSong, CurrentSong) && lbxSongs.Items.Contains(CurrentSong))
             {
                 lbxSongs.SelectedItem = CurrentSong;
             }
         }
 
-        public void ScrollToCurrentSongTop()
+        private void LbxSongs_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            try
-            {
-                scrollTo = ScrollToType.Last;
-                lbxSongs.ScrollIntoView(lbxSongs.Items.LastOrDefault());
-                scrollTo = ScrollToType.Current;
-            }
-            catch (Exception e)
-            {
-                MobileDebug.Service.WriteEvent("ScrollToCurrentTopFail", e);
-            }
+            CheckNeedsScrolling();
         }
 
-        public void ScrollToCurrentSongDirect()
+        private void GidItemContainer_Loaded(object sender, RoutedEventArgs e)
+        {
+            CheckNeedsScrolling();
+        }
+
+        private void CheckNeedsScrolling()
+        {
+            if (needScrollToCurrentSong) ScrollToCurrentSong();
+        }
+
+        public async void ScrollToCurrentSong()
         {
             try
             {
-                lbxSongs.ScrollIntoView(CurrentSong);
+                needScrollToCurrentSong = true;
+
+                if (scrollViewer == null && !TryFindScrollView((DependencyObject)lbxSongs, out scrollViewer)) return;
+
+                int index = lbxSongs.Items.IndexOf(CurrentSong);
+                if (index == -1) return;
+
+                double scrollOffset = index;
+                if (scrollOffset > scrollViewer.ScrollableHeight) scrollOffset = scrollViewer.ScrollableHeight;
+                else if (scrollOffset < 0) scrollOffset = 0;
+
+                scrollViewer.ChangeView(null, scrollOffset, null);
+
+                await Task.Delay(100);
+                needScrollToCurrentSong = false;
             }
             catch (Exception e)
             {
@@ -186,52 +195,51 @@ namespace FolderMusic
             }
         }
 
-        private void lbxSongs_LayoutUpdated(object sender, object e)
+        private static bool TryFindScrollView(DependencyObject db, out ScrollViewer sv)
         {
-            if (scrollTo == ScrollToType.No || lbxSongs.Items.Count == 0) return;
-
-            ISongCollection songs = Source;
-
-            if (songs == null)
+            if (db is ScrollViewer)
             {
-                scrollTo = ScrollToType.No;
-                return;
+                sv = (ScrollViewer)db;
+                return true;
             }
 
-            if (lbxSongs.Items.Count < songs.Shuffle.Count) return;
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(db); i++)
+            {
+                if (TryFindScrollView(VisualTreeHelper.GetChild(db, i), out sv)) return true;
+            }
 
-            if (scrollTo == ScrollToType.Current)
-            {
-                lbxSongs.ScrollIntoView(CurrentSong);
-                scrollTo = ScrollToType.No;
-            }
-            else
-            {
-                lbxSongs.ScrollIntoView(lbxSongs.Items.Last());
-                scrollTo = ScrollToType.Current;
-            }
+            sv = null;
+            return false;
         }
 
         private void Song_Holding(object sender, HoldingRoutedEventArgs e)
         {
-            MobileDebug.Service.WriteEvent("Song_Holding", ActualWidth);
-            if (((Song)((FrameworkElement)sender).DataContext).IsEmpty) return;
+            if (!((Song?)((FrameworkElement)sender).DataContext).HasValue) return;
 
             FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
         }
 
         private async void ResetSong_Click(object sender, RoutedEventArgs e)
         {
-            Song song = (Song)((MenuFlyoutItem)sender).DataContext;
+            Song oldSong = (Song)((MenuFlyoutItem)sender).DataContext;
 
-            await song.Reset();
-        }
-
-        private void RemoveSong_Click(object sender, RoutedEventArgs e)
-        {
-            Song song = (Song)((MenuFlyoutItem)sender).DataContext;
-
-            Source.Remove(song);
+            try
+            {
+                StorageFile file = await StorageFile.GetFileFromPathAsync(oldSong.FullPath);
+                Song? newSong = await UpdateLibraryUtils.LoadSong(file);
+                if (newSong.HasValue)
+                {
+                    if (!Equals(newSong.Value, oldSong))
+                    {
+                        Source.Change(new Song[] { oldSong }, new Song[] { newSong.Value });
+                    }
+                }
+                else await new MessageDialog("Reloading song failed").ShowAsync();
+            }
+            catch (Exception exc)
+            {
+                await new MessageDialog(exc.Message, exc.GetType().Name).ShowAsync();
+            }
         }
 
         private async void DeleteSong_Click(object sender, RoutedEventArgs e)
@@ -240,7 +248,7 @@ namespace FolderMusic
 
             try
             {
-                StorageFile file = await StorageFile.GetFileFromPathAsync(song.Path);
+                StorageFile file = await StorageFile.GetFileFromPathAsync(song.FullPath);
 
                 await file.DeleteAsync();
                 Source.Remove(song);
@@ -258,9 +266,12 @@ namespace FolderMusic
         private void EditSong_Click(object sender, RoutedEventArgs e)
         {
             Frame frame = Window.Current.Content as Frame;
-            Song song = (sender as FrameworkElement)?.DataContext as Song;
+            Song? song = (sender as FrameworkElement)?.DataContext as Song?;
 
-            frame?.Navigate(typeof(SongPage), song);
+            if (!song.HasValue) return;
+
+            SongPageParameter parameter = new SongPageParameter(song.Value, Source);
+            frame?.Navigate(typeof(SongPage), parameter);
         }
     }
 }

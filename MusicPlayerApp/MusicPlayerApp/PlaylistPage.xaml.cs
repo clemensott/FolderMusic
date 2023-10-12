@@ -3,13 +3,19 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
-using MusicPlayer.Models.Interfaces;
+using FolderMusic.EventArgs;
+using FolderMusic.NavigationParameter;
+using MusicPlayer.Handler;
+using MusicPlayer.UpdateLibrary;
+using System.Threading.Tasks;
+using MusicPlayer.Models.Foreground.Interfaces;
 
 namespace FolderMusic
 {
     public sealed partial class PlaylistPage : Page
     {
-        private IPlaylist viewModel;
+        private ForegroundPlayerHandler handler;
+        private IPlaylist playlist;
 
         public PlaylistPage()
         {
@@ -18,69 +24,51 @@ namespace FolderMusic
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            DataContext = viewModel = e.Parameter as IPlaylist;
-        }
-
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
+            PlaylistPageParameter parameter = (PlaylistPageParameter)e.Parameter;
+            handler = parameter?.Handler;
+            DataContext = playlist = parameter?.Playlist;
         }
 
         private void Shuffle_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            viewModel.Songs.SetNextShuffle();
+            playlist.Songs.SetNextShuffle(playlist.CurrentSong);
         }
 
         private void Loop_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            viewModel.SetNextLoop();
+            playlist.SetNextLoop();
         }
 
         private async void ResetThisPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            StopOperationToken stopToken = new StopOperationToken();
+            ChildUpdateProgress progress;
+            Task task = playlist.Update(out progress);
+            Frame.Navigate(typeof(UpdateProgressPage), progress);
+            await task;
 
-            Frame.Navigate(typeof(LoadingPage), stopToken);
-            await viewModel.Reset(stopToken);
-            Frame.GoBack();
-
-            if (viewModel.Songs.Count == 0) Frame.GoBack();
+            if (playlist.Songs.Count == 0) Frame.GoBack();
         }
 
         private async void SearchForNewSongs_Click(object sender, RoutedEventArgs e)
         {
-            StopOperationToken stopToken = new StopOperationToken();
+            ChildUpdateProgress progress;
+            Task task = playlist.UpdateFast(out progress);
+            Frame.Navigate(typeof(UpdateProgressPage), progress);
+            await task;
 
-            Frame.Navigate(typeof(LoadingPage), stopToken);
-            await viewModel.AddNew(stopToken);
-            Frame.GoBack();
-        }
-
-        private async void UpdateThisPlaylist_Click(object sender, RoutedEventArgs e)
-        {
-            StopOperationToken stopToken = new StopOperationToken();
-
-            Frame.Navigate(typeof(LoadingPage), stopToken);
-            await viewModel.Update(stopToken);
-            Frame.GoBack();
-        }
-
-        private void DeleteThisPlaylist_Click(object sender, RoutedEventArgs e)
-        {
-            viewModel.Parent.Remove(viewModel);
-
-            Frame.GoBack();
+            if (playlist.Songs.Count == 0) Frame.GoBack();
         }
 
         private void OnSelectedSongChangedManually(object sender, SelectedSongChangedManuallyEventArgs e)
         {
             try
             {
-                viewModel.Parent.Parent.CurrentPlaylist = viewModel;
+                handler.Library.CurrentPlaylist = playlist;
             }
             catch (System.Exception exc)
             {
                 MobileDebug.Service.WriteEventPair("OnSelectedSongChangedManuallyFail",
-                    "CurrentPlaylist", viewModel?.Parent?.Parent?.CurrentPlaylist, exc);
+                    "CurrentPlaylist", handler?.Library?.CurrentPlaylist, exc);
             }
 
             Frame.GoBack();

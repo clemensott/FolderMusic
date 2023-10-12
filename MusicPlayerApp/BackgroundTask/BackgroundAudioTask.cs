@@ -1,239 +1,132 @@
 ﻿using System;
+using System.Threading;
 using Windows.ApplicationModel.Background;
-using Windows.Media;
 using Windows.Media.Playback;
 using MusicPlayer;
+using MusicPlayer.Handler;
+using MusicPlayer.Models;
 using MusicPlayer.Models.EventArgs;
-using MusicPlayer.Models.Interfaces;
-using MusicPlayer.SubscriptionsHandler;
+using MusicPlayer.Models.Enums;
 
 namespace BackgroundTask
 {
-    enum BackgroundPlayerType { Music, Ringer }
-
     public sealed class BackgroundAudioTask : IBackgroundTask
     {
-        private const string completeFileName = "Data.xml", backupFileName = "Data.bak",
-              simpleFileName = "SimpleData.xml";
+        private const string dataFileName = "backgroundData.xml";
 
-        private static BackgroundAudioTask task;
+        private static BackgroundAudioTask lastTask;
 
-        private AutoSaveLoad saveLoad;
-        private LibrarySubscriptionsHandler lsh;
-        private ILibrary library;
-        private SystemMediaTransportControls smtc;
         private BackgroundTaskDeferral deferral;
-        private BackgroundPlayerType playerType;
-        private MusicPlayer musicPlayer;
-        private Ringer ringer;
-
-        internal BackgroundPlayerType PlayerType
-        {
-            get { return playerType; }
-            set { playerType = value; }
-        }
-
-        internal IBackgroundPlayer BackgroundPlayer => playerType == BackgroundPlayerType.Music ? (IBackgroundPlayer)musicPlayer : ringer;
+        private BackgroundPlayerHandler musicPlayer;
+        private Timer timer;
 
         public async void Run(IBackgroundTaskInstance taskInstance)
         {
             string taskId = taskInstance.InstanceId.ToString();
             MobileDebug.Service.SetIsBackground(taskId);
-            MobileDebug.Service.WriteEventPair("Run", "task == null", task == null,
-                "this.Hash", GetHashCode(), "PlayerHash", BackgroundMediaPlayer.Current.GetHashCode());
+            MobileDebug.Service.WriteEventPair("Run1",
+                "task == null", lastTask == null, "this.Hash", GetHashCode());
 
-            deferral = taskInstance.GetDeferral();
-            taskInstance.Canceled += OnCanceled;
-            taskInstance.Task.Completed += TaskCompleted;
-
-            Unsubscribe(task);
-
-            saveLoad = new AutoSaveLoad(completeFileName, backupFileName, simpleFileName);
-            library = await saveLoad.LoadSimple(false);
-            lsh = LibrarySubscriptionsHandler.GetInstance(library);
-            smtc = SystemMediaTransportControls.GetForCurrentView();
-            task = this;
-
-            musicPlayer = new MusicPlayer(smtc, library);
-            ringer = new Ringer(this, library);
-
-            await saveLoad.LoadComplete(library);
-            saveLoad.Add(library);
-
-            Subscribe(task);
-
-            await BackgroundPlayer.SetCurrent();
-
-            MobileDebug.Service.WriteEventPair("RunFinish", "This", GetHashCode(), "Lib", library.GetHashCode());
-        }
-
-        private static void Subscribe(BackgroundAudioTask task)
-        {
-            string smtcType = task?.smtc.DisplayUpdater.Type.ToString() ?? "null";
-            string smtcHash = task?.smtc.DisplayUpdater.GetHashCode().ToString() ?? "null";
-            MobileDebug.Service.WriteEventPair("BackSubscribe", "SmtcType", smtcType, "SmtcHash", smtcHash);
-
-            if (task == null) return;
-
-            if (task.smtc != null) task.smtc.ButtonPressed += task.MediaTransportControlButtonPressed;
-
-            BackgroundMediaPlayer.Current.CurrentStateChanged += task.BackgroundMediaPlayer_CurrentStateChanged;
-            BackgroundMediaPlayer.Current.MediaEnded += task.BackgroundMediaPlayer_MediaEnded;
-            BackgroundMediaPlayer.Current.MediaOpened += task.BackgroundMediaPlayer_MediaOpened;
-            BackgroundMediaPlayer.Current.MediaFailed += task.BackgroundMediaPlayer_MediaFailed;
-
-            task.lsh.IsPlayingChanged += task.OnPlayStateChanged;
-            task.lsh.CurrentPlaylistChanged += task.OnCurrentPlaylistChanged;
-            task.lsh.SettingsChanged += task.OnSettingsChanged;
-            task.lsh.CurrentPlaylist.CurrentSongChanged += task.OnCurrentSongChanged;
-            task.lsh.CurrentPlaylist.LoopChanged += task.OnLoopChanged;
-        }
-
-        private static void Unsubscribe(BackgroundAudioTask task)
-        {
-            string smtcType = task?.smtc.DisplayUpdater.Type.ToString() ?? "null";
-            string smtcHash = task?.smtc.DisplayUpdater.GetHashCode().ToString() ?? "null";
-            MobileDebug.Service.WriteEventPair("BackUnsubscribe", "SmtcType", smtcType, "SmtcHash", smtcHash);
-
-            if (task == null) return;
-
-            if (task.smtc != null) task.smtc.ButtonPressed -= task.MediaTransportControlButtonPressed;
-
-            BackgroundMediaPlayer.Current.CurrentStateChanged -= task.BackgroundMediaPlayer_CurrentStateChanged;
-            BackgroundMediaPlayer.Current.MediaEnded -= task.BackgroundMediaPlayer_MediaEnded;
-            BackgroundMediaPlayer.Current.MediaOpened -= task.BackgroundMediaPlayer_MediaOpened;
-            BackgroundMediaPlayer.Current.MediaFailed -= task.BackgroundMediaPlayer_MediaFailed;
-
-            task.lsh.IsPlayingChanged -= task.OnPlayStateChanged;
-            task.lsh.CurrentPlaylistChanged -= task.OnCurrentPlaylistChanged;
-            task.lsh.SettingsChanged -= task.OnSettingsChanged;
-            task.lsh.CurrentPlaylist.CurrentSongChanged -= task.OnCurrentSongChanged;
-            task.lsh.CurrentPlaylist.LoopChanged -= task.OnLoopChanged;
-
-            task.lsh.Unsubscribe(task.library);
-        }
-
-        private void MediaTransportControlButtonPressed(SystemMediaTransportControls sender,
-            SystemMediaTransportControlsButtonPressedEventArgs args)
-        {
-            MobileDebug.Service.WriteEventPair("MTCPressed", "Button", args.Button,
-                "Song", library.CurrentPlaylist?.CurrentSong);
-
-            MediaTransportControlButtonPressed(args.Button);
-        }
-
-        private void MediaTransportControlButtonPressed(SystemMediaTransportControlsButton button)
-        {
-            switch (button)
+            try
             {
-                case SystemMediaTransportControlsButton.Play:
-                    library.IsPlaying = true;
-                    return;
+                deferral = taskInstance.GetDeferral();
+                taskInstance.Canceled += OnCanceled;
+                taskInstance.Task.Completed += TaskCompleted;
 
-                case SystemMediaTransportControlsButton.Pause:
-                    library.IsPlaying = false;
-                    return;
+                lastTask?.musicPlayer?.Dispose();
+                lastTask = this;
 
-                case SystemMediaTransportControlsButton.Previous:
-                    BackgroundPlayer.Previous();
-                    return;
+                Song[] songs;
 
-                case SystemMediaTransportControlsButton.Next:
-                    BackgroundPlayer.Next(false);
-                    return;
+                try
+                {
+                    songs = await IO.LoadObjectAsync<Song[]>(dataFileName);
+                    CurrentPlaylistStore.Current.SongsHash = Utils.GetSha256Hash(songs);
+                }
+                catch (Exception e)
+                {
+                    MobileDebug.Service.WriteEvent("Load background songs error", e);
+                    songs = new Song[0];
+                }
+
+                Song? song = CurrentPlaylistStore.Current.CurrentSong;
+                TimeSpan position = TimeSpan.FromTicks(CurrentPlaylistStore.Current.PositionTicks);
+                double playbackRate = CurrentPlaylistStore.Current.PlaybackRate;
+                LoopType loop = CurrentPlaylistStore.Current.Loop;
+                musicPlayer = new BackgroundPlayerHandler(song, position, playbackRate, loop, songs);
+                musicPlayer.CurrentSongChanged += MusicPlayer_CurrentSongChanged;
+                musicPlayer.PlaybackRateChanged += MusicPlayer_PlaybackRateChanged;
+                musicPlayer.LoopChanged += MusicPlayer_LoopChanged;
+                musicPlayer.SongsChanged += MusicPlayer_SongsChanged;
+                await musicPlayer.Start();
+
+                timer = new Timer(Timer_Tick, null, Timeout.Infinite, Timeout.Infinite);
+                BackgroundMediaPlayer.Current.CurrentStateChanged += OnStateChanged;
+            }
+            catch (Exception e)
+            {
+                MobileDebug.Service.WriteEvent("Run error", e);
+            }
+
+            MobileDebug.Service.WriteEventPair("RunFinish",
+                "This", GetHashCode(), "mp", musicPlayer.GetHashCode());
+        }
+
+        private void OnStateChanged(MediaPlayer sender, object args)
+        {
+            if (sender.CurrentState == MediaPlayerState.Playing) timer.Change(0, 2000);
+            else timer.Change(Timeout.Infinite, Timeout.Infinite);
+        }
+
+        private static void Timer_Tick(object state)
+        {
+            CurrentPlaylistStore.Current.PositionTicks = BackgroundMediaPlayer.Current.Position.Ticks;
+        }
+
+        private void MusicPlayer_PlaybackRateChanged(object sender, ChangedEventArgs<double> e)
+        {
+            CurrentPlaylistStore.Current.PlaybackRate = e.NewValue;
+        }
+
+        private static void MusicPlayer_LoopChanged(object sender, ChangedEventArgs<LoopType> e)
+        {
+            CurrentPlaylistStore.Current.Loop = e.NewValue;
+        }
+
+        private static async void MusicPlayer_SongsChanged(object sender, ChangedEventArgs<Song[]> e)
+        {
+            try
+            {
+                await IO.SaveObjectAsync(dataFileName, e.NewValue);
+                CurrentPlaylistStore.Current.SongsHash = Utils.GetSha256Hash(e.NewValue);
+            }
+            catch (Exception exc)
+            {
+                MobileDebug.Service.WriteEvent("Save playlist error", exc);
             }
         }
 
-        public void SetLoopToBackgroundPlayer()
+        private static void MusicPlayer_CurrentSongChanged(object sender, ChangedEventArgs<Song?> e)
         {
-            BackgroundMediaPlayer.Current.IsLoopingEnabled = library.CurrentPlaylist?.Loop == LoopType.Current;
-        }
-
-        private void BackgroundMediaPlayer_MediaOpened(MediaPlayer sender, object args)
-        {
-            BackgroundPlayer.MediaOpened(sender, args);
-        }
-
-        private async void BackgroundMediaPlayer_MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
-        {
-            await BackgroundPlayer.MediaFailed(sender, args);
-        }
-
-        private async void BackgroundMediaPlayer_MediaEnded(MediaPlayer sender, object args)
-        {
-            await BackgroundPlayer.MediaEnded(sender, args);
-        }
-
-        private void BackgroundMediaPlayer_CurrentStateChanged(MediaPlayer sender, object args)
-        {
-            library.PlayerState = sender.CurrentState;
-
-            bool pauseAllowed = false, playing = sender.CurrentState == MediaPlayerState.Playing;
-            double curMillis = sender.Position.TotalMilliseconds;
-            double natMillis = sender.NaturalDuration.TotalMilliseconds;
-
-            if (curMillis >= natMillis) pauseAllowed = false;
-
-            MobileDebug.Service.WriteEventPair("StateChanged", "Playerstate", sender.CurrentState,
-                "SMTC-State", smtc.PlaybackStatus, "PlayerPosition [s]", sender.Position.TotalMilliseconds,
-                "PlayerDuration [s]", sender.NaturalDuration.TotalMilliseconds, "PauseAllowed", pauseAllowed,
-                "LibraryIsPlaying", library.IsPlaying, "CurrentSongFileName", library.CurrentPlaylist?.CurrentSong,
-                "LibIsCompleteLoaded", library.IsLoaded);
-
-            if (playing)
-            {
-                ringer.SetTimesIfIsDisposed();
-            }
-            else if (pauseAllowed) library.IsPlaying = false;
-        }
-
-        private void OnSettingsChanged(object sender, EventArgs e)
-        {
-            ringer.ReloadTimes();
-        }
-
-        private async void OnPlayStateChanged(object sender, SubscriptionsEventArgs<ILibrary, IsPlayingChangedEventArgs> e)
-        {
-            MobileDebug.Service.WriteEvent("BackgroundIsPlayingChanged", e.Base.NewValue);
-
-            if (e.Base.NewValue) await BackgroundPlayer.Play();
-            else BackgroundPlayer.Pause();
-        }
-
-        private void OnLoopChanged(object sender, EventArgs args)
-        {
-            SetLoopToBackgroundPlayer();
-        }
-
-        private async void OnCurrentSongChanged(object sender, EventArgs args)
-        {
-            //MobileDebug.Manager.WriteEvent("SetOnCurrentSong", library.CurrentPlaylist?.CurrentSongFileName);
-            await BackgroundPlayer.SetCurrent();
-        }
-
-        private async void OnCurrentPlaylistChanged(object sender, SubscriptionsEventArgs<ILibrary, CurrentPlaylistChangedEventArgs> e)
-        {
-            await BackgroundPlayer.SetCurrent();
+            CurrentPlaylistStore.Current.CurrentSong = e.NewValue;
         }
 
         private void TaskCompleted(BackgroundTaskRegistration sender, BackgroundTaskCompletedEventArgs args)
         {
-            library.IsPlaying = false;
             //MobileDebug.Service.WriteEvent("TaskCompleted");
             Cancel();
         }
 
         private void OnCanceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason)
         {
-            library.IsPlaying = false;
             //MobileDebug.Service.WriteEvent("OnCanceled", reason);
             Cancel();
         }
 
         private void Cancel()
         {
-            ringer?.Dispose();
-            musicPlayer?.Dispose();
+            musicPlayer?.Stop();
+            timer.Dispose();
 
             BackgroundMediaPlayer.Shutdown();
             deferral.Complete();

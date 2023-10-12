@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
 
@@ -35,7 +36,7 @@ namespace MobileDebug
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public void NotifyPropertyChanged(string propertyName)
+        public async void NotifyPropertyChanged(string propertyName)
         {
             try
             {
@@ -47,7 +48,7 @@ namespace MobileDebug
                 }
                 else
                 {
-                    CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                    await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                         () => { PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); });
                 }
             }

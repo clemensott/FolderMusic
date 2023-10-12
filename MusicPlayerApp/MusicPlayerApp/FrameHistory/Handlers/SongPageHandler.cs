@@ -1,8 +1,11 @@
-﻿using System.Linq;
+﻿using System;
 using System.Threading.Tasks;
 using Windows.Storage.FileProperties;
+using FolderMusic.NavigationParameter;
+using MusicPlayer;
+using MusicPlayer.Handler;
 using MusicPlayer.Models;
-using MusicPlayer.Models.Interfaces;
+using MusicPlayer.Models.Foreground.Interfaces;
 
 namespace FolderMusic.FrameHistory.Handlers
 {
@@ -10,7 +13,7 @@ namespace FolderMusic.FrameHistory.Handlers
     {
         public override HistoricParameter ToHistoricParameter(object parameter)
         {
-            string songPath = ((Song)parameter).Path;
+            string songPath = ((SongPageParameter)parameter).Song.FullPath;
 
             return new HistoricParameter(songPath, true);
         }
@@ -20,17 +23,24 @@ namespace FolderMusic.FrameHistory.Handlers
             return new RestoreMusicProperties((MusicProperties)dataContext);
         }
 
-        public override Parameter FromHistoricParameter(HistoricParameter parameter, ILibrary library)
+        public override Parameter FromHistoricParameter(HistoricParameter parameter, ForegroundPlayerHandler handler)
         {
             string songPath = (string)parameter.Value;
-            Song song = library.Playlists.SelectMany(p => p.Songs).First(s => s.Path == songPath);
+            foreach (IPlaylist playlist in handler.Library.Playlists)
+            {
+                Song song;
 
-            RestoreMusicProperties rmp = (RestoreMusicProperties)parameter.DataContext;
-            Task<MusicProperties> task = rmp.ToMusicProperties(songPath);
+                if (!playlist.Songs.TryGetSong(songPath, out song)) continue;
 
-            task.Wait();
+                RestoreMusicProperties rmp = (RestoreMusicProperties)parameter.DataContext;
+                Task<MusicProperties> task = rmp.ToMusicProperties(songPath);
 
-            return new Parameter(song, task.Result);
+                task.Wait();
+
+                return new Parameter(new SongPageParameter(song, playlist.Songs), task.Result);
+            }
+
+            throw new Exception($"Song '{songPath}' not found for SongPage restore");
         }
     }
 }
