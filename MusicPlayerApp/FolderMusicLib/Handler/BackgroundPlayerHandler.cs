@@ -15,7 +15,7 @@ namespace MusicPlayer.Handler
         private const int maxFailOrSetCount = 15;
 
         private bool isPlaying, playNext = true, mediaEndedHappened;
-        private int failedCount, setSongCount;
+        private int failedCount, setSongCount, currentVolumeFadeId;
         private double playbackRate;
         private LoopType loop;
         private Song openSong;
@@ -182,6 +182,7 @@ namespace MusicPlayer.Handler
 
                 if (duration > TimeSpan.Zero && position >= duration && !BackgroundMediaPlayer.Current.IsLoopingEnabled)
                 {
+                    MobileDebug.Service.WriteEvent("SetNextSongIfMediaEndedNotHappens1", position, duration, mediaEndedHappened);
                     await Task.Delay(5000);
 
                     if (mediaEndedHappened) break;
@@ -308,7 +309,11 @@ namespace MusicPlayer.Handler
             if (IsPlaying)
             {
                 if (sender.Position > TimeSpan.Zero) Volume0To1();
-                else BackgroundMediaPlayer.Current.Play();
+                else
+                {
+                    BackgroundMediaPlayer.Current.Volume = 1;
+                    BackgroundMediaPlayer.Current.Play();
+                }
             }
             else smtc.PlaybackStatus = MediaPlaybackStatus.Paused;
 
@@ -358,10 +363,10 @@ namespace MusicPlayer.Handler
             TimeSpan durationLeft = BackgroundMediaPlayer.Current.NaturalDuration - setPositionPosition;
             bool passedEnoughTime = (DateTime.Now - setPositionTime).TotalDays > durationLeft.TotalDays / 2;
 
-            //MobileDebug.Service.WriteEventPair("MusicEnded", "SMTC-State", smtc.PlaybackStatus,
-            //    "Pos", sender.Position.TotalSeconds, "Duration", sender.NaturalDuration.TotalSeconds,
-            //    "CurrentSongFileName", CurrentSong, "setPositionTime", setPositionTime,
-            //    "setPositionPosition", setPositionPosition, "passedTime", passedEnoughTime);
+            MobileDebug.Service.WriteEventPair("MusicEnded", "SMTC-State", smtc.PlaybackStatus,
+                "Pos", sender.Position.TotalSeconds, "Duration", sender.NaturalDuration.TotalSeconds,
+                "CurrentSongFileName", CurrentSong, "setPositionTime", setPositionTime,
+                "setPositionPosition", setPositionPosition, "passedTime", passedEnoughTime);
 
             if (DateTime.Now - setPositionTime < TimeSpan.FromSeconds(2))
             {
@@ -385,37 +390,39 @@ namespace MusicPlayer.Handler
 
             if (BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Playing ||
                 BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Opening) return;
-            if (setSongCount >= maxFailOrSetCount)
+            if (setSongCount >= maxFailOrSetCount || !(
+                    BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Closed ||
+                    BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Stopped ||
+                    BackgroundMediaPlayer.Current.NaturalDuration == TimeSpan.Zero
+                ))
             {
                 MobileDebug.Service.WriteEvent("PlayBecauseOfSetSongCount", BackgroundMediaPlayer.Current.CurrentState, setSongCount);
 
                 setSongCount = 0;
                 Volume0To1();
             }
-            else if (BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Closed ||
-                     BackgroundMediaPlayer.Current.CurrentState == MediaPlayerState.Stopped)
-            {
-                MobileDebug.Service.WriteEvent("PlayClosedOrStopped", BackgroundMediaPlayer.Current.CurrentState);
-                await SetSong(CurrentSong, Position);
-            }
-            else if (BackgroundMediaPlayer.Current.NaturalDuration == TimeSpan.Zero)
-            {
-                MobileDebug.Service.WriteEvent("SetOnPlayDurationZero", CurrentSong);
-                await SetSong(CurrentSong, Position);
-            }
             else
             {
-                Volume0To1();
-                setSongCount = 0;
+                MobileDebug.Service.WriteEvent("PlayClosedOrStoppedOrDurationZero", BackgroundMediaPlayer.Current.CurrentState);
+                bool changeSongSource = await SetSong(CurrentSong, Position);
+
+                if (changeSongSource && CurrentSong.HasValue)
+                {
+                    if (Position > TimeSpan.Zero) Volume0To1();
+                    else
+                    {
+                        BackgroundMediaPlayer.Current.Volume = 1;
+                        BackgroundMediaPlayer.Current.Play();
+                    }
+                }
             }
 
             smtc.PlaybackStatus = MediaPlaybackStatus.Playing;
-
-            BackgroundMediaPlayer.Current.Play();
         }
 
-        private static async void Volume0To1()
+        private async void Volume0To1()
         {
+            int fadeId = ++currentVolumeFadeId;
             BackgroundMediaPlayer.Current.Volume = 0;
             BackgroundMediaPlayer.Current.Play();
 
@@ -423,9 +430,13 @@ namespace MusicPlayer.Handler
 
             for (double i = step; i < 1; i += step)
             {
+                if (fadeId != currentVolumeFadeId) return;
+
                 BackgroundMediaPlayer.Current.Volume = Math.Sqrt(i);
                 await Task.Delay(10);
             }
+
+            BackgroundMediaPlayer.Current.Volume = 1;
         }
 
         public async void Pause()
@@ -437,12 +448,15 @@ namespace MusicPlayer.Handler
             if (BackgroundMediaPlayer.Current.CurrentState != MediaPlayerState.Paused) await Volume1To0AndPause();
         }
 
-        private static async Task Volume1To0AndPause()
+        private async Task Volume1To0AndPause()
         {
+            int fadeId = ++currentVolumeFadeId;
             const double step = 0.1;
 
             for (double i = 1; i > 0; i -= step)
             {
+                if (fadeId != currentVolumeFadeId) return;
+
                 BackgroundMediaPlayer.Current.Volume = i;
                 await Task.Delay(10);
             }
@@ -499,7 +513,7 @@ namespace MusicPlayer.Handler
             return SetSong(song, TimeSpan.Zero);
         }
 
-        public async Task SetSong(Song? song, TimeSpan position)
+        public async Task<bool> SetSong(Song? song, TimeSpan position)
         {
             MobileDebug.Service.WriteEventPair("TrySet", "OpenPath", openSong.FullPath,
                 "CurrentSongFileName", song?.FullPath ?? "<null>", "Position", position,
@@ -511,13 +525,13 @@ namespace MusicPlayer.Handler
             if (!song.HasValue)
             {
                 Pause();
-                return;
+                return false;
             }
 
             if (openSong.FullPath == song.Value.FullPath)
             {
                 SeekToPosition(position);
-                return;
+                return false;
             }
 
             BackgroundMediaPlayer.Current.AutoPlay = IsPlaying && position == TimeSpan.Zero;
@@ -537,6 +551,8 @@ namespace MusicPlayer.Handler
                 if (playNext) await Next(false);
                 else await Previous();
             }
+
+            return true;
         }
 
         public void Dispose()
